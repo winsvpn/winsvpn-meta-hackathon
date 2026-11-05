@@ -1,0 +1,20 @@
+{
+  "flutter-analyze": {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "exit_code": 0,
+    "seconds": 3.21
+  },
+  "flutter-test": {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "exit_code": 0,
+    "seconds": 15.43
+  }
+}

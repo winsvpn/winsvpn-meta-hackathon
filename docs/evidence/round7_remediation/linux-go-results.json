@@ -1,0 +1,10 @@
+{
+  "arm64": {
+    "compile_exit_code": 0,
+    "test_exit_code": 0
+  },
+  "amd64": {
+    "compile_exit_code": 0,
+    "test_exit_code": 0
+  }
+}

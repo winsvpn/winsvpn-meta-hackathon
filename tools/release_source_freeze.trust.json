@@ -1,0 +1,15 @@
+{
+  "app_source_lock_sha256": "b38ee96242b4defae7731e6c6842b65e5c081da90d6cc6c5897c3d824205ac67",
+  "authenticated": true,
+  "contract": "winsvpn-source-freeze-external-trust-v1",
+  "controller_sha256": "89aa60a292d6bb98040abbd71828c4864977d472110c5a0864f5fd6c2161855d",
+  "created_utc": "2026-10-16T07:08:46Z",
+  "issuance_id": "26acef808e28a8d9084f2fb4dc6fb69e",
+  "issuer": "winsvpn-release-source-freeze",
+  "manifest_sha256": "f35a46702baf272e8b27e5d95a16e7d33a199147a344759a71ff520947225eed",
+  "release": "1.0.16+33",
+  "schema_version": 1,
+  "scope_freeze_sha256": "c3dc5b83e3c3b36469b97d2c7ab0f54ac8795219aa5d5c71f993007b2c52ec4e",
+  "test_sha256": "49c5485de19fb7990e55ef44f4cfd4ba2c6d4bb470adc712d680f1563e06c5f7",
+  "website_stage_sha256": null
+}

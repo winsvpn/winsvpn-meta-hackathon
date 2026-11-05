@@ -1,0 +1,21 @@
+// Safari-specific manifest fragment, merged over base.jsonc.
+//
+// Safari 26.6 accepts a nonpersistent MV3 background page, storage, alarms, and
+// nativeMessaging. The page loads background.js with script type="module", so
+// static imports do not depend on the converter's stale manifest-key checker.
+// Safari has no WebExtension proxy or proxy-auth surface. This unavailable
+// build has no site or block-rule feature, so it also omits activeTab and DNR.
+{
+  "name": "Win's VPN Proxy for Safari",
+  "description": "Standalone Safari proxy preview. Native routing is not enabled in this build.",
+
+  "background": {
+    "page": "src/background/safari.html"
+  },
+
+  "browser_specific_settings": {
+    "safari": {
+      "strict_min_version": "26.0"
+    }
+  }
+}

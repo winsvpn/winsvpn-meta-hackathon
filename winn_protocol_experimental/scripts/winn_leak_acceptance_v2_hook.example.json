@@ -1,0 +1,80 @@
+{
+  "version": "winn-leak-hook-config/v2",
+  "ssh": {
+    "identity_file": "/root/.ssh/id_ed25519_winn_leak_v2",
+    "public_fingerprint": "SHA256:REPLACE_WITH_CLIENT_SSH_KEY_FINGERPRINT",
+    "known_hosts_file": "/etc/winn-leak-v2/known_hosts"
+  },
+  "client": {
+    "disposable_marker": "/etc/winn-leak-v2/DISPOSABLE_ACCEPTANCE_CLIENT",
+    "expected_hostname": "winn-leak-client-v2",
+    "netprobe_binary": "/opt/winn-leak-v2/bin/winn-leak-netprobe-v2",
+    "tcpdump_binary": "/usr/bin/tcpdump",
+    "awg_go_binary": "/opt/winn-lab/bin/amneziawg-go"
+  },
+  "providers": {
+    "gateway": {
+      "hosts": {
+        "v4": "<NODE_EXIT_CHI>",
+        "v6": "<NODE_EXIT_CHI_V6>"
+      },
+      "user": "root",
+      "host_ed25519_fingerprint": "SHA256:BBMi53dwLuizXJtfb6a9qofC99kbX2sI/88daLG6kqU",
+      "remote_binary": "/opt/winn-leak-v2/bin/winn-leak-provider-v2",
+      "remote_evidence_root": "/var/lib/winn-leak-provider-v2"
+    },
+    "observer": {
+      "hosts": {
+        "v4": "<NODE_CONTROL_ATL>",
+        "v6": "<NODE_CONTROL_ATL_V6>"
+      },
+      "user": "root",
+      "host_ed25519_fingerprint": "SHA256:UD2htSona+dxG+mvft/7DArVeT9u/3I4nw1vc/UfOUE",
+      "remote_binary": "/opt/winn-leak-v2/bin/winn-leak-provider-v2",
+      "remote_evidence_root": "/var/lib/winn-leak-provider-v2"
+    }
+  },
+  "families": {
+    "v4": {
+      "underlay_interface": "ens3",
+      "nft_table": "winn_leak_v2_v4",
+      "underlay_mark": "ca6c",
+      "inner_addresses": [
+        "10.251.4.5",
+        "10.251.4.6"
+      ],
+      "gateway_dns_endpoint": "10.251.4.1:53",
+      "gateway_dns_address": "10.251.4.1",
+      "gateway_dns_nonce": "11111111111111111111111111111111",
+      "gateway_dns_zone": "leak-v2.invalid",
+      "gateway_dns_answer": "<NODE_CONTROL_ATL>",
+      "gateway_canary_endpoint": "10.251.4.1:7007",
+      "observer_http_endpoint": "<NODE_CONTROL_ATL>:46380",
+      "observer_stun_endpoint": "<NODE_CONTROL_ATL>:46378",
+      "observer_nonce": "33333333333333333333333333333333",
+      "expected_gateway_egress": "<NODE_EXIT_CHI>",
+      "ordinary_dns_endpoint": "1.1.1.1:53"
+    },
+    "v6": {
+      "underlay_interface": "ens4",
+      "nft_table": "winn_leak_v2_v6",
+      "underlay_mark": "ca6d",
+      "inner_addresses": [
+        "fd42:251:6::5",
+        "fd42:251:6::6",
+        "fd42:251:6::7"
+      ],
+      "gateway_dns_endpoint": "[fd42:251:6::1]:53",
+      "gateway_dns_address": "fd42:251:6::1",
+      "gateway_dns_nonce": "22222222222222222222222222222222",
+      "gateway_dns_zone": "leak-v2.invalid",
+      "gateway_dns_answer": "<NODE_CONTROL_ATL_V6>",
+      "gateway_canary_endpoint": "[fd42:251:6::1]:7007",
+      "observer_http_endpoint": "[<NODE_CONTROL_ATL_V6>]:46381",
+      "observer_stun_endpoint": "[<NODE_CONTROL_ATL_V6>]:46379",
+      "observer_nonce": "44444444444444444444444444444444",
+      "expected_gateway_egress": "<NODE_EXIT_CHI_V6>",
+      "ordinary_dns_endpoint": "[2606:4700:4700::1111]:53"
+    }
+  }
+}

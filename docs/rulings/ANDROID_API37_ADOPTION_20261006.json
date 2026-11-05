@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "ruling_id": "android-api37-adoption-20261006",
+  "decided_on": "2026-10-06",
+  "status": "owner_directed_pending_debate_round",
+  "authority": {
+    "record": ".agent/debates/_decisions/owner_decision_bump_everything_latest_20261006.md",
+    "owner_message": "bump Python, SDKs and everything else to latest too",
+    "owner_message_date": "2026-10-06",
+    "landing_condition": "three-model Debate Round before the change lands"
+  },
+  "supersedes": [
+    "docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json",
+    "docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260824.json"
+  ],
+  "scope": {
+    "surfaces": [
+      "phone",
+      "android_tv",
+      "wear_os"
+    ],
+    "compile_sdk": 37,
+    "target_sdk": 37,
+    "ndk_version": "30.0.16248370",
+    "ndk_release": "r30"
+  },
+  "play_compliance": {
+    "as_of": "2026-10-06",
+    "api_37_exceeds_play_requirement": true,
+    "statement": "Google Play requires target API 36 for phone from 2026-08-31 (API 35 for Wear OS, API 34 for Android TV); target API 37 exceeds that requirement for phone, Android TV, and Wear OS.",
+    "source": "https://support.google.com/googleplay/android-developer/answer/11926878"
+  },
+  "upstream_evidence": {
+    "agp": "9.4.1 (Google Maven maven-metadata; AGP 9.4 maximum supported API level is 37, minimum Gradle 9.6.0, JDK 17, Build-Tools 36.0.0)",
+    "ndk": "r30 30.0.16248370, Latest LTS on https://developer.android.com/ndk/downloads, GitHub android/ndk release r30 published 2026-09-08, not a prerelease",
+    "sdk_platform": "platforms;android-37.0 revision 2 in dl.google.com/android/repository/repository2-3.xml, stable channel",
+    "play_services_wearable": "20.0.1 is recommended by Google as the minimum for apps targeting API 37"
+  },
+  "api_37_adoption_requirements": [
+    {
+      "id": "build_tools_37",
+      "status": "open",
+      "requirement": "Install and freeze reviewed Android SDK Build-Tools 37.x. Build-Tools 36.0.0 remains the hash-pinned release toolchain until the owner stages 37.0.0 and its apksigner.jar SHA-256 is recorded."
+    },
+    {
+      "id": "phone_runtime_evidence",
+      "status": "open",
+      "requirement": "Complete API 37 phone runtime qualification."
+    },
+    {
+      "id": "android_tv_runtime_evidence",
+      "status": "open",
+      "requirement": "Complete API 37 Android TV runtime qualification."
+    },
+    {
+      "id": "wear_os_runtime_evidence",
+      "status": "open",
+      "requirement": "Complete API 37 Wear OS runtime qualification."
+    },
+    {
+      "id": "local_network_product_decision",
+      "status": "open",
+      "requirement": "Decide whether private or LAN VPN gateways are supported and implement the Android 17 local-network permission contract or reject physical-LAN endpoints."
+    },
+    {
+      "id": "adaptive_tv_validation",
+      "status": "open",
+      "requirement": "Validate the Android TV UI when orientation, aspect-ratio, or resizability restrictions are ignored."
+    },
+    {
+      "id": "ct_ech_validation",
+      "status": "open",
+      "requirement": "Validate certificate transparency and ECH or ECH GREASE behavior, including blocked or stripped ECH and redirect-safe pinning."
+    },
+    {
+      "id": "full_native_abi_tests",
+      "status": "open",
+      "requirement": "Run full native ABI load and tunnel-start tests for every shipped Flutter, Winn v3, AmneziaWG, and Xray binary, rebuilt against NDK r30."
+    }
+  ],
+  "review_trigger": {
+    "required_before_next_android_release_candidate_upload": true,
+    "open_requirements_must_be_closed_or_waived_by_owner": true
+  },
+  "decision": "Move phone, Android TV, and Wear OS to compileSdk 37, targetSdk 37, and the latest final stable NDK r30 (30.0.16248370) under the owner direction of 2026-10-06 to bump every pinned third-party component to latest stable. The API 37 adoption requirements carried over from the 2026-09-13 exception stay open qualification items for the release candidate, not preconditions of this pin change. Release 1.0.16+33 artifacts already built on API 36 and NDK r29 are not re-labelled by this ruling."
+}

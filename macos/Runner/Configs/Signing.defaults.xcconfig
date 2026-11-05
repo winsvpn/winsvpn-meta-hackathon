@@ -1,0 +1,10 @@
+// Signing.defaults.xcconfig: COMMITTED defaults (R11a). These are the same safe
+// values as Signing.xcconfig.example: Xcode-managed automatic signing, generic
+// identity, no profile pin. A clean release checkout builds with them, because
+// the release source freeze refuses untracked files such as a local
+// Signing.xcconfig. A signing machine may still override them with a local
+// Signing.xcconfig (gitignored, optional include after this file); distribution
+// signing happens at export through apple/ExportOptions.
+WINS_APPLE_CODE_SIGN_IDENTITY = Apple Development
+WINS_APPLE_CODE_SIGN_STYLE = Automatic
+WINS_APPLE_PROVISIONING_PROFILE_SPECIFIER =

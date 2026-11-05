@@ -1,0 +1,50 @@
+{
+  "schema": "winsvpn-website-download-custody-v1",
+  "release_id": "v1.0.16+33",
+  "canonical_release": "1.0.16+33",
+  "package_identity": "org.winsvpn.app",
+  "status": "verification_pending",
+  "owner_evidence_filename": null,
+  "platforms": [
+    "windows-x64",
+    "windows-arm64",
+    "android",
+    "linux-x64",
+    "linux-arm64",
+    "macos",
+    "ios"
+  ],
+  "forbidden_android_debug_package": "com.example.wins_vpn",
+  "forbidden_android_debug_sha256": "89e8ba316dd2a041bde8d019fd407aebf6250a1840a73c98f053e0b6b4621d0f",
+  "forbidden_windows_unsigned_sha256": "25cfc27fabf67a937c52704fc3a288f105aa74d99cdd7a23e850389ef83261d3",
+  "winn_primary": "winn/3",
+  "winn_fallback": "winn/1",
+  "winn_fallback_order": [
+    "awg",
+    "xray"
+  ],
+  "production_origin": "https://winsvpn.org",
+  "canonical_filenames": {
+    "windows-x64": "WinsVPN-Setup.exe",
+    "windows-arm64": "WinsVPN-Setup-arm64.exe",
+    "android": "wins-vpn-android.apk",
+    "linux-x64": "wins-vpn-linux-x64.tar.gz",
+    "linux-arm64": "wins-vpn-linux-arm64.tar.gz"
+  },
+  "unsigned_canonical_filenames": {
+    "windows-x64": "WinsVPN-UNSIGNED-LOCAL-Setup.exe",
+    "windows-arm64": "WinsVPN-UNSIGNED-LOCAL-Setup-arm64.exe"
+  },
+  "unsigned_waiver_filename": "download-unsigned-waiver.json",
+  "r2_object_prefix": "downloads/sha256/",
+  "github_release_prefix": "https://github.com/winsvpn/winsvpn-downloads/releases/download/v1.0.16-33/",
+  "verifier_boundary": [
+    "tools/website_security_audit.py",
+    "tools/linux_cross_store_artifact_gate.py",
+    "tools/windows_cross_store_artifact_gate.py",
+    "tools/apple_cross_store_artifact_gate.py",
+    "tools/linux_release_signing.py"
+  ],
+  "replay_log_filename": "download-custody-consumed.jsonl",
+  "challenge_filename": "download-custody-challenge.json"
+}

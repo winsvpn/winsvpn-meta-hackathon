@@ -1,0 +1,10 @@
+  h1: 11
+  h2: 22
+  h3: 33
+  h4: 44
+
+peer: 6TAPiU34LiYCcS8Vejw2bCfEZVwHyl1K+jrkkBO7iz4=
+  endpoint: <WINPC_EGRESS_IP>:50540
+  allowed ips: 10.8.1.50/32
+  latest handshake: 8 seconds ago
+  transfer: 4.25 MiB received, 62.55 MiB sent

@@ -1,0 +1,2 @@
+#!/bin/sh
+printf '%s\n' 'not-a-sha256  injected-input'

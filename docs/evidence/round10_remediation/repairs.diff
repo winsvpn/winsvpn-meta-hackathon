@@ -1,0 +1,1306 @@
+--- a/extension/src/background/background.js
++++ b/extension/src/background/background.js
+@@ -25,6 +25,12 @@
+     });
+   }
+   return readyPromise;
++}
++
++function startReady() {
++  return ready().catch((error) => {
++    controller.lastError = 'initialization failed and will be retried';
++  });
+ }
+ 
+ // Registered synchronously, before any await, for the reason spelled out in
+@@ -68,12 +74,12 @@
+ 
+ api.runtime.onInstalled.addListener(() => {
+   ensureAlarm();
+-  ready();
++  startReady();
+ });
+ 
+ api.runtime.onStartup.addListener(() => {
+   ensureAlarm();
+-  ready();
++  startReady();
+ });
+ 
+ api.alarms.onAlarm.addListener(async (alarm) => {
+@@ -161,4 +167,4 @@
+ // Also run on plain load, which covers the service worker being revived by an
+ // event that is not one of the two above.
+ ensureAlarm();
+-ready();
++startReady();
+--- /dev/null
++++ b/extension/tools/test_background_lifecycle.py
+@@ -0,0 +1,131 @@
++"""Initialization failure and retry tests for the real background entry point."""
++
++import shutil
++import subprocess
++from pathlib import Path
++
++import pytest
++
++
++BACKGROUND = Path(__file__).resolve().parents[1] / "src/background/background.js"
++
++HARNESS = """
++import assert from 'node:assert/strict';
++const listeners = {};
++const event = (name) => ({ addListener(fn) { listeners[name] = fn; } });
++globalThis.api = {
++  runtime: {
++    id: 'test-extension',
++    onInstalled: event('installed'),
++    onStartup: event('startup'),
++    onMessage: event('message'),
++  },
++  alarms: { create() {}, onAlarm: event('alarm') },
++};
++const failure = new Error('injected initialization failure: private detail');
++let fail = true;
++let attempts = 0;
++let actions = 0;
++let controller;
++globalThis.Controller = class {
++  constructor() {
++    controller = this;
++    this.adapter = {
++      name: 'chrome',
++      installProxyAuth(fn) { listeners.auth = fn; },
++    };
++  }
++  async init() { attempts++; if (fail) throw failure; }
++  async onAlarm() { actions++; }
++  async waitForCredential() { actions++; return 'credential'; }
++  async reconcile() { actions++; }
++  snapshot() { return { initialized: true }; }
++};
++const unhandled = [];
++process.on('unhandledRejection', (error) => unhandled.push(error));
++const flush = async () => {
++  await new Promise(setImmediate);
++  await new Promise(setImmediate);
++};
++await import('./background/background.js');
++await flush();
++assert.equal(attempts, 1);
++assert.equal(controller.lastError, 'initialization failed and will be retried');
++assert.deepEqual(unhandled, []);
++assert.equal(typeof listeners.installed, 'function');
++assert.equal(typeof listeners.startup, 'function');
++"""
++
++
++def run_background(tmp_path, script):
++    node = shutil.which("node")
++    if not node:
++        pytest.skip("no local Node runtime")
++    (tmp_path / "background").mkdir()
++    (tmp_path / "adapters").mkdir()
++    shutil.copyfile(BACKGROUND, tmp_path / "background/background.js")
++    (tmp_path / "package.json").write_text('{"type":"module"}\n', encoding="ascii")
++    (tmp_path / "background/controller.js").write_text(
++        "export const Controller = globalThis.Controller;\n"
++        "export const ALARM_NAME = 'test-alarm';\n"
++        "export const ALARM_PERIOD_MINUTES = 1;\n", encoding="ascii")
++    (tmp_path / "adapters/index.js").write_text(
++        "export const api = globalThis.api;\n", encoding="ascii")
++    (tmp_path / "test.mjs").write_text(HARNESS + script, encoding="utf-8")
++    result = subprocess.run(
++        [node, "--unhandled-rejections=strict", "test.mjs"],
++        cwd=tmp_path, capture_output=True, text=True, timeout=30,
++    )
++    assert result.returncode == 0, result.stderr or result.stdout
++
++
++@pytest.mark.parametrize("trigger", ["load", "installed", "startup"])
++def test_startup_rejection_is_handled_and_later_event_retries(tmp_path, trigger):
++    run_background(tmp_path, f"""
++const trigger = '{trigger}';
++if (trigger !== 'load') {{
++  listeners[trigger]();
++  await flush();
++  assert.equal(attempts, 2);
++  assert.equal(controller.lastError, 'initialization failed and will be retried');
++  assert.deepEqual(unhandled, []);
++}}
++fail = false;
++listeners[trigger === 'load' ? 'startup' : trigger]();
++await flush();
++assert.equal(attempts, trigger === 'load' ? 2 : 3);
++await listeners.alarm({{ name: 'test-alarm' }});
++assert.equal(actions, 1);
++assert.equal(attempts, trigger === 'load' ? 2 : 3);
++assert.deepEqual(unhandled, []);
++""")
++
++
++@pytest.mark.parametrize("handler", ["auth", "alarm", "message"])
++def test_awaiting_handlers_preserve_rejection_and_retry(tmp_path, handler):
++    run_background(tmp_path, f"""
++const handler = '{handler}';
++const invoke = () => {{
++  if (handler === 'auth') return listeners.auth();
++  if (handler === 'alarm') return listeners.alarm({{ name: 'test-alarm' }});
++  return new Promise((resolve) => {{
++    assert.equal(listeners.message(
++      {{ type: 'getState' }}, {{ id: api.runtime.id }}, resolve), true);
++  }});
++}};
++if (handler === 'message') {{
++  assert.deepEqual(await invoke(), {{ error: failure.message }});
++}} else {{
++  await assert.rejects(invoke(), (error) => error === failure);
++}}
++assert.equal(attempts, 2);
++assert.equal(actions, 0);
++fail = false;
++const result = await invoke();
++if (handler === 'auth') assert.equal(result, 'credential');
++if (handler === 'message') assert.deepEqual(result, {{ initialized: true }});
++assert.equal(attempts, 3);
++assert.equal(actions, 1);
++await flush();
++assert.deepEqual(unhandled, []);
++""")
+--- a/linux/runner/linux_tunnel_backend.cc
++++ b/linux/runner/linux_tunnel_backend.cc
+@@ -4482,6 +4482,7 @@
+     const bool winn3_ok = winsvpn::winn3host::StopLinuxWinn3Standalone(
+         winn3_runner, &winn3_error);
+     StopLinuxBypassSlice();
++    StopTunnelPowerProtection();
+     g_winn_tunnel_active = false;
+     g_winn_last_tx_payload = -1;
+     g_winn_last_rx_payload = -1;
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -6479,6 +6479,14 @@
+ def security_details_json(details: Optional[dict]) -> str:
+     return json.dumps(minimize_security_details(details or {}), sort_keys=True, default=str, indent=2)
+ 
++def configure_security_events_connection(conn: sqlite3.Connection) -> None:
++    conn.execute("PRAGMA busy_timeout=10000")
++    journal_mode = conn.execute("PRAGMA journal_mode=WAL").fetchone()[0]
++    if str(journal_mode).lower() != "wal":
++        raise RuntimeError("security events database refused WAL mode")
++    conn.execute("PRAGMA synchronous=NORMAL")
++    conn.execute("PRAGMA foreign_keys=ON")
++
+ def ensure_security_events_db(conn: sqlite3.Connection):
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS security_events (
+@@ -6536,6 +6544,7 @@
+         utc_text, local_text = security_time_text(now_utc)
+         detail_text = security_details_json(details)
+         with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn:
++            configure_security_events_connection(conn)
+             with conn:
+                 ensure_security_events_db(conn)
+                 conn.execute("""
+@@ -6565,6 +6574,7 @@
+         return
+     try:
+         with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn:
++            configure_security_events_connection(conn)
+             with conn:
+                 conn.execute(
+                     "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
+@@ -18395,54 +18405,65 @@
+ def peer_revocation_backoff_seconds(attempts: int) -> float:
+     return float(min(900, 30 * (2 ** min(max(attempts, 0), 5))))
+ 
++def peer_has_current_authority(conn: sqlite3.Connection, node_ip: str, public_key: str) -> bool:
++    rows = conn.execute("""
++        SELECT u.expiration_date, n.ssh_host, n.endpoint
++        FROM devices d
++        JOIN users u ON u.account_number=d.account_number
++        JOIN nodes n ON n.slug=d.location_slug
++        WHERE d.client_public_key=? AND u.status='active'
++    """, (public_key,)).fetchall()
++    now = utcnow()
++    for row in rows:
++        host = str(row["ssh_host"] or extract_node_host(row["endpoint"] or "")).strip()
++        expiry = parse_iso_datetime(row["expiration_date"])
++        if host == node_ip and expiry is not None and expiry > now:
++            return True
++    return False
++
++
+ def drain_peer_revocation_outbox(limit: int = 64) -> dict:
+     removed = 0
+     retry = 0
+     with get_db() as conn:
+         ensure_schema(conn)
+-        conn.commit()
+-        conn.execute("BEGIN IMMEDIATE")
+-        now = time.time()
+         rows = conn.execute("""
+-            SELECT * FROM peer_revocations
+-            WHERE next_attempt_at <= ?
+-              AND (lease_until IS NULL OR lease_until <= ?)
+-            ORDER BY next_attempt_at, created_at
+-            LIMIT ?
+-        """, (now, now, max(1, min(int(limit), 256)))).fetchall()
+-        claimed = []
+-        for row in rows:
+-            updated = conn.execute(
+-                "UPDATE peer_revocations SET lease_until=?, attempts=attempts+1 "
+-                "WHERE revocation_id=? AND (lease_until IS NULL OR lease_until<=?)",
+-                (now + 120, row["revocation_id"], now),
+-            )
+-            if updated.rowcount:
+-                claimed.append(dict(row))
+-        conn.commit()
+-        for item in claimed:
+-            ok = remove_peer_from_node(
+-                item["node_ip"], item["client_public_key"]
+-            )
++            SELECT revocation_id FROM peer_revocations
++            WHERE next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)
++            ORDER BY next_attempt_at, created_at LIMIT ?
++        """, (time.time(), time.time(), max(1, min(int(limit), 256)))).fetchall()
++    for queued in rows:
++        with get_db() as conn:
++            # Admission holds the same writer lock through remote installation.
++            # Keep the authority check and removal indivisible with that start.
++            conn.execute("BEGIN IMMEDIATE")
++            now = time.time()
++            item = conn.execute("""
++                SELECT * FROM peer_revocations WHERE revocation_id=?
++                  AND next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)
++            """, (queued["revocation_id"], now, now)).fetchone()
++            if item is None:
++                continue
++            if peer_has_current_authority(conn, item["node_ip"], item["client_public_key"]):
++                conn.execute("DELETE FROM peer_revocations WHERE revocation_id=?",
++                             (item["revocation_id"],))
++                continue
++            ok = remove_peer_from_node(item["node_ip"], item["client_public_key"])
+             if ok:
+-                conn.execute(
+-                    "DELETE FROM peer_revocations WHERE revocation_id=?",
+-                    (item["revocation_id"],),
+-                )
++                conn.execute("DELETE FROM peer_revocations WHERE revocation_id=?",
++                             (item["revocation_id"],))
+                 removed += 1
+             else:
+                 attempts = int(item["attempts"] or 0) + 1
+                 conn.execute("""
+-                    UPDATE peer_revocations
+-                    SET lease_until=NULL, next_attempt_at=?, last_failure_kind='remove_failed'
++                    UPDATE peer_revocations SET attempts=?, lease_until=NULL,
++                        next_attempt_at=?, last_failure_kind='remove_failed'
+                     WHERE revocation_id=?
+-                """, (
+-                    time.time() + peer_revocation_backoff_seconds(attempts),
+-                    item["revocation_id"],
+-                ))
++                """, (attempts, time.time() + peer_revocation_backoff_seconds(attempts),
++                      item["revocation_id"]))
+                 retry += 1
+-            conn.commit()
+     return {"removed": removed, "retry": retry}
++
+ 
+ def sweep_expired_account_runtime(limit: int = 500) -> int:
+     now = utcnow()
+@@ -20516,6 +20537,19 @@
+             if (not login.free_access and authorization_kind == "enrollment") or not (device_cfg.get("device_auth_token_hash") or ""):
+                 issued_device_auth_token = secrets.token_urlsafe(32)
+                 device_cfg["device_auth_token_hash"] = token_digest(issued_device_auth_token)
++            rotate_winn3_identity = (
++                old_device_id != login.device_id
++                or (requested_client_public_key and requested_client_public_key != old_public_key)
++                or (not login.free_access and authorization_kind == "enrollment")
++            )
++            if rotate_winn3_identity:
++                conn.execute(
++                    "UPDATE devices SET winn3_inner_v4=NULL, "
++                    "winn3_static_private=NULL, winn3_static_public=NULL WHERE device_id=?",
++                    (old_device_id,),
++                )
++                for field in ("winn3_inner_v4", "winn3_static_private", "winn3_static_public"):
++                    device_cfg[field] = ""
+             seen_at = utcnow().isoformat()
+             conn.execute(
+                 """
+@@ -20991,6 +21025,15 @@
+             # or commit a device whose bearer the client has never received.
+             if not sync_winn3_registry_to_node(conn, node_ssh_host, node["slug"]):
+                 conn.rollback()
++                conn.execute("""
++                    INSERT INTO winn3_registry_refreshes (node_slug, attempts, next_attempt_at)
++                    VALUES (?, 0, 0)
++                    ON CONFLICT(node_slug) DO UPDATE SET attempts=0, next_attempt_at=0
++                """, (node["slug"],))
++                if not double_vpn_requested:
++                    queue_peer_revocation(
++                        conn, node_ssh_host, device_cfg.get("client_public_key") or ""
++                    )
+                 mark_node_management_status(
+                     conn, node["slug"], "failed", "Winn3 peer registry sync failed"
+                 )
+@@ -21004,7 +21047,6 @@
+                     },
+                 )
+             mark_node_management_status(conn, node["slug"], "ok")
+-            conn.commit()
+             # A location change makes the old node's full snapshot stale. The
+             # device must not receive its new descriptor while the same static
+             # identity remains authorized at the previous gateway.
+@@ -21018,6 +21060,21 @@
+                     )
+                 )
+             ):
++                conn.rollback()
++                # The selected node's AWG installation also preceded this
++                # failure. Revalidate it against restored authority at drain.
++                if not double_vpn_requested:
++                    queue_peer_revocation(
++                        conn, node_ssh_host, device_cfg.get("client_public_key") or ""
++                    )
++                # A remote replacement can succeed before its caller reports
++                # failure. Reconcile both gateways from the restored database.
++                for repair_slug in (node["slug"], old_location_slug):
++                    conn.execute("""
++                        INSERT INTO winn3_registry_refreshes (node_slug, attempts, next_attempt_at)
++                        VALUES (?, 0, 0)
++                        ON CONFLICT(node_slug) DO UPDATE SET attempts=0, next_attempt_at=0
++                    """, (repair_slug,))
+                 mark_node_management_status(
+                     conn,
+                     old_location_slug,
+@@ -21039,7 +21096,7 @@
+                 and old_peer_node_ip
+             ):
+                 mark_node_management_status(conn, old_location_slug, "ok")
+-                conn.commit()
++            conn.commit()
+         # THE STANDALONE PLAN, resolved through the SAME helper the gate used
+         # (added 2026-08-10, ds_iosconfig3). One function on both paths so the
+         # numbers emitted here can never contradict the gate that admitted the
+@@ -31446,6 +31503,14 @@
+     return datetime.now(UTC).isoformat()
+ 
+ 
++def configure_security_events_connection(conn: sqlite3.Connection) -> None:
++    conn.execute("PRAGMA busy_timeout=10000")
++    journal_mode = conn.execute("PRAGMA journal_mode=WAL").fetchone()[0]
++    if str(journal_mode).lower() != "wal":
++        raise RuntimeError("security events database refused WAL mode")
++    conn.execute("PRAGMA synchronous=NORMAL")
++    conn.execute("PRAGMA foreign_keys=ON")
++
+ def _add_column_if_missing(conn: sqlite3.Connection, table: str, column: str, ddl: str):
+     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+     if column not in existing:
+@@ -31617,6 +31682,7 @@
+     try:
+         EVENTS_DB.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+         with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++            configure_security_events_connection(conn)
+             ensure_schema(conn)
+             feedback = feedback_counts(conn, key)
+     except Exception:
+@@ -31667,6 +31733,7 @@
+     if len(reason) < 8:
+         raise ValueError("feedback reason must contain at least 8 characters")
+     with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        configure_security_events_connection(conn)
+         ensure_schema(conn)
+         row = conn.execute(
+             "SELECT event_type, details_json FROM security_events WHERE event_id=?",
+@@ -31699,6 +31766,7 @@
+     """Backfill missing classifier results without overwriting human labels."""
+     bounded_limit = max(1, min(int(limit or 1), 50000))
+     with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+         rows = conn.execute("""
+@@ -31748,6 +31816,7 @@
+ 
+     if updates:
+         with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++            configure_security_events_connection(conn)
+             ensure_schema(conn)
+             conn.executemany("""
+                 UPDATE security_events
+@@ -31768,6 +31837,7 @@
+ 
+ def list_events(limit: int):
+     with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+         rows = conn.execute("""
+@@ -31783,6 +31853,7 @@
+ def report(hours: int):
+     cutoff = (datetime.now(UTC) - timedelta(hours=max(1, min(hours, 24 * 90)))).isoformat()
+     with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        configure_security_events_connection(conn)
+         ensure_schema(conn)
+         rows = conn.execute("""
+             SELECT COALESCE(triage_label, 'unclassified'), COUNT(*)
+@@ -32090,6 +32161,14 @@
+ def details_json(details: dict) -> str:
+     return json.dumps(minimize_security_details(details or {}), sort_keys=True, default=str, indent=2)
+ 
++def configure_security_events_connection(conn: sqlite3.Connection) -> None:
++    conn.execute("PRAGMA busy_timeout=10000")
++    journal_mode = conn.execute("PRAGMA journal_mode=WAL").fetchone()[0]
++    if str(journal_mode).lower() != "wal":
++        raise RuntimeError("security events database refused WAL mode")
++    conn.execute("PRAGMA synchronous=NORMAL")
++    conn.execute("PRAGMA foreign_keys=ON")
++
+ def ensure_events_db(conn: sqlite3.Connection):
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS security_events (
+@@ -32185,6 +32264,7 @@
+                 "feedback_state": "unavailable",
+             }
+         with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++            configure_security_events_connection(conn)
+             ensure_events_db(conn)
+             conn.execute("""
+                 INSERT OR IGNORE INTO security_events (
+@@ -32227,6 +32307,7 @@
+         return
+     try:
+         with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++            configure_security_events_connection(conn)
+             conn.execute(
+                 "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
+                 (status, error[:500], event_id),
+@@ -32261,6 +32342,7 @@
+     triage_reasons = []
+     try:
+         with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++            configure_security_events_connection(conn)
+             row = conn.execute("""
+                 SELECT triage_label, triage_score, triage_confidence, triage_reasons
+                 FROM security_events WHERE event_id=?
+@@ -32579,6 +32661,15 @@
+ ENV_FILE = Path("/root/vpn_auth.env")
+ KNOWN_BUCKET_WIDTHS = {16: "canonical", 24: "legacy-monitor"}
+ 
++def configure_security_events_connection(conn: sqlite3.Connection) -> None:
++    conn.execute("PRAGMA busy_timeout=10000")
++    journal_mode = conn.execute("PRAGMA journal_mode=WAL").fetchone()[0]
++    if str(journal_mode).lower() != "wal":
++        raise RuntimeError("security events database refused WAL mode")
++    conn.execute("PRAGMA synchronous=NORMAL")
++    conn.execute("PRAGMA foreign_keys=ON")
++
++
+ def load_env(path: Path) -> dict:
+     env = dict(os.environ)
+     if path.exists():
+@@ -32695,6 +32786,7 @@
+     params.append(max(1, min(args.limit, 1000)))
+ 
+     with sqlite3.connect(db_path) as conn:
++        configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         rows = conn.execute(f"""
+             SELECT observed_at_eastern, priority, event_type, source_ip_bucket, request_path,
+--- a/server/test_donor_acknowledgment_hub.py
++++ b/server/test_donor_acknowledgment_hub.py
+@@ -13,6 +13,7 @@
+ Run:  python3 server/test_donor_acknowledgment_hub.py
+ """
+ import _toolchain  # noqa: F401  (V-01 preflight)
++import inspect
+ import json
+ import os
+ import re
+@@ -39,6 +40,13 @@
+ def test(fn):
+     RESULTS.append(fn)
+     return fn
++
++
++def call_handler(handler, *args, **kwargs):
++    result = handler(*args, **kwargs)
++    if inspect.isawaitable(result):
++        return harness.asyncio.run(result)
++    return result
+ 
+ 
+ class SentMail:
+@@ -801,17 +809,17 @@
+     handler = mod.app.routes[("POST", "/admin/donor-acknowledgment/issue")]
+     request = FakeRequest(path="/admin/donor-acknowledgment/issue")
+     try:
+-        harness.asyncio.run(handler(request, BackgroundTasks(), donor_name="X", amount="100",
+-                                    contribution_date="2026-08-03", x_admin_token="wrong"))
++        call_handler(handler, request, BackgroundTasks(), donor_name="X", amount="100",
++                     contribution_date="2026-08-03", x_admin_token="wrong")
+     except HTTPException as exc:
+         assert exc.status_code in (401, 403)
+     else:
+         raise AssertionError("the admin route must reject a bad token")
+ 
+-    result = harness.asyncio.run(handler(
++    result = call_handler(handler,
+         request, BackgroundTasks(), donor_name="Retro Donor", amount="300.00,450.00",
+         contribution_date="2026-02-01,2026-07-01", email="retro@example.test",
+-        x_admin_token="test-admin-token"))
++        x_admin_token="test-admin-token")
+     assert result["status"] == "issued"
+     assert result["gift_count"] == 2
+     assert result["amount_total"] == "750.00"
+@@ -826,7 +834,7 @@
+     handler = mod.app.routes[("GET", "/admin/donor-acknowledgments")]
+     request = FakeRequest(path="/admin/donor-acknowledgments", method="GET")
+     request.query_params = {"undelivered": "1"}
+-    payload = harness.asyncio.run(handler(request, x_admin_token="test-admin-token"))
++    payload = call_handler(handler, request, x_admin_token="test-admin-token")
+     assert payload["counts"]["total"] == 2
+     assert payload["counts"]["sent"] == 1
+     assert payload["counts"]["required_not_delivered"] == 1
+@@ -922,7 +930,7 @@
+     request = FakeRequest(path="/admin/donor-acknowledgments", method="GET")
+     request.query_params = {"undelivered": "1"}
+     handler = mod.app.routes[("GET", "/admin/donor-acknowledgments")]
+-    return harness.asyncio.run(handler(request, x_admin_token="test-admin-token"))
++    return call_handler(handler, request, x_admin_token="test-admin-token")
+ 
+ 
+ @test
+@@ -1158,11 +1166,11 @@
+     assert result["reason"] == "one_time_payment_missing_lifetime_marker"
+     assert tasks.tasks == []
+     assert len(acks(mod)) == 0
+-    manual = harness.asyncio.run(
+-        mod.app.routes[("POST", "/admin/donor-acknowledgment/issue")](
+-            FakeRequest(path="/admin/donor-acknowledgment/issue"), BackgroundTasks(),
+-            donor_name="Hand Issued", amount="500.00", contribution_date="2026-08-03",
+-            email="hand@example.test", x_admin_token="test-admin-token"))
++    manual = call_handler(
++        mod.app.routes[("POST", "/admin/donor-acknowledgment/issue")],
++        FakeRequest(path="/admin/donor-acknowledgment/issue"), BackgroundTasks(),
++        donor_name="Hand Issued", amount="500.00", contribution_date="2026-08-03",
++        email="hand@example.test", x_admin_token="test-admin-token")
+     assert manual["status"] == "issued"
+     assert len(acks(mod)) == 1
+ 
+--- /dev/null
++++ b/server/test_control_plane_round10.py
+@@ -0,0 +1,295 @@
++#!/usr/bin/env python3
++"""Round 10 regressions using production hub code and real SQLite files.
++
++Remote peer operations are controlled doubles. Signing and identity generation
++use the existing descriptor harness; no live account or gateway is changed.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++from concurrent.futures import ThreadPoolExecutor
++from contextlib import closing
++from datetime import timedelta
++import json
++import logging
++from pathlib import Path
++import re
++import shutil
++import sqlite3
++import threading
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_winn3_descriptor_hub as descriptor
++
++
++class Round10Tests(unittest.TestCase):
++    def setUp(self):
++        def close_handlers(**kwargs):
++            for handler in kwargs.get("handlers", []):
++                handler.close()
++
++        with patch("logging.basicConfig", side_effect=close_handlers):
++            self.mod = descriptor.load_hub_with_ring(
++                DURABILITY_BARRIER_ENABLED=0, DURABILITY_BARRIER_REQUIRED=0,
++                WINN3_INNER_POOL_CIDR="10.10.0.0/24", WINN3_CANARY_NODE_SLUG="",
++                HIDE_CONTROL_ORIGIN=0, DEVICE_LIMIT=1,
++            )
++        self.mod.logger.propagate = False
++        self.mod.logger.addHandler(logging.NullHandler())
++        self.mod.security_alert = lambda *args, **kwargs: None
++        self.addCleanup(self.cleanup)
++        harness.seed_account(self.mod, devices=0)
++        for slug, host in (("lab-alpha", "192.0.2.10"), ("lab-beta", "192.0.2.11")):
++            payload, signature = descriptor.envelope_for(descriptor.descriptor_payload(node=slug))
++            descriptor.seed_node(
++                self.mod, slug=slug, protocol_version="winn/3", protocol_params_json="{}",
++                descriptor_json=json.dumps({"payload": payload, "sig": signature}),
++            )
++            with self.mod.get_db() as conn:
++                conn.execute("UPDATE nodes SET ssh_host=? WHERE slug=?", (host, slug))
++
++    def cleanup(self):
++        for handler in list(self.mod.logger.handlers):
++            handler.close()
++            self.mod.logger.removeHandler(handler)
++        shutil.rmtree(self.mod._TMPDIR)
++
++    def verify(self, *, bearer=None, publish=None, sync_peer=None, **overrides):
++        if bearer is None:
++            descriptor.arm_activation(self.mod)
++            headers = {"x-wins-activation": descriptor.ACTIVATION_SECRET}
++        else:
++            headers = {"authorization": "Bearer " + bearer}
++        login = descriptor.build_login(
++            self.mod, supports_winn3=True, supports_winn3_descriptor=True, **overrides)
++        with patch.object(self.mod, "sync_peer_to_node", side_effect=sync_peer or (lambda *args: True)), patch.object(
++            self.mod, "sync_winn3_registry_to_node", side_effect=publish or (lambda *args: True)
++        ):
++            result = asyncio.run(self.mod.verify_account(
++                harness.FakeRequest(path="/verify", headers=headers), login, harness.BackgroundTasks()))
++        return json.loads(result.body) if hasattr(result, "body") else result
++
++    def device(self):
++        with self.mod.get_db() as conn:
++            return dict(conn.execute("SELECT * FROM devices").fetchone())
++
++    def test_replacement_rotates_identity_and_revokes_old_registry_key(self):
++        self.verify()
++        before = self.device()
++        published = []
++
++        def publish(conn, host, slug):
++            published.extend(self.mod.winn3_peer_registry_document(conn, slug)["peers"])
++            return True
++
++        self.verify(device_id="replacement-device-12345678",
++                    device_fingerprint="replacement-fingerprint-12345678",
++                    client_public_key="D" * 43 + "=", publish=publish)
++        after = self.device()
++        self.assertNotEqual(before["device_id"], after["device_id"])
++        for field in ("winn3_static_private", "winn3_static_public", "device_auth_token_hash"):
++            self.assertTrue(after[field])
++            self.assertNotEqual(before[field], after[field], field)
++        self.assertNotIn(before["winn3_static_public"], json.dumps(published))
++        self.assertIn(after["winn3_static_public"], json.dumps(published))
++
++    def test_authenticated_reconnect_preserves_identity_but_new_enrollment_rotates(self):
++        result = self.verify()
++        before = self.device()
++        self.verify(bearer=result["device_auth_token"])
++        after = self.device()
++        for field in ("winn3_inner_v4", "winn3_static_private", "winn3_static_public"):
++            self.assertEqual(before[field], after[field], field)
++        self.verify()
++        self.assertNotEqual(before["winn3_static_public"], self.device()["winn3_static_public"])
++
++    def test_awg_key_change_requires_enrollment_and_rotates_v3_identity(self):
++        result = self.verify()
++        before = self.device()
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(bearer=result["device_auth_token"], client_public_key="E" * 43 + "=")
++        self.assertEqual(caught.exception.status_code, 401)
++        self.assertEqual(self.device()["winn3_static_public"], before["winn3_static_public"])
++        self.verify(client_public_key="E" * 43 + "=")
++        self.assertNotEqual(before["winn3_static_public"], self.device()["winn3_static_public"])
++
++    def test_failed_old_registry_sync_rolls_back_and_repairs_both_nodes(self):
++        self.verify()
++        before = self.device()
++        publications = []
++        remote_peers = {("192.0.2.10", before["client_public_key"])}
++
++        def sync_peer(host, device):
++            remote_peers.add((host, device["client_public_key"]))
++            return True
++
++        def publish(conn, host, slug):
++            self.assertTrue(conn.in_transaction)
++            with self.mod.get_db() as reader:
++                self.assertEqual(reader.execute("SELECT location_slug FROM devices").fetchone()[0],
++                                 "lab-alpha")
++            publications.append(slug)
++            return slug != "lab-alpha"
++
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(location="lab-beta", publish=publish, sync_peer=sync_peer)
++        self.assertEqual(caught.exception.status_code, 503)
++        self.assertEqual(publications, ["lab-beta", "lab-alpha"])
++        self.assertEqual(self.device(), before)
++        with self.mod.get_db() as conn:
++            user = conn.execute("SELECT activation_secret_hash, activation_secret_used_at FROM users").fetchone()
++            self.assertEqual(user[0], self.mod.token_digest(descriptor.ACTIVATION_SECRET))
++            self.assertIsNone(user[1])
++            self.assertEqual({row[0] for row in conn.execute(
++                "SELECT node_slug FROM winn3_registry_refreshes WHERE next_attempt_at=0")},
++                {"lab-alpha", "lab-beta"})
++            self.assertEqual(conn.execute(
++                "SELECT management_status FROM nodes WHERE slug='lab-alpha'").fetchone()[0], "failed")
++            self.assertEqual([tuple(row) for row in conn.execute(
++                "SELECT node_ip, client_public_key FROM peer_revocations")],
++                [("192.0.2.11", before["client_public_key"])])
++        self.assertIn(("192.0.2.11", before["client_public_key"]), remote_peers)
++
++        def remove_peer(host, key):
++            remote_peers.discard((host, key))
++            return True
++
++        with patch.object(self.mod, "remove_peer_from_node", side_effect=remove_peer):
++            self.assertEqual(self.mod.drain_peer_revocation_outbox(), {"removed": 1, "retry": 0})
++        self.assertEqual(remote_peers, {("192.0.2.10", before["client_public_key"])})
++        # Reuse the same still-valid activation without rearming it.
++        request = harness.FakeRequest(path="/verify", headers={
++            "x-wins-activation": descriptor.ACTIVATION_SECRET})
++        login = descriptor.build_login(self.mod, location="lab-beta", supports_winn3=True,
++                                       supports_winn3_descriptor=True)
++        with patch.object(self.mod, "sync_peer_to_node", return_value=True), patch.object(
++                self.mod, "sync_winn3_registry_to_node", return_value=True):
++            result = asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++        result = json.loads(result.body) if hasattr(result, "body") else result
++        self.assertTrue(result["device_auth_token"])
++        self.assertEqual(self.device()["location_slug"], "lab-beta")
++
++    def test_failed_selected_registry_sync_queues_remote_side_effect_repairs(self):
++        with self.mod.get_db() as conn:
++            conn.execute("DELETE FROM winn3_registry_refreshes")
++        installed = []
++
++        def sync_peer(host, device):
++            installed.append((host, device["client_public_key"]))
++            return True
++
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(publish=lambda *args: False, sync_peer=sync_peer)
++        self.assertEqual(caught.exception.status_code, 503)
++        self.assertEqual(len(installed), 1)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++            self.assertEqual([row[0] for row in conn.execute(
++                "SELECT node_slug FROM winn3_registry_refreshes WHERE next_attempt_at=0")], ["lab-alpha"])
++            self.assertEqual([tuple(row) for row in conn.execute(
++                "SELECT node_ip, client_public_key FROM peer_revocations")], installed)
++        with patch.object(self.mod, "remove_peer_from_node", return_value=True) as remove:
++            self.assertEqual(self.mod.drain_peer_revocation_outbox(), {"removed": 1, "retry": 0})
++            remove.assert_called_once_with(*installed[0])
++
++    def queue_current_peer(self):
++        self.verify()
++        key = self.device()["client_public_key"]
++        with self.mod.get_db() as conn:
++            self.mod.queue_peer_revocation(conn, "192.0.2.10", key)
++        return key
++
++    def test_delayed_revocation_cannot_remove_reauthorized_peer(self):
++        key = self.queue_current_peer()
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE devices SET location_slug='lab-beta'")
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE devices SET location_slug='lab-alpha'")
++        with patch.object(self.mod, "remove_peer_from_node") as remove:
++            self.assertEqual(self.mod.drain_peer_revocation_outbox(), {"removed": 0, "retry": 0})
++            remove.assert_not_called()
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 0)
++            self.assertTrue(self.mod.peer_has_current_authority(conn, "192.0.2.10", key))
++            self.assertFalse(self.mod.peer_has_current_authority(conn, "192.0.2.11", key))
++
++    def test_revocation_removal_holds_writer_lock_and_retries_durably(self):
++        self.queue_current_peer()
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE devices SET location_slug='lab-beta'")
++
++        def remove(host, key):
++            with closing(sqlite3.connect(self.mod._DB, timeout=0.02)) as writer:
++                with self.assertRaises(sqlite3.OperationalError):
++                    writer.execute("BEGIN IMMEDIATE")
++            return False
++
++        with patch.object(self.mod, "remove_peer_from_node", side_effect=remove):
++            self.assertEqual(self.mod.drain_peer_revocation_outbox(), {"removed": 0, "retry": 1})
++        with self.mod.get_db() as conn:
++            row = conn.execute("SELECT * FROM peer_revocations").fetchone()
++            self.assertEqual(row["attempts"], 1)
++            self.assertIsNone(row["lease_until"])
++            self.assertEqual(row["last_failure_kind"], "remove_failed")
++            conn.execute("UPDATE peer_revocations SET next_attempt_at=0")
++        with patch.object(self.mod, "remove_peer_from_node", return_value=True) as remove:
++            with ThreadPoolExecutor(max_workers=2) as pool:
++                results = list(pool.map(lambda _: self.mod.drain_peer_revocation_outbox(), range(2)))
++            self.assertEqual(sum(result["removed"] for result in results), 1)
++            remove.assert_called_once()
++
++    def test_authority_rejects_inactive_expired_missing_and_malformed_expiry(self):
++        key = self.queue_current_peer()
++        now = self.mod.utcnow()
++        for status, expiry, expected in (
++            ("active", (now + timedelta(days=1)).isoformat(), True),
++            ("disabled", (now + timedelta(days=1)).isoformat(), False),
++            ("active", now.isoformat(), False), ("active", None, False),
++            ("active", "invalid", False),
++        ):
++            with self.subTest(status=status, expiry=expiry), self.mod.get_db() as conn:
++                conn.execute("UPDATE users SET status=?, expiration_date=?", (status, expiry))
++                with patch.object(self.mod, "utcnow", return_value=now):
++                    self.assertEqual(self.mod.peer_has_current_authority(conn, "192.0.2.10", key), expected)
++
++    def test_security_event_connections_apply_pragmas_and_concurrent_writes(self):
++        configure = self.mod.configure_security_events_connection
++        observed = []
++        lock = threading.Lock()
++
++        def checked(conn):
++            configure(conn)
++            actual = tuple(conn.execute("PRAGMA " + name).fetchone()[0]
++                           for name in ("journal_mode", "synchronous", "busy_timeout", "foreign_keys"))
++            with lock:
++                observed.append(actual)
++
++        def record(index):
++            return self.mod.record_security_event(3, "round10", "192.0.2.20", "/probe",
++                                                  {"index": index}, "pending")
++
++        with patch.object(self.mod, "configure_security_events_connection", side_effect=checked):
++            first = record(-1)
++            with ThreadPoolExecutor(max_workers=16) as pool:
++                ids = list(pool.map(record, range(100)))
++            self.mod.update_security_event_email_status(first, "sent")
++        self.assertEqual(len(set(ids)), 100)
++        self.assertEqual(len(observed), 102)
++        self.assertTrue(all(item == ("wal", 1, 10000, 1) for item in observed))
++        with closing(sqlite3.connect(self.mod.SECURITY_EVENTS_DB)) as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM security_events").fetchone()[0], 101)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM security_events WHERE source_ip IS NOT NULL").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT email_status FROM security_events WHERE event_id=?", (first,)).fetchone()[0], "sent")
++
++    def test_every_embedded_security_db_connection_is_configured(self):
++        source = Path(harness.HUB).read_text()
++        pattern = r"(?m)^( +)with (?:closing\()?sqlite3\.connect\((?:SECURITY_EVENTS_DB|EVENTS_DB|db_path)[^\n]*\n([^\n]+)"
++        matches = list(re.finditer(pattern, source))
++        self.assertEqual(len(matches), 12)
++        for match in matches:
++            self.assertEqual(match.group(2), match.group(1) + "    configure_security_events_connection(conn)")
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+--- a/tools/native_messaging/host/bin/wins_bridge_host.dart
++++ b/tools/native_messaging/host/bin/wins_bridge_host.dart
+@@ -152,10 +152,9 @@
+   /// Caller origins the browser itself vouches for. Browsers pass the
+   /// extension origin as an extra argv entry (Chrome/Edge:
+   /// `chrome-extension://<id>/`, Firefox: the addon id via
+-  /// `moz-extension://` or the manifest id). When this set is non-empty and
+-  /// the observed caller origin is not in it, the host refuses every
+-  /// credential-bearing operation — a local process that executes the host
+-  /// directly cannot mint a loopback proxy credential.
++  /// `moz-extension://` or the manifest id). This set must be non-empty and
++  /// contain the observed caller origin for credential-bearing operations.
++  /// Direct execution without a caller origin cannot mint a credential.
+   final Set<String> allowedOrigins;
+ 
+   /// The origin the browser passed as argv, or null when the host was
+@@ -163,7 +162,7 @@
+   String? _callerOrigin;
+ 
+   bool get _originAuthorized =>
+-      allowedOrigins.isEmpty || allowedOrigins.contains(_callerOrigin);
++      allowedOrigins.isNotEmpty && allowedOrigins.contains(_callerOrigin);
+ 
+   final StateSourceTunnelGate gate = StateSourceTunnelGate();
+   final NativeMessageReader _reader = NativeMessageReader();
+--- a/tools/native_messaging/host/bin/wins_bridge_host_harness.dart
++++ b/tools/native_messaging/host/bin/wins_bridge_host_harness.dart
+@@ -149,9 +149,14 @@
+ 
+   stderr.writeln('harness host: state=${statePath ?? "unobserved"}');
+ 
++  // Explicit fixture identity for this nonshipping state-source harness only.
++  const testCallerOrigin =
++      'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/';
+   final BridgeHost host = BridgeHost(
+     stateSource: source,
+     operatingSystem: os,
++    allowedOrigins: const <String>{testCallerOrigin},
+   );
++  host.setCallerOrigin(testCallerOrigin);
+   await host.run();
+ }
+--- a/tools/native_messaging/host/test/wins_bridge_host_identity_test.dart
++++ b/tools/native_messaging/host/test/wins_bridge_host_identity_test.dart
+@@ -13,6 +13,8 @@
+ import 'package:wins_bridge_host/browser_bridge_protocol.dart';
+ 
+ import '../bin/wins_bridge_host.dart';
++
++const _allowedOrigin = 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/';
+ 
+ void _expect(bool ok, String message) {
+   if (!ok) {
+@@ -114,7 +116,9 @@
+       ),
+       operatingSystem: Platform.operatingSystem,
+       emitForTest: replies.add,
+-    );
++      allowedOrigins: const <String>{_allowedOrigin},
++    );
++    host.setCallerOrigin(_allowedOrigin);
+ 
+     await host.handleNativeMessageForTest(<String, Object?>{
+       'v': kBridgeProtocolVersion,
+@@ -217,7 +221,9 @@
+     ),
+     operatingSystem: Platform.operatingSystem,
+     emitForTest: replies.add,
+-  );
++    allowedOrigins: const <String>{_allowedOrigin},
++  );
++  host.setCallerOrigin(_allowedOrigin);
+   await host.handleNativeMessageForTest(<String, Object?>{
+     'v': kBridgeProtocolVersion,
+     'id': 'public-mac-status',
+@@ -260,7 +266,9 @@
+     ),
+     operatingSystem: Platform.operatingSystem,
+     emitForTest: replies.add,
+-  );
++    allowedOrigins: const <String>{_allowedOrigin},
++  );
++  host.setCallerOrigin(_allowedOrigin);
+   await host.handleNativeMessageForTest(<String, Object?>{
+     'v': kBridgeProtocolVersion,
+     'id': 'missing-root-status',
+@@ -603,7 +611,9 @@
+       ),
+       operatingSystem: Platform.operatingSystem,
+       emitForTest: replies.add,
+-    );
++      allowedOrigins: const <String>{_allowedOrigin},
++    );
++    host.setCallerOrigin(_allowedOrigin);
+ 
+     await host.handleNativeMessageForTest(<String, Object?>{
+       'v': kBridgeProtocolVersion,
+@@ -622,6 +632,57 @@
+     });
+     _expectEq(replies.single['status'], 'connected', 'connected status');
+     _expectEq(replies.single['proxyReady'], true, 'connected proxyReady');
++
++    for (final origins in <Set<String>>[
++      const <String>{},
++      const <String>{_allowedOrigin},
++    ]) {
++      for (final caller in <String?>[
++        null,
++        _allowedOrigin,
++        'chrome-extension://bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/',
++        '${_allowedOrigin}extra',
++      ]) {
++        if (origins.contains(caller)) continue;
++        final deniedReplies = <Map<String, Object?>>[];
++        final deniedHost = BridgeHost(
++          stateSource: host.stateSource,
++          operatingSystem: Platform.operatingSystem,
++          allowedOrigins: origins,
++          emitForTest: deniedReplies.add,
++        );
++        deniedHost.setCallerOrigin(caller);
++        try {
++          await deniedHost.handleNativeMessageForTest(<String, Object?>{
++            'v': kBridgeProtocolVersion,
++            'id': 'origin-cred',
++            'type': 'issue_proxy_credential',
++          });
++          _expectEq(deniedReplies.length, 1, 'one origin refusal');
++          _expectEq(deniedReplies.single['ok'], false, 'origin must not mint');
++          _expectEq(
++            deniedReplies.single['error'],
++            'app_not_running',
++            'origin error',
++          );
++          _expect(!deniedReplies.single.containsKey('token'), 'no origin token');
++          deniedReplies.clear();
++          await deniedHost.handleNativeMessageForTest(<String, Object?>{
++            'v': kBridgeProtocolVersion,
++            'id': 'origin-status',
++            'type': 'get_status',
++          });
++          _expectEq(deniedReplies.single['status'], 'connected', 'status works');
++          _expectEq(deniedReplies.single['proxyPort'], 0, 'no proxy listener');
++        } finally {
++          await deniedHost.handleNativeMessageForTest(<String, Object?>{
++            'v': kBridgeProtocolVersion,
++            'id': 'origin-revoke',
++            'type': 'revoke_proxy_credential',
++          });
++        }
++      }
++    }
+ 
+     replies.clear();
+     await host.handleNativeMessageForTest(<String, Object?>{
+--- a/tools/test_linux_tunnel_shutdown.py
++++ b/tools/test_linux_tunnel_shutdown.py
+@@ -109,11 +109,14 @@
+   g_tunnel_session_committed = true;
+   assert(!ShutdownLinuxTunnelBackend(&error));
+   assert(g_tunnel_session_committed && standalone_calls == 1);
++  assert(bypass_calls == 2 && power_calls == 3 && xray_calls == 2);
+   standalone_ok = true;
+   assert(ShutdownLinuxTunnelBackend(&error));
+   assert(!g_tunnel_session_committed && standalone_calls == 2);
++  assert(bypass_calls == 3 && power_calls == 4 && xray_calls == 2);
+   assert(ShutdownLinuxTunnelBackend(&error));
+   assert(standalone_calls == 2 && stop_calls == 2);
++  assert(bypass_calls == 3 && power_calls == 4 && xray_calls == 2);
+ }
+ int main(int argc, char** argv) {
+   assert(argc == 2);
+--- a/tools/test_windows_awg_runtime_validation.py
++++ b/tools/test_windows_awg_runtime_validation.py
+@@ -157,12 +157,24 @@
+         for fragment in (
+             'UniqueConfigPath(directory, L"winsvpn", L".conf")',
+             "WriteBytesSecureAtomic(",
+-            "kSystemAdminDaclSddl",
++            "EnsureDirectoryWithDacl(directory, kSystemAdminDirectorySddl)",
++            "ApplyProtectedOwnerAndDacl(directory, kSystemAdminDirectorySddl)",
++            "awg_config.size(), kSystemAdminFileSddl)",
+             "ScopedFileDelete delete_awg_config(config_path)",
+         ):
+             self.assertIn(fragment, awg_body)
+         self.assertNotIn('JoinPath(directory, L"winsvpn.conf")', awg_body)
+         self.assertNotIn("HardenConfigDirectory", SOURCE)
++        for name, expected in (
++            ("kSystemAdminDirectorySddl", "O:SYD:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)"),
++            ("kSystemAdminFileSddl", "O:SYD:P(A;;FA;;;SY)(A;;FA;;;BA)"),
++        ):
++            with self.subTest(sddl=name):
++                declaration = re.search(
++                    rf'constexpr wchar_t {name}\[\]\s*=\s*L"([^"]+)";', SOURCE
++                )
++                self.assertIsNotNone(declaration)
++                self.assertEqual(declaration.group(1), expected)
+ 
+     def test_runtime_query_uses_bounded_protected_uapi(self) -> None:
+         self.assertIn("ReadAwgRuntimeUapi", SOURCE)
+--- a/tools/test_windows_arm64_release_readiness.py
++++ b/tools/test_windows_arm64_release_readiness.py
+@@ -55,13 +55,31 @@
+     def test_every_engine_has_a_native_arm64_target(self) -> None:
+         self.assertIn("'arm64' = 'arm64'", INSTALLER)
+         self.assertIn(
+-            '$Winn3ArtifactInputDir = Join-Path $RepoRoot '
+-            '"build\\windows\\winn3\\$TargetArchitecture"',
++            '$ReleaseDir = Join-Path $RepoRoot '
++            '"build\\windows\\$($script:WindowsFlutterArchDirectory)\\runner\\$Configuration"',
+             INSTALLER,
+         )
+-        self.assertIn('$Winn3DatapathInput = Join-Path $Winn3ArtifactInputDir "winn-datapath.exe"', INSTALLER)
+-        self.assertIn('$Winn3RelayInput = Join-Path $Winn3ArtifactInputDir "winsvpn_winn3_engine.exe"', INSTALLER)
+-        self.assertIn("Assert-PeCoffMachine -Path $sourceState.Path -Expected $script:WindowsPeMachine", INSTALLER)
++        self.assertIn('$WinnEngineArtifact = Join-Path $ReleaseDir "winn-datapath.exe"', INSTALLER)
++        self.assertIn('$Winn3RelayArtifact = Join-Path $ReleaseDir "winsvpn_winn3_engine.exe"', INSTALLER)
++        verifier_start = INSTALLER.index("function Invoke-Winn3ArtifactProvenanceVerification")
++        verifier_end = INSTALLER.index("\n}", verifier_start)
++        verifier = INSTALLER[verifier_start:verifier_end]
++        for fragment in (
++            "-I -S $tool.Path verify-sealed-pair",
++            "--sealed-generation $sealedGeneration",
++            "--target-architecture $TargetArchitecture",
++            "--stage-directory $ReleaseDir",
++            "--expected-owner-authorized-receipt-sha256 $Winn3ReceiptSha256",
++            "--expected-signed-artifact-bindings-sha256 $Winn3SignedArtifactBindingsSha256",
++            "if ($verificationExit -ne 0 -or $verificationOutput.Count -ne 1)",
++            "Remove-Winn3PairStage",
++            "$core = Get-WinsBoundedRegularFile -Path $WinnEngineArtifact",
++            "$relay = Get-WinsBoundedRegularFile -Path $Winn3RelayArtifact",
++            "Assert-PeCoffMachine -Path $core.Path -Expected $script:WindowsPeMachine",
++            "Assert-PeCoffMachine -Path $relay.Path -Expected $script:WindowsPeMachine",
++        ):
++            self.assertIn(fragment, verifier)
++        self.assertNotIn("$Winn3ArtifactInputDir", INSTALLER)
+         self.assertIn("[ValidateSet('amd64', 'arm64')]", AWG_ENGINE)
+         self.assertIn("GOARCH = $TargetArchitecture", AWG_ENGINE)
+         self.assertIn("GOARM64 = 'v8.0'", AWG_ENGINE)
+--- a/winn_protocol_experimental/cmd/winn3-gateway/forward.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/forward.go
+@@ -79,8 +79,9 @@
+ // # Eviction
+ //
+ // There is no TTL and no idle sweep in this type. An address stays mapped
+-// until forget runs for the *driver.Loop that currently owns it. forget is
+-// called from gatewayForwardDevice.Close, which runs when the owning session
++// until forget runs for the *driver.Loop that currently owns it, or learn
++// confirms that the registry no longer authorizes that owner for the address.
++// forget is called from gatewayForwardDevice.Close, which runs when the owning session
+ // is torn down. server.releasePeer is what tears a session down when its
+ // Loop.Run returns, so a dead session cannot keep an inner address (the
+ // 2026-08-12 measurement: collisions 1, forgotten 0, 10.64.0.2 still held
+@@ -93,8 +94,8 @@
+ //
+ // # Collisions
+ //
+-// learn refuses to replace a live owner. Two different loops claiming one
+-// address increment Collisions, but the first loop keeps the mapping. Same-loop
++// learn refuses to replace an owner still authorized for the address. Such
++// collisions increment Collisions, but the first loop keeps the mapping. Same-loop
+ // relearn is not a collision. This is a security boundary: replacing the owner
+ // would route the first client's replies into the second client's authenticated
+ // session.
+@@ -113,9 +114,9 @@
+ }
+ 
+ // learn records that addr's traffic belongs to loop. It returns false for an
+-// invalid claim or when another live loop already owns addr. A dead owner is
+-// removed by gatewayForwardDevice.Close, so reconnect recovery does not require
+-// allowing one live session to steal another's return path.
++// invalid claim or when another loop still owns addr under registry authority.
++// Close removes dead owners; learn also evicts owners whose registry authority
++// for addr has ended, without allowing a live authorized owner's displacement.
+ func (t *forwardTable) learn(addr netip.Addr, loop *driver.Loop) bool {
+ 	if !addr.IsValid() || loop == nil {
+ 		return false
+@@ -123,8 +124,17 @@
+ 	t.mu.Lock()
+ 	defer t.mu.Unlock()
+ 	if existing, ok := t.byAddr[addr]; ok && existing != loop {
+-		t.collisions++
+-		return false
++		if t.registry == nil || existing == nil || existing.Session() == nil {
++			t.collisions++
++			return false
++		}
++		currentAddr, authorized := t.registry.innerForPeer(existing.Session().PeerStatic())
++		if authorized && currentAddr == addr {
++			t.collisions++
++			return false
++		}
++		delete(t.byAddr, addr)
++		t.forgotten++
+ 	}
+ 	t.byAddr[addr] = loop
+ 	t.learned++
+--- /dev/null
++++ b/winn_protocol_experimental/cmd/winn3-gateway/forward_round10_test.go
+@@ -0,0 +1,113 @@
++package main
++
++import (
++	"encoding/base64"
++	"fmt"
++	"testing"
++
++	"winsvpn.local/winnprotocol/winn3/driver"
++)
++
++func TestRound10ForwardReplacesStaleAuthorityOwner(t *testing.T) {
++	for _, oldAddress := range []string{"", "10.10.0.3"} {
++		name := "revoked"
++		if oldAddress != "" {
++			name = "reassigned"
++		}
++		t.Run(name, func(t *testing.T) {
++			old := newAuthorityFixture(t, 0)
++			next := newAuthorityFixture(t, 0)
++			peers := fmt.Sprintf(`{"static_public":%q,"inner_v4":%q,"not_after":0}`,
++				base64.StdEncoding.EncodeToString(next.key), old.addr.String())
++			if oldAddress != "" {
++				peers += fmt.Sprintf(`,{"static_public":%q,"inner_v4":%q,"not_after":0}`,
++					base64.StdEncoding.EncodeToString(old.key), oldAddress)
++			}
++			replaceAuthority(t, old.registry.path, `{"version":1,"peers":[`+peers+`]}`)
++			dueAuthorityRefresh(old.registry)
++			if _, ok := old.table.lookup(old.addr); ok {
++				t.Fatal("stale owner still receives return traffic")
++			}
++
++			writer := &fakeInnerWriter{}
++			device := newGatewayForwardDevice(writer, old.table, old.device.MTU(), old.registry)
++			device.bind(next.loop)
++			t.Cleanup(func() { _ = device.Close() })
++			before := old.table.Stats()
++			pkt := ipv4Packet(t, old.addr.String(), "8.8.8.8")
++			if n, err := device.WritePacket(pkt); err != nil || n != len(pkt) {
++				t.Fatalf("authorized replacement blocked by stale owner: write = %d, %v", n, err)
++			}
++			if len(writer.written) != 1 {
++				t.Fatal("replacement packet did not reach the shared writer")
++			}
++			if got, ok := old.table.lookup(old.addr); !ok || got != next.loop {
++				t.Fatal("return traffic does not route to the authorized replacement")
++			}
++			after := old.table.Stats()
++			if after.Size != before.Size || after.Learned != before.Learned+1 ||
++				after.Forgotten != before.Forgotten+1 || after.Collisions != before.Collisions {
++				t.Fatalf("stale eviction counters: before = %+v, after = %+v", before, after)
++			}
++			if err := old.device.Close(); err != nil {
++				t.Fatal(err)
++			}
++			if got, ok := old.table.lookup(old.addr); !ok || got != next.loop {
++				t.Fatal("old session cleanup removed the replacement owner")
++			}
++			if got := old.table.Stats(); got != after {
++				t.Fatalf("old session cleanup changed replacement counters: %+v", got)
++			}
++		})
++	}
++}
++
++func TestRound10ForwardPreservesAuthorizedOwner(t *testing.T) {
++	owner := newAuthorityFixture(t, 0)
++	claimant := newAuthorityFixture(t, 0)
++	before := owner.table.Stats()
++	if owner.table.learn(owner.addr, claimant.loop) {
++		t.Fatal("different authenticated session displaced an authorized owner")
++	}
++	if got, ok := owner.table.lookup(owner.addr); !ok || got != owner.loop {
++		t.Fatal("collision changed the authorized return path")
++	}
++	want := before
++	want.Collisions++
++	if got := owner.table.Stats(); got != want {
++		t.Fatalf("collision counters = %+v, want %+v", got, want)
++	}
++	if !owner.table.learn(owner.addr, owner.loop) {
++		t.Fatal("same owner could not relearn its address")
++	}
++}
++
++func TestRound10ForwardKeepsOwnerWithoutAuthorityEvidence(t *testing.T) {
++	for _, name := range []string{"no_registry", "nil_owner", "no_session"} {
++		t.Run(name, func(t *testing.T) {
++			f := newAuthorityFixture(t, 0)
++			var existing *driver.Loop = f.loop
++			switch name {
++			case "no_registry":
++				f.table.registry = nil
++			case "nil_owner":
++				existing = nil
++			case "no_session":
++				existing = fakeLoop()
++			}
++			f.table.byAddr[f.addr] = existing
++			before := f.table.Stats()
++			if f.table.learn(f.addr, fakeLoop()) {
++				t.Fatal("owner replaced without registry evidence of lost authority")
++			}
++			if got := f.table.byAddr[f.addr]; got != existing {
++				t.Fatal("collision changed the existing mapping")
++			}
++			want := before
++			want.Collisions++
++			if got := f.table.Stats(); got != want {
++				t.Fatalf("collision counters = %+v, want %+v", got, want)
++			}
++		})
++	}
++}

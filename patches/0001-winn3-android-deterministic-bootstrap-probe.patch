@@ -1,0 +1,625 @@
+diff -Naur a/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt b/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
+--- a/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt	2026-08-17 13:43:07
++++ b/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt	2026-08-17 13:45:56
+@@ -2449,6 +2449,16 @@
+                     }
+                 }
+ 
++                // THE BOOTSTRAP PROBE'S TWO ADDRESSES, read off the plan rather
++                // than off the postures: the assignment is the only source
++                // `winn3/tun`'s outbound rule accepts (an equality, not a prefix
++                // containment), and the next hop is the gateway's own inner
++                // address, which is the one destination both gateway inner sides
++                // in this tree answer. Both are already validated by
++                // WinnV3SessionPlan.from, which requires each to be non-empty.
++                val probeSource = plan.engineConfig.innerAddress
++                val probeTarget = plan.engineConfig.innerNextHop
++
+                 val staged = WinnV3StagedStart(
+                     bootstrap = plan.bootstrap,
+                     promoted = plan.promotion,
+@@ -2482,6 +2492,64 @@
+                     log = { message -> debugLog(message) },
+                     nowMs = { SystemClock.elapsedRealtime() },
+                     sleepMs = { millis -> Thread.sleep(millis) },
++                    // THE DETERMINISTIC BOOTSTRAP. Until this existed, promotion
++                    // required a human to drive a routed application at the
++                    // gateway's inner address inside the thirty-second window,
++                    // because the gateway learns its return route from the
++                    // client's FIRST inner packet and the engine's `rx_packets`
++                    // is not even reported until the host device has produced one.
++                    // See WinnV3BootstrapProbe for both halves of that.
++                    //
++                    // Injected into the seam and not written to the tun: the
++                    // packet has to travel host -> engine, and the bootstrap
++                    // posture routes almost nothing while this service's own
++                    // carrier socket is protect()ed out of the tunnel on purpose.
++                    // See WinnV3AndroidIpPacketSeam.injectOutgoingPacket.
++                    probe = { sequence ->
++                        val live = seam
++                        if (live == null) {
++                            // Cannot happen: the staged start polls only after
++                            // install(bootstrap) has returned, and that closure is
++                            // what opens the seam. Logged rather than asserted,
++                            // because a refusal is the correct outcome either way
++                            // and throwing here would tear down a tunnel that is
++                            // otherwise fine.
++                            debugLog("winn3: bootstrap probe $sequence skipped; no seam is open")
++                        } else {
++                            val packet = WinnV3BootstrapProbe.echoRequest(
++                                source = probeSource,
++                                destination = probeTarget,
++                                sequence = sequence,
++                            )
++                            if (packet == null) {
++                                // Once, on the first attempt. A configuration whose
++                                // addresses cannot carry an inner probe still
++                                // starts; it simply promotes the old way, on traffic
++                                // from a routed application. Saying so thirty times
++                                // would bury the reason it fell back.
++                                if (sequence == 1) {
++                                    logWarning(
++                                        "Winn v3 cannot build a bootstrap probe for " +
++                                            "$probeSource -> $probeTarget; promotion now depends " +
++                                            "on a routed application emitting this session's " +
++                                            "first inner packet inside the proof window."
++                                    )
++                                }
++                            } else if (!live.injectOutgoingPacket(packet)) {
++                                debugLog(
++                                    "winn3: bootstrap probe $sequence was not queued; the " +
++                                        "outbound queue is full, which means real traffic is " +
++                                        "already flowing"
++                                )
++                            } else {
++                                debugLog(
++                                    "winn3: bootstrap probe $sequence queued — ICMP echo " +
++                                        "$probeSource -> $probeTarget (${packet.size} bytes)"
++                                )
++                            }
++                        }
++                    },
++                    probeIntervalMs = WinnV3StagedStart.DEFAULT_PROBE_INTERVAL_MS,
+                 )
+ 
+                 when (val outcome = staged.start()) {
+diff -Naur a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3AndroidTun.kt b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3AndroidTun.kt
+--- a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3AndroidTun.kt	2026-08-17 13:43:07
++++ b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3AndroidTun.kt	2026-08-17 13:44:21
+@@ -199,6 +199,52 @@
+         }
+     }
+ 
++    /**
++     * Queues one host-originated inner packet as though the tun had produced it.
++     *
++     * This is [WinnV3BootstrapProbe]'s way in, and the queue is the right place
++     * for it rather than the descriptor. Writing the probe INTO the tun with
++     * [writeIncomingPacket] would hand it to the kernel as an arriving packet,
++     * which is the opposite direction; and there is no way to make the kernel
++     * emit a packet on this interface from inside this process, because the
++     * bootstrap posture captures almost nothing and this service's own carrier
++     * socket is `protect()`ed out of the tunnel by design.
++     *
++     * ## What this does and does not weaken
++     *
++     * It does move `winn3/tun`'s `DeviceProven` — the engine's `DeviceReads`
++     * counter cannot tell a queued probe from a queued tun packet, and must not
++     * be able to, since the whole point of the channel-backed device is that the
++     * engine holds one `Device` across a promotion that swaps the descriptor
++     * underneath it. That is worth stating plainly, because `DeviceProven` exists
++     * to stop a false promotion: `winn3/tun.Stats` explains that
++     * `cmd/winn-datapath`'s loopback-UDP seam's `sendto` to a dead port returns
++     * success, so an inbound write was not by itself evidence of a host.
++     *
++     * The corroboration this weakens is precisely the part that was never load
++     * bearing HERE. This seam's inbound side is [WinnV3AndroidTunDevice.write] on
++     * a real `VpnService` tun descriptor: a write to it either transfers the
++     * bytes to the kernel or throws. There is no dead-port analogue to defend
++     * against. And the rest of the gate is untouched — `rx_packets` still
++     * requires an inbound packet that the gateway sent, that `winn3/core`
++     * decrypted, that `winn3/tun`'s inbound validator accepted as addressed to
++     * this session, and that the tun descriptor took in full. A probe cannot
++     * manufacture any of those four, so promotion still means the datapath
++     * carried.
++     *
++     * ## Not counted as a drop
++     *
++     * A refusal returns false and touches neither [dropped] nor [onDropped].
++     * That counter is the diagnosis for "the frame channel is behind real
++     * traffic", and a queue that is full of real traffic is a session that is
++     * about to promote on its own; charging the probe to it would put a number in
++     * front of an operator that means the opposite of what it says.
++     */
++    fun injectOutgoingPacket(packet: ByteArray): Boolean {
++        if (closed.get()) return false
++        return queue.offer(packet)
++    }
++
+     override fun readOutgoingPacket(buffer: ByteArray): Int {
+         while (!closed.get()) {
+             val packet = queue.poll(POLL_MS, TimeUnit.MILLISECONDS) ?: continue
+diff -Naur a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3BootstrapProbe.kt b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3BootstrapProbe.kt
+--- a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3BootstrapProbe.kt	1969-12-31 19:00:00
++++ b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3BootstrapProbe.kt	2026-08-17 13:44:04
+@@ -0,0 +1,238 @@
++package org.winsvpn.app
++
++/**
++ * The one inner packet a winn/3 client must emit before it can be promoted, and
++ * the reason it cannot come from an application.
++ *
++ * ## What the promotion gate actually requires
++ *
++ * [WinnV3PromotionGate] wants `gate_state == carrying` AND `rx_packets > 0`.
++ * The first clause is the session's: `winn3/driver`'s `syncGate` opens the gate
++ * when `session.State()` reaches established, which is a handshake and needs no
++ * inner traffic at all. The second clause is the one that stalls, and it stalls
++ * for TWO independent reasons — both of which this probe answers and neither of
++ * which any amount of waiting fixes:
++ *
++ *  1. **The gateway has no return route yet.** `cmd/winn3-gateway`'s
++ *     `gatewayForwardDevice.WritePacket` calls `forwardTable.learn(src, loop)`
++ *     on the FIRST authenticated inner packet of the session and never before.
++ *     Until that fires, the shared kernel tun's return pump has no session to
++ *     hand a reply to, so nothing can ever come back — there is no route to
++ *     this client, and the gateway is the only party that could create one.
++ *  2. **`RxPackets` is not reported at all until the host device has spoken.**
++ *     `winn3/tun.Stats()` reports `RxPackets` as zero unless `DeviceProven` is
++ *     true, and `DeviceProven` is `DeviceReads > 0` — a packet having come OUT
++ *     of the host device. On Android the "device" is the frame channel
++ *     (`winn3FrameDevice`), so `DeviceReads` only moves when the host writes an
++ *     `OpInbound` frame. A session that received a gateway packet before the
++ *     host had ever sent one would still report `rx_packets: 0`.
++ *
++ * So the client must transmit first, and the engine has nothing that does it:
++ * the session's silence timer carries frame-level keepalives, which the gateway
++ * consumes at the frame layer and never presents to its inner side, so they
++ * teach the forwarding table nothing and move neither counter.
++ *
++ * ## Why an application cannot supply it on this platform
++ *
++ * `startWinnV3EngineThread` establishes the BOOTSTRAP posture, which §4.1 pins
++ * to one `/32` address, at most one route and NO default route. Almost nothing
++ * on the handset routes into it, and this service's own sockets are the worst
++ * candidate of all: the carrier socket is `VpnService.protect()`ed by
++ * construction, and an `adb shell` process is a different UID that the bootstrap
++ * routes do not capture. The measured bootstrap was a human driving Chrome at
++ * `http://10.10.0.1:8080` inside the thirty-second proof window, which is not a
++ * mechanism — it is a person, and the failure when they are absent is a
++ * `RefusedNotProven` that reads exactly like censorship.
++ *
++ * ## What this builds
++ *
++ * A 28-byte ICMPv4 echo request from the session's assigned inner address to its
++ * inner next hop — the gateway's own inner address. It is the smallest thing
++ * that satisfies both clauses in one round trip, and it works against BOTH
++ * gateway inner sides this tree ships:
++ *
++ *  - `-forward` (a real Linux tun addressed `<inner>/24`): the kernel owns that
++ *    address, so it answers the echo itself. `learn` has already run by then,
++ *    because `WritePacket` learns before it writes to the descriptor.
++ *  - the reflector (`cmd/winn3-gateway/reflect.go`): mirrors ANY validated IPv4
++ *    packet with the addresses swapped, so the reply is unconditional.
++ *
++ * Either way the reply's source is the gateway's inner address and its
++ * destination is ours, which is precisely what `winn3/tun/ip.go`'s inbound rule
++ * requires (`dst` ours, `src` not ours, neither martian), so it is delivered,
++ * `RxDeviceWrites` moves, `DeviceProven` is already true from this packet's own
++ * outbound trip, and `rx_packets` reports the delivery.
++ *
++ * ## Free of Android imports, and of `InetAddress`
++ *
++ * The same rule the rest of this host follows, plus one more: `InetAddress`
++ * would resolve a non-literal, and a DNS lookup on a string that came out of a
++ * config file is a lookup this tunnel exists to prevent. The parse below accepts
++ * a dotted quad and nothing else.
++ */
++internal object WinnV3BootstrapProbe {
++
++    /** IPv4 header, no options, plus the eight-byte ICMP echo header. */
++    const val PROBE_BYTES = 28
++
++    private const val IPV4_HEADER_BYTES = 20
++    private const val ICMP_HEADER_BYTES = 8
++
++    /**
++     * The ICMP identifier every probe carries.
++     *
++     * A constant rather than a random draw: nothing correlates on it (the outer
++     * wire is `winn3/core` transport, so this byte pair is inside the AEAD), the
++     * builder stays deterministic under unit test, and the sequence number is
++     * what makes each probe distinct in a capture.
++     */
++    const val IDENTIFIER = 0x7733
++
++    private const val ICMP_TYPE_ECHO_REQUEST = 8
++    private const val IP_PROTO_ICMP = 1
++
++    /**
++     * TTL 64, the Linux default.
++     *
++     * It has to be non-zero — `winn3/tun`'s parser refuses a zero TTL outright —
++     * and it has to look like everything else the host emits, because a probe
++     * with a distinctive TTL would be the one packet in the session that
++     * fingerprints the client. 64 is what the rest of the handset sends.
++     */
++    private const val TTL = 64
++
++    /** Don't-fragment. A 28-byte probe is never fragmented; saying so is free. */
++    private const val FLAG_DONT_FRAGMENT = 0x40
++
++    /**
++     * Builds one echo request, or null when this configuration cannot have one.
++     *
++     * Null rather than a thrown exception and rather than a best-effort packet:
++     * the caller's correct response is to log that the deterministic bootstrap
++     * is unavailable and let the staged start run exactly as it did before this
++     * file existed. A malformed probe would be worse than none — it would spend
++     * the session's first packet on something `winn3/tun`'s outbound validator
++     * counts as `TxDroppedInvalid`, which is the one outcome that teaches the
++     * gateway nothing while looking like it should have.
++     *
++     * @param source the session's assigned inner address (`[winn] inner_v4`).
++     *   The outbound rule is an equality against exactly this address.
++     * @param destination the inner next hop (`[winn] inner_router_v4`).
++     * @param sequence the ICMP sequence number; the caller counts probes.
++     */
++    fun echoRequest(
++        source: String,
++        destination: String,
++        sequence: Int,
++        identifier: Int = IDENTIFIER,
++    ): ByteArray? {
++        val src = parseIpv4(source) ?: return null
++        val dst = parseIpv4(destination) ?: return null
++        // Every clause winn3/tun/ip.go's outbound rule would apply, applied here
++        // instead, so a refusal is a log line on this side of the seam rather
++        // than a counter on the other side of it.
++        if (!isCarriable(src) || !isCarriable(dst)) return null
++        if (src.contentEquals(dst)) {
++            // ErrMartian, "destination is this endpoint's own inner address".
++            return null
++        }
++
++        val p = ByteArray(PROBE_BYTES)
++        p[0] = 0x45                                   // IPv4, IHL 5 (no options)
++        p[1] = 0x00                                   // no DSCP, no ECN
++        writeU16(p, 2, PROBE_BYTES)                   // total length
++        writeU16(p, 4, 0)                             // identification
++        p[6] = FLAG_DONT_FRAGMENT.toByte()            // DF, fragment offset 0
++        p[7] = 0x00
++        p[8] = TTL.toByte()
++        p[9] = IP_PROTO_ICMP.toByte()
++        writeU16(p, 10, 0)                            // checksum, filled below
++        src.copyInto(p, 12)
++        dst.copyInto(p, 16)
++        writeU16(p, 10, checksum(p, 0, IPV4_HEADER_BYTES))
++
++        p[IPV4_HEADER_BYTES] = ICMP_TYPE_ECHO_REQUEST.toByte()
++        p[IPV4_HEADER_BYTES + 1] = 0x00               // code
++        writeU16(p, IPV4_HEADER_BYTES + 2, 0)         // checksum, filled below
++        writeU16(p, IPV4_HEADER_BYTES + 4, identifier and 0xFFFF)
++        writeU16(p, IPV4_HEADER_BYTES + 6, sequence and 0xFFFF)
++        writeU16(
++            p,
++            IPV4_HEADER_BYTES + 2,
++            checksum(p, IPV4_HEADER_BYTES, IPV4_HEADER_BYTES + ICMP_HEADER_BYTES),
++        )
++        return p
++    }
++
++    /**
++     * Parses a dotted quad, or null.
++     *
++     * A trailing `/nn` is tolerated because the same strings travel through this
++     * host as bare literals and as prefixes depending on which config wrote
++     * them. A leading zero is refused: `010` is ten to this parser and eight to
++     * an octal one, and an address that means two things is not an address.
++     */
++    fun parseIpv4(text: String): ByteArray? {
++        val bare = text.substringBefore('/').trim()
++        if (bare.isEmpty()) return null
++        val parts = bare.split('.')
++        if (parts.size != 4) return null
++        val out = ByteArray(4)
++        for (i in 0..3) {
++            val part = parts[i]
++            if (part.isEmpty() || part.length > 3) return null
++            if (part.length > 1 && part[0] == '0') return null
++            var value = 0
++            for (c in part) {
++                if (c < '0' || c > '9') return null
++                value = value * 10 + (c - '0')
++            }
++            if (value > 255) return null
++            out[i] = value.toByte()
++        }
++        return out
++    }
++
++    /**
++     * The IPv4 clauses of `winn3/tun/ip.go`'s `martianReason`, mirrored.
++     *
++     * Mirrored and not approximated: unspecified, the reserved leading-zero
++     * block, loopback, multicast and above, and link-local unicast. A tunnel
++     * that will not carry the address is a tunnel this probe must not build for.
++     */
++    private fun isCarriable(a: ByteArray): Boolean {
++        val b0 = a[0].toInt() and 0xFF
++        val b1 = a[1].toInt() and 0xFF
++        if (b0 == 0) return false            // unspecified, and the reserved 0/8
++        if (b0 == 127) return false          // loopback
++        if (b0 >= 224) return false          // multicast, reserved high, broadcast
++        if (b0 == 169 && b1 == 254) return false // link-local unicast
++        return true
++    }
++
++    private fun writeU16(b: ByteArray, at: Int, value: Int) {
++        b[at] = ((value shr 8) and 0xFF).toByte()
++        b[at + 1] = (value and 0xFF).toByte()
++    }
++
++    /**
++     * The 16-bit one's complement of the one's complement sum, over `[from,
++     * until)` with that range's own checksum field already zeroed.
++     *
++     * The same routine `winn3/tun/ip.go`'s `checksum` is, deliberately: the
++     * engine verifies the IPv4 header with it and refuses `ErrBadChecksum`, so a
++     * second implementation that disagreed on the fold or on an odd tail would
++     * produce a probe the engine drops.
++     */
++    fun checksum(b: ByteArray, from: Int, until: Int): Int {
++        var sum = 0L
++        var i = from
++        while (i + 1 < until) {
++            sum += (((b[i].toInt() and 0xFF) shl 8) or (b[i + 1].toInt() and 0xFF)).toLong()
++            i += 2
++        }
++        if (i < until) sum += ((b[i].toInt() and 0xFF) shl 8).toLong()
++        while ((sum shr 16) != 0L) sum = (sum and 0xFFFF) + (sum shr 16)
++        return (sum.inv() and 0xFFFF).toInt()
++    }
++}
+diff -Naur a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3StagedStart.kt b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3StagedStart.kt
+--- a/android/app/src/main/kotlin/org/winsvpn/app/WinnV3StagedStart.kt	2026-08-17 13:43:07
++++ b/android/app/src/main/kotlin/org/winsvpn/app/WinnV3StagedStart.kt	2026-08-17 13:46:22
+@@ -395,6 +395,21 @@
+     private val log: (String) -> Unit = {},
+     private val nowMs: () -> Long,
+     private val sleepMs: (Long) -> Unit,
++    /**
++     * Emits the session's own first inner packet. Called with a 1-based probe
++     * count so the caller can use it as an ICMP sequence number.
++     *
++     * The fourth thing this class cannot do itself, and the newest. See
++     * [WinnV3BootstrapProbe] for why the packet has to exist and why nothing
++     * else on an Android handset will produce it; see [DEFAULT_PROBE_INTERVAL_MS]
++     * for why it is called repeatedly rather than once.
++     *
++     * Defaults to a no-op, which is exactly the behaviour this class had before
++     * the probe existed: a host that supplies nothing waits for a routed
++     * application, as every caller in the test suite still does.
++     */
++    private val probe: (Int) -> Unit = {},
++    private val probeIntervalMs: Long = DEFAULT_PROBE_INTERVAL_MS,
+ ) {
+ 
+     companion object {
+@@ -411,6 +426,36 @@
+          */
+         const val DEFAULT_PROOF_DEADLINE_MS = 30_000L
+         const val DEFAULT_POLL_INTERVAL_MS = 250L
++
++        /**
++         * How often the bootstrap probe is re-emitted while the proof is
++         * outstanding.
++         *
++         * REPEATED, not once, and for one reason that is not about packet loss:
++         * the gate is closed for the whole handshake. `winn3/tun.Outbound` takes
++         * the gate BEFORE it parses — "a closed gate produces exactly one
++         * observable effect, a counter increment, and zero bytes anywhere" — so
++         * a probe emitted at the top of the window is counted as
++         * `TxDroppedClosed` and never reaches the wire. Nothing tells this class
++         * when the gate opens; the status it polls says `handshaking` and then
++         * says `carrying`, and the probe has to be in flight after that.
++         *
++         * A second is the right grain. The proof window is thirty seconds, so
++         * the worst case is thirty probes of 28 bytes each; and the worst-case
++         * latency this adds after the gate opens is one interval plus one poll,
++         * about 1.25 s, against a handshake that measured twelve polls. Tighter
++         * buys nothing a person can perceive and puts more inner packets in the
++         * session's first second than the session itself sends.
++         *
++         * A probe that lands on a closed gate is not wasted, which is what makes
++         * the early ones worth sending: `winn3/tun.PumpOutbound` credits
++         * `DeviceReads` on the READ, before the gate and before any validation,
++         * so every probe from the first one proves the host device to the engine.
++         * By the time the gate opens, `DeviceProven` is already true and the
++         * first probe that crosses can be answered into a `rx_packets` the engine
++         * is willing to report.
++         */
++        const val DEFAULT_PROBE_INTERVAL_MS = 1_000L
+     }
+ 
+     sealed class Outcome {
+@@ -463,9 +508,22 @@
+ 
+         val deadline = nowMs() + proofDeadlineMs
+         var polls = 0
++        var probes = 0
++        // The first probe goes out on the first poll, before any status has been
++        // read. It is the one that proves the host device to the engine, and it
++        // is free to send into a gate that is still handshaking.
++        var nextProbeAtMs = nowMs()
+         var lastReason = "no status was read"
+         while (nowMs() < deadline) {
+             polls++
++            // BEFORE the status is read, so that a probe and the poll that could
++            // observe its answer are never inverted within one iteration.
++            val at = nowMs()
++            if (at >= nextProbeAtMs) {
++                probes++
++                probe(probes)
++                nextProbeAtMs = at + probeIntervalMs
++            }
+             val status = try {
+                 WinnV3EngineStatus.parse(readStatus())
+             } catch (e: WinnV3StartRefusal) {
+@@ -478,7 +536,8 @@
+                 refuseIfSuperseded("before promotion")
+                 log(
+                     "winn3: datapath proven — gate=carrying rxPackets=${status.rxPackets} " +
+-                        "after $polls polls; installing PROMOTED posture"
++                        "after $polls polls and $probes bootstrap probes; installing " +
++                        "PROMOTED posture"
+                 )
+                 install(promoted)
+                 return Outcome.Promoted(status.rxPackets, polls)
+@@ -488,7 +547,18 @@
+         }
+ 
+         // §4.3 rule 2. The host is put back exactly as it was.
+-        log("winn3: refusing to promote after ${proofDeadlineMs}ms — $lastReason")
++        //
++        // The probe count is in the line because it is what separates the two
++        // diagnoses that used to look alike. Probes sent and the gate never
++        // carrying is a session that never established — a handshake the network
++        // ate, or a peer registry that does not hold this device's static public
++        // key. Probes sent, the gate carrying, and rx_packets still zero is a
++        // gateway that took the packet and had no way back: no learned route, no
++        // reply, or an inner side that is not there.
++        log(
++            "winn3: refusing to promote after ${proofDeadlineMs}ms — $lastReason " +
++                "($probes bootstrap probes emitted)"
++        )
+         tearDown()
+         return Outcome.RefusedNotProven(lastReason, polls)
+     }
+diff -Naur a/android/app/src/test/kotlin/org/winsvpn/app/WinnV3BootstrapProbeTest.kt b/android/app/src/test/kotlin/org/winsvpn/app/WinnV3BootstrapProbeTest.kt
+--- a/android/app/src/test/kotlin/org/winsvpn/app/WinnV3BootstrapProbeTest.kt	1969-12-31 19:00:00
++++ b/android/app/src/test/kotlin/org/winsvpn/app/WinnV3BootstrapProbeTest.kt	2026-08-17 13:47:01
+@@ -0,0 +1,123 @@
++package org.winsvpn.app
++
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNotNull
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * The bootstrap probe, checked against the rules the ENGINE applies to it.
++ *
++ * These tests are written from `winn3/tun/ip.go` rather than from the builder:
++ * `parseIPv4` refuses a bad IHL, a total length that disagrees with the buffer,
++ * a set reserved flag bit, a zero TTL and — the one that would be silent — a
++ * header whose checksum does not verify to zero. A probe that fails any of them
++ * is counted `TxDroppedInvalid` inside the engine and teaches the gateway
++ * nothing, which is indistinguishable in a log from the bug this probe exists to
++ * fix. So the shape is asserted here, on a plain JVM, and not on a handset.
++ */
++class WinnV3BootstrapProbeTest {
++
++    private val source = "10.10.0.5"
++    private val target = "10.10.0.1"
++
++    private fun probe(sequence: Int = 1) =
++        WinnV3BootstrapProbe.echoRequest(source, target, sequence)
++
++    @Test
++    fun `the probe is a well formed 28 byte ICMPv4 echo request`() {
++        val built = probe()
++        assertNotNull(built)
++        val p = built!!
++        assertEquals(WinnV3BootstrapProbe.PROBE_BYTES, p.size)
++        assertEquals(28, p.size)
++        // Version 4, IHL 5: parseIPv4 refuses anything else at 28 bytes.
++        assertEquals(0x45, p[0].toInt() and 0xFF)
++        // Total length must equal what is present, or ErrBadHeader.
++        assertEquals(28, u16(p, 2))
++        // Bit 15 of the flags word is reserved and MUST be zero — ip.go calls it
++        // "one of the few places a deliberately malformed packet announces
++        // itself". DF may be set; the reserved bit may not.
++        assertEquals(0, p[6].toInt() and 0x80)
++        // A zero TTL is ErrBadHeader.
++        assertTrue((p[8].toInt() and 0xFF) > 0)
++        assertEquals(1, p[9].toInt() and 0xFF) // ICMP
++        assertEquals(8, p[20].toInt() and 0xFF) // echo request
++        assertEquals(0, p[21].toInt() and 0xFF) // code 0
++    }
++
++    @Test
++    fun `both checksums verify to zero the way the engine verifies them`() {
++        val p = probe()!!
++        // ip.go: "Applied to a buffer that already carries its correct checksum
++        // it returns 0, which is how verification is done here". Both ranges.
++        assertEquals(0, WinnV3BootstrapProbe.checksum(p, 0, 20))
++        assertEquals(0, WinnV3BootstrapProbe.checksum(p, 20, 28))
++    }
++
++    @Test
++    fun `the addresses are the ones the outbound rule requires`() {
++        val p = probe()!!
++        assertEquals(source, dotted(p, 12))
++        assertEquals(target, dotted(p, 16))
++    }
++
++    @Test
++    fun `the sequence number varies and the checksum tracks it`() {
++        val first = probe(1)!!
++        val second = probe(2)!!
++        assertEquals(1, u16(first, 26))
++        assertEquals(2, u16(second, 26))
++        assertEquals(WinnV3BootstrapProbe.IDENTIFIER, u16(first, 24))
++        assertEquals(WinnV3BootstrapProbe.IDENTIFIER, u16(second, 24))
++        // The whole point of recomputing: a builder that stamped a constant ICMP
++        // checksum would pass the test above and fail on every probe but one.
++        assertEquals(0, WinnV3BootstrapProbe.checksum(second, 20, 28))
++    }
++
++    @Test
++    fun `a destination equal to the assignment is refused`() {
++        // ip.go outbound: dst == ours is ErrMartian, "destination is this
++        // endpoint's own inner address".
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, source, 1))
++    }
++
++    @Test
++    fun `martian addresses are refused rather than built`() {
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "127.0.0.1", 1))
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "224.0.0.1", 1))
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "240.0.0.1", 1))
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "169.254.1.1", 1))
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "0.0.0.0", 1))
++        assertNull(WinnV3BootstrapProbe.echoRequest("0.0.0.0", target, 1))
++    }
++
++    @Test
++    fun `only a dotted quad parses`() {
++        assertNull(WinnV3BootstrapProbe.parseIpv4(""))
++        assertNull(WinnV3BootstrapProbe.parseIpv4("10.10.0"))
++        assertNull(WinnV3BootstrapProbe.parseIpv4("10.10.0.1.1"))
++        assertNull(WinnV3BootstrapProbe.parseIpv4("10.10.0.256"))
++        assertNull(WinnV3BootstrapProbe.parseIpv4("fd00::1"))
++        assertNull(WinnV3BootstrapProbe.parseIpv4("gateway.example"))
++        // A leading zero means two different numbers to two different parsers.
++        assertNull(WinnV3BootstrapProbe.parseIpv4("10.10.0.010"))
++        // A prefix suffix is tolerated: the same strings travel through this host
++        // bare and with a length depending on which config wrote them.
++        assertEquals("10.10.0.1", WinnV3BootstrapProbe.parseIpv4("10.10.0.1/32")?.let { bytes ->
++            bytes.joinToString(".") { (it.toInt() and 0xFF).toString() }
++        })
++    }
++
++    @Test
++    fun `an IPv6 next hop yields no probe rather than a broken one`() {
++        assertNull(WinnV3BootstrapProbe.echoRequest(source, "fd00::1", 1))
++    }
++
++    private fun u16(b: ByteArray, at: Int): Int =
++        ((b[at].toInt() and 0xFF) shl 8) or (b[at + 1].toInt() and 0xFF)
++
++    private fun dotted(b: ByteArray, at: Int): String =
++        (0..3).joinToString(".") { (b[at + it].toInt() and 0xFF).toString() }
++}

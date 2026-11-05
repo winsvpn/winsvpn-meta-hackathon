@@ -1,0 +1,26 @@
+Win's VPN is a user-initiated encrypted VPN for Linux desktops.
+
+The tunnel uses Winn v3 as the product's primary protocol. Winn v1
+AWG then Xray fallback is the ordered compatibility path after a served
+Winn v3 attempt. A served Winn v3 lead attempt cannot be skipped. Direct
+AWG or Xray is not a separate request site.
+
+Install the x64 native tarball or the derived amd64 Debian package,
+then connect from the app. Disconnect from the app at any time. This
+listing is not an AppImage package.
+
+The required website upload kind is the native tarball, not a DEB.
+Debian is derived and is not a separate upload target. The decided Flathub
+target is org.winsvpn.WinsVPN, dual-arch x64/arm64, with an unprivileged GUI
+and a typed, polkit-controlled host service. The decided Snap target is
+dual-arch x64/arm64 and uses strict confinement with an unprivileged GUI and
+authenticated root daemon. Neither design is implemented or eligible for
+submission in the current package. Flathub and
+Snap listing copy and screenshots remain owner-blocked and are not submitted. Native
+ARM64 tarball evidence remains pending-owner-evidence. Do not treat an
+x64 tarball or amd64 deb as native ARM64.
+
+Premium access is purchased through the secure PayPal checkout on
+https://winsvpn.org. The app does not collect card data.
+
+Privacy policy: https://www.winsvpn.org/privacy/

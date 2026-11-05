@@ -1,0 +1,74 @@
+name: wins_vpn
+description: "A secure, obfuscated anti-censorship tunnel network client."
+publish_to: 'none'
+
+version: 1.0.17+34
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Ships inside the Flutter SDK -- no pub download, no new third-party code.
+  # Supplies GlobalMaterialLocalizations/Cupertino/Widgets, which is what makes
+  # the framework's own chrome (date pickers, text-selection menus, semantics
+  # labels, layout direction) render in the device's language instead of always
+  # English. Burmese is among the locales it covers.
+  flutter_localizations:
+    sdk: flutter
+  crypto: ^3.0.7      # Handles the SHA256 hashing and HMAC generation
+
+  # Production Network & Hardware Telemetry Matrix
+  http: ^1.6.0
+  decimal: ^3.2.6
+  cryptography: ^2.9.0
+  country_flags: ^4.1.2
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Automated Native Resource Generation Toolchain
+  flutter_launcher_icons: ^0.14.4
+
+# FIXED: Stripped out adaptive template blocks to force flat icon compliance
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/Win's VPN.png"
+
+flutter:
+  generate: true
+  uses-material-design: true
+
+  assets:
+    - assets/icon/app_icon.webp
+    - assets/icon/ic_calculator.png
+    - assets/wallpaper/australia.webp
+    - assets/wallpaper/canada.webp
+    - assets/wallpaper/africa.webp
+    - assets/wallpaper/central_asia.webp
+    - assets/wallpaper/chicago.webp
+    - assets/wallpaper/default.webp
+    - assets/wallpaper/east_asia.webp
+    - assets/wallpaper/europe.webp
+    - assets/wallpaper/france.webp
+    - assets/wallpaper/germany.webp
+    - assets/wallpaper/japan.webp
+    - assets/wallpaper/korea.webp
+    - assets/wallpaper/latin_america.webp
+    - assets/wallpaper/los_angeles.webp
+    - assets/wallpaper/middle_east.webp
+    - assets/wallpaper/new_york.webp
+    - assets/wallpaper/oregon.webp
+    - assets/wallpaper/oceania.webp
+    - assets/wallpaper/offline_world_map.webp
+    - assets/wallpaper/singapore.webp
+    - assets/wallpaper/south_asia.webp
+    - assets/wallpaper/southeast_asia.webp
+    - assets/wallpaper/uk.webp

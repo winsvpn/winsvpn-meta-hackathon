@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "winn_protocol_experimental",
+    "exit_code": 0,
+    "seconds": 58.83,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/go-test.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./cmd/winn3-gateway"
+    ],
+    "cwd": "winn_protocol_experimental",
+    "exit_code": 0,
+    "seconds": 48.58,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/go-gateway-race.log"
+  }
+]

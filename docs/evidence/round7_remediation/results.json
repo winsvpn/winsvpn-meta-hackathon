@@ -1,0 +1,206 @@
+{
+  "date_utc": "2026-09-13T17:31:57.613737+00:00",
+  "workspace": "/Users/owner/xprize/winsvpnv3",
+  "required": {
+    "flutter-analyze": {
+      "command": [
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "exit_code": 0
+    },
+    "flutter-test": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub"
+      ],
+      "exit_code": 0
+    },
+    "test_control_plane_deepseek_round2": {
+      "command": [
+        "python3",
+        "server/test_control_plane_deepseek_round2.py"
+      ],
+      "exit_code": 0
+    },
+    "test_control_plane_round6": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round6.py"
+      ],
+      "exit_code": 0
+    },
+    "test_control_plane_round4": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round4.py"
+      ],
+      "exit_code": 0
+    },
+    "test_control_plane_round5": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round5.py"
+      ],
+      "exit_code": 0
+    },
+    "website_security_audit": {
+      "command": [
+        "python3",
+        "tools/website_security_audit.py"
+      ],
+      "exit_code": 0
+    },
+    "test_winn3_descriptor_hub": {
+      "command": [
+        "python3",
+        "server/test_winn3_descriptor_hub.py"
+      ],
+      "exit_code": 0
+    }
+  },
+  "supplementary": {
+    "round7_server": {
+      "exit_code": 0,
+      "tests": 17
+    },
+    "account_deletion": {
+      "exit_code": 0,
+      "tests": 20
+    },
+    "account_expiry": {
+      "exit_code": 0,
+      "tests": 4
+    },
+    "crypto_payments": {
+      "exit_code": 0,
+      "tests": 7
+    },
+    "go_carrier_race": {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./winn3/carrier"
+      ],
+      "exit_code": 0
+    },
+    "linux_arm64_compile_and_inhibitor_harness": {
+      "exit_code": 0
+    },
+    "linux_x64_compile_and_inhibitor_harness": {
+      "exit_code": 0
+    },
+    "linux_socket_tests": {
+      "arm64": {
+        "compile_exit_code": 0,
+        "test_exit_code": 0
+      },
+      "amd64": {
+        "compile_exit_code": 0,
+        "test_exit_code": 0
+      }
+    },
+    "rulings": {
+      "exit_code": 0,
+      "general_checks": 59,
+      "apple_checks": 6
+    },
+    "bash_syntax": {
+      "exit_code": 0
+    },
+    "original_source_negative_control": {
+      "tests": 17,
+      "subtest_failures": 44,
+      "errors": 22,
+      "expected_failure": true
+    }
+  },
+  "blocked": {
+    "android_phone_smoke": "Connected phone, but no release APK and no reviewed RELEASE_INPUT_INDEX.json. Actual producer exits 1: ReleaseInputIndex is required for every Android release build."
+  },
+  "changed_files": [
+    {
+      "path": "docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md",
+      "before_sha256": "64eece9873ce96b1bff98048909e0b4a98af41f1d95b6f3f8af60b34d4d6544d",
+      "after_sha256": "124422ff785107fbcedcf97161bef7bcc8c64ac0923d8ad8218cf3d78410706b"
+    },
+    {
+      "path": "lib/main.dart",
+      "before_sha256": "82101daee4b795c0a9ee395d89e361e22ca66bce9debe058402034eadb6974ca",
+      "after_sha256": "cabfc25302f1e3dffb6e98419f40d9477d0db9e811a6e0ba43f423f394594d35"
+    },
+    {
+      "path": "linux/runner/linux_tunnel_backend.cc",
+      "before_sha256": "8d55987f055e517bacb354c28de42f7b812efc9b4a5417de4606af0d4966c88e",
+      "after_sha256": "c103e52865a3b882c317644a9dabc732140795625b9b831f66e96686e340508f"
+    },
+    {
+      "path": "server/test_account_expiry_revocation_hub.py",
+      "before_sha256": "39e2fff4a7e680da5d6f9633ebf6cf58fa445ae3611ec46ecc98a4ed91a62c58",
+      "after_sha256": "0316422fd0b793a1349bb302ad9604a56ceb50bf79d391c4e4f4ab488136a06f"
+    },
+    {
+      "path": "server/test_control_plane_deepseek_round2.py",
+      "before_sha256": "5d542ca9b972367c24086aa98a15152de95080d8017f8efd0233377eb57160a2",
+      "after_sha256": "a35b99fbec59d91ced76cc9361782780bf4f2b0b7c33f7879f3c06115f7ee7a3"
+    },
+    {
+      "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+      "before_sha256": "7b368e808ac260d82c73d1efb182a867f2cf1ce5554a8eb48766c9d17e36c9ff",
+      "after_sha256": "8b5f322f0f5fa672432a5632ada2a3df7462297688042057d0b03953fb2ea95a"
+    },
+    {
+      "path": "winn_protocol_experimental/winn3/carrier/udp_socket_buffers.go",
+      "before_sha256": "164fabf250c03f703a781ca472b60a2214505a1973555e4f269af1a6393340b4",
+      "after_sha256": "a82373d1296b1c5397e3bd4c6014491cae62e6cbd117efce4ec95423ee71849c"
+    },
+    {
+      "path": "winn_protocol_experimental/winn3/carrier/udp_socket_buffers_test.go",
+      "before_sha256": "023bf8a28f902de327e820665357f572394732cd22628be0ce0e7081dc378c80",
+      "after_sha256": "75daa23ff7fac0bef73c3d23602eb5fcce47cc8ca1be757e1fa7436d0898ac66"
+    },
+    {
+      "path": "server/test_control_plane_round7.py",
+      "after_sha256": "72be0a4c3f3272fa2cf16ba4bd4ca4ab3bb9f5016c86b37b5db56b98b0759e27",
+      "new_file": true
+    },
+    {
+      "path": "tools/test_linux_round7.py",
+      "after_sha256": "a64f631c496467141c2d026379b962491d52cce550b7546db8dcfd3b569c45ec",
+      "new_file": true
+    }
+  ],
+  "linux_socket_test_count_per_arch": 11,
+  "evidence_sha256": {
+    "android-release-build.log": "c13b7c8c0eac20895020db57232e1b83757143c362c4f7a4031e856c30d63289",
+    "changed-files.json": "62a826fb50dd63cbb9547352d1e18dbf56029c7e039d29945937e44c628fec56",
+    "flutter-analyze.log": "abaa17c4a419f8f784165ed145d4c11d2265f8a16ab86a01e37ece069b9530e1",
+    "flutter-results.json": "c1ddd5be81f3e8343552cd6719c8cbac9279cafff92dc96a886cf5d5089b31a3",
+    "flutter-test.log": "d0875514339274acc65cb9b4aef7de6a4228f53a41ba4589742cbf34aa29c988",
+    "go-carrier.log": "e448e4ac5369f627ba4f803c9d947321c1503dd6f321c2062a207322ae593fef",
+    "linux-arm64.log": "d1d57d8773ac1c264229bc97a83e6b5d053c848949f2d0a74ef839954447b00e",
+    "linux-go-amd64.log": "edf21b9a3c7b9ebc80c0cd7100125a2143b1ac584ee630bedb34077d4ad9d357",
+    "linux-go-arm64.log": "edf21b9a3c7b9ebc80c0cd7100125a2143b1ac584ee630bedb34077d4ad9d357",
+    "linux-go-results.json": "1d89baf8d6836d460c88f16d261f40b2da6ca4ec8217cb0a8e1f2d512df860d9",
+    "linux-x64.log": "9c0f07f26d023d13eef907d747b19768d4e8029a98a80eace2176afc2f3a662b",
+    "remediation.diff": "a83cab5c2d99b79487b06d1196d928a86c62ec853d08625b5a9012c01e43a08f",
+    "rulings.log": "0fc28b07f1e37912c22681603b2cd8eb20a80ed0eb8aca916e50b9eee8f6bca6",
+    "server-negative-control.log": "0ef158208137b476a91d18d31cce7c1134339278ac7dfef7f4b2c1e7d6960421",
+    "server-results.json": "888f9ef5dbcf0d9570105253d0c39355f875db66ad867c4eb2ceddd566c8154c",
+    "server-round7.log": "a75cdb3da3a93a2e6e584ba3068edaf27f59059fb395d800aa17c218d52f1b03",
+    "test_account_deletion_hub.log": "06bc42fd6ff57a4fce26afd83e3413800be07e242ac3e88116c9474886b19282",
+    "test_account_expiry_revocation_hub.log": "4d64bd09393e3acd79b46f0243cbe2d48a0402c3b006d1c1884ba5e2bada9c3e",
+    "test_control_plane_deepseek_round2.log": "8d65ccc5eb2162a16dc569a9a678e98adf2333bd207ed363776b8b36f0ce3f70",
+    "test_control_plane_round4.log": "76412258c854b5ef681824a3dd8adbb29bffd958445cc0f6d04b309885077ea1",
+    "test_control_plane_round5.log": "9110e116a56b73edf89d58680df3c2818d2cf96ce2d37be73593e9598a95d773",
+    "test_control_plane_round6.log": "6ab770585c02b5ce85be93bbc2e5ee37e0ab8792a7b5b211be4697b0513d3a66",
+    "test_control_plane_round7.log": "f4cd3941254729c2f4d918d38b622c3aa61fdf777d8fae80085d6b6e9613e7da",
+    "test_crypto_payments_spain.log": "6eff8becdce49adb38867ab7996c298a4a2ff0e8e88e2d5974c1842fc588eb94",
+    "test_winn3_descriptor_hub.log": "3f3d3cf699e9b9fd2181471079e6c9f549f8b515e87e5097db3ab496c406ef9b",
+    "website_security_audit.log": "6154723dfc83000c1643b4ae386ece0986bd7387878d57ba754c4ec74d2b2f65"
+  },
+  "report_sha256": "9c0d4f41fc7b985b9624664d7d08790aa15d310f5532402c1b0fd9524354d634"
+}

@@ -1,0 +1,16 @@
+Win's VPN on Wear OS is a non-standalone companion for the paired phone app.
+
+The watch can start or stop the phone tunnel and choose a country. It does not
+create a VPN on the watch, does not hold account numbers or keys, and does not
+talk to VPN servers. Pairing uses the Wearable Data Layer only.
+
+The paired phone runs Winn v3 as the product's primary protocol. Winn v1 AWG
+then Xray fallback is the ordered compatibility path after a served Winn v3
+attempt. Those native engines ship in the phone form factor of org.winsvpn.app,
+not in this Wear package.
+
+Play must not offer this watch app to unpaired watches. The watch launcher
+label is the permanent Calculator disguise; the Play listing name remains
+Win's VPN because this is the Wear form factor of the same application ID.
+
+Privacy policy: https://www.winsvpn.org/privacy/

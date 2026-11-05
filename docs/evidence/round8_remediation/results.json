@@ -1,0 +1,283 @@
+{
+  "required_suites": {
+    "control_plane_deepseek_round2": {
+      "command": [
+        "python3",
+        "server/test_control_plane_deepseek_round2.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.92,
+      "log": "control_plane_deepseek_round2-final.log"
+    },
+    "control_plane_round4": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round4.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.02,
+      "log": "control_plane_round4-final.log"
+    },
+    "control_plane_round5": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round5.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.92,
+      "log": "control_plane_round5-final.log"
+    },
+    "control_plane_round6": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round6.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.55,
+      "log": "control_plane_round6-final.log"
+    },
+    "control_plane_round7": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round7.py"
+      ],
+      "exit_code": 0,
+      "seconds": 5.63,
+      "log": "control_plane_round7-final.log"
+    },
+    "control_plane_round8": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round8.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.86,
+      "log": "control_plane_round8-final.log"
+    },
+    "winn3_descriptor_hub": {
+      "command": [
+        "python3",
+        "server/test_winn3_descriptor_hub.py"
+      ],
+      "exit_code": 0,
+      "seconds": 22.3,
+      "log": "winn3_descriptor_hub-final.log"
+    },
+    "account_deletion_hub": {
+      "command": [
+        "python3",
+        "server/test_account_deletion_hub.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.39,
+      "log": "account_deletion_hub-final.log"
+    },
+    "winn3_serving_hub": {
+      "command": [
+        "python3",
+        "server/test_winn3_serving_hub.py"
+      ],
+      "exit_code": 0,
+      "seconds": 7.3,
+      "log": "winn3_serving_hub-final.log"
+    },
+    "winn3_install_time_carrier": {
+      "command": [
+        "python3",
+        "server/test_winn3_install_time_carrier.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.84,
+      "log": "winn3_install_time_carrier-final.log"
+    },
+    "core_dark_start_latch": {
+      "command": [
+        "python3",
+        "server/test_core_dark_start_latch.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.96,
+      "log": "core_dark_start_latch-final.log"
+    },
+    "winn3_pathmtu_hub": {
+      "command": [
+        "python3",
+        "server/test_winn3_pathmtu_hub.py"
+      ],
+      "exit_code": 0,
+      "seconds": 4.5,
+      "log": "winn3_pathmtu_hub-final.log"
+    },
+    "winn3_sign_descriptor_tool": {
+      "command": [
+        "python3",
+        "server/test_winn3_sign_descriptor_tool.py"
+      ],
+      "exit_code": 0,
+      "seconds": 4.22,
+      "log": "winn3_sign_descriptor_tool-final.log"
+    },
+    "data_plane_dark_start_latch": {
+      "command": [
+        "python3",
+        "server/test_data_plane_dark_start_latch.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.28,
+      "log": "data_plane_dark_start_latch-final.log"
+    },
+    "hoppy_agent_tier1_hub": {
+      "command": [
+        "python3",
+        "server/test_hoppy_agent_tier1_hub.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.67,
+      "log": "hoppy_agent_tier1_hub-final.log"
+    },
+    "rulings": {
+      "command": [
+        "sh",
+        "tools/verify_rulings.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 3.32,
+      "log": "rulings-final.log"
+    },
+    "apple-contract": {
+      "command": [
+        "python3",
+        "tools/verify_apple_method_channel_contract.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.05,
+      "log": "apple-contract-final.log"
+    },
+    "ruling-regressions": {
+      "command": [
+        "python3",
+        "tools/test_rulings_round8.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.29,
+      "log": "ruling-regressions-final.log"
+    },
+    "website": {
+      "command": [
+        "python3",
+        "tools/website_security_audit.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.37,
+      "log": "website-final.log"
+    },
+    "edge-verify": {
+      "command": [
+        "python3",
+        "extension/build.py",
+        "--verify",
+        "edge",
+        "extension/dist/wins-vpn-companion-edge.zip"
+      ],
+      "exit_code": 0,
+      "seconds": 3.51,
+      "log": "edge-verify-final.log"
+    },
+    "firefox-verify": {
+      "command": [
+        "python3",
+        "extension/build.py",
+        "--verify",
+        "firefox",
+        "extension/dist/wins-vpn-companion-firefox.zip"
+      ],
+      "exit_code": 0,
+      "seconds": 3.27,
+      "log": "firefox-verify-final.log"
+    }
+  },
+  "flutter": {
+    "flutter-analyze": {
+      "command": [
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "exit_code": 0,
+      "seconds": 3.21
+    },
+    "flutter-test": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub"
+      ],
+      "exit_code": 0,
+      "seconds": 15.43
+    }
+  },
+  "android_release": {
+    "command": [
+      "pwsh",
+      "-NoProfile",
+      "-File",
+      "tools/build_android_release.ps1"
+    ],
+    "exit_code": 1,
+    "release_apk_exists": false,
+    "reviewed_indexes": []
+  },
+  "android_jvm": {
+    "counts": {
+      "tests": 591,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0
+    },
+    "failures": [
+      {
+        "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+        "test": "everyStagedEngineCarriesTheMarkersTheV3ProbeDependsOn",
+        "message": "java.lang.AssertionError: expected one staged engine per variant/ABI under android/app/src/*/jniLibs/, but these are missing: [/Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/arm64-v8a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/armeabi-v7a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/x86_64/libwinnengine.so]. If the staging inventory changed, update this assertion first."
+      },
+      {
+        "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+        "test": "everyPackagedApkCarriesAnEngineWithTheV3Symbols",
+        "message": "java.lang.AssertionError: /Users/owner/xprize/winsvpnv3/build/app/outputs/apk/phone/debug/app-phone-debug.apk packages no libwinnengine.so for any ABI. The app resolves the engine through context.applicationInfo.nativeLibraryDir, so an APK without it cannot start a tunnel at all. Check that the variant's jniLibs source set is populated and that packaging.jniLibs.excludes does not match it."
+      },
+      {
+        "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+        "test": "everyAbiWithNativeCodeAlsoGetsTheEngine",
+        "message": "java.lang.AssertionError: /Users/owner/xprize/winsvpnv3/build/app/outputs/apk/phone/debug/app-phone-debug.apk ships native code for [arm64-v8a, armeabi-v7a, x86_64] but packages libwinnengine.so only for []. Devices on [arm64-v8a, armeabi-v7a, x86_64] would install this build and find no engine."
+      },
+      {
+        "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+        "test": "everyShippedNativeArtifactMatchesABuildOfCurrentSource",
+        "message": "java.lang.AssertionError: a shipped native artifact does not match a build of current source.\nThe APK would ship the first digest; every test that builds from source is exercising the second.\n\nFATAL: native inventory preflight failed closed: OWNER-BLOCKED: stale Windows native consumer authority paths: installer/windows/build_winn3_msi.ps1, installer/windows/build_winn3_msi_arm64.ps1, installer/windows/build_zip_installer.ps1, installer/windows/winsvpn.iss\n"
+      },
+      {
+        "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+        "test": "theStagedEnginesAreTheSameBuildAcrossEveryVariant",
+        "message": "java.lang.AssertionError: expected one staged engine per variant/ABI under android/app/src/*/jniLibs/, but these are missing: [/Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/arm64-v8a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/armeabi-v7a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/x86_64/libwinnengine.so]. If the staging inventory changed, update this assertion first."
+      }
+    ]
+  },
+  "extension_build": {
+    "command": [
+      "python3",
+      "extension/build.py",
+      "edge",
+      "firefox"
+    ],
+    "exit_code": 0,
+    "rebuild_identical_to_verified_archives": true,
+    "sha256": {
+      "extension/dist/wins-vpn-companion-edge.zip": "22734014d0f1caa7dff0c851f6de99d371d2309e737667ba6c25d290e3d90875",
+      "extension/dist/wins-vpn-companion-firefox.zip": "e5a9a17bbb21ecb51231c2cd67964401eba72d6ede604e9224db120ce6b9ec58"
+    }
+  },
+  "h3_index_blob": "93e17c98e22accc7ba8193f054eeddd34ccef177",
+  "changed_files": 23,
+  "all_changed_sources_lf": true,
+  "independent_review_available": false
+}

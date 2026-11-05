@@ -1,0 +1,13 @@
+# Hash-pinned wheels for the python.org CPython 3.14.7 (amd64) that runs
+# tools/release_inno_toolchain_custody.py on the Windows build hosts (the
+# Windows producer calls it with the PATH python.exe). The x64 and ARM64
+# build VMs both use the amd64 interpreter: cryptography publishes no
+# win_arm64 wheel. Install exactly with:
+#   python.exe -m pip install --require-hashes --no-deps --only-binary=:all: -r tools\windows-custody-python-requirements.txt
+# Digests: PyPI JSON API (files.pythonhosted.org), 2026-10-15.
+cryptography==50.0.2 \
+    --hash=sha256:7afa5a6602a9f29af1f3a2965f831bae7c9d5d597b7cbb716d41ab3b7d89879c
+cffi==2.1.1 \
+    --hash=sha256:3222ba5d678f80a030e6afbcc33dc1ae5cb45facabb61cee2c7016b8432fde48
+pycparser==3.11 \
+    --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80

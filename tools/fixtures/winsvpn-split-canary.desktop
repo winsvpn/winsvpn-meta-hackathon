@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Win's VPN Split Route Canary
+Comment=Release-only launcher-scoped split-tunnel verifier
+Exec=/usr/local/bin/winsvpn-split-canary
+Terminal=false
+NoDisplay=false
+Categories=Network;

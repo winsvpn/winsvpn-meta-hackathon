@@ -1,0 +1,16 @@
+{
+  "contract": "winsvpn-browser-archive-custody-trust-v1",
+  "schema_version": 1,
+  "controller": "tools/release_browser_archive_custody.py",
+  "wrapper": "tools/release_browser_archive_custody.sh",
+  "manifest": "tools/toolchain-pins.json",
+  "trust_anchor": "tools/release_browser_archive_custody.trust.json",
+  "issuance_env": "WINS_BROWSER_CUSTODY_ISSUANCE",
+  "issuance_contract": "winsvpn-browser-archive-custody-issuance-v2",
+  "authority": "/Library/WinsVPN/ReleaseBrowserAuthority/v1/authority.json",
+  "authority_contract": "winsvpn-browser-archive-custody-authority-v1",
+  "signature_algorithm": "ecdsa-p256-sha256-x962",
+  "controller_sha256": "39dd66ceca06cc61fafdb8fba6e529d06174d77ac5fc5c4747a5fc6aae0d0aec",
+  "wrapper_sha256": "a86e61b8d21f71724f258185c5592aa4237228e5da6cfd30309113076f28691a",
+  "manifest_sha256": "3615ddbd9cb8602c610e6c3bfed4804749b3d5de29f7c7436434f0da5c28e365"
+}

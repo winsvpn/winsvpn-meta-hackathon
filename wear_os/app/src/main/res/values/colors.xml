@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+         Adaptive-icon background. Changed from #0B1524 (dark navy) on
+         2026-08-08 when the shield foreground became a calculator.
+
+         The navy was chosen to sit behind a bright blue shield. The calculator
+         body is #202124, near-black — on #0B1524 the two differ by about 6% of
+         luminance, so the glyph would have read as a dark smudge on a dark
+         disc at watch-launcher size, which is worse than the shield it
+         replaced: an unreadable icon draws the eye, and drawing the eye is the
+         one thing this artwork exists to avoid.
+
+         Light grey inverts it: a near-black body on a light disc, which is how
+         nearly every calculator icon on either platform reads, and which
+         survives the Wear launcher's circular mask and its small size.
+    -->
+    <color name="ic_launcher_background">#DADCE0</color>
+</resources>

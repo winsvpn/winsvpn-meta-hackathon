@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Win's VPN
+Comment=Privacy-focused VPN with free and premium access
+Exec=wins_vpn
+Icon=org.winsvpn.app
+Terminal=false
+Categories=Network;Security;
+StartupNotify=true
+StartupWMClass=org.winsvpn.app

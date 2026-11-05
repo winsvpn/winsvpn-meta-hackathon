@@ -1,0 +1,11 @@
+sudo: unable to resolve host <DATA_SIM_INTERNAL_HOST>: Name or service not known
+tcpdump: data link type LINUX_SLL2
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+04:32:26.954965 ens4  In  IP <CONTROL_SIM_IP>.25060 > 10.128.0.13.9110: UDP, length 36
+04:32:27.972725 lo    In  IP 127.0.0.1.54802 > 127.0.0.1.9110: UDP, length 36
+04:32:28.222736 lo    In  IP 127.0.0.1.54802 > 127.0.0.1.9110: UDP, length 36
+
+3 packets captured
+6 packets received by filter
+0 packets dropped by kernel

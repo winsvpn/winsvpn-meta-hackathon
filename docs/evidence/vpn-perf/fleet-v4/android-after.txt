@@ -1,0 +1,18 @@
+=== AFTER (through winn3 fleet tunnel) ===
+2026-08-23T03:53:17Z
+http=200 bytes=25000000 speed_bps=10854331 time_s=2.303228 remote=162.159.140.220
+2026-08-23T03:53:20Z
+=== AFTER run 2 ===
+2026-08-23T03:53:30Z
+192.168.50.0/24 dev wlan0 table 1000000017 proto static scope link 
+224.0.0.0/24 dev wlan0 table 1000000017 proto static scope link 
+224.0.0.0/24 dev rmnet_data0 table 1000000020 proto static scope link 
+224.0.0.0/24 dev rmnet_data2 table 1000000022 proto static scope link 
+10.10.0.2 dev tun1 table 1000000040 proto static scope link 
+fe80::/64 dev wlan0 table 1000000017 proto static metric 1024 pref medium
+http=200 bytes=25000000 speed_bps=9827573 time_s=2.543863 remote=172.66.0.218
+2026-08-23T03:53:33Z
+=== AFTER run 3 (no --resolve, in-tunnel DNS) ===
+2026-08-23T03:54:31Z
+http=200 bytes=25000000 speed_bps=10014111 time_s=2.496477 remote=162.159.140.220
+2026-08-23T03:54:33Z

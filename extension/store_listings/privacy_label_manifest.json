@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-browser-extension-privacy-label-v1",
+  "status": "BLOCKED",
+  "canonical_release": "1.0.17+34",
+  "package_version": "1.0.17",
+  "privacy_policy_url": "https://www.winsvpn.org/browser-extension-privacy/",
+  "remote_code": false,
+  "off_device_collection": false,
+  "tracking": false,
+  "sale_of_data": false,
+  "host_permissions_at_install": false,
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "native_messaging": "on_device_only",
+  "firefox_data_collection_permissions": [
+    "none"
+  ],
+  "listing_screenshot_inventory": "owner-blocked",
+  "stores": {
+    "chrome-extension-package": {
+      "surface": "chrome-web-store",
+      "privacy_practices_status": "BLOCKED",
+      "single_purpose": "desktop-companion-site-routing",
+      "source_disclosure_status": "BLOCKED"
+    },
+    "edge-extension-package": {
+      "surface": "edge-add-ons",
+      "privacy_practices_status": "BLOCKED",
+      "single_purpose": "desktop-companion-site-routing",
+      "source_disclosure_status": "BLOCKED"
+    },
+    "firefox-extension-package": {
+      "surface": "firefox-amo",
+      "privacy_practices_status": "BLOCKED",
+      "single_purpose": "desktop-proxy-site-routing",
+      "source_disclosure_status": "BLOCKED"
+    }
+  }
+}

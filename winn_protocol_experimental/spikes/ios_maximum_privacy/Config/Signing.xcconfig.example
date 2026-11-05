@@ -1,0 +1,6 @@
+// Copy to Signing.xcconfig only after Xcode has a valid Apple Development
+// identity. Signing.xcconfig is ignored and must not contain private material.
+SPIKE_DEVELOPMENT_TEAM = 5YT8H4U72M
+DEVELOPMENT_TEAM = $(SPIKE_DEVELOPMENT_TEAM)
+CODE_SIGN_STYLE = Automatic
+

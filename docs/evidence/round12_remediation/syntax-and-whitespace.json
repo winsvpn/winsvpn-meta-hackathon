@@ -1,0 +1,45 @@
+{
+  "compiled_generated_modules": [
+    "/opt/vpn_auth/main.py",
+    "/usr/local/lib/wins_threat_triage.py",
+    "/usr/local/bin/wins-security-alert-monitor"
+  ],
+  "checks": [
+    {
+      "command": [
+        "bash",
+        "-n",
+        "server/wins_control_plane_setup_ONETOUCH.sh"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "pubspec.yaml",
+        "server/wins_control_plane_setup_ONETOUCH.sh",
+        "tools/native_messaging/test_native_host_registration.py",
+        "tools/test_linux_native_host_delivery.py",
+        "winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "/dev/null",
+        "server/test_control_plane_round12.py"
+      ],
+      "exit_code": 1,
+      "output": ""
+    }
+  ]
+}

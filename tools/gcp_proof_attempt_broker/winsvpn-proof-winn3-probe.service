@@ -1,0 +1,37 @@
+[Unit]
+Description=Win's VPN proof Winn Protocol v3 client probe
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+After=network-online.target
+Wants=network-online.target
+# Oneshot client transaction for the root-owned protocol-attempt broker.
+# Flags come only from the root-owned EnvironmentFile. The broker never
+# accepts caller hosts, ports, paths, or secrets.
+ConditionFileNotEmpty=/etc/winn/proof-client/winn3-probe.env
+ConditionDirectoryNotEmpty=/etc/winn/proof-client
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/winn/proof-client/winn3-probe.env
+ExecStart=/usr/local/bin/winn3-probe -gw ${WINN3_PROOF_GW} -dir /etc/winn/proof-client -gateway-id ${WINN3_PROOF_GATEWAY_ID} -inner 10.10.0.2 -count 2 -interval 500ms -budget 8s -dual-ed-pub ${WINN3_PROOF_ED_PUB} -dual-ml-pub ${WINN3_PROOF_ML_PUB}
+StandardOutput=truncate:/run/winsvpn-proof/winn3-probe.out
+StandardError=inherit
+TimeoutStartSec=80
+RemainAfterExit=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/winsvpn-proof
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

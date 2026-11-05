@@ -1,0 +1,1014 @@
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -5899,7 +5899,7 @@
+ import urllib.request
+ import urllib.parse
+ import urllib.error
+-from contextlib import closing, contextmanager
++from contextlib import ExitStack, closing, contextmanager
+ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+ from datetime import datetime, timedelta, timezone
+ from email.mime.application import MIMEApplication
+@@ -7789,6 +7789,23 @@
+         )
+     """)
+ 
++def create_double_vpn_enrollment_leases_table(conn: sqlite3.Connection):
++    conn.execute("""
++        CREATE TABLE IF NOT EXISTS double_vpn_enrollment_leases (
++            account_number TEXT PRIMARY KEY,
++            device_id TEXT NOT NULL,
++            lease_token TEXT NOT NULL UNIQUE,
++            expires_at REAL NOT NULL,
++            created_at TEXT NOT NULL,
++            FOREIGN KEY(account_number) REFERENCES users(account_number) ON DELETE CASCADE
++        )
++    """)
++    conn.execute(
++        "CREATE INDEX IF NOT EXISTS idx_double_vpn_enrollment_leases_expiry "
++        "ON double_vpn_enrollment_leases(expires_at)"
++    )
++
++
+ def create_core_exit_peers_table(conn: sqlite3.Connection):
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS core_exit_peers (
+@@ -8385,6 +8402,7 @@
+     create_node_promotion_events_table(conn)
+     create_core_promotion_events_table(conn)
+     create_double_vpn_assignments_table(conn)
++    create_double_vpn_enrollment_leases_table(conn)
+     create_core_exit_peers_table(conn)
+     create_settings_table(conn)
+     create_paypal_events_table(conn)
+@@ -14079,6 +14097,67 @@
+             return False
+         time.sleep(min(0.5, remaining))
+ 
++def acquire_double_vpn_enrollment_lease(
++    conn: sqlite3.Connection,
++    account_number: str,
++    device_id: str,
++) -> str:
++    now = time.time()
++    ttl_seconds = max(
++        60,
++        DOUBLE_VPN_ASSIGNMENT_READY_TIMEOUT_SECONDS + 30,
++    )
++    conn.execute(
++        "DELETE FROM double_vpn_enrollment_leases WHERE expires_at <= ?",
++        (now,),
++    )
++    lease_token = secrets.token_urlsafe(32)
++    try:
++        conn.execute(
++            """
++            INSERT INTO double_vpn_enrollment_leases (
++                account_number, device_id, lease_token, expires_at, created_at
++            ) VALUES (?, ?, ?, ?, ?)
++            """,
++            (
++                account_number,
++                device_id,
++                lease_token,
++                now + ttl_seconds,
++                utcnow().isoformat(),
++            ),
++        )
++    except sqlite3.IntegrityError as exc:
++        raise HTTPException(
++            status_code=409,
++            detail="A Double VPN enrollment is already being prepared for this account.",
++            headers={
++                "X-Wins-Error-Code": "double_vpn_enrollment_in_flight",
++                "Retry-After": "5",
++            },
++        ) from exc
++    return lease_token
++
++
++def release_double_vpn_enrollment_lease(
++    account_number: str,
++    lease_token: str,
++) -> None:
++    try:
++        with get_db() as cleanup_conn:
++            cleanup_conn.execute("BEGIN IMMEDIATE")
++            cleanup_conn.execute(
++                "DELETE FROM double_vpn_enrollment_leases "
++                "WHERE account_number = ? AND lease_token = ?",
++                (account_number, lease_token),
++            )
++    except sqlite3.Error:
++        logger.exception(
++            "Double VPN enrollment lease cleanup failed for account_hash=%s",
++            security_event_hash(account_number),
++        )
++
++
+ def cleanup_stale_devices(conn: sqlite3.Connection, background_tasks: Optional[BackgroundTasks] = None) -> int:
+     rows = []
+     if STALE_DEVICE_RETENTION_DAYS > 0:
+@@ -20236,6 +20315,7 @@
+ 
+ def _verify_account_sync(fastapi_request: Request, login: LoginRequest, background_tasks: BackgroundTasks):
+     deferred_activation_secret = ""
++    double_vpn_lease_token = ""
+     logger.info("Verify request received: path=%s login_free_access=%s account_hash=%s", fastapi_request.url.path, login.free_access, security_event_hash(normalize_account_number(login.account_number)))
+     if fastapi_request.url.path == "/verify":
+         # M-4: /free/verify (see verify_free_access below) calls this same
+@@ -20255,7 +20335,7 @@
+         alert_failed_login(fastapi_request, "invalid_client_public_key", acc, detail="Invalid client public key.", status_code=400)
+     selection_generation, ordinary_v3_failure_generation = typed_selection_generations(login)
+ 
+-    with get_db() as conn:
++    with ExitStack() as deferred_cleanup, get_db() as conn:
+         ensure_schema(conn)
+         cleanup_stale_devices(conn, background_tasks)
+         if not login.free_access:
+@@ -20516,6 +20596,15 @@
+         core = select_double_vpn_core(conn) if double_vpn_requested else None
+         if double_vpn_requested and not core:
+             raise HTTPException(status_code=503, detail="Double VPN core is not available yet.")
++        if double_vpn_requested and deferred_activation_secret:
++            double_vpn_lease_token = acquire_double_vpn_enrollment_lease(
++                conn, acc, login.device_id
++            )
++            deferred_cleanup.callback(
++                release_double_vpn_enrollment_lease,
++                acc,
++                double_vpn_lease_token,
++            )
+ 
+         old_peer_to_remove = ""
+         old_peer_node_ip = ""
+@@ -20766,18 +20855,6 @@
+                 mark_node_management_status(conn, node["slug"], "failed", "double vpn exit peer sync failed")
+                 conn.commit()
+                 raise HTTPException(status_code=503, detail="Selected Double VPN exit node is not ready. Please try again in a minute.")
+-            mark_node_management_status(conn, node["slug"], "ok")
+-        elif not sync_peer_to_node(node_ssh_host, device_cfg):
+-            conn.rollback()
+-            # A lost SSH acknowledgment does not prove the peer was absent.
+-            # Reconcile against committed authority using the durable outbox.
+-            queue_peer_revocation(
+-                conn, node_ssh_host, device_cfg.get("client_public_key") or ""
+-            )
+-            mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
+-            conn.commit()
+-            raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
+-        else:
+             mark_node_management_status(conn, node["slug"], "ok")
+         if old_peer_to_remove and old_peer_node_ip:
+             queue_peer_revocation(conn, old_peer_node_ip, old_peer_to_remove, background_tasks)
+@@ -21069,6 +21146,19 @@
+                 status_code=503,
+                 detail="Selected Winn Protocol v3 node cannot be served for this request.",
+             )
++        # Validate the complete route before installing its remote AWG peer.
++        if not double_vpn_requested and not sync_peer_to_node(node_ssh_host, device_cfg):
++            conn.rollback()
++            # A lost SSH acknowledgment does not prove the peer was absent.
++            # Reconcile against committed authority using the durable outbox.
++            queue_peer_revocation(
++                conn, node_ssh_host, device_cfg.get("client_public_key") or ""
++            )
++            mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
++            conn.commit()
++            raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
++        elif not double_vpn_requested:
++            mark_node_management_status(conn, node["slug"], "ok")
+         if served_winn3_descriptor and served_winn3_device:
+             # Publish while the admission transaction still owns its writer
+             # lock. A failed publication must not consume the activation key
+@@ -21349,6 +21439,16 @@
+             })
+         else:
+             response_payload.update(account_referral_payload(conn, acc))
++        if double_vpn_lease_token and conn.execute(
++            "SELECT 1 FROM double_vpn_enrollment_leases "
++            "WHERE account_number=? AND lease_token=? AND expires_at>?",
++            (acc, double_vpn_lease_token, time.time()),
++        ).fetchone() is None:
++            raise HTTPException(
++                status_code=409,
++                detail="Double VPN enrollment lease expired or changed. Please retry.",
++                headers={"Retry-After": "5"},
++            )
+         if deferred_activation_secret and not verify_and_consume_activation_secret(
+             conn, acc, deferred_activation_secret
+         ):
+@@ -25540,7 +25640,16 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         if not reserve_paypal_event(conn, event_id, event, subscription_id):
+-            return {"status": "duplicate", "event": event}
++            existing = conn.execute(
++                "SELECT status FROM paypal_events WHERE event_id=?", (event_id,)
++            ).fetchone()
++            if existing is not None and existing["status"] in {"processed", "ignored"}:
++                return {"status": "duplicate", "event": event}
++            raise HTTPException(
++                status_code=409,
++                detail="PayPal event processing is still in progress. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+ 
+     try:
+         if event in stop_events and subscription_id:
+@@ -25825,7 +25934,16 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         if not reserve_paypal_event(conn, dedupe_id, event_type, ""):
+-            return {"status": "duplicate", "event": event_type}
++            existing = conn.execute(
++                "SELECT status FROM paypal_events WHERE event_id=?", (dedupe_id,)
++            ).fetchone()
++            if existing is not None and existing["status"] in {"processed", "ignored"}:
++                return {"status": "duplicate", "event": event_type}
++            raise HTTPException(
++                status_code=409,
++                detail="BTCPay invoice processing is still in progress. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+     try:
+         # Never grant from webhook fields alone: re-read the authoritative invoice
+         # for its settled status AND its metadata (the delivery body carries
+@@ -25833,11 +25951,14 @@
+         invoice = btcpay_fetch_invoice(invoice_id)
+         status = str(invoice.get("status") or "").strip().lower()
+         if status not in BTCPAY_SETTLED_INVOICE_STATUSES:
+-            # A per-payment settle that reached us before the invoice itself
+-            # settled. Leave the reservation NON-terminal (still 'processing') --
+-            # do NOT mark it processed/ignored -- so the eventual InvoiceSettled
+-            # delivery can still provision this invoice.
+-            return {"status": "pending", "event": event_type, "invoice_status": status}
++            # The exception handler releases this reservation as failed.
++            # A successful HTTP response would acknowledge an unsettled invoice
++            # and could suppress the later settlement during the live lease.
++            raise HTTPException(
++                status_code=409,
++                detail="BTCPay invoice settlement is not ready. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+         metadata = invoice.get("metadata") if isinstance(invoice.get("metadata"), dict) else {}
+         plan_key = str(metadata.get("plan_key") or "").strip()
+         if plan_key not in CRYPTO_PLAN_KEYS:
+@@ -25901,7 +26022,8 @@
+             # back to the invoice amount because a Greenfield "Settled" invoice is
+             # guaranteed fully paid. hub_order_id/plan_key/currency must ALL match
+             # the bound order, requested must equal what we priced, and paid must
+-            # cover it. crypto_settled_invoice_amount_ok stays as an extra gate.
++            # cover it. The bound order owns the accepted purchase price;
++            # changing the catalog price cannot invalidate that purchase.
+             try:
+                 requested = Decimal(str(invoice.get("amount") or ""))
+                 paid = Decimal(str(invoice.get("paidAmount") or invoice.get("amount") or ""))
+@@ -25914,10 +26036,12 @@
+                 and str(metadata.get("plan_key") or "") == order["plan_key"]
+                 and plan_key == order["plan_key"]
+                 and str(invoice.get("currency") or "").upper() == order["expected_currency"]
++                and expected.is_finite()
++                and requested.is_finite()
++                and paid.is_finite()
+                 and expected > 0
+                 and requested == expected
+                 and paid >= expected
+-                and crypto_settled_invoice_amount_ok(conn, plan_key, invoice)
+             )
+             if not contract_ok:
+                 conn.execute(
+@@ -31479,6 +31603,7 @@
+ import json
+ import os
+ import sqlite3
++from contextlib import closing
+ from datetime import UTC, datetime, timedelta
+ from pathlib import Path
+ 
+@@ -31738,7 +31863,7 @@
+     feedback = {"false_positive": 0, "benign_expected": 0, "threat": 0}
+     try:
+         EVENTS_DB.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+-        with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_schema(conn)
+             feedback = feedback_counts(conn, key)
+@@ -31789,7 +31914,7 @@
+     reason = " ".join(reason.strip().split())[:500]
+     if len(reason) < 8:
+         raise ValueError("feedback reason must contain at least 8 characters")
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         ensure_schema(conn)
+         row = conn.execute(
+@@ -31822,7 +31947,7 @@
+ def reclassify_events(limit: int, include_stale: bool = False):
+     """Backfill missing classifier results without overwriting human labels."""
+     bounded_limit = max(1, min(int(limit or 1), 50000))
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+@@ -31872,7 +31997,7 @@
+         ))
+ 
+     if updates:
+-        with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_schema(conn)
+             conn.executemany("""
+@@ -31893,7 +32018,7 @@
+ 
+ 
+ def list_events(limit: int):
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+@@ -31909,7 +32034,7 @@
+ 
+ def report(hours: int):
+     cutoff = (datetime.now(UTC) - timedelta(hours=max(1, min(hours, 24 * 90)))).isoformat()
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         ensure_schema(conn)
+         rows = conn.execute("""
+@@ -32025,11 +32150,13 @@
+ import os
+ import re
+ import sqlite3
++from contextlib import closing
+ import smtplib
+ import ssl
+ import subprocess
+ import sys
+ import time
++import tempfile
+ from datetime import UTC, datetime, timedelta, timezone
+ from email.mime.text import MIMEText
+ from pathlib import Path
+@@ -32320,7 +32447,7 @@
+                 "model_version": "fail-safe",
+                 "feedback_state": "unavailable",
+             }
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_events_db(conn)
+             conn.execute("""
+@@ -32363,7 +32490,7 @@
+     if not event_id:
+         return
+     try:
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             conn.execute(
+                 "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
+@@ -32398,7 +32525,7 @@
+     ]
+     triage_reasons = []
+     try:
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             row = conn.execute("""
+                 SELECT triage_label, triage_score, triage_confidence, triage_reasons
+@@ -32613,19 +32740,31 @@
+     match = IP_RE.search(line)
+     return match.group(1) if match else "local"
+ 
++def write_journal_cursor(path: Path, timestamp: int) -> None:
++    fd, temporary = tempfile.mkstemp(prefix=".journal-cursor-", dir=path.parent)
++    try:
++        with os.fdopen(fd, "w", encoding="utf-8") as stream:
++            stream.write(str(timestamp))
++            stream.flush()
++            os.fsync(stream.fileno())
++        os.replace(temporary, path)
++        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
++        try:
++            os.fsync(directory)
++        finally:
++            os.close(directory)
++    finally:
++        Path(temporary).unlink(missing_ok=True)
++
+ def monitor_journal():
+     state_path = STATE_DIR / "journal-auth.last"
+     now = int(time.time())
+-    if not state_path.exists():
+-        state_path.write_text(str(now), encoding="utf-8")
+-        return
+     try:
+         since = int(float(state_path.read_text(encoding="utf-8").strip() or str(now - 60)))
+     except Exception:
+         since = now - 60
+-    state_path.write_text(str(now), encoding="utf-8")
+     cmd = ["journalctl", f"--since=@{since}", f"--until=@{now}", "-o", "short-unix", "--no-pager"]
+-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=25)
++    result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=25)
+     for line in result.stdout.splitlines():
+         lowered = line.lower()
+         if "failed password" in lowered or "invalid user" in lowered:
+@@ -32656,6 +32795,8 @@
+                 "mechanism": "su",
+                 "line_hash": event_hash(line),
+             })
++    write_journal_cursor(state_path, now)
++
+ 
+ def main():
+     if "--test-email" in sys.argv:
+--- a/server/test_control_plane_round9.py
++++ b/server/test_control_plane_round9.py
+@@ -183,9 +183,14 @@
+                 self.mod, 'btcpay_enabled', return_value=True), patch.object(
+                 self.mod, 'verify_btcpay_webhook_signature', return_value=True), patch.object(
+                 self.mod, 'btcpay_fetch_invoice', side_effect=fetch):
+-            result = asyncio.run(self.mod.btcpay_webhook(Request(body={
+-                'type': 'InvoiceSettled', 'invoiceId': 'ROUND9-INVOICE'}), harness.BackgroundTasks()))
+-            self.assertEqual(result['status'], 'pending')
++            with self.assertRaises(harness.HTTPException) as caught:
++                asyncio.run(self.mod.btcpay_webhook(Request(body={
++                    'type': 'InvoiceSettled', 'invoiceId': 'ROUND9-INVOICE'}), harness.BackgroundTasks()))
++            self.assertEqual(caught.exception.status_code, 409)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute(
++                "SELECT status FROM paypal_events WHERE event_id='btcpay:ROUND9-INVOICE'"
++            ).fetchone()[0], 'failed')
+         self.assertIn('db', observed)
+         self.assertIn('provider', observed)
+ 
+--- a/server/test_control_plane_round12.py
++++ b/server/test_control_plane_round12.py
+@@ -0,0 +1,425 @@
++#!/usr/bin/env python3
++"""Round 12 regressions on generated production code and isolated SQLite.
++
++Remote nodes, payment providers, journalctl and alert delivery are controlled
++boundaries. No live account, journal, host identity or service is accessed.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++from concurrent.futures import ThreadPoolExecutor
++from contextlib import closing, redirect_stderr, redirect_stdout
++import io
++import json
++import os
++from pathlib import Path
++import sqlite3
++import subprocess
++import sys
++import tempfile
++import threading
++import types
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_control_plane_round10 as round10
++import test_control_plane_round11 as round11
++import test_control_plane_round5 as round5
++import test_winn3_descriptor_hub as descriptor
++
++
++def set_up_hub(test):
++    round10.Round10Tests.setUp(test)
++
++    class HeaderHTTPException(harness.HTTPException):
++        def __init__(self, status_code, detail=None, headers=None):
++            super().__init__(status_code=status_code, detail=detail)
++            self.headers = headers or {}
++
++    test.mod.HTTPException = HeaderHTTPException
++
++
++class AdmissionTests(unittest.TestCase):
++    setUp = set_up_hub
++    cleanup = round10.Round10Tests.cleanup
++    device = round10.Round10Tests.device
++    activate = round11.Round11Tests.activate
++    seed_core = round11.Round11Tests.seed_core
++    verify = round11.Round11Tests.verify
++    used = round11.Round11Tests.used
++
++    def refuse_before_install(self, sql, status=503):
++        self.activate()
++        with self.mod.get_db() as conn:
++            conn.execute(sql)
++        installed = []
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(double=False, sync=lambda *args: installed.append(args) or True)
++        self.assertEqual(caught.exception.status_code, status)
++        self.assertEqual(installed, [])
++        self.assertIsNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 0)
++
++    def test_missing_route_refuses_before_remote_install(self):
++        self.refuse_before_install("UPDATE nodes SET tunnel_gateway_ipv4=''")
++
++    def test_invalid_obfuscation_refuses_before_remote_install(self):
++        self.refuse_before_install("UPDATE nodes SET obfuscation_json='invalid-json'")
++
++    def test_descriptor_eligibility_refusal_precedes_remote_install(self):
++        with patch.object(self.mod, 'resolve_served_winn3_descriptor',
++                          side_effect=self.mod.Winn3ContractError('client-dual-auth-downgrade')):
++            self.refuse_before_install('SELECT 1')
++
++    def test_capability_refusal_precedes_remote_install(self):
++        with patch.object(self.mod, 'request_client_capabilities',
++                          side_effect=self.mod.Winn3ContractError('invalid-capability')):
++            self.refuse_before_install('SELECT 1', status=400)
++
++    def test_actual_awg_subprocess_timeout_keeps_durable_compensation(self):
++        self.activate()
++        sync = self.mod.sync_peer_to_node
++        attempted = []
++
++        def timeout(host, cfg):
++            attempted.append((host, cfg['client_public_key']))
++            with patch.object(self.mod.subprocess, 'run', side_effect=subprocess.TimeoutExpired('ssh', 15)):
++                return sync(host, cfg)
++
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(double=False, sync=timeout)
++        self.assertEqual(caught.exception.status_code, 503)
++        self.assertEqual(len(attempted), 1)
++        self.assertIsNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM devices').fetchone()[0], 0)
++            self.assertEqual([tuple(row) for row in conn.execute(
++                'SELECT node_ip, client_public_key FROM peer_revocations')], attempted)
++
++    def test_concurrent_activation_has_one_preparer_and_one_assignment(self):
++        self.seed_core()
++        waiting = threading.Event()
++        release = threading.Event()
++        waits = []
++
++        def ready(core, device, revision):
++            waits.append(device)
++            if len(waits) > 1:
++                return True
++            waiting.set()
++            if not release.wait(10):
++                raise AssertionError('first enrollment was not released')
++            return True
++
++        def enroll(second=False):
++            overrides = {}
++            if second:
++                overrides = dict(device_id='round12-second-device-12345678',
++                                 device_fingerprint='round12-second-fingerprint-12345678',
++                                 client_public_key='F' * 43 + '=')
++            login = descriptor.build_login(self.mod, supports_winn3=True,
++                                           supports_winn3_descriptor=True, double_vpn=True, **overrides)
++            request = harness.FakeRequest(path='/verify', headers={'x-wins-activation': self.secret})
++            return self.mod._verify_account_sync(request, login, harness.BackgroundTasks())
++
++        with patch.object(self.mod, 'sync_peer_to_node', return_value=True), patch.object(
++                self.mod, '_wait_for_core_assignment_ready_sync', side_effect=ready):
++            with ThreadPoolExecutor(max_workers=2) as pool:
++                first = pool.submit(enroll)
++                try:
++                    self.assertTrue(waiting.wait(5), 'first enrollment never reached readiness')
++                    with self.assertRaises(harness.HTTPException) as caught:
++                        pool.submit(enroll, True).result(timeout=5)
++                    self.assertEqual(caught.exception.status_code, 409)
++                    self.assertEqual(caught.exception.headers['X-Wins-Error-Code'],
++                                     'double_vpn_enrollment_in_flight')
++                    with self.mod.get_db() as conn:
++                        self.assertEqual(conn.execute('SELECT COUNT(*) FROM devices').fetchone()[0], 1)
++                        self.assertEqual(conn.execute(
++                            "SELECT COUNT(*) FROM double_vpn_assignments WHERE status='active'").fetchone()[0], 1)
++                finally:
++                    release.set()
++                result = first.result(timeout=5)
++        self.assertEqual(len(waits), 1)
++        self.assertTrue(result['device_auth_token'])
++        self.assertIsNotNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM double_vpn_enrollment_leases').fetchone()[0], 0)
++
++    def test_failed_preparation_releases_lease_and_preserves_secret(self):
++        self.seed_core()
++
++        def fail(*args):
++            raise RuntimeError('fixture failure')
++
++        for ready in (lambda *args: False, fail):
++            with self.assertRaises((harness.HTTPException, RuntimeError)):
++                self.verify(ready=ready)
++            self.assertIsNone(self.used())
++            with self.mod.get_db() as conn:
++                self.assertEqual(conn.execute('SELECT COUNT(*) FROM double_vpn_enrollment_leases').fetchone()[0], 0)
++        self.assertTrue(self.verify(ready=lambda *args: True)['device_auth_token'])
++
++    def test_lease_expiry_recovery_and_old_cleanup_cannot_remove_new_owner(self):
++        self.seed_core()
++        with self.mod.get_db() as conn:
++            old = self.mod.acquire_double_vpn_enrollment_lease(conn, harness.ACCOUNT, 'old-device')
++            conn.execute('UPDATE double_vpn_enrollment_leases SET expires_at=0')
++        with self.mod.get_db() as conn:
++            new = self.mod.acquire_double_vpn_enrollment_lease(conn, harness.ACCOUNT, 'new-device')
++        self.mod.release_double_vpn_enrollment_lease(harness.ACCOUNT, old)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT lease_token FROM double_vpn_enrollment_leases').fetchone()[0], new)
++        self.mod.release_double_vpn_enrollment_lease(harness.ACCOUNT, new)
++
++    def test_expired_worker_cannot_finish_or_delete_replacement_lease(self):
++        self.seed_core()
++        replacement = []
++
++        def replace(*args):
++            with self.mod.get_db() as conn:
++                conn.execute('UPDATE double_vpn_enrollment_leases SET expires_at=0')
++                replacement.append(self.mod.acquire_double_vpn_enrollment_lease(
++                    conn, harness.ACCOUNT, 'replacement-device'))
++            return True
++
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(ready=replace)
++        self.assertEqual(caught.exception.status_code, 409)
++        self.assertIsNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT lease_token FROM double_vpn_enrollment_leases').fetchone()[0], replacement[0])
++
++
++class PaymentTests(unittest.TestCase):
++    setUp = set_up_hub
++    cleanup = round10.Round10Tests.cleanup
++
++    def invoice(self, invoice_id='round12-invoice'):
++        return dict(id=invoice_id, status='Settled', amount='10.00', paidAmount='10.00', currency='USD',
++                    metadata=dict(hub_order_id='round12-order', plan_key='lifetime_no_support',
++                                  buyerEmail='round12@example.test'))
++
++    def seed_order(self):
++        self.mod.PAYPAL_LIFETIME_NO_SUPPORT_AMOUNT = '20.00'
++        self.mod.PAYPAL_LIFETIME_CURRENCY = 'USD'
++        with self.mod.get_db() as conn:
++            conn.execute("INSERT INTO payment_orders(hub_order_id,provider,provider_order_id,plan_key,"
++                         "expected_amount,expected_currency,buyer_email,status,created_at) "
++                         "VALUES ('round12-order','btcpay','round12-invoice','lifetime_no_support',"
++                         "'10.00','USD','round12@example.test','pending',?)", (self.mod.utcnow().isoformat(),))
++
++    def btcpay(self, event='InvoiceSettled'):
++        with patch.object(self.mod, 'btcpay_enabled', return_value=True), patch.object(
++                self.mod, 'verify_btcpay_webhook_signature', return_value=True):
++            return asyncio.run(self.mod.btcpay_webhook(round5.WebhookRequest(body={
++                'type': event, 'invoiceId': 'round12-invoice'}), harness.BackgroundTasks()))
++
++    def test_inflight_deliveries_retry_but_terminal_duplicates_acknowledge(self):
++        self.mod.PAYPAL_WEBHOOK_ID = 'round12-webhook'
++        for provider, event_id in (('paypal', 'round12-paypal'), ('btcpay', 'btcpay:round12-invoice')):
++            with self.subTest(provider=provider):
++                with self.mod.get_db() as conn:
++                    self.assertTrue(self.mod.reserve_paypal_event(conn, event_id, 'fixture', ''))
++
++                def invoke():
++                    if provider == 'btcpay':
++                        return self.btcpay()
++                    with patch.object(self.mod, 'paypal_enabled', return_value=True), patch.object(
++                            self.mod, 'verify_paypal_webhook_signature', return_value=True):
++                        return asyncio.run(self.mod.paypal_webhook(round5.WebhookRequest(body={
++                            'id': event_id, 'event_type': 'UNSUPPORTED', 'resource': {}}), harness.BackgroundTasks()))
++
++                with patch.object(self.mod, 'btcpay_fetch_invoice', side_effect=AssertionError('duplicate fetched provider')):
++                    with self.assertRaises(harness.HTTPException) as caught:
++                        invoke()
++                    self.assertEqual(caught.exception.status_code, 409)
++                    self.assertEqual(caught.exception.headers['Retry-After'], '10')
++                    with self.mod.get_db() as conn:
++                        row = conn.execute('SELECT status,attempts FROM paypal_events WHERE event_id=?', (event_id,)).fetchone()
++                        self.assertEqual(tuple(row), ('processing', 1))
++                    for terminal in ('processed', 'ignored'):
++                        with self.mod.get_db() as conn:
++                            self.mod.finish_paypal_event(conn, event_id, terminal)
++                        self.assertEqual(invoke()['status'], 'duplicate')
++
++    def test_early_settlement_retries_then_uses_bound_lifetime_price_once(self):
++        self.seed_order()
++        invoice = self.invoice()
++        early = dict(invoice, status='Processing')
++        with patch.object(self.mod, 'btcpay_fetch_invoice', side_effect=[early, invoice]) as fetch:
++            with self.assertRaises(harness.HTTPException) as caught:
++                self.btcpay('InvoicePaymentSettled')
++            self.assertEqual(caught.exception.status_code, 409)
++            with self.mod.get_db() as conn:
++                self.assertEqual(conn.execute("SELECT status FROM paypal_events WHERE event_id='btcpay:round12-invoice'").fetchone()[0], 'failed')
++            result = self.btcpay()
++            self.assertEqual(result['status'], 'ok')
++            self.assertTrue(result['created'])
++            self.assertEqual(self.btcpay()['status'], 'duplicate')
++            self.assertEqual(fetch.call_count, 2)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT status FROM payment_orders WHERE hub_order_id='round12-order'").fetchone()[0], 'settled')
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM users WHERE email='round12@example.test'").fetchone()[0], 1)
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM activation_delivery_outbox').fetchone()[0], 1)
++
++    def test_expired_webhook_lease_can_resume_a_paid_invoice(self):
++        self.seed_order()
++        with self.mod.get_db() as conn:
++            self.mod.reserve_paypal_event(conn, 'btcpay:round12-invoice', 'InvoiceSettled', '')
++            conn.execute("UPDATE paypal_events SET lease_until='2000-01-01T00:00:00+00:00'")
++        with patch.object(self.mod, 'btcpay_fetch_invoice', return_value=self.invoice()):
++            self.assertTrue(self.btcpay()['created'])
++
++    def test_lifetime_purchase_is_not_repriced_at_settlement(self):
++        self.seed_order()
++        with patch.object(self.mod, 'btcpay_fetch_invoice', return_value=self.invoice()):
++            self.assertTrue(self.btcpay()['created'])
++            self.assertEqual(self.btcpay()['status'], 'duplicate')
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM activation_delivery_outbox').fetchone()[0], 1)
++
++    def test_bound_invoice_still_rejects_underpayment_mismatch_and_nonfinite_amounts(self):
++        self.seed_order()
++        mutations = [dict(amount='9.99'), dict(paidAmount='9.99'), dict(currency='EUR'),
++                     dict(amount='Infinity', paidAmount='Infinity'), dict(paidAmount='NaN'),
++                     dict(paidAmount='Infinity'), dict(amount='NaN'),
++                     dict(metadata=dict(self.invoice()['metadata'], hub_order_id='foreign-order')),
++                     dict(metadata=dict(self.invoice()['metadata'], plan_key='one_month'))]
++        for mutation in mutations:
++            with self.subTest(mutation=mutation):
++                with self.mod.get_db() as conn:
++                    conn.execute('DELETE FROM paypal_events')
++                    conn.execute("UPDATE payment_orders SET status='pending'")
++                with patch.object(self.mod, 'btcpay_fetch_invoice', return_value=dict(self.invoice(), **mutation)):
++                    with self.assertRaises(RuntimeError):
++                        self.btcpay()
++                with self.mod.get_db() as conn:
++                    self.assertEqual(conn.execute("SELECT status FROM payment_orders WHERE hub_order_id='round12-order'").fetchone()[0], 'manual_review')
++                    self.assertEqual(conn.execute('SELECT COUNT(*) FROM activation_delivery_outbox').fetchone()[0], 0)
++
++
++class SecurityHelperTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = tempfile.TemporaryDirectory(prefix='round12-security-')
++        self.addCleanup(self.temp.cleanup)
++        self.root = Path(self.temp.name)
++        source = Path(harness.HUB).read_text()
++        self.source = source
++
++        def load(path, name):
++            marker = f"cat > {path} <<'PYEOF'\n"
++            code = source.split(marker, 1)[1].split('\nPYEOF', 1)[0]
++            code = code.replace('/root/vpn_auth.env', str(self.root / 'absent.env'))
++            code = code.replace('/var/lib/wins-security-alerts', str(self.root))
++            mod = types.ModuleType(name)
++            exec(compile(code, name, 'exec'), mod.__dict__)
++            return mod
++
++        with patch.dict(os.environ, {'RATE_LIMIT_SECRET': 'fixture-secret-' * 4,
++                                    'SECURITY_EVENTS_DB': str(self.root / 'events.sqlite'),
++                                    'WINS_SECURITY_EVENTS_DB': str(self.root / 'events.sqlite')}, clear=True):
++            self.triage = load('/usr/local/lib/wins_threat_triage.py', 'wins_threat_triage')
++            old_path = sys.path[:]
++            try:
++                with patch.dict(sys.modules, {'wins_threat_triage': self.triage}):
++                    self.monitor = load('/usr/local/bin/wins-security-alert-monitor', 'round12_monitor')
++            finally:
++                sys.path[:] = old_path
++
++    def test_journal_errors_keep_existing_and_missing_checkpoints(self):
++        checkpoint = self.root / 'journal-auth.last'
++        failures = [subprocess.CalledProcessError(1, 'journalctl'),
++                    subprocess.TimeoutExpired('journalctl', 25), OSError('fixture read failure')]
++        for initial in (None, '100'):
++            for failure in failures:
++                with self.subTest(initial=initial, error=type(failure).__name__):
++                    checkpoint.unlink(missing_ok=True)
++                    if initial is not None:
++                        checkpoint.write_text(initial)
++                    with patch.object(self.monitor.time, 'time', return_value=200), patch.object(
++                            self.monitor.subprocess, 'run', side_effect=failure) as read:
++                        with self.assertRaises(type(failure)):
++                            self.monitor.monitor_journal()
++                    self.assertTrue(read.call_args.kwargs['check'])
++                    self.assertEqual(checkpoint.read_text() if checkpoint.exists() else None, initial)
++
++    def test_journal_advances_only_after_all_returned_lines_are_processed(self):
++        checkpoint = self.root / 'journal-auth.last'
++        checkpoint.write_text('100')
++
++        def alert(*args):
++            self.assertEqual(checkpoint.read_text(), '100')
++
++        output = subprocess.CompletedProcess(['journalctl'], 0, stdout='150 failed password from 192.0.2.1\n')
++        with patch.object(self.monitor.time, 'time', return_value=200), patch.object(
++                self.monitor.subprocess, 'run', return_value=output), patch.object(
++                self.monitor, 'send_alert', side_effect=alert) as sent:
++            self.monitor.monitor_journal()
++            self.assertEqual(sent.call_count, 1)
++        self.assertEqual(checkpoint.read_text(), '200')
++        self.assertEqual(list(self.root.glob('.journal-cursor-*')), [])
++        checkpoint.write_text('100')
++        with patch.object(self.monitor.time, 'time', return_value=200), patch.object(
++                self.monitor.subprocess, 'run', return_value=output), patch.object(
++                self.monitor, 'send_alert', side_effect=RuntimeError('fixture processing failure')):
++            with self.assertRaises(RuntimeError):
++                self.monitor.monitor_journal()
++        self.assertEqual(checkpoint.read_text(), '100')
++
++    def test_sqlite_helpers_close_connections_on_success_and_errors(self):
++        connections = []
++        real_connect = sqlite3.connect
++
++        class TrackedConnection(sqlite3.Connection):
++            closed = False
++
++            def close(self):
++                self.closed = True
++                return super().close()
++
++        def connect(*args, **kwargs):
++            conn = real_connect(*args, factory=TrackedConnection, **kwargs)
++            connections.append(conn)
++            return conn
++
++        def assert_closed():
++            self.assertTrue(connections)
++            for conn in connections:
++                self.assertTrue(conn.closed, 'helper retained an open connection')
++                with self.assertRaises(sqlite3.ProgrammingError):
++                    conn.execute('SELECT 1')
++
++        with patch.object(sqlite3, 'connect', side_effect=connect), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
++            event = self.monitor.record_event(3, 'failed ssh login', '192.0.2.1', {'fixture': True}, 'fixture')
++            self.monitor.update_event_email_status(event, 'fixture-recorded')
++            self.monitor.alert_body(3, 'failed ssh login', '192.0.2.1', {}, event)
++            self.triage.classify_event('failed ssh login', 3, '192.0.2.1', {})
++            self.triage.list_events(5)
++            self.triage.report(24)
++            with closing(real_connect(self.root / 'events.sqlite')) as conn, conn:
++                self.assertEqual(conn.execute('SELECT email_status FROM security_events WHERE event_id=?', (event,)).fetchone()[0], 'fixture-recorded')
++                conn.execute("UPDATE security_events SET triage_model_version='fixture-old'")
++            self.assertEqual(self.triage.reclassify_events(5, include_stale=True)['processed'], 1)
++            with patch.object(self.triage.os, 'geteuid', return_value=0):
++                self.triage.submit_feedback(event, 'false_positive', 'Local fixture review only')
++                with self.assertRaises(ValueError):
++                    self.triage.submit_feedback('missing-event', 'false_positive', 'Local fixture review only')
++            assert_closed()
++            with patch.object(self.monitor, 'configure_security_events_connection', side_effect=sqlite3.OperationalError('fixture database failure')):
++                self.monitor.record_event(3, 'failed ssh login', '192.0.2.1', {}, 'fixture')
++                self.monitor.update_event_email_status(event, 'fixture-error')
++                self.monitor.alert_body(3, 'failed ssh login', '192.0.2.1', {}, event)
++            with patch.object(self.triage, 'configure_security_events_connection', side_effect=sqlite3.OperationalError('fixture database failure')):
++                self.triage.classify_event('failed ssh login', 3, '192.0.2.1', {})
++                for operation in (lambda: self.triage.list_events(5), lambda: self.triage.report(24),
++                                  lambda: self.triage.reclassify_events(5)):
++                    with self.assertRaises(sqlite3.OperationalError):
++                        operation()
++            assert_closed()
++
++
++if __name__ == '__main__':
++    unittest.main()
+--- a/tools/native_messaging/test_native_host_registration.py
++++ b/tools/native_messaging/test_native_host_registration.py
+@@ -59,17 +59,20 @@
+         renderer.OWNER_IDENTITY_ENV,
+     )
+     previous = {key: os.environ.get(key) for key in keys}
+-    for key in keys:
+-        os.environ.pop(key, None)
+-    os.environ.update(values)
+-    try:
+-        yield
+-    finally:
+-        for key, value in previous.items():
+-            if value is None:
+-                os.environ.pop(key, None)
+-            else:
+-                os.environ[key] = value
++    with tempfile.TemporaryDirectory(prefix="winsvpn-owner-identity-absent-") as raw:
++        if not values.get(renderer.OWNER_IDENTITY_ENV, "").strip():
++            values[renderer.OWNER_IDENTITY_ENV] = str(Path(raw) / "missing-owner-identity.json")
++        for key in keys:
++            os.environ.pop(key, None)
++        os.environ.update(values)
++        try:
++            yield
++        finally:
++            for key, value in previous.items():
++                if value is None:
++                    os.environ.pop(key, None)
++                else:
++                    os.environ[key] = value
+ 
+ 
+ def _dummy_host_interpreter() -> Path:
+@@ -494,7 +497,7 @@
+                         **os.environ,
+                         "WINSVPN_CHROME_STORE_ID": "",
+                         "WINSVPN_EDGE_STORE_ID": "",
+-                        renderer.OWNER_IDENTITY_ENV: "",
++                        renderer.OWNER_IDENTITY_ENV: os.environ[renderer.OWNER_IDENTITY_ENV],
+                     },
+                 )
+                 self.assertEqual(completed.returncode, renderer.MISSING_STORE_ID_EXIT)
+@@ -504,9 +507,24 @@
+     def test_check_host_manifests_refuses_placeholders_without_owner_identity(
+         self,
+     ) -> None:
+-        with isolated_store_env():
++        with isolated_store_env(), tempfile.TemporaryDirectory() as raw:
++            manifests = Path(raw)
++            for browser in ("chrome", "edge"):
++                (manifests / f"org.winsvpn.bridge.{browser}.json").write_text(
++                    json.dumps({"allowed_origins": ["chrome-extension://PLACEHOLDER/"]}),
++                    encoding="utf-8",
++                )
++            (manifests / "org.winsvpn.bridge.firefox.json").write_text(
++                json.dumps({"allowed_extensions": [renderer.canonical_firefox_id()]}),
++                encoding="utf-8",
++            )
+             completed = subprocess.run(
+-                [sys.executable, str(HERE / "check_host_manifests.py")],
++                [sys.executable, "-c",
++                 "import runpy,sys; from pathlib import Path; "
++                 "checker=runpy.run_path(sys.argv[1]); "
++                 "checker['main'].__globals__['MANIFESTS']=Path(sys.argv[2]); "
++                 "sys.exit(checker['main']())",
++                 str(HERE / "check_host_manifests.py"), str(manifests)],
+                 check=False,
+                 capture_output=True,
+                 text=True,
+@@ -515,7 +533,7 @@
+                     **os.environ,
+                     "WINSVPN_CHROME_STORE_ID": "",
+                     "WINSVPN_EDGE_STORE_ID": "",
+-                    renderer.OWNER_IDENTITY_ENV: "",
++                    renderer.OWNER_IDENTITY_ENV: os.environ[renderer.OWNER_IDENTITY_ENV],
+                 },
+             )
+             output = completed.stdout + completed.stderr
+@@ -523,7 +541,7 @@
+             self.assertIn("WARN", completed.stdout)
+             self.assertIn("FAIL", completed.stdout)
+             self.assertIn("owner-blocked", output)
+-            self.assertIn("PLACEHOLDER", (HERE / "manifests" / "org.winsvpn.bridge.chrome.json").read_text())
++            self.assertIn("PLACEHOLDER", (manifests / "org.winsvpn.bridge.chrome.json").read_text())
+         checker_mod_spec = importlib.util.spec_from_file_location(
+             "check_host_manifests_under_test", HERE / "check_host_manifests.py"
+         )
+--- a/tools/test_linux_native_host_delivery.py
++++ b/tools/test_linux_native_host_delivery.py
+@@ -310,6 +310,9 @@
+         env.pop("WINSVPN_EDGE_STORE_ID", None)
+         with tempfile.TemporaryDirectory(prefix="winsvpn-native-host-chrome-id-") as raw:
+             root = pathlib.Path(raw)
++            env["WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT"] = str(
++                root / "missing-owner-identity.json"
++            )
+             host = root / "wins_bridge_host"
+             host.write_text("#!/bin/sh\nexit 0\n", encoding="ascii")
+             host.chmod(0o755)
+@@ -344,9 +347,11 @@
+         env = os.environ.copy()
+         env.pop("WINSVPN_CHROME_STORE_ID", None)
+         env.pop("WINSVPN_EDGE_STORE_ID", None)
+-        env.pop("WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT", None)
+         with tempfile.TemporaryDirectory(prefix="winsvpn-native-host-edge-id-") as raw:
+             root = pathlib.Path(raw)
++            env["WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT"] = str(
++                root / "missing-owner-identity.json"
++            )
+             host = root / "wins_bridge_host"
+             host.write_text("#!/bin/sh\nexit 0\n", encoding="ascii")
+             host.chmod(0o755)
+--- a/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
+@@ -164,7 +164,9 @@
+ 	t.Parallel()
+ 	expires := time.Now().Unix() + 3
+ 	f := newAuthorityFixture(t, expires)
+-	time.Sleep(time.Until(time.Unix(expires, 0)))
++	for time.Now().Unix() < expires {
++		time.Sleep(10 * time.Millisecond)
++	}
+ 	// Keep refresh cached to prove expiry is checked on every inner lookup.
+ 	f.registry.refreshMu.Lock()
+ 	f.registry.lastCheck = time.Now()
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -32,7 +32,7 @@
+   flutter_test:
+     sdk: flutter
+   flutter_lints: ^6.0.0
+-  
++
+   # Automated Native Resource Generation Toolchain
+   flutter_launcher_icons: ^0.14.4
+ 

@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started_at": "2026-09-13T19:39:59.959618+00:00",
+    "exit_code": 0,
+    "seconds": 81.03,
+    "log": "go-all.log"
+  }
+]

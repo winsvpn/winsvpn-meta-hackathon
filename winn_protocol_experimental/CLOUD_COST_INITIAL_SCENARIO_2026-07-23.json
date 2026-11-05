@@ -1,0 +1,67 @@
+{
+  "format": "winn-cloud-cost/v1",
+  "observed_at": "2026-07-24T01:30:00Z",
+  "accounts": [
+    {
+      "provider": "upcloud",
+      "currency": "EUR",
+      "available_credit_micros": 233630000,
+      "current_charges_micros": 0,
+      "historical_usage_micros": 276370000,
+      "source": "authenticated UpCloud console and live Premium plan catalog inspected 2026-07-23"
+    },
+    {
+      "provider": "vultr",
+      "currency": "USD",
+      "available_credit_micros": 255000000,
+      "current_charges_micros": 0,
+      "source": "authenticated Vultr console and live Shared CPU plan catalog inspected 2026-07-23"
+    }
+  ],
+  "resources": [
+    {
+      "provider": "vultr",
+      "resource_id": "winn-control-atl",
+      "role": "controller",
+      "phase": "phase1",
+      "region": "atl",
+      "currency": "USD",
+      "rate_micros": 5000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    },
+    {
+      "provider": "vultr",
+      "resource_id": "winn-entry-nyc",
+      "role": "entry",
+      "phase": "phase1",
+      "region": "ewr",
+      "currency": "USD",
+      "rate_micros": 15000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    },
+    {
+      "provider": "vultr",
+      "resource_id": "winn-entry-mia",
+      "role": "entry",
+      "phase": "phase1",
+      "region": "mia",
+      "currency": "USD",
+      "rate_micros": 5000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    },
+    {
+      "provider": "upcloud",
+      "resource_id": "winn-exit-chi",
+      "role": "exit",
+      "phase": "phase1",
+      "region": "us-chi1",
+      "currency": "EUR",
+      "rate_micros": 52000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    }
+  ]
+}

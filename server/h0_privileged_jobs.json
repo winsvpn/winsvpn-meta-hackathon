@@ -1,0 +1,3235 @@
+{
+  "helpers": [
+    {
+      "data_consumers": [],
+      "file_operations": [],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 3646,
+      "subprocesses": [],
+      "target": "/usr/local/bin/wins-performance-mode",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 3680,
+      "subprocesses": [],
+      "target": "/usr/local/bin/wins-dmcrypt-performance",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "mkdir"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 5705,
+      "subprocesses": [
+        "systemctl"
+      ],
+      "target": "/usr/local/sbin/wins-vault-unlock",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "bounded canary results",
+        "database path supplied as data",
+        "hub API data",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "(WINN3_CANARY_REQUEST_DIR / (name + '.json')).unlink",
+        "(locale or 'en').replace",
+        "(locale or 'en').replace('-', '_').split",
+        "(locale or 'en').replace('-', '_').split('_', 1)[0].lower",
+        "Path(MANAGEMENT_KNOWN_HOSTS_PATH).read_text",
+        "Path(MANAGEMENT_KNOWN_HOSTS_PATH).read_text().splitlines",
+        "WINN3_CANARY_KEY_ROOT.mkdir",
+        "_CLOUDFLARE_NO_REDIRECT_OPENER.open",
+        "_PROVIDER_NO_REDIRECT_OPENER.open",
+        "_SITE_AI_NO_REDIRECT_OPENER.open",
+        "_read_capped",
+        "_read_capped(resp, MONERO_PRICE_MAX_BYTES).decode",
+        "_read_capped(resp, MONERO_RPC_MAX_BYTES).decode",
+        "_site_ai_open",
+        "_smart_router_open",
+        "_wait_for_core_assignment_ready_sync",
+        "_winn3_provision_start_thread",
+        "_winn3_write_keyring",
+        "alert_unevidenced_open_nodes",
+        "allowed.write_text",
+        "asyncio.to_thread",
+        "authorized.read_text",
+        "authorized.read_text(encoding='utf-8', errors='ignore').splitlines",
+        "auto_reopen_health_closed_nodes",
+        "base64.b64encode(hmac.new(base64.b64decode(SPA_HMAC), data_str.encode(), hashlib.sha256).digest()).decode().replace",
+        "check_conn.execute(\"\\n                SELECT cs.exit_public_key, cs.status, cs.runtime_ready, cs.promoted,\\n                       cs.active_promotion_id, cs.deployment_withdrawal_id\\n                FROM double_vpn_assignments a\\n                JOIN core_servers cs ON cs.core_id = a.core_id\\n                JOIN core_exit_peers cep ON cep.core_id = a.core_id AND cep.exit_slug = a.exit_slug\\n                WHERE a.core_id = ? AND a.exit_slug = ? AND a.status = 'active'\\n                LIMIT 1\\n                \", (core_id, node_slug)).fetchone",
+        "checked.astimezone(timezone.utc).replace",
+        "concurrent.futures.ThreadPoolExecutor",
+        "conn.execute('SELECT health_closed_at, noticed_at FROM node_auto_reopen_notices WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT hostname, path, state FROM edge_plaintext_exceptions WHERE transaction_id = ?', (subject_open[0],)).fetchall",
+        "conn.execute('SELECT promotion_id, core_id, promoted_at, evidence_sha256, operator_source_hash, core_status, management_status, management_checked_at, runtime_ready, runtime_checked_at, last_heartbeat FROM core_promotion_events ORDER BY promoted_at DESC, promotion_id DESC LIMIT 200').fetchall",
+        "core_promotion_readiness_failures",
+        "created_dt.replace",
+        "data.decode(run_kwargs.get('encoding') or 'utf-8', run_kwargs.get('errors') or 'strict').replace",
+        "data.decode(run_kwargs.get('encoding') or 'utf-8', run_kwargs.get('errors') or 'strict').replace('\\r\\n', '\\n').replace",
+        "datetime.fromisoformat(previous).replace",
+        "directory.mkdir",
+        "disc_at_raw.replace",
+        "donor_assert_no_unreplaced_tokens",
+        "dt.replace",
+        "edge_write_rule",
+        "evaluate_reopen_on_last_proof",
+        "exc.read",
+        "exp_dt.replace",
+        "f'open {source}\\n'.encode",
+        "f.read",
+        "f.read().strip",
+        "f.write",
+        "fresh_install_reopen_failures",
+        "handle.read",
+        "handle.read().split",
+        "handle.write",
+        "host_key_path.read_text",
+        "host_key_path.read_text(encoding='utf-8', errors='ignore').strip",
+        "host_key_path.read_text(encoding='utf-8', errors='ignore').strip().split",
+        "installer_rerun_reopen_eligibility",
+        "installer_rerun_reopen_failures",
+        "ledger.execute('SELECT 1 FROM winn3_journal_reads WHERE node_slug=? AND gateway=? AND recovery_since=? AND read_at>=? LIMIT 1', (slug, host, since, seen)).fetchone",
+        "monero_opener",
+        "node_auto_reopen_arm",
+        "node_auto_reopen_failures",
+        "node_auto_reopen_gate_notice_due",
+        "node_auto_reopen_gate_record",
+        "node_promotion_readiness_failures",
+        "now.astimezone(timezone.utc).replace",
+        "now.replace",
+        "open",
+        "open(path, 'r', encoding='utf-8').read",
+        "open(path, 'r', encoding='utf-8').read().strip",
+        "open_activation_delivery",
+        "open_fulfillment_secret",
+        "open_nodes_without_promotion_evidence",
+        "opener.open",
+        "os.fdopen",
+        "os.getenv('AWG_CONTAINER_CANDIDATES', 'amnezia-awg2 awg amnezia-awg').replace",
+        "os.getenv('AWG_CONTAINER_CANDIDATES', 'amnezia-awg2 awg amnezia-awg').replace(',', ' ').split",
+        "os.open",
+        "os.read",
+        "os.replace",
+        "os.unlink",
+        "parent.mkdir",
+        "parsed._replace",
+        "parsed.astimezone(timezone.utc).replace",
+        "parsed.replace",
+        "parsed.replace(microsecond=0).isoformat",
+        "path.read_text",
+        "path.read_text(encoding='utf-8', errors='strict').splitlines",
+        "promoted.replace",
+        "read_request_body_mapping",
+        "reader.is_alive",
+        "reader.join",
+        "reader.start",
+        "readers.append",
+        "ready_conn.execute",
+        "ready_conn.execute('\\n                SELECT a.applied_revision, a.runtime_validated_at, a.status,\\n                       c.runtime_ready, c.status AS core_status,\\n                       c.last_heartbeat, c.runtime_checked_at\\n                FROM double_vpn_assignments a\\n                JOIN core_servers c ON c.core_id = a.core_id\\n                WHERE a.core_id = ? AND a.device_id = ?\\n                ', (core_id, device_id)).fetchone",
+        "reopen_last_proof_arrived",
+        "reopen_proof_columns",
+        "resp.read",
+        "resp.read().decode",
+        "response.read",
+        "response.read().decode",
+        "result['reopened'].append",
+        "secrets.token_urlsafe(12).replace",
+        "secrets.token_urlsafe(12).replace('-', '').replace",
+        "secrets.token_urlsafe(12).replace('-', '').replace('_', '').lower",
+        "sigfile.write_bytes",
+        "sqlite3.connect",
+        "ssh_dir.mkdir",
+        "str(getattr(payload, 'csr', '') or '').replace",
+        "str(getattr(payload, 'csr', '') or '').replace('\\r\\n', '\\n').strip",
+        "str(platform or 'unknown').strip().lower().replace",
+        "str(raw_created).replace",
+        "str(value).replace",
+        "str(value).replace('&', '&amp;').replace",
+        "str(value).replace('&', '&amp;').replace('<', '&lt;').replace",
+        "str(value).replace(',', '').replace",
+        "str(value).replace(',', '').replace('$', '').strip",
+        "stream.read",
+        "stream.write",
+        "subprocess.Popen",
+        "svg.replace",
+        "template.replace",
+        "template.replace('{z}', '8').replace",
+        "template.replace('{z}', '8').replace('{x}', '128').replace",
+        "temporary.open",
+        "temporary.unlink",
+        "text.replace",
+        "text.replace('I', '1').replace",
+        "text.replace('I', '1').replace('L', '1').replace",
+        "text.replace('I', '1').replace('L', '1').replace('O', '0').replace",
+        "threading.Condition",
+        "threading.Lock",
+        "threading.Thread",
+        "threading.Thread(target=_send_security_alert_email, args=(priority, event_type, source_ip, path, event_details, event_id), daemon=True).start",
+        "threading.Thread(target=target, args=(slug,), name='winn3-provision-' + slug, daemon=True).start",
+        "threading.Timer",
+        "tmp_path.write_text",
+        "urllib.request.build_opener",
+        "utcnow().replace",
+        "value.replace",
+        "winn3_node_readiness",
+        "winn3_proof_reopen_class_enabled",
+        "winn3_proof_reopen_watch_loop",
+        "winn3_read_canary_key",
+        "winn3_write_canary_file",
+        "write_ends.append"
+      ],
+      "imports": [
+        "asyncio",
+        "base64",
+        "collections",
+        "concurrent.futures",
+        "contextlib",
+        "cryptography.hazmat.primitives",
+        "cryptography.hazmat.primitives.asymmetric",
+        "cryptography.hazmat.primitives.serialization",
+        "datetime",
+        "dateutil.relativedelta",
+        "decimal",
+        "email.mime.application",
+        "email.mime.multipart",
+        "email.mime.text",
+        "email.utils",
+        "fastapi",
+        "fastapi.responses",
+        "fcntl",
+        "google.auth.transport.requests",
+        "google.oauth2",
+        "hashlib",
+        "hmac",
+        "html",
+        "ipaddress",
+        "json",
+        "jwt",
+        "logging",
+        "logging.handlers",
+        "math",
+        "os",
+        "pathlib",
+        "pydantic",
+        "re",
+        "requests",
+        "secrets",
+        "shlex",
+        "shutil",
+        "signal",
+        "smtplib",
+        "socket",
+        "sqlite3",
+        "ssl",
+        "stat",
+        "subprocess",
+        "tempfile",
+        "threading",
+        "time",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "zoneinfo"
+      ],
+      "interpreter": "embedded system Python",
+      "language": "python",
+      "line": 8998,
+      "subprocesses": [
+        "check_conn.execute",
+        "check_conn.execute(\"\\n                SELECT cs.exit_public_key, cs.status, cs.runtime_ready, cs.promoted,\\n                       cs.active_promotion_id, cs.deployment_withdrawal_id\\n                FROM double_vpn_assignments a\\n                JOIN core_servers cs ON cs.core_id = a.core_id\\n                JOIN core_exit_peers cep ON cep.core_id = a.core_id AND cep.exit_slug = a.exit_slug\\n                WHERE a.core_id = ? AND a.exit_slug = ? AND a.status = 'active'\\n                LIMIT 1\\n                \", (core_id, node_slug)).fetchone",
+        "check_conn.execute('SELECT * FROM devices WHERE device_id = ?', (device_id,)).fetchone",
+        "check_conn.execute('SELECT * FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "cleanup_conn.execute",
+        "conn.execute",
+        "conn.execute(\"SELECT * FROM account_deletion_requests WHERE account_number = ? AND status = 'pending'\", (account_number,)).fetchone",
+        "conn.execute(\"SELECT * FROM nodes WHERE (? = '' OR slug = ?)\", (requested_slug, requested_slug)).fetchall",
+        "conn.execute(\"SELECT * FROM nodes WHERE retired_at IS NULL AND (? = '' OR slug = ?)\", (requested_slug, requested_slug)).fetchall",
+        "conn.execute(\"SELECT * FROM nodes WHERE retired_at IS NULL AND (? = '' OR slug = ?)\", (slug_filter, slug_filter)).fetchall",
+        "conn.execute(\"SELECT 1 FROM node_promotion_events WHERE data_plane_code_revision = ? AND tier IN ('free', 'premium') AND operator_source_hash GLOB ? AND operator_source_hash NOT IN (\" + ', '.join(('?' for _ in AUTOMATIC_PROMOTION_SOURCES)) + ') LIMIT 1', (revision, MANUAL_PROMOTION_SOURCE_GLOB, *AUTOMATIC_PROMOTION_SOURCES)).fetchone",
+        "conn.execute(\"SELECT 1 FROM nodes WHERE winn3_bootstrap_authorized=0 AND EXISTS (SELECT 1 FROM bootstrap_grants b WHERE b.role='node' AND b.subject_id=nodes.slug AND b.used_at IS NOT NULL) LIMIT 1\").fetchone",
+        "conn.execute(\"SELECT 1 FROM redemption_codes WHERE code_hash = ? AND key_version = ? AND status IN ('redeemed', 'refunded')\", (code_hash, version)).fetchone",
+        "conn.execute(\"SELECT 1 FROM sqlite_master WHERE name='winn3_canary_bindings'\").fetchone",
+        "conn.execute(\"SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'edge_plaintext_exceptions'\").fetchone",
+        "conn.execute(\"SELECT 1 FROM sqlite_master WHERE type='index' AND name='idx_devices_winn3_inner_v4_unique'\").fetchone",
+        "conn.execute(\"SELECT 1 FROM sqlite_master WHERE type='index' AND name=?\", (WINN3_STATIC_PUBLIC_UNIQUE_INDEX,)).fetchone",
+        "conn.execute(\"SELECT 1 FROM sqlite_master WHERE type='table' AND name=?\", (table,)).fetchone",
+        "conn.execute(\"SELECT COUNT(*) AS n FROM devices WHERE winn3_static_public IS NOT NULL AND winn3_static_public != '' GROUP BY winn3_static_public HAVING COUNT(*) > 1\").fetchall",
+        "conn.execute(\"SELECT COUNT(*) AS n FROM emergency_outbox WHERE status IN ('pending','held')\").fetchone",
+        "conn.execute(\"SELECT MAX(occurred_at) FROM redemption_events WHERE idempotency_key=? AND outcome='fulfillment_acknowledged'\", (item['idempotency_key'],)).fetchone",
+        "conn.execute(\"SELECT TRIM(winn3_inner_v4) AS inner_v4 FROM devices WHERE winn3_inner_v4 IS NOT NULL AND TRIM(winn3_inner_v4) != '' GROUP BY TRIM(winn3_inner_v4) HAVING COUNT(*) > 1\").fetchall",
+        "conn.execute(\"SELECT account_number, expiration_date FROM users WHERE referral_code = ? AND status = 'active'\", (code,)).fetchone",
+        "conn.execute(\"SELECT ack_number FROM donation_acknowledgments WHERE provider = 'paypal' AND provider_reference = ?\", (donation_reference,)).fetchone",
+        "conn.execute(\"SELECT c.exit_public_key FROM core_exit_peers e JOIN core_servers c ON c.core_id = e.core_id WHERE e.exit_slug = ? AND COALESCE(c.exit_public_key, '') != ''\", (slug,)).fetchall",
+        "conn.execute(\"SELECT device_id, account_number, client_public_key, location_slug FROM devices WHERE COALESCE(location_slug, '') != '' AND (? = '' OR location_slug = ?)\", (requested_slug, requested_slug)).fetchall",
+        "conn.execute(\"SELECT hostname, path, subject_kind, subject_id, transaction_id, state FROM edge_plaintext_exceptions WHERE state IN ('armed', 'committed') ORDER BY hostname, path\").fetchall",
+        "conn.execute(\"SELECT hub_order_id, provider, plan_key, expected_amount, expected_currency, status, created_at, settled_at FROM payment_orders WHERE buyer_email = ? AND status = 'settled' ORDER BY COALESCE(settled_at, created_at) DESC LIMIT 1\", (email,)).fetchone",
+        "conn.execute(\"SELECT idempotency_key FROM redemption_events WHERE code_hash=? AND key_version=? AND outcome='granted' AND idempotency_key IS NOT NULL\", (row['code_hash'], row['key_version'])).fetchall",
+        "conn.execute(\"SELECT last_failure_kind AS kind, COUNT(*) AS n FROM emergency_outbox WHERE status IN ('pending','held') AND last_failure_kind IS NOT NULL GROUP BY last_failure_kind\").fetchall",
+        "conn.execute(\"SELECT name, status, free_access_enabled FROM nodes WHERE status = 'online' AND management_status = 'ok' AND COALESCE(operator_enabled, 0) = 1 ORDER BY name LIMIT 20\").fetchall",
+        "conn.execute(\"SELECT plan_key, status FROM payment_orders WHERE provider='paypal_wallet' AND provider_order_id=?\", (order_id,)).fetchone",
+        "conn.execute(\"SELECT sealed_secret FROM hoppy_agent_mail_outbox WHERE id=? AND idempotency_key=? AND status='pending'\", (item['id'], item['idempotency_key'])).fetchone",
+        "conn.execute(\"SELECT slug FROM nodes WHERE retired_at IS NULL AND COALESCE(winn3_operator_hold,0)=0 AND deployment_withdrawal_id IS NULL AND node_token_hash IS NOT NULL AND node_token_hash<>'' AND winn3_bootstrap_authorized=1 AND management_status='ok' ORDER BY slug\").fetchall",
+        "conn.execute(\"SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'nodes'\").fetchone",
+        "conn.execute(\"SELECT transaction_id FROM edge_redirect_transactions WHERE subject_kind = ? AND subject_id = ? AND state = 'armed' ORDER BY transaction_id\", (kind, subject)).fetchall",
+        "conn.execute(\"SELECT type, name, sql FROM sqlite_master WHERE tbl_name = 'nodes' AND type IN ('index', 'trigger') AND sql IS NOT NULL ORDER BY type, name\").fetchall",
+        "conn.execute(\"SELECT updated_at FROM devices WHERE location_slug = ? AND COALESCE(winn3_inner_v4, '') != ''\", (slug,)).fetchall",
+        "conn.execute(\"\\n                                SELECT hub_order_id, plan_key, expected_amount,\\n                                       expected_currency, referral_code, promo_code, status\\n                                FROM payment_orders\\n                                WHERE provider='paypal_wallet' AND provider_order_id=?\\n                                \", (wallet_order_id,)).fetchone",
+        "conn.execute(\"\\n                    SELECT * FROM devices\\n                    WHERE account_number = ?\\n                    ORDER BY COALESCE(last_seen, '1970-01-01T00:00:00') ASC\\n                    LIMIT 1\\n                    \", (acc,)).fetchone",
+        "conn.execute(\"\\n                    SELECT 1 FROM users WHERE (paypal_subscription_id=? OR email=?)\\n                    AND UPPER(COALESCE(paypal_status, '')) IN ('REFUNDED', 'REVERSED')\\n                    LIMIT 1\\n                \", (subscription_id, email)).fetchone",
+        "conn.execute(\"\\n                    SELECT account_number, paypal_subscription_id, expiration_date, paypal_status, last_paypal_sync\\n                    FROM users WHERE account_number=? AND status='active'\\n                \", (row['account_number'],)).fetchone",
+        "conn.execute(\"\\n                INSERT INTO emergency_outbox (\\n                    dedupe_key, channel, destination, lat, lng, captured_at,\\n                    status, not_before, accepted_at\\n                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)\\n                ON CONFLICT(dedupe_key) DO UPDATE SET\\n                    repeat_count = emergency_outbox.repeat_count + 1,\\n                    not_before = MIN(emergency_outbox.not_before, excluded.not_before)\\n                RETURNING id, status, repeat_count, not_before\\n                \", (key, channel, contact, lat, lng, captured_at or None, now + delay, utcnow().isoformat())).fetchone",
+        "conn.execute(\"\\n                SELECT hub_order_id, plan_key, expected_amount, expected_currency,\\n                       buyer_email, referral_code, promo_code, status\\n                FROM payment_orders\\n                WHERE provider='btcpay' AND provider_order_id=?\\n                \", (invoice_id,)).fetchone",
+        "conn.execute(\"\\n            SELECT * FROM activation_delivery_outbox\\n            WHERE (status IN ('pending', 'failed') OR (status='sending' AND lease_until <= ?))\\n              AND next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)\\n            ORDER BY next_attempt_at, created_at LIMIT ?\\n        \", (now_text, now_text, now_text, max(1, min(int(limit), 100)))).fetchall",
+        "conn.execute(\"\\n            SELECT COUNT(*) AS total,\\n                   SUM(CASE WHEN delivery_status = 'sent' THEN 1 ELSE 0 END) AS sent,\\n                   SUM(CASE WHEN ack_required = 1 AND delivery_status != 'sent' THEN 1 ELSE 0 END)\\n                       AS required_not_delivered\\n            FROM donation_acknowledgments\\n            \").fetchone",
+        "conn.execute(\"\\n            SELECT DISTINCT\\n                c.core_id,\\n                c.exit_public_key AS client_public_key,\\n                e.core_exit_ip AS vpn_internal_ip,\\n                '' AS preshared_key,\\n                u.expiration_date, u.renewal_source,\\n                n.slug,\\n                n.endpoint,\\n                n.ssh_host,\\n                n.status,\\n                n.max_peers,\\n                n.operator_enabled,\\n                n.retired_at,\\n                n.deployment_withdrawal_id\\n            FROM double_vpn_assignments a\\n            JOIN devices d\\n              ON d.device_id = a.device_id\\n             AND d.account_number = a.account_number\\n            JOIN users u ON u.account_number = a.account_number\\n            JOIN core_exit_peers e\\n              ON e.core_id = a.core_id\\n             AND e.exit_slug = a.exit_slug\\n            JOIN core_servers c ON c.core_id = e.core_id\\n            JOIN nodes n ON n.slug = e.exit_slug\\n            WHERE a.status = 'active'\\n              AND u.status = 'active'\\n              AND c.status = 'online'\\n              AND n.retired_at IS NULL\\n              AND c.exit_public_key IS NOT NULL\\n              AND c.exit_public_key != ''\\n              AND e.core_exit_ip IS NOT NULL\\n              AND e.core_exit_ip != ''\\n              AND (? = '' OR n.slug = ?)\\n        \", (requested_slug, requested_slug)).fetchall",
+        "conn.execute(\"\\n            SELECT account_number, paypal_subscription_id, expiration_date, paypal_status, last_paypal_sync\\n            FROM users\\n            WHERE paypal_subscription_id IS NOT NULL\\n              AND paypal_subscription_id != ''\\n              AND status = 'active'\\n              AND (expiration_date IS NULL OR expiration_date <= ? OR last_paypal_sync IS NULL OR last_paypal_sync < ?)\\n            ORDER BY expiration_date ASC\\n            LIMIT 200\\n        \", (cutoff, (utcnow() - timedelta(hours=PAYPAL_SYNC_STALE_HOURS)).isoformat())).fetchall",
+        "conn.execute(\"\\n            SELECT account_number\\n            FROM users u\\n            WHERE (\\n                u.status='active'\\n                AND wins_account_expiration_due(u.expiration_date)=1\\n            ) OR (\\n                u.status='expired'\\n                AND EXISTS (\\n                    SELECT 1 FROM devices d\\n                    WHERE d.account_number=u.account_number\\n                )\\n            )\\n            ORDER BY u.expiration_date\\n            LIMIT ?\\n        \", (max(1, min(int(limit), 2000)),)).fetchall",
+        "conn.execute(\"\\n            SELECT ack_number FROM donation_acknowledgments\\n            WHERE delivery_status IN ('pending','failed')\\n              AND delivery_attempts < ?\\n              AND (delivery_detail IS NULL OR delivery_detail NOT LIKE 'lease:%'\\n                   OR substr(delivery_detail, 7) < ?)\\n              AND (delivered_at IS NULL OR delivered_at < ? OR delivery_status='failed')\\n            ORDER BY issued_at ASC LIMIT ?\\n            \", (DONOR_ACK_OUTBOX_MAX_ATTEMPTS, now_iso, now_iso, limit)).fetchall",
+        "conn.execute(\"\\n            SELECT b.batch_id, b.label, b.partner, b.plan_key, b.duration, b.issued_count,\\n                   b.canary_count, b.key_version, b.expires_at, b.revoked_at, b.revoked_reason, b.created_at,\\n                   b.channel, b.distribution_reference,\\n                   SUM(CASE WHEN c.status = 'unused' THEN 1 ELSE 0 END) AS unused,\\n                   SUM(CASE WHEN c.status = 'redeemed' THEN 1 ELSE 0 END) AS redeemed,\\n                   SUM(CASE WHEN c.status = 'revoked' THEN 1 ELSE 0 END) AS revoked,\\n                   SUM(CASE WHEN c.status = 'refunded' THEN 1 ELSE 0 END) AS refunded,\\n                   SUM(CASE WHEN c.status = 'canary_tripped' THEN 1 ELSE 0 END) AS canary_tripped\\n            FROM redemption_batches b\\n            LEFT JOIN redemption_codes c ON c.batch_id = b.batch_id\\n            GROUP BY b.batch_id\\n            ORDER BY b.created_at DESC\\n        \").fetchall",
+        "conn.execute(\"\\n            SELECT device_id, device_auth_token_hash, client_public_key, location_slug\\n            FROM devices\\n            WHERE account_number = ?\\n              AND device_auth_token_hash IS NOT NULL AND device_auth_token_hash != ''\\n              AND last_seen IS NOT NULL AND last_seen >= ?\\n            ORDER BY device_id\\n            \", (account_number, cutoff)).fetchall",
+        "conn.execute(\"\\n            SELECT sealed_secret FROM activation_delivery_outbox\\n            WHERE delivery_id=? AND status='sending' AND lease_token=? AND lease_until>?\\n        \", (item['delivery_id'], item['lease_token'], utcnow().isoformat())).fetchone",
+        "conn.execute(\"\\n            SELECT slug, name, flag, endpoint, stealth_endpoint, status, xray_path, xray_security,\\n                   xray_sni, stealth_public_port, regional_aliases, stealth_transports,\\n                   awg_rx_bytes, awg_tx_bytes, wan_rx_bytes, wan_tx_bytes,\\n                   rx_mbps, tx_mbps, peer_count, max_peers,\\n                   free_access_enabled, direct_awg_enabled, public_key, ssh_host, last_heartbeat,\\n                   protocol_version, protocol_params_json,\\n                   data_plane_status, data_plane_ok_at,\\n                   data_plane_udp_status, data_plane_udp_ok_at,\\n                   data_plane_stealth_status,\\n                   data_plane_stealth_tls_status, data_plane_stealth_tls_ok_at,\\n                   load_band, load_reported_at\\n            FROM nodes\\n            WHERE status != 'offline'\\n              AND management_status = 'ok'\\n              AND COALESCE(operator_enabled, 0) = 1\\n              AND retired_at IS NULL\\n            ORDER BY LOWER(name) ASC, LOWER(slug) ASC\\n        \").fetchall",
+        "conn.execute(\"\\n            SELECT\\n                d.device_id,\\n                d.account_number,\\n                d.client_public_key,\\n                d.vpn_internal_ip,\\n                d.preshared_key,\\n                d.location_slug,\\n                u.expiration_date, u.renewal_source,\\n                n.slug,\\n                n.endpoint,\\n                n.ssh_host,\\n                n.status,\\n                n.max_peers,\\n                n.operator_enabled,\\n                n.retired_at,\\n                n.deployment_withdrawal_id\\n            FROM devices d\\n            JOIN users u ON u.account_number = d.account_number\\n            JOIN nodes n ON n.slug = d.location_slug\\n            WHERE u.status = 'active'\\n              AND n.retired_at IS NULL\\n              AND d.client_public_key IS NOT NULL\\n              AND d.client_public_key != ''\\n              AND d.vpn_internal_ip IS NOT NULL\\n              AND d.vpn_internal_ip != ''\\n              AND (? = '' OR n.slug = ?)\\n        \", (requested_slug, requested_slug)).fetchall",
+        "conn.execute(\"\\n        INSERT INTO paypal_events (\\n            event_id, event_type, paypal_subscription_id, status,\\n            attempts, updated_at, lease_until\\n        ) VALUES (?, ?, ?, 'processing', 1, ?, ?)\\n        ON CONFLICT(event_id) DO UPDATE SET\\n            event_type=excluded.event_type,\\n            paypal_subscription_id=excluded.paypal_subscription_id,\\n            status='processing',\\n            attempts=paypal_events.attempts + 1,\\n            updated_at=excluded.updated_at,\\n            lease_until=excluded.lease_until\\n        WHERE paypal_events.status='failed'\\n           OR (\\n               paypal_events.status='processing'\\n               AND (paypal_events.lease_until IS NULL OR paypal_events.lease_until < excluded.updated_at)\\n           )\\n        RETURNING event_id\\n    \", (event_id, event_type, subscription_id, now_iso, lease_until)).fetchone",
+        "conn.execute(\"\\n        SELECT * FROM account_deletion_requests\\n        WHERE status = 'pending' AND execute_after IS NOT NULL AND execute_after != '' AND execute_after <= ?\\n        \", (now.isoformat(),)).fetchall",
+        "conn.execute(\"\\n        SELECT * FROM emergency_outbox\\n        WHERE status IN ('pending', 'held')\\n          AND not_before <= ?\\n          AND (lease_until IS NULL OR lease_until <= ?)\\n        ORDER BY not_before ASC, id ASC\\n        LIMIT ?\\n        \", (now, now, limit)).fetchall",
+        "conn.execute(\"\\n        SELECT * FROM hoppy_agent_mail_outbox\\n        WHERE status IN ('pending', 'delivered')\\n          AND (status = 'delivered' OR attempts < ?)\\n          AND (lease_until IS NULL OR lease_until < ?)\\n        ORDER BY id ASC\\n        LIMIT ?\\n    \", (HOPPY_AGENT_OUTBOX_MAX_ATTEMPTS, now_iso, limit)).fetchall",
+        "conn.execute(\"\\n        SELECT * FROM redemption_outbox\\n        WHERE status IN ('pending', 'delivered')\\n          AND (status = 'delivered' OR attempts < ?)\\n          AND (lease_until IS NULL OR lease_until < ?)\\n        ORDER BY id ASC\\n        LIMIT ?\\n    \", (REDEMPTION_OUTBOX_MAX_ATTEMPTS, now_iso, limit)).fetchall",
+        "conn.execute(\"\\n        SELECT 1 WHERE EXISTS (\\n            SELECT 1 FROM nodes\\n            WHERE retired_at IS NULL\\n              AND (\\n                ((last_heartbeat IS NULL OR last_heartbeat < ?)\\n                 AND (status != 'offline' OR COALESCE(operator_enabled, 0) != 0))\\n                OR (COALESCE(operator_enabled, 0) = 1\\n                    AND (COALESCE(data_plane_status, 'unknown') IN ('unreachable', 'probe_error')\\n                         OR (data_plane_ok_at IS NOT NULL AND data_plane_ok_at < ?)))\\n              )\\n        ) OR EXISTS (\\n            SELECT 1 FROM double_vpn_assignments a\\n            JOIN nodes n ON n.slug = a.exit_slug\\n            WHERE a.status = 'active' AND n.retired_at IS NULL\\n              AND (n.last_heartbeat IS NULL OR n.last_heartbeat < ?\\n                   OR COALESCE(n.data_plane_status, 'unknown') IN ('unreachable', 'probe_error')\\n                   OR (n.data_plane_ok_at IS NOT NULL AND n.data_plane_ok_at < ?))\\n        ) OR EXISTS (\\n            SELECT 1 FROM core_servers\\n            WHERE (COALESCE(promoted, 0) = 1 OR pending_promotion_id IS NOT NULL)\\n              AND (last_heartbeat IS NULL OR last_heartbeat < ?\\n                   OR runtime_checked_at IS NULL OR runtime_checked_at < ?\\n                   OR management_checked_at IS NULL OR management_checked_at < ?)\\n        )\\n        \", (node_cutoff, data_cutoff, node_cutoff, data_cutoff, core_cutoff, core_cutoff, core_cutoff)).fetchone",
+        "conn.execute(\"\\n        SELECT account_number, COALESCE(created_at, ?) AS anchor\\n          FROM users\\n         WHERE expiration_date IS NULL\\n            OR expiration_date = ''\\n            OR UPPER(TRIM(expiration_date)) IN (?, ?, ?)\\n        \", (anchor_default.isoformat(timespec='seconds'), 'LIFETIME ACCESS', 'LIFETIME', 'PERPETUAL')).fetchall",
+        "conn.execute(\"\\n        SELECT account_number, status, expiration_date, created_at, paypal_status, renewal_source\\n        FROM users\\n        WHERE account_number != '9999-9999-9999'\\n          AND (renewal_source IS NULL OR renewal_source != 'free_access')\\n          AND (expiration_date IS NULL OR (expiration_date != 'Lifetime Access' AND expiration_date NOT LIKE '10-Year%'))\\n          AND (paypal_status IS NULL OR UPPER(paypal_status) NOT IN ('ACTIVE', 'APPROVAL_PENDING', 'APPROVED'))\\n        ORDER BY created_at ASC\\n    \").fetchall",
+        "conn.execute(\"\\n        SELECT d.client_public_key, d.vpn_internal_ip, d.preshared_key, d.account_number, u.expiration_date, u.renewal_source,\\n               n.max_peers, n.ssh_host, n.endpoint\\n        FROM devices d\\n        JOIN users u ON u.account_number = d.account_number\\n        JOIN nodes n ON n.slug = d.location_slug\\n        WHERE d.client_public_key = ? AND u.status = 'active'\\n    \", (client_public_key,)).fetchall",
+        "conn.execute(\"\\n        SELECT d.device_id, d.winn3_static_public, d.winn3_inner_v4, u.expiration_date, u.account_number, u.renewal_source\\n        FROM devices d\\n        JOIN users u ON u.account_number = d.account_number\\n        WHERE d.location_slug = ?\\n          AND u.status = 'active'\\n          AND d.winn3_static_public IS NOT NULL\\n          AND d.winn3_static_public != ''\\n          AND d.winn3_inner_v4 IS NOT NULL\\n          AND d.winn3_inner_v4 != ''\\n        ORDER BY d.winn3_inner_v4, d.winn3_static_public\\n        \", ((node_slug or '').strip().lower(),)).fetchall",
+        "conn.execute(\"\\n        SELECT device_id, device_auth_token_hash, client_public_key, location_slug\\n        FROM devices\\n        WHERE account_number = ?\\n          AND device_auth_token_hash IS NOT NULL AND device_auth_token_hash != ''\\n        ORDER BY device_id\\n        \", (account_number,)).fetchall",
+        "conn.execute(\"\\n        SELECT donor_name, contribution_schedule, currency\\n        FROM donation_acknowledgments\\n        WHERE donor_email = ? AND tax_year = ? AND kind = 'single'\\n        ORDER BY sequence\\n        \", (donor_email.strip(), str(tax_year))).fetchall",
+        "conn.execute(\"\\n        SELECT g.grant_id, g.device_id, g.static_public, g.inner_v4, g.expires_at,\\n               u.expiration_date, u.account_number, u.renewal_source\\n        FROM winn3_departure_grants g\\n        JOIN devices d\\n          ON d.device_id = g.device_id\\n         AND d.account_number = g.account_number\\n         AND d.winn3_static_public = g.static_public\\n         AND d.winn3_inner_v4 = g.inner_v4\\n        JOIN users u ON u.account_number = d.account_number\\n        WHERE g.node_slug = ?\\n          AND g.expires_at > ?\\n          AND u.status = 'active'\\n          AND COALESCE(d.location_slug, '') != g.node_slug\\n        ORDER BY g.inner_v4, g.static_public, g.expires_at DESC\\n        \", ((node_slug or '').strip().lower(), grant_now)).fetchall",
+        "conn.execute(\"\\n        SELECT hub_order_id, subaddress, subaddress_index, plan_key, amount_atomic,\\n               referral_code, buyer_email, created_at, expires_at\\n        FROM monero_orders\\n        WHERE status='pending' AND (lease_until IS NULL OR lease_until < ?)\\n        ORDER BY created_at ASC\\n        LIMIT ?\\n    \", (now_iso, limit)).fetchall",
+        "conn.execute(\"\\n        SELECT provider_order_id, plan_key, expected_currency,\\n               buyer_email, referral_code, promo_code, status\\n        FROM payment_orders\\n        WHERE provider='monero' AND hub_order_id=?\\n        \", (hub_order_id,)).fetchone",
+        "conn.execute(\"\\n        SELECT r.exit_slug AS relay_exit_slug, r.relay_port AS relay_port, n.*\\n        FROM core_relay_exits r\\n        JOIN nodes n ON n.slug = r.exit_slug\\n        WHERE r.core_id = ?\\n          AND r.enabled = 1\\n          AND n.retired_at IS NULL\\n          AND COALESCE(n.operator_enabled, 0) = 1\\n          AND n.status NOT IN ('offline', 'maintenance')\\n        ORDER BY r.relay_port\\n        \", (core_id,)).fetchall",
+        "conn.execute(\"\\n        SELECT u.expiration_date, n.ssh_host, n.endpoint,\\n               n.operator_enabled, n.retired_at, n.deployment_withdrawal_id,\\n               d.device_id, d.account_number\\n        FROM devices d\\n        JOIN users u ON u.account_number=d.account_number\\n        JOIN nodes n ON n.slug=d.location_slug\\n        WHERE d.client_public_key=? AND u.status='active'\\n    \", (public_key,)).fetchall",
+        "conn.execute(\"\\n        SELECT\\n            a.device_id, a.account_number, a.core_id, a.exit_slug, a.client_public_key,\\n            a.client_ip, a.preshared_key, a.status, a.updated_at,\\n            e.core_exit_ip, e.table_id, e.iface,\\n            n.name AS exit_name, n.endpoint AS exit_endpoint,\\n            n.public_key AS exit_public_key, n.wg_port AS exit_wg_port,\\n            n.status AS exit_status, n.stealth_endpoint AS exit_stealth_endpoint,\\n            n.xray_uuid AS exit_xray_uuid, n.xray_path AS exit_xray_path,\\n            n.xray_security AS exit_xray_security, n.xray_sni AS exit_xray_sni,\\n            n.stealth_public_port AS exit_stealth_public_port,\\n            n.stealth_transports AS exit_stealth_transports,\\n            n.direct_awg_enabled AS exit_direct_awg_enabled,\\n            n.obfuscation_json AS exit_obfuscation_json,\\n            u.expiration_date, u.renewal_source\\n        FROM double_vpn_assignments a\\n        JOIN devices d ON d.device_id = a.device_id AND d.account_number = a.account_number\\n        JOIN users u ON u.account_number = a.account_number\\n        JOIN core_exit_peers e ON e.core_id = a.core_id AND e.exit_slug = a.exit_slug\\n        JOIN nodes n ON n.slug = a.exit_slug\\n        WHERE a.core_id = ?\\n          AND a.status = 'active'\\n          AND u.status = 'active'\\n          AND n.status NOT IN ('offline', 'maintenance')\\n          AND n.retired_at IS NULL\\n          AND COALESCE(n.operator_enabled, 0) = 1\\n        \", (core_id,)).fetchall",
+        "conn.execute('PRAGMA database_list').fetchone",
+        "conn.execute('PRAGMA foreign_key_check').fetchall",
+        "conn.execute('PRAGMA foreign_keys').fetchone",
+        "conn.execute('PRAGMA journal_mode=WAL').fetchone",
+        "conn.execute('PRAGMA schema_version').fetchone",
+        "conn.execute('SELECT * FROM core_exit_peers WHERE core_id = ? AND exit_slug = ?', (core_id, exit_slug)).fetchone",
+        "conn.execute('SELECT * FROM core_servers WHERE core_id = ?', (requested_core,)).fetchone",
+        "conn.execute('SELECT * FROM core_servers WHERE core_id=?', (core_id,)).fetchone",
+        "conn.execute('SELECT * FROM devices WHERE account_number = ? AND device_id = ?', (acc, login.device_id)).fetchone",
+        "conn.execute('SELECT * FROM devices WHERE account_number = ? ORDER BY last_seen DESC', (acc,)).fetchall",
+        "conn.execute('SELECT * FROM devices WHERE device_id = ?', (login.device_id,)).fetchone",
+        "conn.execute('SELECT * FROM donation_acknowledgments WHERE ack_number = ?', (ack_number,)).fetchone",
+        "conn.execute('SELECT * FROM double_vpn_assignments WHERE device_id = ?', (login.device_id,)).fetchone",
+        "conn.execute('SELECT * FROM edge_redirect_transactions WHERE transaction_id = ?', (transaction_id,)).fetchone",
+        "conn.execute('SELECT * FROM node_closure_cleanup WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT * FROM node_closure_cleanup WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT * FROM node_latch_events WHERE alerted_at IS NULL ORDER BY event_id LIMIT ?', (max(1, int(limit)),)).fetchall",
+        "conn.execute('SELECT * FROM node_offnode_gates WHERE gate_sha256 = ?', ((gate_sha256 or '').strip().lower(),)).fetchone",
+        "conn.execute('SELECT * FROM node_retirements WHERE slug = ? AND restored_at IS NULL ORDER BY retired_at DESC, retirement_id DESC LIMIT 1', (slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE COALESCE(operator_enabled, 0) = 0 AND health_closed_reason IN (' + ', '.join(('?' for _ in classes)) + ') AND retired_at IS NULL AND deployment_completed_at IS NOT NULL ORDER BY slug', classes).fetchall",
+        "conn.execute('SELECT * FROM nodes WHERE retired_at IS NULL').fetchall",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', ((node_slug or '').strip().lower(),)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (clean,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (existing_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (old_location_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (preferred_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (row['exit_slug'],)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (selected_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug=?', (node_slug,)).fetchone",
+        "conn.execute('SELECT * FROM nodes WHERE slug=?', (slug,)).fetchone",
+        "conn.execute('SELECT * FROM paypal_events WHERE event_id = ?', (event_id,)).fetchone",
+        "conn.execute('SELECT * FROM promo_campaigns WHERE code = ?', (code,)).fetchone",
+        "conn.execute('SELECT * FROM redemption_batches WHERE batch_id = ?', (code_row['batch_id'],)).fetchone",
+        "conn.execute('SELECT * FROM redemption_codes WHERE code_hash = ? AND key_version = ?', (code_hash, version)).fetchone",
+        "conn.execute('SELECT * FROM redemption_codes WHERE serial = ?', (serial,)).fetchone",
+        "conn.execute('SELECT * FROM redemption_fulfillments WHERE idempotency_key = ?', (idem_key,)).fetchone",
+        "conn.execute('SELECT * FROM redemption_fulfillments WHERE idempotency_key = ?', (item['idempotency_key'],)).fetchone",
+        "conn.execute('SELECT * FROM users WHERE account_number = ?', (account,)).fetchone",
+        "conn.execute('SELECT * FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone",
+        "conn.execute('SELECT * FROM users WHERE paypal_subscription_id = ?', (subscription_id,)).fetchone",
+        "conn.execute('SELECT * FROM winn3_canary_bindings WHERE slug=?', (slug,)).fetchone",
+        "conn.execute('SELECT 1 FROM activation_extra_keys WHERE account_number = ? AND used_at IS NOT NULL LIMIT 1', (item['account_number'],)).fetchone",
+        "conn.execute('SELECT 1 FROM core_servers WHERE core_id = ?', (core_key,)).fetchone",
+        "conn.execute('SELECT 1 FROM core_servers WHERE core_id = ?', (label,)).fetchone",
+        "conn.execute('SELECT 1 FROM core_servers WHERE core_id=?', (core_id,)).fetchone",
+        "conn.execute('SELECT 1 FROM devices WHERE device_auth_token_hash = ? LIMIT 1', (token_digest(token),)).fetchone",
+        "conn.execute('SELECT 1 FROM devices WHERE winn3_inner_v4 = ? LIMIT 1', (binding['inner_v4'],)).fetchone",
+        "conn.execute('SELECT 1 FROM devices WHERE winn3_static_public = ? LIMIT 1', (binding['static_public'],)).fetchone",
+        "conn.execute('SELECT 1 FROM double_vpn_enrollment_leases WHERE account_number=? AND lease_token=? AND expires_at>?', (acc, double_vpn_lease_token, time.time())).fetchone",
+        "conn.execute('SELECT 1 FROM edge_hostname_bindings WHERE hostname = ?', (host,)).fetchone",
+        "conn.execute('SELECT 1 FROM node_fresh_completions WHERE slug = ? AND ticket_nonce = ? AND epoch != ? LIMIT 1', (slug, ticket['nonce'], epoch)).fetchone",
+        "conn.execute('SELECT 1 FROM node_promotion_events WHERE slug = ? AND promoted_at < ? LIMIT 1', (slug, epoch)).fetchone",
+        "conn.execute('SELECT 1 FROM node_promotion_events WHERE slug = ? AND promoted_at >= ? LIMIT 1', (slug, epoch)).fetchone",
+        "conn.execute('SELECT 1 FROM nodes WHERE node_bootstrapped_at IS NULL LIMIT 1').fetchone",
+        "conn.execute('SELECT 1 FROM nodes WHERE slug = ?', (label,)).fetchone",
+        "conn.execute('SELECT 1 FROM paypal_terminal_payments WHERE payment_reference=?', (payment_reference,)).fetchone",
+        "conn.execute('SELECT 1 FROM paypal_terminal_payments WHERE payment_reference=?', (reference,)).fetchone",
+        "conn.execute('SELECT 1 FROM promo_campaigns WHERE code = ?', (promo,)).fetchone",
+        "conn.execute('SELECT 1 FROM promo_redemptions WHERE code = ? AND account_number = ?', (code, account_number)).fetchone",
+        "conn.execute('SELECT 1 FROM promo_redemptions WHERE code = ? AND account_number = ?', (promo, target_account)).fetchone",
+        "conn.execute('SELECT 1 FROM redemption_batches WHERE batch_id = ?', (batch_id,)).fetchone",
+        "conn.execute('SELECT 1 FROM referral_rewards WHERE referred_account_number = ?', (target_account,)).fetchone",
+        "conn.execute('SELECT 1 FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT 1 FROM users WHERE referral_code = ?', (code,)).fetchone",
+        "conn.execute('SELECT COALESCE(MAX(sequence), 0) + 1 AS next_sequence FROM donation_acknowledgments WHERE tax_year = ?', (str(tax_year),)).fetchone",
+        "conn.execute('SELECT COALESCE(promoted, 0) AS promoted, pending_promotion_id, active_promotion_id FROM core_servers WHERE core_id = ?', (core_id,)).fetchone",
+        "conn.execute('SELECT COUNT(*) AS clicks FROM payment_clicks WHERE clicked_at >= ?', (cutoff,)).fetchone",
+        "conn.execute('SELECT COUNT(*) AS cnt FROM devices WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT COUNT(*) AS cnt FROM devices WHERE location_slug = ?', (str(data.get('slug') or ''),)).fetchone",
+        "conn.execute('SELECT COUNT(*) AS cnt FROM nodes WHERE COALESCE(free_access_enabled, 0) = 1').fetchone",
+        "conn.execute('SELECT COUNT(*) AS n FROM nodes').fetchone",
+        "conn.execute('SELECT COUNT(*) FROM node_latch_events WHERE slug = ? AND cause IN (' + ', '.join(('?' for _ in NODE_AUTO_REOPEN_CAUSES)) + ') AND changed_at >= ?', (slug, *NODE_AUTO_REOPEN_CAUSES, day_ago)).fetchone",
+        "conn.execute('SELECT COUNT(*) FROM peer_revocations WHERE node_ip = ?', (node_ip,)).fetchone",
+        "conn.execute('SELECT DISTINCT device_id FROM winn3_departure_grants WHERE node_slug = ? AND expires_at > ?', (slug, grant_now)).fetchall",
+        "conn.execute('SELECT DISTINCT node_slug FROM winn3_departure_grants WHERE expires_at<=? AND cleanup_queued=0', (now,)).fetchall",
+        "conn.execute('SELECT account_number FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT account_number FROM users WHERE paypal_subscription_id = ?', (subscription_id,)).fetchall",
+        "conn.execute('SELECT account_number FROM users WHERE paypal_subscription_id=?', (subscription_id,)).fetchall",
+        "conn.execute('SELECT account_number, email FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT account_number, email, subscriber_name FROM users').fetchall",
+        "conn.execute('SELECT account_number, email, subscriber_name, paypal_status FROM users WHERE paypal_subscription_id = ?', (subscription_id,)).fetchone",
+        "conn.execute('SELECT account_number, email, subscriber_name, status, expiration_date FROM users WHERE account_number=?', (cand['account_number'],)).fetchone",
+        "conn.execute('SELECT account_number, expiration_date FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT account_number, expiration_date FROM users WHERE email = ?', (email,)).fetchone",
+        "conn.execute('SELECT account_number, subscriber_name, email FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT account_number, subscriber_name, email, status, expiration_date, renewal_source FROM users WHERE account_number = ?', (account,)).fetchone",
+        "conn.execute('SELECT account_number, subscriber_name, status, email, expiration_date FROM users WHERE email = ?', (email,)).fetchone",
+        "conn.execute('SELECT ack_number FROM donation_acknowledgments WHERE ack_number = ?', (reference,)).fetchone",
+        "conn.execute('SELECT ack_number FROM donation_acknowledgments WHERE provider = ? AND provider_reference = ?', (provider, provider_reference)).fetchone",
+        "conn.execute('SELECT action, COUNT(*) AS n FROM hoppy_agent_audit GROUP BY action').fetchall",
+        "conn.execute('SELECT activation_secret_hash, activation_secret_expires_at FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT activation_secret_hash, activation_secret_expires_at, activation_secret_used_at FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT activation_secret_used_at FROM users WHERE account_number = ?', (item['account_number'],)).fetchone",
+        "conn.execute('SELECT attempts FROM winn3_registry_refreshes WHERE node_slug=? AND next_attempt_at<=?', (item['node_slug'], time.time())).fetchone",
+        "conn.execute('SELECT awg_rx_bytes, awg_tx_bytes, last_heartbeat, free_access_enabled, direct_awg_enabled, direct_awg_node_enabled, direct_awg_admin_override, load_band, load_candidate, load_candidate_count, load_reported_at, load_band_at FROM nodes WHERE slug = ?', (payload.slug,)).fetchone",
+        "conn.execute('SELECT batch_id FROM redemption_batches WHERE batch_id = ?', (batch_id,)).fetchone",
+        "conn.execute('SELECT bonus_days FROM promo_campaigns WHERE code = ?', (code,)).fetchone",
+        "conn.execute('SELECT bonus_days FROM referral_rewards WHERE referred_account_number = ?', (referred_account_number,)).fetchone",
+        "conn.execute('SELECT c.*, (SELECT COUNT(*) FROM promo_redemptions r WHERE r.code = c.code AND r.reversed_at IS NOT NULL) AS reversed FROM promo_campaigns c ORDER BY c.created_at DESC').fetchall",
+        "conn.execute('SELECT changes() AS changes').fetchone",
+        "conn.execute('SELECT client_ip FROM double_vpn_assignments WHERE client_ip IS NOT NULL').fetchall",
+        "conn.execute('SELECT client_public_key, device_model, location_slug FROM devices WHERE account_number = ? AND device_id = ?', (account_number, device_id)).fetchone",
+        "conn.execute('SELECT client_public_key, location_slug FROM devices WHERE account_number = ?', (acc,)).fetchall",
+        "conn.execute('SELECT core_exit_ip FROM core_exit_peers WHERE core_exit_ip IS NOT NULL').fetchall",
+        "conn.execute('SELECT core_id FROM core_servers WHERE COALESCE(promoted, 0)=1 AND active_promotion_id IS NULL').fetchall",
+        "conn.execute('SELECT core_token_hash FROM core_servers WHERE core_id = ?', (core_id,)).fetchone",
+        "conn.execute('SELECT count, reset_at FROM rate_limits WHERE bucket = ?', (bucket,)).fetchone",
+        "conn.execute('SELECT d.device_auth_token_hash, u.status, u.expiration_date FROM devices d JOIN users u ON u.account_number=d.account_number WHERE d.device_id=? AND d.account_number=?', (login.device_id, acc)).fetchone",
+        "conn.execute('SELECT data_plane_status, data_plane_fail_streak FROM nodes WHERE slug = ? AND retired_at IS NULL', (existing_slug,)).fetchone",
+        "conn.execute('SELECT device_auth_token_hash FROM devices WHERE account_number = ? AND client_public_key = ?', (account_number, requested_client_public_key)).fetchall",
+        "conn.execute('SELECT device_auth_token_hash FROM devices WHERE account_number = ? AND device_id = ?', (account_number, device_id)).fetchone",
+        "conn.execute('SELECT device_id FROM devices WHERE winn3_inner_v4 IN (?, ?)', (descriptor['inner_router_v4'], descriptor['inner_resolver_v4'])).fetchone",
+        "conn.execute('SELECT device_id, client_public_key, location_slug FROM devices WHERE account_number = ? AND device_id = ?', (acc, device_id)).fetchone",
+        "conn.execute('SELECT device_id, device_binding FROM account_deletion_confirmations WHERE request_id = ? AND account_number = ?', (request_id, account_number)).fetchall",
+        "conn.execute('SELECT device_id, device_model, client_public_key, location_slug FROM devices WHERE account_number = ? AND device_id != ?', (acc, login.device_id)).fetchall",
+        "conn.execute('SELECT device_id, device_model, client_public_key, location_slug FROM devices WHERE account_number = ? AND device_id = ?', (acc, target_id)).fetchone",
+        "conn.execute('SELECT device_id, device_model, client_public_key, location_slug, last_seen FROM devices WHERE account_number = ? AND LOWER(device_model) = LOWER(?) ORDER BY last_seen DESC', (acc, target_model)).fetchall",
+        "conn.execute('SELECT device_id, device_model, client_public_key, location_slug, last_seen FROM devices WHERE account_number = ? AND LOWER(device_model) LIKE LOWER(?) ORDER BY last_seen DESC', (acc, f'%{target_model}%')).fetchall",
+        "conn.execute('SELECT device_id, device_model, location_slug, vpn_internal_ip, last_seen FROM devices WHERE account_number = ? ORDER BY last_seen DESC', (acc,)).fetchall",
+        "conn.execute('SELECT device_limit_override FROM users WHERE account_number = ?', (account,)).fetchone",
+        "conn.execute('SELECT direct_awg_enabled FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT endpoint FROM nodes WHERE slug = ?', (payload.slug,)).fetchone",
+        "conn.execute('SELECT endpoint, ssh_host FROM nodes WHERE slug = ?', (_ds,)).fetchone",
+        "conn.execute('SELECT endpoint, ssh_host FROM nodes WHERE slug = ?', (device['location_slug'],)).fetchone",
+        "conn.execute('SELECT endpoint, ssh_host FROM nodes WHERE slug = ?', (loc_slug,)).fetchone",
+        "conn.execute('SELECT endpoint, ssh_host FROM nodes WHERE slug = ?', (old_location_slug,)).fetchone",
+        "conn.execute('SELECT event_id, changed_at FROM node_latch_events WHERE slug = ? AND to_value = 0 ORDER BY event_id DESC LIMIT 1', (slug,)).fetchone",
+        "conn.execute('SELECT event_id, changed_at, cause FROM node_latch_events WHERE slug = ? AND to_value = 1 ORDER BY event_id DESC LIMIT 1', (slug,)).fetchone",
+        "conn.execute('SELECT exit_slug, relay_port, enabled FROM core_relay_exits WHERE core_id = ? AND exit_slug = ?', (core_id, str(node['slug']))).fetchone",
+        "conn.execute('SELECT exit_slug, relay_port, enabled FROM core_relay_exits WHERE core_id = ? ORDER BY relay_port', (core_key,)).fetchall",
+        "conn.execute('SELECT expiration_date FROM users WHERE account_number = ?', (referrer,)).fetchone",
+        "conn.execute('SELECT expiration_date, referral_bonus_days FROM users WHERE account_number = ?', (referrer,)).fetchone",
+        "conn.execute('SELECT free_access_enabled, operator_enabled FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT gate_sha256 FROM node_offnode_gates WHERE slug = ? AND used_at IS NULL AND recorded_at >= ? ORDER BY recorded_at DESC LIMIT 1', (slug, cutoff)).fetchone",
+        "conn.execute('SELECT grant_mode FROM redemption_codes WHERE code_hash = ? AND key_version = ?', (row['code_hash'], row['key_version'])).fetchone",
+        "conn.execute('SELECT grant_mode, referral_bonus_days, promo_bonus_days FROM redemption_codes WHERE code_hash = ? AND key_version = ?', (row['code_hash'], row['key_version'])).fetchone",
+        "conn.execute('SELECT health_closed_at, noticed_at FROM node_auto_reopen_notices WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT health_closed_reason FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT hostname FROM edge_hostname_bindings WHERE subject_kind = ? AND subject_id = ? ORDER BY hostname', (kind, subject)).fetchall",
+        "conn.execute('SELECT hostname FROM edge_hostname_bindings').fetchall",
+        "conn.execute('SELECT hostname FROM edge_reserved_hostnames').fetchall",
+        "conn.execute('SELECT hostname, path, state FROM edge_plaintext_exceptions WHERE transaction_id = ?', (subject_open[0],)).fetchall",
+        "conn.execute('SELECT hostname, state FROM edge_plaintext_exceptions WHERE transaction_id = ?', (transaction_id,)).fetchall",
+        "conn.execute('SELECT installer_sha256 FROM node_fresh_completions WHERE slug=? AND epoch=?', (node_slug, epoch)).fetchone",
+        "conn.execute('SELECT key, value FROM systemsettings').fetchall",
+        "conn.execute('SELECT key_id, slot, secret_hash, expires_at, used_at FROM activation_extra_keys WHERE account_number = ? ORDER BY slot', (account_number,)).fetchall",
+        "conn.execute('SELECT location_slug FROM devices WHERE account_number = ? AND device_id = ?', (acc, login.device_id)).fetchone",
+        "conn.execute('SELECT location_slug FROM devices WHERE device_id = ?', (synthetic_device_id,)).fetchone",
+        "conn.execute('SELECT location_slug, device_model FROM devices WHERE account_number = ? ORDER BY last_seen DESC', (acc,)).fetchall",
+        "conn.execute('SELECT management_host, management_user FROM core_servers WHERE core_id = ?', (core_id,)).fetchone",
+        "conn.execute('SELECT node_slug FROM winn3_registry_refreshes WHERE next_attempt_at<=? ' + ('AND node_slug IN (' + ','.join('?' * len(wanted)) + ') ' if wanted else '') + 'ORDER BY next_attempt_at, node_slug LIMIT ?', (time.time(), *wanted, max(1, min(int(limit), 32)))).fetchall",
+        "conn.execute('SELECT node_slug, expires_at FROM winn3_departure_grants WHERE device_id=? AND static_public=? AND expires_at>?', (identity['device_id'], identity['static_public'], now)).fetchall",
+        "conn.execute('SELECT node_token_hash FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT not_before FROM emergency_outbox WHERE id = ?', (item_id,)).fetchone",
+        "conn.execute('SELECT operator_enabled FROM nodes WHERE slug=?', (slug,)).fetchone",
+        "conn.execute('SELECT operator_enabled, ssh_host, endpoint FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT payload, sig FROM winn3_signer_tickets WHERE slug = ? AND action IN (' + marks + ') ORDER BY posted_at DESC, nonce DESC LIMIT 1', (slug, *actions)).fetchone",
+        "conn.execute('SELECT payment_hold FROM paypal_subscription_authority WHERE subscription_id=?', (subscription_id,)).fetchone",
+        "conn.execute('SELECT promoted, pending_promotion_id FROM core_servers WHERE core_id = ?', (requested_core,)).fetchone",
+        "conn.execute('SELECT promoted_at FROM core_promotion_events WHERE promotion_id=?', (promotion_id,)).fetchone",
+        "conn.execute('SELECT promotion_id, core_id, promoted_at, evidence_sha256, operator_source_hash, core_status, management_status, management_checked_at, runtime_ready, runtime_checked_at, last_heartbeat FROM core_promotion_events ORDER BY promoted_at DESC, promotion_id DESC LIMIT 200').fetchall",
+        "conn.execute('SELECT promotion_id, slug, promoted_at, tier, evidence_sha256, operator_source_hash, node_status, management_status, management_checked_at, data_plane_status, data_plane_ok_at, data_plane_code_revision FROM node_promotion_events ORDER BY promoted_at DESC, promotion_id DESC LIMIT 200').fetchall",
+        "conn.execute('SELECT protocol_params_json, protocol_version FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT purchase_reference FROM referral_rewards WHERE referred_account_number = ? AND clawed_back_at IS NULL', (account,)).fetchone",
+        "conn.execute('SELECT referral_code FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT relay_port, enabled FROM core_relay_exits WHERE core_id = ? AND exit_slug = ?', (core_key, slug)).fetchone",
+        "conn.execute('SELECT renewal_source FROM users WHERE account_number = ?', (account_number,)).fetchone",
+        "conn.execute('SELECT report_json, reported_at FROM core_relay_reports WHERE core_id = ?', (core_id,)).fetchone",
+        "conn.execute('SELECT result_json FROM hoppy_agent_actions WHERE idempotency_key = ?', (idempotency_key,)).fetchone",
+        "conn.execute('SELECT retired_at FROM nodes WHERE slug = ?', (clean,)).fetchone",
+        "conn.execute('SELECT retired_at FROM nodes WHERE slug = ?', (payload.slug,)).fetchone",
+        "conn.execute('SELECT retired_at FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT retired_at FROM nodes WHERE slug = ?', (subject,)).fetchone",
+        "conn.execute('SELECT retirement_id, slug, retired_at, reason, was_servable, servable_before, servable_after, last_servable_confirmed, restored_at FROM node_retirements ORDER BY retired_at DESC, retirement_id DESC LIMIT 200').fetchall",
+        "conn.execute('SELECT revision FROM paypal_subscription_authority WHERE subscription_id=?', (subscription_id,)).fetchone",
+        "conn.execute('SELECT slug FROM nodes WHERE COALESCE(operator_enabled, 0) = 0 AND health_closed_at IS NOT NULL AND retired_at IS NULL AND (? IS NULL OR slug = ?) ORDER BY slug', (only_slug, only_slug)).fetchall",
+        "conn.execute('SELECT slug FROM nodes WHERE COALESCE(operator_enabled, 0) = 1 AND retired_at IS NULL ORDER BY slug').fetchall",
+        "conn.execute('SELECT slug FROM nodes WHERE lower(slug) = lower(?) AND retired_at IS NULL', (target_region,)).fetchone",
+        "conn.execute('SELECT slug FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT slug FROM nodes WHERE slug NOT IN (SELECT slug FROM winn3_node_key_digests) ORDER BY LOWER(slug) ASC').fetchall",
+        "conn.execute('SELECT slug, action, epoch, nonce, payload, sig, go_live, tier, not_after, posted_at FROM winn3_signer_tickets WHERE slug = ? ORDER BY posted_at ASC, nonce ASC', (node_slug,)).fetchall",
+        "conn.execute('SELECT slug, ech_public_key_sha256, ech_config_list_sha256, leaf_spki_sha256, recorded_at FROM winn3_node_key_digests ORDER BY LOWER(slug) ASC').fetchall",
+        "conn.execute('SELECT slug, endpoint, stealth_endpoint, public_key, ssh_host FROM nodes WHERE slug != ?', (slug,)).fetchall",
+        "conn.execute('SELECT slug, name, endpoint, obfuscation_json, protocol_version, protocol_params_json, path_mtu, carrier_classes, winn3_descriptor_json, winn3_canary_status, winn3_canary_ok_at, winn3_identity_sha256, deployment_generation, winn3_canary_identity_sha256, winn3_canary_seq, winn3_canary_generation, deployment_completed_at, deployment_released_at, winn3_carrier_flipped_at, winn3_gateway_report_json FROM nodes ORDER BY LOWER(slug) ASC').fetchall",
+        "conn.execute('SELECT slug, name, endpoint, protocol_version, protocol_params_json, winn3_descriptor_json, winn3_admission_json FROM nodes ORDER BY LOWER(slug) ASC').fetchall",
+        "conn.execute('SELECT slug, name, endpoint, ssh_host FROM nodes').fetchall",
+        "conn.execute('SELECT slug, name, status, management_status, free_access_enabled, operator_enabled FROM nodes WHERE retired_at IS NULL ORDER BY LOWER(name) ASC, LOWER(slug) ASC').fetchall",
+        "conn.execute('SELECT slug, retired_at FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT slug, retired_at FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT slug, retired_at, operator_enabled, status, management_status, management_checked_at, data_plane_status, data_plane_ok_at, data_plane_code_revision, deployment_withdrawal_id, data_plane_udp_status, data_plane_udp_ok_at, data_plane_stealth_status, data_plane_stealth_ok_at, data_plane_stealth_tls_status, data_plane_stealth_tls_ok_at, protocol_version, direct_awg_enabled, endpoint, wg_port, stealth_endpoint, stealth_transports, xray_security, xray_path, xray_uuid, ssh_host, public_key, stealth_public_port, regional_aliases FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT slug, winn3_descriptor_json, winn3_admission_json FROM nodes WHERE slug = ?', (node_slug,)).fetchone",
+        "conn.execute('SELECT source FROM node_offnode_gates WHERE gate_sha256 = ?', (existing_gate,)).fetchone",
+        "conn.execute('SELECT source FROM node_offnode_gates WHERE gate_sha256 = ?', (record,)).fetchone",
+        "conn.execute('SELECT source, used_at FROM node_offnode_gates WHERE gate_sha256 = ? AND slug = ?', (digest, slug)).fetchone",
+        "conn.execute('SELECT ssh_host, endpoint FROM nodes WHERE slug = ?', (drow['location_slug'],)).fetchone",
+        "conn.execute('SELECT ssh_host, endpoint FROM nodes WHERE slug = ?', (row['location_slug'],)).fetchone",
+        "conn.execute('SELECT ssh_host, endpoint FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT ssh_host, endpoint FROM nodes WHERE slug=?', (item['node_slug'],)).fetchone",
+        "conn.execute('SELECT ssh_host, endpoint FROM nodes WHERE slug=?', (node_slug,)).fetchone",
+        "conn.execute('SELECT stack_referral FROM promo_campaigns WHERE code = ?', (code,)).fetchone",
+        "conn.execute('SELECT state FROM node_closure_cleanup WHERE slug = ?', (data.get('slug'),)).fetchone",
+        "conn.execute('SELECT state FROM node_closure_cleanup WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT state, confirmed_at FROM node_closure_cleanup WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT status FROM paypal_events WHERE event_id=?', (audit_event_id,)).fetchone",
+        "conn.execute('SELECT status FROM paypal_events WHERE event_id=?', (dedupe_id,)).fetchone",
+        "conn.execute('SELECT status FROM paypal_events WHERE event_id=?', (event_id,)).fetchone",
+        "conn.execute('SELECT status, COUNT(*) AS n FROM emergency_outbox GROUP BY status').fetchall",
+        "conn.execute('SELECT status, COUNT(*) AS n FROM hoppy_agent_mail_outbox GROUP BY status').fetchall",
+        "conn.execute('SELECT status, email, expiration_date FROM users WHERE account_number=?', (account_number,)).fetchone",
+        "conn.execute('SELECT status, email, expiration_date FROM users WHERE account_number=?', (item['account_number'],)).fetchone",
+        "conn.execute('SELECT status, endpoint, ssh_host FROM nodes WHERE slug = ?', (requested_slug,)).fetchone",
+        "conn.execute('SELECT status, expiration_date FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT status, expiration_date FROM users WHERE account_number=?', (account_number,)).fetchone",
+        "conn.execute('SELECT status, expiration_date, hardware_hash, email, subscriber_name, renewal_source, activation_secret_hash, activation_secret_expires_at FROM users WHERE account_number = ?', (acc,)).fetchone",
+        "conn.execute('SELECT status, sealed_secret FROM redemption_outbox WHERE id=? AND idempotency_key=?', (item['id'], item['idempotency_key'])).fetchone",
+        "conn.execute('SELECT subject_kind, subject_id FROM edge_hostname_bindings WHERE hostname = ?', (default,)).fetchone",
+        "conn.execute('SELECT subject_kind, subject_id FROM edge_hostname_bindings WHERE hostname = ?', (host,)).fetchone",
+        "conn.execute('SELECT subscriber_name FROM users WHERE account_number = ?', (referrer,)).fetchone",
+        "conn.execute('SELECT table_id, iface FROM core_exit_peers WHERE core_id = ?', (core_id,)).fetchall",
+        "conn.execute('SELECT token_hash FROM bootstrap_grants WHERE role = ? AND subject_id = ? AND used_at IS NULL AND expires_at > ?', (role, subject_id, now_iso)).fetchall",
+        "conn.execute('SELECT value FROM edge_zone_state WHERE key = ?', (key,)).fetchone",
+        "conn.execute('SELECT value FROM system_settings WHERE key = ?', (key,)).fetchone",
+        "conn.execute('SELECT vpn_internal_ip FROM devices WHERE vpn_internal_ip IS NOT NULL').fetchall",
+        "conn.execute('SELECT winn3_descriptor_json, slug FROM nodes WHERE winn3_descriptor_json IS NOT NULL').fetchall",
+        "conn.execute('SELECT winn3_inner_v4 FROM devices WHERE winn3_inner_v4 IS NOT NULL').fetchall",
+        "conn.execute('SELECT winn3_inner_v4, winn3_static_private, winn3_static_public FROM devices WHERE device_id = ?', (device_id,)).fetchone",
+        "conn.execute('\\n                    SELECT d.client_public_key, d.location_slug, n.endpoint, n.ssh_host\\n                    FROM devices d\\n                    LEFT JOIN nodes n ON n.slug = d.location_slug\\n                    WHERE d.account_number = ? AND d.hardware_hash = ? AND d.device_id != ?\\n                    ', (acc, device_bucket, login.device_id)).fetchall",
+        "conn.execute('\\n                    SELECT location_slug FROM devices\\n                    WHERE account_number = ? AND hardware_hash = ?\\n                    ORDER BY last_seen DESC\\n                    LIMIT 1\\n                    ', (acc, device_bucket)).fetchone",
+        "conn.execute('\\n                SELECT * FROM devices\\n                WHERE account_number = ? AND hardware_hash = ?\\n                ORDER BY last_seen DESC\\n                LIMIT 1\\n                ', (acc, device_bucket)).fetchone",
+        "conn.execute('\\n                SELECT * FROM peer_revocations WHERE revocation_id=?\\n                  AND next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)\\n            ', (revocation_id, now, now)).fetchone",
+        "conn.execute('\\n            SELECT COUNT(*) AS events,\\n                   COUNT(DISTINCT device_id_bucket) AS devices,\\n                   COUNT(DISTINCT source_ip_bucket) AS sources\\n            FROM free_access_events\\n            WHERE created_at >= ?\\n        ', (cutoff,)).fetchone",
+        "conn.execute('\\n            SELECT action, account_number, device_id_bucket, source_ip_bucket,\\n                   client_public_key_fingerprint, platform, device_model,\\n                   node_slug, stealth_mode, user_agent_hash, created_at\\n            FROM free_access_events\\n            WHERE created_at >= ?\\n            ORDER BY created_at DESC\\n            LIMIT ?\\n        ', (cutoff, limit)).fetchall",
+        "conn.execute('\\n            SELECT d.device_id, d.account_number, d.client_public_key, d.location_slug,\\n                   n.endpoint, n.ssh_host\\n            FROM devices d\\n            LEFT JOIN nodes n ON n.slug = d.location_slug\\n            WHERE d.last_seen IS NULL OR d.last_seen < ?\\n            ', (cutoff,)).fetchall",
+        "conn.execute('\\n            SELECT event_id, event_type, paypal_subscription_id, account_number,\\n                   status, attempts, last_error, received_at, updated_at\\n            FROM paypal_events\\n            WHERE status = ?\\n            ORDER BY COALESCE(updated_at, received_at) DESC\\n            LIMIT ?\\n        ', (status, limit)).fetchall",
+        "conn.execute('\\n            SELECT option_key, source, COUNT(*) AS clicks, MIN(clicked_at) AS first_click, MAX(clicked_at) AS last_click\\n            FROM payment_clicks\\n            WHERE clicked_at >= ?\\n            GROUP BY option_key, source\\n            ORDER BY clicks DESC, last_click DESC\\n        ', (cutoff,)).fetchall",
+        "conn.execute('\\n            SELECT revocation_id FROM peer_revocations\\n            WHERE next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)\\n            ORDER BY next_attempt_at, created_at LIMIT ?\\n        ', (time.time(), time.time(), max(1, min(int(limit), 256)))).fetchall",
+        "conn.execute('\\n            SELECT status, email, expiration_date FROM users WHERE account_number=?\\n        ', (item['account_number'],)).fetchone",
+        "conn.execute('\\n        INSERT INTO paypal_subscription_authority(subscription_id, revision)\\n        VALUES (?, 1)\\n        ON CONFLICT(subscription_id) DO UPDATE SET revision=revision+1\\n        RETURNING revision\\n    ', (subscription_id,)).fetchone",
+        "conn.execute('\\n        INSERT INTO rate_limits (bucket, count, reset_at) VALUES (?, 1, ?)\\n        ON CONFLICT(bucket) DO UPDATE SET\\n          count = CASE WHEN rate_limits.reset_at <= ? THEN 1 ELSE rate_limits.count + 1 END,\\n          reset_at = CASE WHEN rate_limits.reset_at <= ? THEN excluded.reset_at ELSE rate_limits.reset_at END\\n        RETURNING count\\n        ', (bucket, now + window_seconds, now, now)).fetchone",
+        "conn.execute('\\n        SELECT * FROM legal_acceptances\\n        WHERE account_number = ?\\n          AND device_id_bucket = ?\\n          AND document_version IN (?, ?)\\n          AND document_hash IN (?, ?, ?)\\n          AND accepted_terms = 1\\n          AND accepted_hold_harmless = 1\\n          AND accepted_limitation_liability = 1\\n          AND accepted_electronic_records = 1\\n        ORDER BY accepted_at DESC\\n        LIMIT 5\\n        ', (normalize_account_number(account_number), legal_device_bucket(device_id), LEGAL_DOCUMENT_VERSION, '2026-07-21.v1', LEGAL_DOCUMENT_HASH, LEGAL_DOCUMENT_HASH_SUPERSEDED_20260721, '6a031f0b4112ac49b16dec8a074c2b56bbfa6e5a02c2536e4be2ac886a9ee041')).fetchall",
+        "conn.execute('\\n        SELECT acceptance_id FROM legal_acceptances\\n        WHERE account_number = ? AND device_id_bucket = ?\\n          AND document_version = ? AND document_hash = ?\\n        ORDER BY accepted_at DESC\\n        LIMIT 1\\n        ', (row['account_number'], row['device_id_bucket'], LEGAL_DOCUMENT_VERSION, LEGAL_DOCUMENT_HASH)).fetchone",
+        "conn.execute('\\n        SELECT activation_secret_hash,\\n               activation_secret_expires_at,\\n               activation_secret_used_at\\n          FROM users\\n         WHERE account_number = ?\\n        ', (account_number,)).fetchone",
+        "conn.execute('\\n        SELECT d.client_public_key, n.endpoint, n.ssh_host\\n        FROM devices d\\n        LEFT JOIN nodes n ON n.slug = d.location_slug\\n        WHERE d.account_number=?\\n    ', (account_number,)).fetchall",
+        "conn.execute('\\n        SELECT d.device_id, d.client_public_key, d.location_slug, n.endpoint, n.ssh_host\\n        FROM devices d\\n        LEFT JOIN nodes n ON n.slug = d.location_slug\\n        WHERE d.account_number = ?\\n        ', (acc,)).fetchall",
+        "conn.execute('\\n        SELECT hub_order_id, subaddress, subaddress_index, plan_key, amount_atomic,\\n               referral_code, buyer_email, created_at, expires_at, status, lease_until\\n        FROM monero_orders WHERE hub_order_id=?\\n    ', (hub_order_id,)).fetchone",
+        "conn.execute('\\n        SELECT id, referrer_account_number, bonus_days\\n        FROM referral_rewards\\n        WHERE referred_account_number IN (?, ?) AND clawed_back_at IS NULL\\n        ', (referred_account_number, deleted_account_tombstone(referred_account_number))).fetchone",
+        "conn.execute('\\n        SELECT r.exit_slug AS exit_slug, r.relay_port AS relay_port, r.enabled AS enabled,\\n               r.updated_at AS updated_at, n.slug AS node_slug, n.retired_at AS retired_at\\n        FROM core_relay_exits r\\n        LEFT JOIN nodes n ON n.slug = r.exit_slug\\n        WHERE r.core_id = ? AND r.exit_slug != ?\\n        ', (core_id, slug)).fetchall",
+        "conn.execute(SERVABLE_NODES_SQL).fetchall",
+        "conn.execute(WINN3_JOB_ROW_SQL, (slug,)).fetchone",
+        "conn.execute(f\"SELECT account_number FROM users WHERE {' OR '.join(clauses)}\", tuple(parameters)).fetchall",
+        "conn.execute(f\"\\n            SELECT * FROM nodes\\n            WHERE status = 'online'\\n              AND management_status = 'ok'\\n              AND COALESCE(operator_enabled, 0) = 1\\n              AND retired_at IS NULL\\n              {free_clause}\\n            ORDER BY LOWER(name) ASC, LOWER(slug) ASC\\n        \").fetchall",
+        "conn.execute(f\"\\n        SELECT * FROM core_servers\\n        WHERE core_id = ?\\n          AND promoted = 1\\n          AND active_promotion_id IS NOT NULL\\n          AND {CORE_SELF_READY_SQL}\\n          AND EXISTS (\\n            SELECT 1 FROM nodes n\\n            WHERE n.status = 'online'\\n              AND n.management_status = 'ok'\\n              AND COALESCE(n.operator_enabled, 0) = 1\\n              AND n.retired_at IS NULL\\n              {DATA_PLANE_AVAILABLE_SQL_N}\\n              AND n.endpoint IS NOT NULL AND n.endpoint != ''\\n              AND n.public_key IS NOT NULL AND n.public_key != ''\\n          )\\n        \", (DOUBLE_VPN_CORE_ID, cutoff, cutoff, cutoff)).fetchone",
+        "conn.execute(f\"\\n        SELECT * FROM nodes\\n        WHERE status = 'online'\\n          AND management_status = 'ok'\\n          AND COALESCE(operator_enabled, 0) = 1\\n          AND retired_at IS NULL\\n          {data_plane_sql(platform)}\\n        ORDER BY LOWER(name) ASC, LOWER(slug) ASC\\n    \").fetchall",
+        "conn.execute(f\"\\n        SELECT * FROM nodes\\n        WHERE status = 'online'\\n          AND management_status = 'ok'\\n          AND COALESCE(operator_enabled, 0) = 1\\n          AND retired_at IS NULL\\n          {extra}\\n        ORDER BY LOWER(name) ASC, LOWER(slug) ASC\\n    \").fetchall",
+        "conn.execute(f'PRAGMA table_info({table})').fetchall",
+        "conn.execute(f'SELECT 1 FROM core_servers WHERE core_id = ? AND {CORE_SELF_READY_SQL}', (requested_core, cutoff, cutoff, cutoff)).fetchone",
+        "conn.execute(f'SELECT 1 FROM core_servers WHERE core_id=? AND {CORE_SELF_READY_SQL}', (core_id, cutoff, cutoff, cutoff)).fetchone",
+        "conn.execute(f'SELECT 1 FROM devices WHERE winn3_static_public = ? AND device_id NOT IN ({placeholders}) LIMIT 1', (public_key, *owners)).fetchone",
+        "conn.execute(f'SELECT hostname, path, subject_kind, subject_id, transaction_id, state FROM edge_plaintext_exceptions WHERE hostname = ? AND state IN ({placeholders})', (host, *EDGE_PINNING_EXCEPTION_STATES)).fetchall",
+        "conn.execute(f'SELECT slug FROM winn3_node_key_digests WHERE {column} = ? AND slug != ?', (digest, node_slug)).fetchone",
+        "conn.execute(f'\\n            SELECT ack_number, tax_year, kind, donor_name, donor_email, amount_total,\\n                   largest_single_gift, currency, gift_count, tier, ack_required,\\n                   quid_pro_quo, provider, render_status, delivery_status,\\n                   delivery_detail, delivery_attempts, delivered_at, issued_at\\n            FROM donation_acknowledgments {where}\\n            ORDER BY tax_year DESC, sequence DESC LIMIT 500\\n            ', tuple(args)).fetchall",
+        "connection.execute",
+        "connection.execute('PRAGMA journal_mode').fetchone",
+        "connection.execute('PRAGMA journal_mode').fetchone()[0].lower",
+        "connection.execute('SELECT 1 FROM sqlite_schema LIMIT 1').fetchall",
+        "evaluate_reopen_on_last_proof",
+        "evaluated.append",
+        "execute_account_deletion",
+        "ledger.execute",
+        "ledger.execute(\"SELECT 1 FROM winn3_publications WHERE node_slug=? AND gateway=? AND outcome='confirmed' AND started_at>=? AND finished_at<=? LIMIT 1\", (slug, gateway, since, now - WINN3_GATEWAY_REFRESH_SECONDS)).fetchone",
+        "ledger.execute(\"SELECT 1 FROM winn3_publications WHERE node_slug=? AND outcome='confirmed' AND started_at>=? AND finished_at<=? LIMIT 1\", (slug, since, now - WINN3_GATEWAY_REFRESH_SECONDS)).fetchone",
+        "ledger.execute(\"SELECT DISTINCT node_slug, gateway FROM winn3_publications WHERE gateway != ''\").fetchall",
+        "ledger.execute(\"SELECT p.seq, e.not_after FROM winn3_publication_entries e JOIN winn3_publications p ON p.seq = e.seq WHERE p.node_slug=? AND p.gateway=? AND p.outcome != 'refused'\", (slug, gateway)).fetchall",
+        "ledger.execute(\"SELECT seq, finished_at FROM winn3_publications WHERE node_slug=? AND gateway=? AND outcome='confirmed' ORDER BY seq DESC LIMIT 1\", (slug, gateway)).fetchone",
+        "ledger.execute(\"SELECT value FROM winn3_ledger_meta WHERE key='recovery_waived'\").fetchone",
+        "ledger.execute(\"SELECT value FROM winn3_ledger_meta WHERE key='seq_floor'\").fetchone",
+        "ledger.execute(\"\\n            SELECT p.node_slug, p.gateway, p.seq, e.not_after\\n            FROM winn3_publication_entries e\\n            JOIN winn3_publications p ON p.seq = e.seq\\n            WHERE e.static_public = ? AND p.outcome != 'refused'\\n            \", (key,)).fetchall",
+        "ledger.execute(\"\\n            SELECT p.node_slug, p.seq, p.outcome FROM winn3_publications p\\n            WHERE p.seq = (\\n                SELECT MAX(q.seq) FROM winn3_publications q\\n                WHERE q.node_slug = p.node_slug AND q.outcome != 'refused'\\n            )\\n            \").fetchall",
+        "ledger.execute('SELECT 1 FROM winn3_journal_reads WHERE node_slug=? AND gateway=? AND recovery_since=? AND read_at>=? LIMIT 1', (slug, host, since, seen)).fetchone",
+        "ledger.execute('SELECT COALESCE(MAX(seq), 0) FROM winn3_publications').fetchone",
+        "ledger.execute('SELECT MAX(COALESCE(finished_at, started_at)) FROM winn3_publications WHERE node_slug=? AND gateway=?', (slug, gateway)).fetchone",
+        "ledger.execute('SELECT charge_id, charged_at, key_id, token FROM winn3_observed_charges WHERE charged_at>?', (horizon,)).fetchall",
+        "ledger.execute('SELECT gateway FROM winn3_publications WHERE node_slug=? ORDER BY seq DESC LIMIT 1', (slug,)).fetchone",
+        "ledger.execute('SELECT o.key_id, o.charged_at FROM winn3_observed_charges o WHERE o.charged_at>? AND NOT EXISTS (SELECT 1 FROM winn3_departure_charges c WHERE c.charge_id=o.charge_id)', (now - WINN3_DEPARTURE_LEDGER_SECONDS,)).fetchall",
+        "ledger.execute('SELECT seq, outcome FROM winn3_publications WHERE node_slug = ? AND gateway = ? ORDER BY seq DESC LIMIT 1', (slug, gateway)).fetchone",
+        "ready_conn.execute",
+        "ready_conn.execute('\\n                SELECT a.applied_revision, a.runtime_validated_at, a.status,\\n                       c.runtime_ready, c.status AS core_status,\\n                       c.last_heartbeat, c.runtime_checked_at\\n                FROM double_vpn_assignments a\\n                JOIN core_servers c ON c.core_id = a.core_id\\n                WHERE a.core_id = ? AND a.device_id = ?\\n                ', (core_id, device_id)).fetchone",
+        "registry_conn.execute",
+        "remote_awg_exec_command",
+        "route_conn.execute",
+        "route_conn.execute('SELECT location_slug FROM devices WHERE device_id = ?', (synthetic_device_id,)).fetchone",
+        "subprocess.CalledProcessError",
+        "subprocess.CompletedProcess",
+        "subprocess.Popen",
+        "subprocess.TimeoutExpired",
+        "subprocess.check_output",
+        "subprocess.check_output(['wg', 'genkey']).decode",
+        "subprocess.check_output(['wg', 'genkey']).decode().strip",
+        "subprocess.check_output(['wg', 'genpsk']).decode",
+        "subprocess.check_output(['wg', 'genpsk']).decode().strip",
+        "subprocess.run",
+        "subprocess.run(['wg', 'pubkey'], input=private_key.encode(), capture_output=True, check=True).stdout.decode",
+        "subprocess.run(['wg', 'pubkey'], input=private_key.encode(), capture_output=True, check=True).stdout.decode().strip"
+      ],
+      "target": "${APP_DIR}/main.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "handle.read",
+        "handle.read().splitlines",
+        "open",
+        "open_window",
+        "os.unlink"
+      ],
+      "imports": [
+        "collections",
+        "ipaddress",
+        "os",
+        "secrets",
+        "shutil",
+        "socket",
+        "struct",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 47158,
+      "subprocesses": [
+        "subprocess.run"
+      ],
+      "target": "/usr/local/lib/wins_hub_spa_window.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "atomic_write",
+        "handle.read",
+        "handle.read().splitlines",
+        "handle.write",
+        "hashlib.sha256(handle.read()).hexdigest",
+        "open",
+        "os.fdopen",
+        "os.open",
+        "os.replace",
+        "os.unlink",
+        "read_config_file",
+        "read_config_file('ticket-epoch').strip",
+        "read_ledger",
+        "read_request",
+        "sqlite3.connect",
+        "sys.stderr.write",
+        "threading.local",
+        "write_ledger",
+        "write_pending_marker",
+        "write_private"
+      ],
+      "imports": [
+        "base64",
+        "binascii",
+        "errno",
+        "fcntl",
+        "hashlib",
+        "ipaddress",
+        "json",
+        "os",
+        "pwd",
+        "re",
+        "signal",
+        "socket",
+        "sqlite3",
+        "struct",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "time"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 47518,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute('SELECT slug, winn3_descriptor_json, winn3_admission_json FROM nodes').fetchall",
+        "subprocess.run"
+      ],
+      "target": "/usr/local/lib/wins_descriptor_signer.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "body.replace",
+        "handle.read",
+        "open"
+      ],
+      "imports": [
+        "email.mime.text",
+        "re",
+        "smtplib",
+        "ssl",
+        "sys"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 49243,
+      "subprocesses": [],
+      "target": "/usr/local/lib/wins_descriptor_signer_digest_mail.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "backup.write_text",
+        "rule_path.read_text",
+        "rule_path.read_text(encoding='utf-8', errors='ignore').splitlines",
+        "rule_path.write_text"
+      ],
+      "imports": [
+        "pathlib",
+        "re",
+        "sys"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 52170,
+      "subprocesses": [],
+      "target": "/usr/local/bin/wins-suricata-prune-rules",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 52437,
+      "subprocesses": [],
+      "target": "/usr/local/bin/wins-suricata-action-policy",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "ENV.get('SECURITY_TRIAGE_PRESENT_PRODUCTS', 'nginx,fastapi,openssh,suricata').split",
+        "EVENTS_DB.parent.mkdir",
+        "path.read_text",
+        "path.read_text(encoding='utf-8', errors='ignore').splitlines",
+        "sqlite3.connect",
+        "str(raw or '').replace",
+        "str(raw or '').replace(',', ' ').split",
+        "value[1:-1].replace"
+      ],
+      "imports": [
+        "argparse",
+        "contextlib",
+        "datetime",
+        "ipaddress",
+        "json",
+        "os",
+        "pathlib",
+        "sqlite3"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 52599,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute(\"\\n            SELECT COALESCE(triage_label, 'unclassified'), COUNT(*)\\n            FROM security_events WHERE observed_at_utc >= ?\\n            GROUP BY COALESCE(triage_label, 'unclassified') ORDER BY COUNT(*) DESC\\n        \", (cutoff,)).fetchall",
+        "conn.execute(\"\\n            SELECT COUNT(*) FROM security_events\\n            WHERE observed_at_utc >= ? AND COALESCE(triage_label, 'needs_review')='needs_review'\\n        \", (cutoff,)).fetchone",
+        "conn.execute(\"\\n            SELECT event_id, priority, event_type, source_ip, details_json\\n            FROM security_events\\n            WHERE COALESCE(triage_feedback_state, '') NOT LIKE 'human_confirmed:%'\\n              AND (\\n                    triage_label IS NULL OR trim(triage_label) = ''\\n                    OR triage_model_version IS NULL OR trim(triage_model_version) = ''\\n                    OR (? = 1 AND triage_model_version != ?)\\n              )\\n            ORDER BY id ASC LIMIT ?\\n        \", (1 if include_stale else 0, MODEL_VERSION, bounded_limit)).fetchall",
+        "conn.execute('PRAGMA journal_mode=WAL').fetchone",
+        "conn.execute('SELECT event_type, details_json FROM security_events WHERE event_id=?', (event_id,)).fetchone",
+        "conn.execute('\\n            SELECT event_id, observed_at_utc, priority, event_type, source_ip_bucket,\\n                   triage_label, triage_score, triage_confidence, triage_feedback_state,\\n                   email_status\\n            FROM security_events\\n            ORDER BY id DESC LIMIT ?\\n        ', (max(1, min(limit, 500)),)).fetchall",
+        "conn.executemany"
+      ],
+      "target": "/usr/local/lib/wins_threat_triage.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [],
+      "imports": [
+        "sys",
+        "wins_threat_triage"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 53100,
+      "subprocesses": [],
+      "target": "/usr/local/bin/wins-threat-triage",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "EVE_PATH.open",
+        "Path(temporary).unlink",
+        "SECURITY_EVENTS_DB.parent.mkdir",
+        "STATE_DIR.mkdir",
+        "identity_path.read_text",
+        "identity_path.read_text(encoding='utf-8').strip",
+        "offset_path.read_text",
+        "offset_path.read_text(encoding='utf-8').strip",
+        "os.fdopen",
+        "os.open",
+        "os.replace",
+        "path.read_text",
+        "path.read_text(encoding='utf-8').strip",
+        "path.read_text(encoding='utf-8', errors='ignore').splitlines",
+        "sqlite3.connect",
+        "state_path.read_text",
+        "state_path.read_text(encoding='utf-8').strip",
+        "stream.write",
+        "value[1:-1].replace",
+        "write_journal_cursor"
+      ],
+      "imports": [
+        "contextlib",
+        "datetime",
+        "email.mime.text",
+        "hashlib",
+        "hmac",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "smtplib",
+        "sqlite3",
+        "ssl",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time",
+        "wins_threat_triage",
+        "zoneinfo"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 53172,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute('PRAGMA journal_mode=WAL').fetchone",
+        "conn.execute('SELECT 1 FROM security_event_migrations WHERE migration_id=?', (migration_id,)).fetchone",
+        "conn.execute('SELECT id, request_path, details_json FROM security_events').fetchall",
+        "conn.execute('\\n                SELECT triage_label, triage_score, triage_confidence, triage_reasons\\n                FROM security_events WHERE event_id=?\\n            ', (event_id,)).fetchone",
+        "subprocess.run"
+      ],
+      "target": "/usr/local/bin/wins-security-alert-monitor",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "cmdline.decode('utf-8', 'replace').split",
+        "data.decode('utf-8', 'replace').splitlines",
+        "handle.read",
+        "open",
+        "os.readlink",
+        "self.read_bytes",
+        "self.read_bytes(path).decode",
+        "self.read_text",
+        "self.read_text('/etc/passwd').splitlines",
+        "self.read_text('/etc/shadow').splitlines",
+        "self.read_text('/proc/sys/kernel/random/boot_id').strip",
+        "self.read_text('/proc/uptime').split",
+        "sys.stderr.write",
+        "sys.stdout.write",
+        "template.replace",
+        "template.replace('%%', '\\x00').replace",
+        "template.replace('%%', '\\x00').replace('%h', home).replace",
+        "template.replace('%%', '\\x00').replace('%h', home).replace('%u', row['name']).replace",
+        "template.replace('%%', '\\x00').replace('%h', home).replace('%u', row['name']).replace('%U', row['uid']).replace"
+      ],
+      "imports": [
+        "base64",
+        "glob",
+        "hashlib",
+        "json",
+        "os",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 53983,
+      "subprocesses": [
+        "subprocess.run"
+      ],
+      "target": "/usr/local/lib/wins-attest-collect.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "(read_json(path, {}) or {}).get",
+        "(st.get('open') or {}).items",
+        "concurrent.futures.ThreadPoolExecutor",
+        "handle.write",
+        "hb.replace",
+        "open",
+        "open('/etc/winsvpn/attest-targets', encoding='utf-8').read",
+        "open('/etc/winsvpn/attest-targets', encoding='utf-8').read().splitlines",
+        "open(path, encoding='utf-8').read",
+        "open(path, encoding='utf-8').read().splitlines",
+        "open(self.collector, encoding='utf-8').read",
+        "opens.items",
+        "opens.values",
+        "os.fdopen",
+        "os.read",
+        "os.replace",
+        "os.unlink",
+        "read_json",
+        "ready.get_map",
+        "ready.register",
+        "ready.select",
+        "ready.unregister",
+        "source.write",
+        "sqlite3.connect",
+        "st.get('open', {}).items",
+        "st['open'].get",
+        "st['open'].pop",
+        "str(heartbeat).replace",
+        "subprocess.Popen",
+        "sys.stderr.write",
+        "sys.stdout.write",
+        "value[1:-1].replace",
+        "write_json"
+      ],
+      "imports": [
+        "argparse",
+        "concurrent.futures",
+        "datetime",
+        "email.message",
+        "email.utils",
+        "fcntl",
+        "hashlib",
+        "ipaddress",
+        "json",
+        "os",
+        "re",
+        "secrets",
+        "selectors",
+        "signal",
+        "smtplib",
+        "sqlite3",
+        "ssl",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 54414,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute('SELECT slug, ssh_host, last_heartbeat, retired_at FROM nodes').fetchall",
+        "self.evaluate",
+        "subprocess.CompletedProcess",
+        "subprocess.Popen",
+        "subprocess.TimeoutExpired",
+        "subprocess.run",
+        "subprocess.run(['systemctl', 'is-active', timer], capture_output=True, text=True).stdout.strip"
+      ],
+      "target": "/usr/local/sbin/wins-fleet-attest",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "path.read_text",
+        "path.read_text(encoding='utf-8', errors='ignore').splitlines",
+        "sqlite3.connect",
+        "value[1:-1].replace"
+      ],
+      "imports": [
+        "argparse",
+        "datetime",
+        "hashlib",
+        "hmac",
+        "json",
+        "os",
+        "pathlib",
+        "sqlite3",
+        "sys"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 55858,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute(\"\\n                SELECT LENGTH(source_ip_bucket) AS width, COUNT(*) AS n\\n                FROM security_events\\n                WHERE observed_at_utc >= ?\\n                  AND source_ip_bucket IS NOT NULL AND source_ip_bucket != ''\\n                GROUP BY width ORDER BY width\\n            \", (cutoff,)).fetchall",
+        "conn.execute('PRAGMA journal_mode=WAL').fetchone",
+        "conn.execute(f\"\\n            SELECT observed_at_eastern, priority, event_type, source_ip_bucket, request_path,\\n                   email_status, event_id, details_json\\n            FROM security_events\\n            WHERE {' AND '.join(where)}\\n            ORDER BY observed_at_utc DESC\\n            LIMIT ?\\n        \", params).fetchall"
+      ],
+      "target": "/usr/local/bin/wins-security-events",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 56076,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-paypal-sync",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 56147,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-monero-poll",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "database path supplied as data"
+      ],
+      "file_operations": [
+        "(datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=HARD_STALE_MINUTES)).isoformat",
+        "(datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=GREEN_HEARTBEAT_MAX_AGE_SECONDS)).isoformat",
+        "client.ready",
+        "datetime.now(timezone.utc).replace",
+        "datetime.now(timezone.utc).replace(tzinfo=None).isoformat",
+        "detail.replace",
+        "handle.read",
+        "handle.read().strip",
+        "open",
+        "proc.stdout.readline",
+        "read_carry_private_key",
+        "ready.is_set",
+        "ready.set",
+        "ready.wait",
+        "self._read_frame",
+        "self.proc.stdin.write",
+        "self.ready",
+        "self.threads.append",
+        "sqlite3.connect",
+        "subprocess.Popen",
+        "then.astimezone(timezone.utc).replace",
+        "thread.join",
+        "thread.start",
+        "threading.Event",
+        "threading.Lock",
+        "threading.Thread",
+        "threading.Thread(target=self._read, args=(proc, self.replies), daemon=True).start",
+        "threading.local"
+      ],
+      "imports": [
+        "__future__",
+        "argparse",
+        "base64",
+        "datetime",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "queue",
+        "re",
+        "secrets",
+        "signal",
+        "socket",
+        "sqlite3",
+        "ssl",
+        "struct",
+        "subprocess",
+        "sys",
+        "threading",
+        "time",
+        "uuid"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 56744,
+      "subprocesses": [
+        "conn.execute",
+        "conn.execute('SELECT * FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute('SELECT operator_enabled, data_plane_status, data_plane_ok_at, data_plane_udp_status, data_plane_udp_fail_streak, data_plane_udp_ok_at, data_plane_stealth_status, data_plane_stealth_fail_streak, data_plane_stealth_ok_at, data_plane_stealth_tls_status, data_plane_stealth_tls_fail_streak, data_plane_stealth_tls_ok_at, data_plane_probe_error_streak, data_plane_green_streak, data_plane_green_since, status, last_heartbeat FROM nodes WHERE slug = ?', (slug,)).fetchone",
+        "conn.execute(query, params).fetchall",
+        "subprocess.Popen",
+        "subprocess.run"
+      ],
+      "target": "/usr/local/lib/wins_node_dataplane_probe.py",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 58733,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-redemption-outbox",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 58783,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-donor-ack-outbox",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 58829,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-hoppy-agent-outbox",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "file_operations": [
+        "chmod",
+        "find",
+        "install",
+        "rm",
+        "source"
+      ],
+      "imports": [
+        "os, stat, sys"
+      ],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 58880,
+      "subprocesses": [
+        "iptables",
+        "python3",
+        "rclone",
+        "sqlite3",
+        "ssh",
+        "tar"
+      ],
+      "target": "/usr/local/bin/wins-hub-backup",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "find",
+        "install",
+        "rm",
+        "source",
+        "touch"
+      ],
+      "imports": [
+        "os, stat, sys"
+      ],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 59397,
+      "subprocesses": [
+        "python3",
+        "rclone",
+        "tar"
+      ],
+      "target": "/usr/local/bin/wins-hub-backup-prune",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "file_operations": [
+        "chmod",
+        "find",
+        "install",
+        "rm"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 59791,
+      "subprocesses": [
+        "python3",
+        "rclone",
+        "sqlite3"
+      ],
+      "target": "/usr/local/bin/wins-hub-backup-manifest",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "file_operations": [
+        "chmod",
+        "rm",
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 59840,
+      "subprocesses": [
+        "sqlite3"
+      ],
+      "target": "/usr/local/bin/wins-hub-db-snapshot",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "file_operations": [
+        "chmod",
+        "install",
+        "rm",
+        "touch"
+      ],
+      "imports": [
+        "sys",
+        "tarfile"
+      ],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 59935,
+      "subprocesses": [
+        "python3",
+        "tar"
+      ],
+      "target": "/usr/local/bin/wins-hub-restore-preflight",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "cp",
+        "install",
+        "mv",
+        "rm"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 60551,
+      "subprocesses": [
+        "curl",
+        "suricata-update",
+        "systemctl"
+      ],
+      "target": "/usr/local/bin/wins-suricata-update",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "chmod",
+        "rm",
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 60705,
+      "subprocesses": [
+        "curl"
+      ],
+      "target": "/usr/local/bin/wins-cloudflare-access-refresh",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "chmod",
+        "find",
+        "install",
+        "mkdir",
+        "mv",
+        "readlink",
+        "source",
+        "touch"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 60738,
+      "subprocesses": [
+        "apt-get",
+        "curl",
+        "logrotate",
+        "rclone",
+        "sqlite3",
+        "suricata-update",
+        "systemctl",
+        "tar"
+      ],
+      "target": "/usr/local/bin/wins-weekly-maintenance",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "hub API data",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "chmod",
+        "mkdir",
+        "mv",
+        "source",
+        "sqlite3.connect",
+        "touch"
+      ],
+      "imports": [
+        "base64",
+        "hashlib",
+        "hmac",
+        "os",
+        "pathlib",
+        "secrets",
+        "socket",
+        "sqlite3",
+        "sys",
+        "time"
+      ],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 61384,
+      "subprocesses": [
+        "curl",
+        "python3",
+        "sqlite3",
+        "ssh"
+      ],
+      "target": "/usr/local/bin/wins-gateway-canary",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "database path supplied as data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 61803,
+      "subprocesses": [
+        "python3"
+      ],
+      "target": "/usr/local/bin/wins-winn3-canary-requests",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "chmod",
+        "mkdir"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 61901,
+      "subprocesses": [
+        "rclone"
+      ],
+      "target": "/usr/local/bin/wins-rclone-config",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "database path supplied as data",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "file_operations": [
+        "Path(path).read_text",
+        "_ADMIN_NO_REDIRECT_OPENER.open",
+        "datetime.now(timezone.utc).replace",
+        "p.read_text",
+        "p.read_text(errors='ignore').splitlines",
+        "r.read",
+        "r.read().decode",
+        "sqlite3.connect",
+        "urllib.request.build_opener",
+        "v[1:-1].replace"
+      ],
+      "imports": [
+        "datetime",
+        "json",
+        "os",
+        "pathlib",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "interpreter": "#!/usr/bin/env python3",
+      "language": "python",
+      "line": 61920,
+      "subprocesses": [
+        "c.execute",
+        "c.execute('SELECT account_number,email,subscriber_name,status,expiration_date,created_at FROM users ORDER BY created_at DESC LIMIT 100').fetchall",
+        "c.execute('SELECT device_id,device_model,vpn_internal_ip,last_seen,location_slug FROM devices WHERE account_number=? ORDER BY last_seen DESC', (acc,)).fetchall",
+        "c.execute('SELECT slug,name,endpoint,stealth_endpoint,status,last_heartbeat,ssh_host,regional_aliases,rx_mbps,tx_mbps,awg_rx_bytes,awg_tx_bytes,peer_count,max_peers,free_access_enabled,direct_awg_enabled,operator_enabled FROM nodes ORDER BY LOWER(name) ASC, LOWER(slug) ASC').fetchall",
+        "subprocess.run"
+      ],
+      "target": "/usr/local/bin/wins-admin",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "chmod",
+        "install",
+        "mv",
+        "rm",
+        "source"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 63904,
+      "subprocesses": [],
+      "target": "/usr/local/sbin/wins-boot-integrity",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [],
+      "file_operations": [
+        "install",
+        "rm"
+      ],
+      "imports": [],
+      "interpreter": "#!/usr/bin/env bash",
+      "language": "shell",
+      "line": 64110,
+      "subprocesses": [],
+      "target": "/usr/local/sbin/wins-grub-superuser-guard",
+      "unresolved": "Runtime ownership, dependency closure and sandbox behavior require Tier A verification"
+    },
+    {
+      "data_consumers": [
+        "app database and canary bindings as data",
+        "root-owned environment",
+        "signed stored descriptor",
+        "private canary client key",
+        "slug-only requests"
+      ],
+      "file_operations": [
+        "sqlite3.connect: mode=ro and query_only",
+        "atomic result publication",
+        "slug-only request consume",
+        "per-slug rate-limit state"
+      ],
+      "imports": [
+        "__future__",
+        "argparse",
+        "base64",
+        "collections",
+        "concurrent.futures",
+        "contextlib",
+        "datetime",
+        "errno",
+        "fcntl",
+        "hashlib",
+        "ipaddress",
+        "json",
+        "logging",
+        "math",
+        "os",
+        "pathlib",
+        "re",
+        "secrets",
+        "signal",
+        "sqlite3",
+        "stat",
+        "subprocess",
+        "tempfile",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "interpreter": "/usr/bin/python3 -I",
+      "language": "python",
+      "line": 1,
+      "source_artifact": "wins_winn3_canary_runtime.py",
+      "source_sha256": "8b6d9d5f636ce71008e5eabe92438a8f6632d8e6a2477df2580a476ac262fce2",
+      "subprocesses": [
+        "subprocess.run: pinned winn3-probe"
+      ],
+      "target": "/usr/local/bin/wins-winn3-canary-runtime.py",
+      "unresolved": "Runtime ownership and mount namespace require Tier A verification"
+    }
+  ],
+  "other_entrypoints": [
+    {
+      "handling": "root ownership and link-target checks; no-write syntax validation",
+      "inputs": [
+        "root-only requirements lock",
+        "read-only venv"
+      ],
+      "target": "installer:setup_python"
+    },
+    {
+      "handling": "system Python -I -S compile without writing bytecode",
+      "inputs": [
+        "app source as data"
+      ],
+      "target": "installer:postflight_control"
+    },
+    {
+      "handling": "synchronous sandboxed prepublication unit",
+      "inputs": [
+        "hub API and app database"
+      ],
+      "target": "installer:run_prepublication_gateway_canary"
+    },
+    {
+      "handling": "synchronous sandboxed regular canary unit",
+      "inputs": [
+        "hub API and app database"
+      ],
+      "target": "maintenance:gateway-canary"
+    },
+    {
+      "handling": "fixed iptables deletion argv; systemd timer custody; CAP_NET_ADMIN helper",
+      "inputs": [
+        "canonical IPv4 and bounded lease identifier"
+      ],
+      "target": "dynamic:SPA-expiry"
+    },
+    {
+      "handling": "root-owned expiry helper; runtime sshd policy still requires verification",
+      "inputs": [
+        "installer-owned account and expiry"
+      ],
+      "target": "dynamic:SSH-recovery-expiry"
+    },
+    {
+      "handling": "distribution logrotate app entry removed; remaining host jobs and plugins must be inspected in Tier A; no host contact in this lane",
+      "inputs": [
+        "logrotate, backup/restore tools, apt, Fail2Ban and Suricata"
+      ],
+      "target": "host:distribution-jobs"
+    }
+  ],
+  "scope": "all generated service execution directives and helpers, plus installer and dynamic jobs",
+  "source_sha256": "26b3344f1688f0add633ca4a4c375568067fc4d9d5bb8730372c00387ec5285a",
+  "units": [
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-performance-mode"
+        ]
+      },
+      "line": 3660,
+      "linked_helpers": [
+        "/usr/local/bin/wins-performance-mode"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-performance-mode.service"
+    },
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-dmcrypt-performance"
+        ]
+      },
+      "line": 3707,
+      "linked_helpers": [
+        "/usr/local/bin/wins-dmcrypt-performance"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-dmcrypt-performance.service"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/cloudflared --no-autoupdate tunnel run --token-file ${token_file}"
+        ]
+      },
+      "line": 6132,
+      "linked_helpers": [],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "${service_file}"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/cloudflared tunnel --config ${config_file} run"
+        ]
+      },
+      "line": 6262,
+      "linked_helpers": [],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "${work}/unit"
+    },
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_hub_spa_window.py"
+        ]
+      },
+      "line": 47302,
+      "linked_helpers": [
+        "/usr/local/lib/wins_hub_spa_window.py"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          "CAP_NET_ADMIN"
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/run/wins-hub-spa-window /run/xtables.lock"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-hub-spa-window.service"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/sbin/logrotate --state /var/lib/wins-hub-logrotate/status /etc/winsvpn/wins-hub-logrotate.conf"
+        ]
+      },
+      "line": 47390,
+      "linked_helpers": [],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateNetwork": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/log/winsvpn /var/lib/wins-hub-logrotate"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-hub-logrotate.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_descriptor_signer.py serve"
+        ]
+      },
+      "line": 49335,
+      "linked_helpers": [
+        "/usr/local/lib/wins_descriptor_signer.py"
+      ],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "/etc/winsvpn/descriptor-signer"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateNetwork": [
+          "yes"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/etc/winsvpn:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-descriptor-signer.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_descriptor_signer.py digest"
+        ]
+      },
+      "line": 49382,
+      "linked_helpers": [
+        "/usr/local/lib/wins_descriptor_signer.py"
+      ],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "-/etc/winsvpn/hub-key-history -/etc/winsvpn/operator-ssh-keys -/etc/winsvpn/descriptor-signer/RECOVERY-PENDING"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateNetwork": [
+          "yes"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-descriptor-signer-digest"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/etc/winsvpn:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-descriptor-signer-digest.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_descriptor_signer_digest_mail.py"
+        ]
+      },
+      "line": 49424,
+      "linked_helpers": [
+        "/usr/local/lib/wins_descriptor_signer_digest_mail.py"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-descriptor-signer-digest-mail.service"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "${VENV_DIR}/bin/python -m uvicorn main:app --host ${bind_host} --port 8000 --no-access-log"
+        ]
+      },
+      "line": 49639,
+      "linked_helpers": [],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "/run/litestream /run/wins-hub-spa-window /run/wins-descriptor-signer",
+          "-/run/systemd/resolve/stub-resolv.conf -/run/systemd/resolve/resolv.conf"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadOnlyPaths": [
+          "${VENV_DIR}",
+          "${APP_DIR}/main.py",
+          "/var/lib/wins-canary-results"
+        ],
+        "ReadWritePaths": [
+          "${APP_DIR} /var/lib/wins-hub-ssh /var/lib/wins-site-ai-tunnel /var/lib/wins-security-alerts /var/log/winsvpn",
+          "/var/lib/wins-canary-requests"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/run:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "${SERVICE_FILE}"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "${ssh_recovery_disable_helper}"
+        ]
+      },
+      "line": 49872,
+      "linked_helpers": [],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "${ssh_recovery_service}"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "",
+          "/usr/bin/suricata -D --pidfile /run/suricata.pid -q 0 -c /etc/suricata/suricata.yaml"
+        ],
+        "ExecStartPre": [
+          "/bin/rm -f /var/run/suricata/suricata-command.socket"
+        ]
+      },
+      "line": 52490,
+      "linked_helpers": [],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/suricata.service.d/30-wins-inline-ips.conf"
+    },
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-threat-triage report --hours 24"
+        ]
+      },
+      "line": 53111,
+      "linked_helpers": [
+        "/usr/local/bin/wins-threat-triage"
+      ],
+      "sandbox": {
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-security-alerts"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-threat-triage-report.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-security-alert-monitor"
+        ]
+      },
+      "line": 53889,
+      "linked_helpers": [
+        "/usr/local/bin/wins-security-alert-monitor"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          "CAP_DAC_READ_SEARCH"
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-security-alerts"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-security-alert-monitor.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/sbin/wins-fleet-attest --role hub run"
+        ]
+      },
+      "line": 55583,
+      "linked_helpers": [
+        "/usr/local/sbin/wins-fleet-attest"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          "CAP_DAC_READ_SEARCH"
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-fleet-attest /root/vpn_auth"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-fleet-attest.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/sbin/wins-fleet-attest --role hub watchdog"
+        ]
+      },
+      "line": 55623,
+      "linked_helpers": [
+        "/usr/local/sbin/wins-fleet-attest"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-fleet-attest"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-alert-watchdog.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/sbin/wins-fleet-attest --role hub digest"
+        ]
+      },
+      "line": 55658,
+      "linked_helpers": [
+        "/usr/local/sbin/wins-fleet-attest"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-fleet-attest"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-fleet-attest-digest.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-paypal-sync"
+        ]
+      },
+      "line": 56094,
+      "linked_helpers": [
+        "/usr/local/bin/wins-paypal-sync"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-paypal-sync.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-monero-poll"
+        ]
+      },
+      "line": 56163,
+      "linked_helpers": [
+        "/usr/local/bin/wins-monero-poll"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-monero-poll.service"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "${bin} replicate"
+        ],
+        "ExecStartPre": [
+          "+/bin/mkdir -p /run/litestream"
+        ]
+      },
+      "line": 56652,
+      "linked_helpers": [],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/root/vpn_auth /run/litestream"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/litestream.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "database path supplied as data"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_node_dataplane_probe.py"
+        ]
+      },
+      "line": 58583,
+      "linked_helpers": [
+        "/usr/local/lib/wins_node_dataplane_probe.py"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/root/vpn_auth -/root/.ssh/cm-probe"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-dataplane-probe.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "database path supplied as data"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/bin/python3 -I /usr/local/lib/wins_node_dataplane_probe.py --carry"
+        ]
+      },
+      "line": 58648,
+      "linked_helpers": [
+        "/usr/local/lib/wins_node_dataplane_probe.py"
+      ],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "-/run/systemd/resolve/stub-resolv.conf -/run/systemd/resolve/resolv.conf"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/root/vpn_auth"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/run:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-awg-carry-probe.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-redemption-outbox"
+        ]
+      },
+      "line": 58749,
+      "linked_helpers": [
+        "/usr/local/bin/wins-redemption-outbox"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-redemption-outbox.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-donor-ack-outbox"
+        ]
+      },
+      "line": 58795,
+      "linked_helpers": [
+        "/usr/local/bin/wins-donor-ack-outbox"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-donor-ack-outbox.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-hoppy-agent-outbox"
+        ]
+      },
+      "line": 58845,
+      "linked_helpers": [
+        "/usr/local/bin/wins-hoppy-agent-outbox"
+      ],
+      "sandbox": {},
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-hoppy-agent-outbox.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-hub-db-snapshot"
+        ]
+      },
+      "line": 60204,
+      "linked_helpers": [
+        "/usr/local/bin/wins-hub-db-snapshot"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadOnlyPaths": [
+          "-/root/vpn_auth/main.py -/root/vpn_auth/managed_known_hosts -/root/vpn_auth/venv"
+        ],
+        "ReadWritePaths": [
+          "/root/vpn_auth /run/wins-hub-db-snapshot"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-hub-db-snapshot.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-hub-backup"
+        ]
+      },
+      "line": 60228,
+      "linked_helpers": [
+        "/usr/local/bin/wins-hub-backup"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/run /var/backups/winsvpn /var/backups/winsvpn-manifests /root/.config/rclone"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-hub-backup.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-hub-backup-prune"
+        ]
+      },
+      "line": 60271,
+      "linked_helpers": [
+        "/usr/local/bin/wins-hub-backup",
+        "/usr/local/bin/wins-hub-backup-prune"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/run /var/backups/winsvpn /var/backups/winsvpn-manifests /root/.config/rclone"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-hub-backup-prune.service"
+    },
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-suricata-update"
+        ]
+      },
+      "line": 60666,
+      "linked_helpers": [
+        "/usr/local/bin/wins-suricata-update"
+      ],
+      "sandbox": {
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "full"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/suricata /var/log/suricata /run"
+        ]
+      },
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-suricata-update.service"
+    },
+    {
+      "data_consumers": [
+        "app database, source or state",
+        "hub API data",
+        "logs including app-controlled messages",
+        "root-owned environment, executable shell input"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-weekly-maintenance"
+        ]
+      },
+      "line": 61234,
+      "linked_helpers": [
+        "/usr/local/bin/wins-weekly-maintenance"
+      ],
+      "sandbox": {
+        "PrivateTmp": [
+          "true"
+        ]
+      },
+      "status": "profile incomplete or host-dependent; H1 prerequisite remains unverified",
+      "target": "/etc/systemd/system/wins-weekly-maintenance.service"
+    },
+    {
+      "data_consumers": [
+        "app database and canary bindings as data",
+        "app database, source or state",
+        "app-controlled security event state",
+        "database path supplied as data",
+        "hub API data",
+        "logs including app-controlled messages",
+        "private canary client key",
+        "root-owned environment",
+        "root-owned environment, executable shell input",
+        "signed stored descriptor",
+        "slug-only requests"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-gateway-canary"
+        ]
+      },
+      "line": 61742,
+      "linked_helpers": [
+        "/usr/local/bin/wins-gateway-canary",
+        "/usr/local/bin/wins-winn3-canary-runtime.py"
+      ],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "-/run/systemd/resolve/stub-resolv.conf -/run/systemd/resolve/resolv.conf"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadOnlyPaths": [
+          "/root/vpn_auth"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-canary-results /var/lib/wins-canary-dispatch"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/run:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-gateway-canary.service"
+    },
+    {
+      "data_consumers": [
+        "app database and canary bindings as data",
+        "app database, source or state",
+        "database path supplied as data",
+        "private canary client key",
+        "root-owned environment",
+        "root-owned environment, executable shell input",
+        "signed stored descriptor",
+        "slug-only requests"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/wins-winn3-canary-requests"
+        ]
+      },
+      "line": 61813,
+      "linked_helpers": [
+        "/usr/local/bin/wins-winn3-canary-requests",
+        "/usr/local/bin/wins-winn3-canary-runtime.py"
+      ],
+      "sandbox": {
+        "BindReadOnlyPaths": [
+          "-/run/systemd/resolve/stub-resolv.conf -/run/systemd/resolve/resolv.conf"
+        ],
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateDevices": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectClock": [
+          "true"
+        ],
+        "ProtectControlGroups": [
+          "true"
+        ],
+        "ProtectHome": [
+          "read-only"
+        ],
+        "ProtectHostname": [
+          "true"
+        ],
+        "ProtectKernelLogs": [
+          "true"
+        ],
+        "ProtectKernelModules": [
+          "true"
+        ],
+        "ProtectKernelTunables": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadOnlyPaths": [
+          "/root/vpn_auth"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-canary-results /var/lib/wins-canary-dispatch /var/lib/wins-canary-requests"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "true"
+        ],
+        "RestrictRealtime": [
+          "true"
+        ],
+        "RestrictSUIDSGID": [
+          "true"
+        ],
+        "TemporaryFileSystem": [
+          "/run:ro"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-winn3-canary-requests.service"
+    },
+    {
+      "data_consumers": [],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/sbin/wins-boot-integrity check"
+        ]
+      },
+      "line": 64166,
+      "linked_helpers": [
+        "/usr/local/sbin/wins-boot-integrity"
+      ],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          ""
+        ],
+        "NoNewPrivileges": [
+          "true"
+        ],
+        "PrivateNetwork": [
+          "true"
+        ],
+        "PrivateTmp": [
+          "true"
+        ],
+        "ProtectHome": [
+          "true"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/wins-boot-integrity"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/wins-boot-integrity.service"
+    },
+    {
+      "data_consumers": [
+        "external executable or dynamic path; inspect runtime dependency and data closure"
+      ],
+      "exec": {
+        "ExecStart": [
+          "/usr/local/bin/winn-server \\"
+        ]
+      },
+      "line": 65018,
+      "linked_helpers": [],
+      "sandbox": {
+        "CapabilityBoundingSet": [
+          "CAP_NET_ADMIN"
+        ],
+        "NoNewPrivileges": [
+          "yes"
+        ],
+        "PrivateDevices": [
+          "yes"
+        ],
+        "PrivateMounts": [
+          "yes"
+        ],
+        "PrivateTmp": [
+          "yes"
+        ],
+        "ProtectClock": [
+          "yes"
+        ],
+        "ProtectControlGroups": [
+          "yes"
+        ],
+        "ProtectHome": [
+          "yes"
+        ],
+        "ProtectHostname": [
+          "yes"
+        ],
+        "ProtectKernelLogs": [
+          "yes"
+        ],
+        "ProtectKernelModules": [
+          "yes"
+        ],
+        "ProtectKernelTunables": [
+          "yes"
+        ],
+        "ProtectProc": [
+          "invisible"
+        ],
+        "ProtectSystem": [
+          "strict"
+        ],
+        "ReadWritePaths": [
+          "/var/lib/winn /var/log/winn /run/winn"
+        ],
+        "RestrictAddressFamilies": [
+          "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        ],
+        "RestrictNamespaces": [
+          "yes"
+        ],
+        "RestrictRealtime": [
+          "yes"
+        ],
+        "RestrictSUIDSGID": [
+          "yes"
+        ]
+      },
+      "status": "source profile present",
+      "target": "/etc/systemd/system/winn-server.service"
+    }
+  ]
+}

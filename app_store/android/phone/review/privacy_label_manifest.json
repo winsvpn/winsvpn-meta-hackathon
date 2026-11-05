@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-android-phone-privacy-label-v1",
+  "canonical_release": "1.0.16+33",
+  "application_id": "org.winsvpn.app",
+  "version_name": "1.0.16",
+  "version_code": 33,
+  "form_factor": "phone-tablet",
+  "privacy_policy_url": "https://www.winsvpn.org/privacy/",
+  "play_listing_name": "Win's VPN",
+  "application_label": "Calculator",
+  "internet_permission": true,
+  "vpn_service": true,
+  "query_all_packages": true,
+  "query_all_packages_status": "PENDING",
+  "camouflage": true,
+  "tracking": false,
+  "data_collected": true,
+  "data_shared": false,
+  "listing_screenshot_inventory": "owner-blocked",
+  "collected_categories": [
+    "device_or_other_ids",
+    "user_ids",
+    "email_address",
+    "approximate_location",
+    "purchase_history",
+    "app_info",
+    "diagnostics_if_sdk_report_proves"
+  ],
+  "not_collected": [
+    "browsing_history",
+    "dns_query_history",
+    "traffic_content",
+    "raw_vpn_traffic",
+    "destination_activity"
+  ],
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg"],
+    "required_local_engines": [
+      "libwinnengine.so",
+      "libam-go.so"
+    ],
+    "forbidden_local_engines": [
+      "libam.so",
+      "libam-quick.so",
+      "libxray.so"
+    ]
+  }
+}

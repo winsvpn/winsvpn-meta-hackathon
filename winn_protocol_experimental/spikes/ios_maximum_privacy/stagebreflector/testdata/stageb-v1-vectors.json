@@ -1,0 +1,30 @@
+{
+  "inputs_class": "deterministic-public-non-secret",
+  "protocol": "winn/3",
+  "public_test_key_base64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "reflector_now_unix_milliseconds": 1800000000000,
+  "reflector_received_unix_milliseconds": 1800000000001,
+  "reflector_sent_unix_milliseconds": 1800000000002,
+  "request_base64": "V0JSMwEBAAB3aW5uLzMQERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2OjwAAAAAAAAAHAAAAAAAAAAsAAAAAAAAADQAAAaMYXFAAAAABoxhccygAAAACGHEaAKChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/1pKbPtQtghBdHrghXg4VzTkroMjH5GxG3Dr4S7zMa8c=",
+  "request_input": {
+    "artifact_sha256_base64": "UFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm8=",
+    "attempt_nonce_base64": "ICEiIyQlJicoKSorLC0uLw==",
+    "canary_sequence": 13,
+    "challenge_base64": "oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8=",
+    "expires_at_unix_milliseconds": 1800000009000,
+    "issued_at_unix_milliseconds": 1800000000000,
+    "psk_generation": 7,
+    "request_sent_monotonic_nanoseconds": 9000000000,
+    "run_id_base64": "EBESExQVFhcYGRobHB0eHw==",
+    "sequence_epoch": 11,
+    "source_sha256_base64": "MDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk8=",
+    "wcf3_binding_id_base64": "gIGCg4SFhoeIiYqLjI2Ojw==",
+    "wcf3_session_id_base64": "cHFyc3R1dnd4eXp7fH1+fw=="
+  },
+  "request_sha256": "64801d4297902aaa23c2ba7e1606bbbfee6f84fc6cd3fd6d0ce24e3045771605",
+  "response_base64": "V0JSMwECAAB3aW5uLzMQERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2OjwAAAAAAAAAHAAAAAAAAAAsAAAAAAAAADQAAAaMYXFAAAAABoxhccygAAAACGHEaAKChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/1pKbPtQtghBdHrghXg4VzTkroMjH5GxG3Dr4S7zMa8cAAAGjGFxQAQAAAaMYXFAC1CtpHOMyLShjheYLp6NmqNzUSxS+irt6WP+djtp+Cfc=",
+  "response_sha256": "6fb4b95a69ee0b1dc0eaff90177e6ac645799121b7e910748fb52d186d569786",
+  "schema": "winn-stageb-reflector-vectors/1",
+  "scope": "local-conformance-only",
+  "wire_schema": "winn-stageb-reflector-wire/1"
+}

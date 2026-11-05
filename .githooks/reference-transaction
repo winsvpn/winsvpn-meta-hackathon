@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+case "${1:-}" in
+  prepared|preparing) ;;
+  *) exit 0 ;;
+esac
+
+freeze_ref=refs/winsvpn/deployment-audit-freeze
+protected_ref=refs/heads/main
+pinned=$(/usr/bin/git rev-parse --verify "${freeze_ref}^{commit}" 2>/dev/null) || exit 0
+
+while IFS=' ' read -r old_oid new_oid reference; do
+  [ -n "${old_oid}" ] && [ -n "${new_oid}" ] && [ -n "${reference}" ] || {
+    printf 'deployment audit freeze refused malformed reference transaction input\n' >&2
+    exit 1
+  }
+  if [ "${reference}" = "${protected_ref}" ] && [ "${new_oid}" != "${pinned}" ]; then
+    printf 'main is frozen at %s until the deployment audit verdict lands\n' "${pinned}" >&2
+    exit 1
+  fi
+done

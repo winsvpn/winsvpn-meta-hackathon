@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-windows-age-rating-v1",
+  "canonical_release": "1.0.17+34",
+  "product_version": "1.0.17",
+  "four_part_version": "1.0.17.34",
+  "pubspec_version": "1.0.17+34",
+  "identity_map": "docs/rulings/RELEASE_IDENTITY_MAP_20260824.json",
+  "status": "OWNER-BLOCKED: ABSENT",
+  "iarc_completed": false,
+  "partner_center_rating_approved": false,
+  "rating_value": "",
+  "notes": "Partner Center IARC or equivalent age-rating answers remain owner-held. This file does not invent a rating or claim questionnaire completion."
+}

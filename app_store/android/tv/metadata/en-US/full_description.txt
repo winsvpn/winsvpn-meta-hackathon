@@ -1,0 +1,14 @@
+Win's VPN is a user-initiated encrypted VPN for Android TV.
+
+This is the TV form factor of org.winsvpn.app, not a second package. Use a
+D-pad / Leanback remote. Do not treat phone touch screenshots as TV evidence.
+
+The tunnel uses Winn v3 as the product's primary protocol. Winn v1 AWG
+fallback is the compatibility path after a served Winn v3 attempt. A served
+Winn v3 lead attempt cannot be skipped.
+
+The TV flavor inherits QUERY_ALL_PACKAGES and exposes the same per-app picker
+named Exclude Apps From VPN (Split Tunneling). Calculator camouflage is
+disabled on TV. The application label is Win's VPN.
+
+Privacy policy: https://www.winsvpn.org/privacy/

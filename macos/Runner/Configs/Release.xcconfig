@@ -1,0 +1,6 @@
+#include "../../Flutter/Flutter-Release.xcconfig"
+#include "Warnings.xcconfig"
+// Reaches the PacketTunnel target's Release AND Profile configurations, both of
+// which use this file as their baseConfigurationReference. See Signing.xcconfig.
+#include "Signing.defaults.xcconfig"
+#include? "Signing.xcconfig"

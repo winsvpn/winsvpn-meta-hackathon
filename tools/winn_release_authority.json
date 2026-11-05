@@ -1,0 +1,7 @@
+{
+  "contract": "winsvpn-winn-release-authority-v1",
+  "algorithm": "ed25519",
+  "public_key": "fac60c882c05f585377dfb16f21e7be71b67bcb2c1539ca9d1d780ed491dd669",
+  "private_key_location": "~/.xprize/releasepython-v2-owner-20260903/authority-signing-key.pem (PKCS#8 PEM, mode 0600; backed up in the 2026-10-03 root keys archive)",
+  "note": "The owner's release authority key: the same Ed25519 key whose public half is key_id in /Library/WinsVPN/ReleasePythonAuthority/v2/authority.json. tools/winn_release.py verify trusts only this public key for Winn engine release manifests, and sign refuses any other key unless --allow-unpinned-key is given for a test key."
+}

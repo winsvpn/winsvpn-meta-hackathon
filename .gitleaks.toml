@@ -1,0 +1,45 @@
+# Allowlist for this public export. Every finding on the tree is a SHA-256
+# digest, a scanner regex, an identifier, an RFC example value or a synthetic
+# conformance fixture; the per-area triage is in docs/EXPORT_NOTES/.
+# No live secret is excluded here.
+title = "Win's VPN public tree"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "digests, scanner patterns, identifiers and synthetic fixtures"
+paths = [
+  '''(^|/)(test|tests|testdata|androidTest)/''',
+  '''_test\.(go|cc|cpp|dart|py|swift|kt)$''',
+  '''Test\.kt$''',
+  '''(^|/)test_[^/]*\.(py|sh)$''',
+  '''docs/''',
+  '''evidence/''',
+  '''tools/[^/]*secret[^/]*\.py$''',
+  '''tools/validate_release_artifact_privacy\.py$''',
+  '''server/winn3-probe\.build\.json$''',
+  '''localization/website/contract\.json$''',
+  '''winn_protocol_experimental/WINN_PROTOCOL_V3_SHARED_PROGRESS_MONITOR\.md$''',
+]
+regexes = [
+  '''[a-f0-9]{64}''',
+  '''AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=''',
+  '''dGhlIHNhbXBsZSBub25jZQ==''',
+  '''MDEyMzQ1Njc4OWFiY2RlZg==''',
+  '''0123456789abcdef''',
+  '''6f39a0c1d24b7e8f5a3c9012b4d6e8f01a2b3c4d5e''',
+  '''NmYzOWEwYzFkMjRiN2U4ZjVhM2M5MDEyYjRkNmU4ZjAxYTJiM2M0ZDVl''',
+  '''Curve25519\.KeyAgreement\.PrivateKey''',
+  '''ChaCha20-Poly1305''',
+  '''x25519-mlkem768''',
+  '''AES-256-GCM-vault''',
+  '''ED25519_SPKI_PREFIX''',
+  '''Winn3KeyCollisionLedger''',
+  '''winn3_(private_key|key_mismatch|served_private_key)''',
+  '''consumed_activation_key''',
+  '''max_bytes=65536''',
+  '''[A-Z_]+_DEFAULT="?''',
+  '''BEGIN PRIVATE KEY-----\\n"''',
+  '''<REDACTED_WG_KEY>''',
+]

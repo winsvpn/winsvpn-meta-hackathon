@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Vulnerability Disclosure Program | Win's VPN</title>
+  <meta name="description" content="Report a security vulnerability in Win's VPN. Safe harbour for good-faith research, clear scope, and public credit for valid findings.">
+  <link rel="canonical" href="https://www.winsvpn.org/vdp/">
+  <link rel="stylesheet" href="/vdp/vdp.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="page">
+      <h1>Vulnerability Disclosure Program</h1>
+      <p class="lede">Win's VPN is used by people for whom a security failure is not an inconvenience.
+      If you have found a weakness in our software or infrastructure, we want to hear from you, and we
+      will not take legal action against you for telling us.</p>
+      <p class="vdp-status"><strong>Owner approved August 31, 2026. Counsel review pending.</strong> This marking does not state or imply that counsel has reviewed this policy.</p>
+    </header>
+
+    <div class="panel safe">
+      <h2 class="flush-top">Safe harbour</h2>
+      <p>If you make a good-faith effort to follow this policy while researching a vulnerability, we
+      will consider your research authorised, we will work with you to understand and fix the issue
+      quickly, and <strong>we will not initiate or support legal action against you</strong>.</p>
+      <p>If a third party brings legal action against you for research that complied with this policy,
+      we will make it known that your activity was authorised.</p>
+      <p class="muted">Act in good faith and stay in scope, and this protection applies. It does not
+      cover accessing other people's data, degrading the service for real users, or extortion.</p>
+    </div>
+
+    <h2>How to report</h2>
+    <p>Email your report to <a href="mailto:security@winsvpn.org">security@winsvpn.org</a>. The
+    machine-readable security contact is also published in
+    <a href="/.well-known/security.txt">security.txt</a>.</p>
+
+    <p class="panel"><strong>Include only what is needed to explain the issue.</strong> Tell us what
+    the issue is and why it matters, give clear reproduction steps or a short proof of concept, name
+    the affected component and version, and say how you would like to be credited or that you prefer
+    to remain anonymous.</p>
+
+    <p class="muted">Please include:</p>
+    <ul>
+      <li>What the issue is and why it matters — the impact, not just the observation.</li>
+      <li>Clear reproduction steps or a short proof of concept.</li>
+      <li>Affected component and version — app build number, endpoint, or server role.</li>
+      <li>How you would like to be credited, or if you would prefer to remain anonymous.</li>
+    </ul>
+    <p>Our machine-readable policy pointer is at
+    <a href="/.well-known/security.txt"><code>/.well-known/security.txt</code></a>.</p>
+
+    <h2>What you can expect from us</h2>
+    <ul>
+      <li><strong>Acknowledgement within 5 business days, as a target.</strong> These are operational
+      targets, not guaranteed response times. We are a small nonprofit, not a 24/7 security team.</li>
+      <li><strong>An assessment and our intended action within 15 business days, as a target.</strong></li>
+      <li><strong>Progress updates</strong> until the issue is resolved or we explain why we are not
+      acting on it.</li>
+      <li><strong>Public credit</strong> when a fix ships, if you want it.</li>
+    </ul>
+
+    <div class="panel warn">
+      <h3 class="flush-top">On rewards — an honest answer</h3>
+      <p>We do not currently pay bounties. Win's VPN Inc. is a nonprofit; our funds go to keeping free
+      access running for people under censorship. We offer public credit, a written reference if it
+      helps your career, and a free lifetime premium pass for a valid report. Here,
+      &ldquo;lifetime&rdquo; means ten years of account validity, not the life of the recipient or service.</p>
+      <p>We would rather say this plainly than let you spend a weekend expecting a payment that is not
+      coming. If a paid programme becomes possible, this page will say so.</p>
+    </div>
+
+    <h2>Scope</h2>
+    <h3>In scope</h3>
+    <ul>
+      <li><code>winsvpn.org</code> and its subdomains</li>
+      <li>The Win's VPN client applications</li>
+      <li>The Win For All application</li>
+      <li>Our control-plane API endpoints</li>
+      <li>Our VPN node infrastructure — subject to the user-safety rules below</li>
+    </ul>
+
+    <h3>Out of scope</h3>
+    <ul>
+      <li>Findings from automated scanners without a demonstrated, exploitable impact</li>
+      <li>Missing security headers, cookie flags, or TLS configuration preferences with no
+      demonstrated exploit</li>
+      <li>Self-XSS, clickjacking on pages without sensitive actions, and issues requiring a rooted or
+      already-compromised device</li>
+      <li>Rate limiting on endpoints that do not handle credentials</li>
+      <li>Social engineering of our staff, partners, or users</li>
+      <li>Physical attacks against our offices or hardware</li>
+      <li>Denial of service, volumetric testing, or anything that degrades availability</li>
+      <li>Vulnerabilities in third-party services we use but do not control</li>
+    </ul>
+
+    <div class="panel warn">
+      <h2 class="flush-top">Rules that exist because of who our users are</h2>
+      <p>Many of our users are journalists, activists and ordinary people living under censorship,
+      where being identified as a VPN user carries real physical risk. Testing that would be merely
+      rude against a normal service can put a person in danger here. So:</p>
+      <ul>
+        <li><strong>Test only against your own account and your own traffic.</strong> Never attempt to
+        access, intercept, or deanonymise another user's connection, traffic, or account.</li>
+        <li><strong>Never run availability-affecting tests against production.</strong> If a node goes
+        down, someone loses their only route to the outside world.</li>
+        <li><strong>If you encounter user data, stop immediately.</strong> Do not download it, do not
+        keep it, tell us at once, and delete anything you obtained.</li>
+        <li><strong>Do not pivot.</strong> Access only what is needed to demonstrate the issue, then
+        stop.</li>
+      </ul>
+    </div>
+
+    <h2>Disclosure</h2>
+    <p>Please give us <strong>90 days</strong> to remediate before publishing, and coordinate the
+    timing with us. If we cannot fix something in that window we will tell you why and agree an
+    extension with you rather than going quiet. We will not ask you to stay silent indefinitely, and
+    we will not treat a disclosure deadline as a hostile act.</p>
+
+    <h2>Recognition</h2>
+    <p>Researchers who report valid issues are credited here and in the release notes for the fix,
+    unless they ask not to be.</p>
+
+    <footer class="page">
+      <p class="muted">You control what your email contains. We use a report only to triage,
+      reproduce, fix, and credit the issue and to correspond with you. We do not use it for
+      marketing. See the <a href="https://www.winsvpn.org/privacy/">Privacy Policy</a>.</p>
+      <p class="muted">Win's VPN Inc. is a Florida nonprofit corporation, document number
+      N26000008302. The IRS determined that Win's VPN Inc. is tax-exempt under Section 501(c)(3),
+      effective June 11, 2026, and classified it as a public charity under Section 509(a)(2).
+      Tax-exempt status is not an IRS review, approval, or endorsement of the service. Questions
+      about this policy: email <a href="mailto:security@winsvpn.org">security@winsvpn.org</a>. For
+      account or billing help, use
+      <a href="mailto:support@winsvpn.org">support@winsvpn.org</a> instead.</p>
+      <p class="muted"><a href="/">Return to winsvpn.org</a></p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>SYSX</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSBackgroundOnly</key>
+	<true/>
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>The Safari proxy needs a native provider to route browser traffic.</string>
+	<key>NetworkExtension</key>
+	<dict>
+		<key>NEMachServiceName</key>
+		<string>$(TeamIdentifierPrefix)$(SAFARI_PROXY_BASE_ID).network</string>
+		<key>NEProviderClasses</key>
+		<dict>
+			<key>com.apple.networkextension.app-proxy</key>
+			<string>$(PRODUCT_MODULE_NAME).TransparentProxyProvider</string>
+			<key>com.apple.networkextension.dns-proxy</key>
+			<string>$(PRODUCT_MODULE_NAME).DNSProxyProvider</string>
+		</dict>
+	</dict>
+	<key>SafariProxyAppGroup</key>
+	<string>$(TeamIdentifierPrefix)$(SAFARI_PROXY_BASE_ID)</string>
+	<key>SafariProxyKeychainAccessGroup</key>
+	<string>$(AppIdentifierPrefix)$(SAFARI_PROXY_BASE_ID).control</string>
+	<key>SafariProxySessionAccessGroup</key>
+	<string>$(AppIdentifierPrefix)$(SAFARI_PROXY_BASE_ID).session</string>
+	<key>SafariProxySystemExtensionIdentifier</key>
+	<string>$(SAFARI_PROXY_BASE_ID).network</string>
+</dict>
+</plist>

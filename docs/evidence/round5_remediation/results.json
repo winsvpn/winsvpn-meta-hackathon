@@ -1,0 +1,82 @@
+{
+  "required": {
+    "flutter_analyze": {
+      "exit": 0,
+      "issues": 0
+    },
+    "server_round2": {
+      "exit": 0,
+      "passed": 11
+    },
+    "server_round4": {
+      "exit": 0,
+      "passed": 8
+    },
+    "descriptor": {
+      "exit": 0,
+      "passed": 117
+    },
+    "website_audit": {
+      "exit": 0,
+      "passed": 56,
+      "skipped": 1,
+      "failed": 0
+    }
+  },
+  "additional": {
+    "server_round5": {
+      "exit": 0,
+      "passed": 16
+    },
+    "firefox_regressions": {
+      "exit": 0,
+      "passed": 12
+    },
+    "browser_checkout": {
+      "exit": 0,
+      "passed": 14
+    },
+    "quic_race": {
+      "exit": 0
+    },
+    "android_lint_jvm": {
+      "exit": 0,
+      "tests": 283
+    },
+    "account_deletion": {
+      "exit": 0,
+      "passed": 20
+    },
+    "donor_offline": {
+      "exit": 0,
+      "passed": 57
+    },
+    "crypto_payments": {
+      "exit": 0,
+      "passed": 7
+    },
+    "rulings": {
+      "exit": 0,
+      "general": 59,
+      "apple_routes": 6
+    }
+  },
+  "negative_controls": {
+    "original_website": {
+      "exit": 1,
+      "expected_failure": true
+    },
+    "original_server": {
+      "exit": 1,
+      "failing_subcases": 4,
+      "expected_failure": true
+    }
+  },
+  "android_smoke": {
+    "status": "BLOCKED",
+    "phone_connected": true,
+    "release_apk_exists": false,
+    "producer_exit": 1,
+    "reason": "ReleaseInputIndex is required for every Android release build."
+  }
+}

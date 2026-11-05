@@ -1,0 +1,2288 @@
+{
+  "format": "winn3-cross-implementation-kat",
+  "version": 1,
+  "protocol": "winn/3",
+  "suite": "winn3-x25519-mlkem768-chacha20poly1305-sha256",
+  "purpose": [
+    "Vectors an INDEPENDENT implementation of Winn Protocol v3 can be built from and checked against.",
+    "Every case carries its inputs, its outputs and the derivation that connects them; no Go is needed to reproduce any value here.",
+    "The primitives assumed are SHA-256, HMAC-SHA-256, HKDF-SHA-256 (RFC 5869), X25519 (RFC 7748) and ChaCha20-Poly1305 (RFC 8439). Nothing else.",
+    "Companion prose: docs/handoff/WINN3_STANDALONE_PROTOCOL_DESIGN_20260808.md sections 3 and 5, and docs/handoff/WINN3_ELLIGATOR_AND_KATS_20260808.md."
+  ],
+  "conventions": [
+    "type=hex: lowercase hex, no prefix. type=utf8: the literal string, no terminator, no length prefix. type=int: decimal, signed 64-bit. type=dec: decimal bignum.",
+    "HKDF-Expand(PRK, info, L) and HKDF-Extract(salt, IKM) are RFC 5869 with SHA-256. Note the argument ORDER: Extract's salt is named first here.",
+    "All multi-byte integers on the wire and in MAC inputs are BIG-ENDIAN unless a field says otherwise. Field elements in the Elligator2 group are LITTLE-ENDIAN, as X25519 requires.",
+    "Every handshake AEAD uses an ALL-ZERO 12-byte nonce. That is correct and not an oversight: each stage key is derived under its own label from a chaining key that has already absorbed every preceding secret, so no stage key is ever used twice.",
+    "Handshake padding is zero bytes and is inside the AEAD. These vectors use padTo=0 so the pad length is 0 and the messages are the unpadded floor."
+  ],
+  "groups": [
+    {
+      "id": "labels",
+      "what": "Every domain-separation string in the protocol, verbatim.",
+      "derivation": [
+        "protocol_label = wire_version || \" \" || suite. It is hashed to seed the transcript and never appears on the wire.",
+        "chain_next is not used alone: mixSecret's info string is \u003cstage label\u003e || \" | \" || chain_next.",
+        "epoch keys append to epoch_base; see the traffic_keys group for the exact composition."
+      ],
+      "cases": [
+        {
+          "name": "protocol_label",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn/3 winn3-x25519-mlkem768-chacha20poly1305-sha256"
+            }
+          ]
+        },
+        {
+          "name": "chain_next",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 chain next v1"
+            }
+          ]
+        },
+        {
+          "name": "dh_ephemeral_static",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 dh ephemeral-static v1"
+            }
+          ]
+        },
+        {
+          "name": "dh_static_static",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 dh static-static v1"
+            }
+          ]
+        },
+        {
+          "name": "dh_ephemeral_ephemeral",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 dh ephemeral-ephemeral v1"
+            }
+          ]
+        },
+        {
+          "name": "dh_static_ephemeral",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 dh static-ephemeral v1"
+            }
+          ]
+        },
+        {
+          "name": "preshared_key",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 preshared key v1"
+            }
+          ]
+        },
+        {
+          "name": "stage_static",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 stage static v1"
+            }
+          ]
+        },
+        {
+          "name": "stage_payload",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 stage payload v1"
+            }
+          ]
+        },
+        {
+          "name": "stage_response",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 stage response v1"
+            }
+          ]
+        },
+        {
+          "name": "pq_ratchet",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 pq ratchet v1"
+            }
+          ]
+        },
+        {
+          "name": "rekey_ratchet",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 rekey ratchet v1"
+            }
+          ]
+        },
+        {
+          "name": "response_tag",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 response tag v1"
+            }
+          ]
+        },
+        {
+          "name": "response_whiten",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 response whiten v1"
+            }
+          ]
+        },
+        {
+          "name": "admission_tag",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 admission tag v1"
+            }
+          ]
+        },
+        {
+          "name": "admission_whiten",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 admission whiten v1"
+            }
+          ]
+        },
+        {
+          "name": "epoch_base",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 epoch v1"
+            }
+          ]
+        },
+        {
+          "name": "demux",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 demux v1"
+            }
+          ]
+        },
+        {
+          "name": "stream_length_reserved",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "utf8",
+              "value": "winn3 stream length v1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "what": "The transcript hash h and the chaining key ck: seeding, mixHash, mixSecret, and the non-advancing derive.",
+      "derivation": [
+        "seed:      h = SHA-256(protocol_label); ck = h. The responder static key does NOT enter ck.",
+        "           Then mixHash(responder_static_public), which binds the gateway identity into h only.",
+        "mixHash(x):     h  \u003c- SHA-256(h || x)",
+        "mixSecret(s,L): ck \u003c- HKDF-Expand(PRK = HKDF-Extract(salt = ck, IKM = s), info = L || \" | \" || chain_next, L_out = 32)",
+        "                This is the ONLY way secret material enters the chain and the only thing that advances ck.",
+        "derive(L,n):    HKDF-Expand(PRK = ck, info = L, L_out = n). It reads ck directly as the PRK, SKIPPING Extract, and does NOT advance ck.",
+        "There is no split(). A stage key is a derive off the current ck."
+      ],
+      "cases": [
+        {
+          "name": "seed",
+          "note": "ck is unchanged by the mixHash; only h moves.",
+          "in": [
+            {
+              "name": "protocol_label",
+              "type": "utf8",
+              "value": "winn/3 winn3-x25519-mlkem768-chacha20poly1305-sha256"
+            },
+            {
+              "name": "responder_static_public",
+              "type": "hex",
+              "value": "5a083ff5cf5601844fe2064fafedf43d3ee4c587b3d5dd7a35a36983a3cfcf60"
+            }
+          ],
+          "out": [
+            {
+              "name": "h_after_label",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "ck_after_label",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "h_after_responder_static",
+              "type": "hex",
+              "value": "1a4ee80a71ab99b48bb38071543a5c08c5b6ef09ee7170a409f494324749d209"
+            }
+          ]
+        },
+        {
+          "name": "mix_hash",
+          "in": [
+            {
+              "name": "h",
+              "type": "hex",
+              "value": "1a4ee80a71ab99b48bb38071543a5c08c5b6ef09ee7170a409f494324749d209"
+            },
+            {
+              "name": "data",
+              "type": "hex",
+              "value": "77696e6e33206d69786861736820766563746f72"
+            }
+          ],
+          "out": [
+            {
+              "name": "h_next",
+              "type": "hex",
+              "value": "88ff1594daea33801291d05044fdc693dc20f51aad1e6dd958e759f94a2d97ea"
+            }
+          ]
+        },
+        {
+          "name": "mix_secret",
+          "note": "hkdf_extract_prk is emitted so a mismatch can be localised to Extract or to Expand.",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "secret",
+              "type": "hex",
+              "value": "1111111111111111111111111111111111111111111111111111111111111111"
+            },
+            {
+              "name": "label",
+              "type": "utf8",
+              "value": "winn3 dh ephemeral-static v1"
+            }
+          ],
+          "out": [
+            {
+              "name": "info",
+              "type": "utf8",
+              "value": "winn3 dh ephemeral-static v1 | winn3 chain next v1"
+            },
+            {
+              "name": "hkdf_extract_prk",
+              "type": "hex",
+              "value": "f12afb0f4269ed5d1edc9704f62cee5fcde7164892829b99eb27d6f4fd1a2630"
+            },
+            {
+              "name": "ck_next",
+              "type": "hex",
+              "value": "a8fd88e45974b4bf6502453836bbfa905776c8f41684396dafdffd6ddcb23efc"
+            }
+          ]
+        },
+        {
+          "name": "derive",
+          "note": "No Extract. ck is used directly as the HKDF PRK.",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "label",
+              "type": "utf8",
+              "value": "winn3 stage static v1"
+            },
+            {
+              "name": "length",
+              "type": "int",
+              "value": "32"
+            }
+          ],
+          "out": [
+            {
+              "name": "out",
+              "type": "hex",
+              "value": "e1938c6c694bbf662209a793e5d64720ec85f929df17b24440b2dfde7e834017"
+            }
+          ]
+        },
+        {
+          "name": "derive_short",
+          "note": "A 4-byte derive, to pin that L_out is honoured rather than truncated from 32.",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "label",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 i2r salt"
+            },
+            {
+              "name": "length",
+              "type": "int",
+              "value": "4"
+            }
+          ],
+          "out": [
+            {
+              "name": "out",
+              "type": "hex",
+              "value": "3bb7f8dd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admission",
+      "what": "The admission tag that is the first field of every initiation, and the whitening keystream that covers everything after it. NOTE: this layer contributes nothing to integrity or authentication; deleting it entirely leaves the cryptographic core exactly as sound.",
+      "derivation": [
+        "tag_input = admission_tag_label || 0x00 || tag_version(1) || tag_len(2 BE) || bucket(8 BE, two's complement) || len(gateway_id)(1) || gateway_id || body",
+        "tag       = HMAC-SHA-256(key = admission_key, tag_input) truncated to tag_len bytes",
+        "tag_version is 1. bucket, tag_len and gateway_id are AUTHENTICATED INPUTS and are NEVER TRANSMITTED.",
+        "keystream = HKDF-Expand(PRK = HKDF-Extract(salt = admission_key, IKM = tag), info = admission_whiten_label, L_out = len(body))",
+        "           note the unusual assignment: the per-packet TAG is the Extract input keying material and the per-gateway KEY is the salt.",
+        "message   = tag || (body XOR keystream)",
+        "The MAC is computed over the PLAINTEXT body, not over the whitened bytes. That is safe here because the keystream is derived from the tag itself, so altering any whitened byte alters the recovered body and the recomputed tag fails.",
+        "The response is the same shape with a different key and a shorter header:",
+        "resp_tag_input = response_tag_label || 0x00 || tag_version(1) || tag_len(1) || body      \u003c- tag_len is ONE byte here, not two",
+        "resp_tag       = HMAC-SHA-256(key = derive(response_tag_label, 32), resp_tag_input)[:tag_len]",
+        "resp_keystream = HKDF-Expand(HKDF-Extract(salt = derive(response_whiten_label, 32), IKM = resp_tag), info = response_whiten_label, L_out = len(body))",
+        "Both response keys come from the chain as it stands AFTER the initiation and BEFORE any response secret is mixed."
+      ],
+      "cases": [
+        {
+          "name": "tag_default_size",
+          "in": [
+            {
+              "name": "admission_key",
+              "type": "hex",
+              "value": "bf0037a9dfbd091463d2018cf1b2f7c54fb4e28b8b354cdd6acd618e492895dc"
+            },
+            {
+              "name": "gateway_id",
+              "type": "utf8",
+              "value": "winn3-kat-gw"
+            },
+            {
+              "name": "tag_len",
+              "type": "int",
+              "value": "32"
+            },
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "178692480"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            }
+          ],
+          "out": [
+            {
+              "name": "tag_input",
+              "type": "hex",
+              "value": "77696e6e332061646d697373696f6e2074616720763100010020000000000aa6a1800c77696e6e332d6b61742d67775a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            },
+            {
+              "name": "tag",
+              "type": "hex",
+              "value": "308994266d3072f13ef78b5afe6292125076cd71d2647077569e6b949e23e5d2"
+            }
+          ]
+        },
+        {
+          "name": "tag_min_size",
+          "note": "tag_len is bound into the MAC input, so a 16-byte tag is NOT the prefix of the 32-byte tag over the same body. Without that binding a message sealed for a 32-byte-tag gateway would verify at a 16-byte-tag gateway sharing the key.",
+          "in": [
+            {
+              "name": "admission_key",
+              "type": "hex",
+              "value": "bf0037a9dfbd091463d2018cf1b2f7c54fb4e28b8b354cdd6acd618e492895dc"
+            },
+            {
+              "name": "gateway_id",
+              "type": "utf8",
+              "value": "winn3-kat-gw"
+            },
+            {
+              "name": "tag_len",
+              "type": "int",
+              "value": "16"
+            },
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "178692480"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            }
+          ],
+          "out": [
+            {
+              "name": "tag_input",
+              "type": "hex",
+              "value": "77696e6e332061646d697373696f6e2074616720763100010010000000000aa6a1800c77696e6e332d6b61742d67775a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            },
+            {
+              "name": "tag",
+              "type": "hex",
+              "value": "36830469c3ab73aefef70b86842cbc31"
+            }
+          ]
+        },
+        {
+          "name": "whiten_keystream_arbitrary",
+          "note": "Deliberately short, non-key-sized inputs, so an implementer can check the HKDF wiring without first getting a handshake right.",
+          "in": [
+            {
+              "name": "admission_key",
+              "type": "utf8",
+              "value": "key"
+            },
+            {
+              "name": "tag",
+              "type": "utf8",
+              "value": "tag"
+            },
+            {
+              "name": "length",
+              "type": "int",
+              "value": "16"
+            }
+          ],
+          "out": [
+            {
+              "name": "keystream",
+              "type": "hex",
+              "value": "4667a987ffe0c3935102ac152d73910d"
+            }
+          ]
+        },
+        {
+          "name": "whiten_and_seal",
+          "in": [
+            {
+              "name": "admission_key",
+              "type": "hex",
+              "value": "bf0037a9dfbd091463d2018cf1b2f7c54fb4e28b8b354cdd6acd618e492895dc"
+            },
+            {
+              "name": "tag",
+              "type": "hex",
+              "value": "308994266d3072f13ef78b5afe6292125076cd71d2647077569e6b949e23e5d2"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            }
+          ],
+          "out": [
+            {
+              "name": "keystream",
+              "type": "hex",
+              "value": "a07e32a50938cad7e05212e4b89f10f6c120627ac61303369890a30e27099627bd8c91251e3d721bca09325c363442d4c3650999502ce4565a9b646edab158f2"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "308994266d3072f13ef78b5afe6292125076cd71d2647077569e6b949e23e5d2fa2468ff5362908dba0848bee2c54aac9b7a38209c49596cc2caf9547d53cc7de7d6cb7f44672841905368066c6e188e993f53c30a76be0c00c13e3480eb02a8"
+            }
+          ]
+        },
+        {
+          "name": "response_tag",
+          "note": "The response header is THREE bytes (0x00, tag_version, tag_len) where the initiation's is twelve. They are not the same serialisation.",
+          "in": [
+            {
+              "name": "response_tag_key",
+              "type": "hex",
+              "value": "2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b"
+            },
+            {
+              "name": "tag_len",
+              "type": "int",
+              "value": "32"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"
+            }
+          ],
+          "out": [
+            {
+              "name": "tag_input",
+              "type": "hex",
+              "value": "77696e6e3320726573706f6e736520746167207631000120c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"
+            },
+            {
+              "name": "tag",
+              "type": "hex",
+              "value": "0e9f5f9b2429dc88f602c5c77a7dec7ddac086b9cff03c6012540e2cb18537b2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "freshness_bucket",
+      "what": "The time bucket that is an authenticated input to the admission tag and is never transmitted.",
+      "derivation": [
+        "bucket = floor(unix_seconds / bucket_window_seconds), FLOORED TOWARD NEGATIVE INFINITY.",
+        "That is not the same as C-style integer division: truncation toward zero would make the bucket immediately before the Unix epoch twice as wide.",
+        "A verifier tries buckets nearest-first: centre, centre-1, centre+1, centre-2, centre+2, ... up to spread = ceil(max_skew / bucket_window).",
+        "Defaults: bucket_window = 10s, max_skew = 60s, therefore spread = 6 and 13 candidate buckets.",
+        "The handshake replay cache lifetime is exactly (2*spread + 1) * bucket_window, which is the same span as the acceptance window."
+      ],
+      "cases": [
+        {
+          "name": "pinned_kat_time",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "1786924800"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "10"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "178692480"
+            }
+          ]
+        },
+        {
+          "name": "epoch",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "0"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "10"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "name": "just_before_epoch",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "-1"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "10"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "-1"
+            }
+          ]
+        },
+        {
+          "name": "ten_before_epoch",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "-10"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "10"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "-1"
+            }
+          ]
+        },
+        {
+          "name": "eleven_before_epoch",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "-11"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "10"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "-2"
+            }
+          ]
+        },
+        {
+          "name": "one_second_window",
+          "in": [
+            {
+              "name": "unix_seconds",
+              "type": "int",
+              "value": "1786924807"
+            },
+            {
+              "name": "bucket_window_seconds",
+              "type": "int",
+              "value": "1"
+            }
+          ],
+          "out": [
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "1786924807"
+            }
+          ]
+        },
+        {
+          "name": "candidate_order",
+          "note": "Nearest first, so a client with a correct clock costs exactly one HMAC.",
+          "in": [
+            {
+              "name": "centre",
+              "type": "int",
+              "value": "100"
+            },
+            {
+              "name": "spread",
+              "type": "int",
+              "value": "3"
+            }
+          ],
+          "out": [
+            {
+              "name": "buckets",
+              "type": "utf8",
+              "value": "100,99,101,98,102,97,103"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handshake_initiation",
+      "what": "A complete initiation, client to gateway, with every chaining key, transcript hash, DH output and stage key on the way.",
+      "derivation": [
+        "wire: admission_tag(tag_len) || whitened( ephemeral(32) || sealed_static(48) || sealed_payload(3 + payload + pad + 16) )",
+        "1.  h  = SHA-256(protocol_label); ck = h; mixHash(responder_static_public)",
+        "2.  mixHash(ephemeral_public)                        \u003c- the WIRE encoding of the ephemeral, whatever the codec produced",
+        "3.  es = X25519(ephemeral_private, responder_static_public); mixSecret(es, dh_ephemeral_static)",
+        "4.  k1 = derive(stage_static, 32)",
+        "5.  sealed_static = ChaCha20-Poly1305(key = k1, nonce = 0^12, aad = h, plaintext = initiator_static_public)",
+        "6.  mixHash(sealed_static)",
+        "7.  ss = X25519(initiator_static_private, responder_static_public); mixSecret(ss, dh_static_static)",
+        "8.  if a PSK is configured: mixSecret(psk, preshared_key)     \u003c- omitted entirely when there is none",
+        "9.  k2 = derive(stage_payload, 32)",
+        "10. inner = flags(1, must be 0) || payload_len(2 BE) || payload || pad(zero bytes)",
+        "11. sealed_payload = ChaCha20-Poly1305(key = k2, nonce = 0^12, aad = h, plaintext = inner)",
+        "12. mixHash(sealed_payload)",
+        "13. body = ephemeral || sealed_static || sealed_payload; then the admission group's tag and whitening.",
+        "The order of steps 2..12 IS the protocol. A reordering is a different protocol that fails with no diagnostic."
+      ],
+      "cases": [
+        {
+          "name": "pinned_initiation",
+          "in": [
+            {
+              "name": "initiator_static_private",
+              "type": "hex",
+              "value": "71eb7cb298ffcce5111b283972a4b944932a44d1f4bae0348e0b66f5c107e357"
+            },
+            {
+              "name": "initiator_static_public",
+              "type": "hex",
+              "value": "d73b4f5570e4bfad37929b3e3eadd3d0ab47e1b0ebeb6bae780a60590a74604b"
+            },
+            {
+              "name": "responder_static_private",
+              "type": "hex",
+              "value": "6278c82b94e369f25ed10bb80c7e12bddcb8c31dc88e84e0ebdc9f5483272675"
+            },
+            {
+              "name": "responder_static_public",
+              "type": "hex",
+              "value": "5a083ff5cf5601844fe2064fafedf43d3ee4c587b3d5dd7a35a36983a3cfcf60"
+            },
+            {
+              "name": "psk",
+              "type": "hex",
+              "value": "0e1b38e534e0e690ef5a702f789a1b44ddc086f85df565dba09f2c070d996679"
+            },
+            {
+              "name": "ephemeral_private",
+              "type": "hex",
+              "value": "3ae42192fb34cf8c50490d15fb5f802bf2a3c6c97937a93eccd878f45f0e9d5a"
+            },
+            {
+              "name": "ephemeral_public",
+              "type": "hex",
+              "value": "129d04ce08d82d347e969225d90ce5940e7465d4f78423e522ae79d4892a274e"
+            },
+            {
+              "name": "admission_key",
+              "type": "hex",
+              "value": "bf0037a9dfbd091463d2018cf1b2f7c54fb4e28b8b354cdd6acd618e492895dc"
+            },
+            {
+              "name": "gateway_id",
+              "type": "utf8",
+              "value": "winn3-kat-gw"
+            },
+            {
+              "name": "tag_len",
+              "type": "int",
+              "value": "32"
+            },
+            {
+              "name": "bucket",
+              "type": "int",
+              "value": "178692480"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": "kat"
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "h0_after_protocol_label",
+              "type": "hex",
+              "value": "41c85c539c5e349e59b8c8229ded68b17f5185be42fcb915c4e72b77992ac146"
+            },
+            {
+              "name": "h1_after_responder_static",
+              "type": "hex",
+              "value": "1a4ee80a71ab99b48bb38071543a5c08c5b6ef09ee7170a409f494324749d209"
+            },
+            {
+              "name": "h2_after_ephemeral",
+              "type": "hex",
+              "value": "1336274ff9dd2320bb7e557ec576b50c9e94b8d9da5f5af4b2d3958970265e62"
+            },
+            {
+              "name": "dh_es",
+              "type": "hex",
+              "value": "e97cf52fb5e9a488deb4f17d37c41769bb9fee7ed359f1d0a225f926f02b1869"
+            },
+            {
+              "name": "ck1_after_es",
+              "type": "hex",
+              "value": "a8aef3fe6e06364786c8e0b7c437af8b97a7f35de53b54b4d255ac549c6fbca5"
+            },
+            {
+              "name": "k1_stage_static",
+              "type": "hex",
+              "value": "5add112a07a5be5f7d4908b0cef4165f15dbd36d995ed87a8cfe4ff49fd76a18"
+            },
+            {
+              "name": "sealed_static",
+              "type": "hex",
+              "value": "3401dc9defa1716da1ccc4fcb80c2087ee3c5a35f23a0a6c555f3f321467633a05a3d7d44ee5efedd5e3c5d1c9807546"
+            },
+            {
+              "name": "h3_after_sealed_static",
+              "type": "hex",
+              "value": "a49e08da0fb15fac7000562167075d0bb97ae9286f2aac1c273d77f047a8618d"
+            },
+            {
+              "name": "dh_ss",
+              "type": "hex",
+              "value": "0b5e3850981e2bb6c399406f8788f73295d5c81f8f0181a087e06543823c2b42"
+            },
+            {
+              "name": "ck2_after_ss",
+              "type": "hex",
+              "value": "62aa7ec5ee14fc1c7c5d0a8fa77658e548468ecd2d38177197f15e30ed95d6e0"
+            },
+            {
+              "name": "ck3_after_psk",
+              "type": "hex",
+              "value": "d9e17f9519ceaf69f891aa8b389fc61f46b92379646f44b232b76ef9cb5968b0"
+            },
+            {
+              "name": "k2_stage_payload",
+              "type": "hex",
+              "value": "dccfc3dac8846e0a84aaf2a1cd51c46e508172c01a4cecca78459effb3373758"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "0000036b6174"
+            },
+            {
+              "name": "sealed_payload",
+              "type": "hex",
+              "value": "7d1574a6e5d07b5f95ef321b64af16b3afcec799834e"
+            },
+            {
+              "name": "h4_after_sealed_payload",
+              "type": "hex",
+              "value": "90fcfdbf5c73cb9c2fc09648cd51bd2f198cd79eb33c0647966812c850a66d4d"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "129d04ce08d82d347e969225d90ce5940e7465d4f78423e522ae79d4892a274e3401dc9defa1716da1ccc4fcb80c2087ee3c5a35f23a0a6c555f3f321467633a05a3d7d44ee5efedd5e3c5d1c98075467d1574a6e5d07b5f95ef321b64af16b3afcec799834e"
+            },
+            {
+              "name": "admission_tag",
+              "type": "hex",
+              "value": "13133389168a3f6081c07821cf17849e21cd8d858c9486e9d0671df9ad7ddf24"
+            },
+            {
+              "name": "whiten_keystream",
+              "type": "hex",
+              "value": "2ac791d37ea39d38613efed4f3c20da79e54b82abb43f6e37f38ef0db2602d6be09fdca05cf2244be7e599201be2d83e04fe53385e497b86f3714e4e63d03c9a4d6bf9a0b40f83ed8015a248ac9c3b9a569778cf62b3b8a7dd7daeec874c34a9385b7e202c81"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "13133389168a3f6081c07821cf17849e21cd8d858c9486e9d0671df9ad7ddf24385a951d767bb00c1fa86cf12acee8339020ddfe4cc7d5065d9696d93b4a0a25d49e003db353552646295ddca3eef8b9eac2090dac7371eaa62e717c77b75fa048c82e74faea6c0055f66799651c4edc2b820c698763c3f848929cf7e3e3221a9795b9b9afcf"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "134"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handshake_response",
+      "what": "The gateway's reply to the pinned initiation, with every intermediate. Continues directly from handshake_initiation.",
+      "derivation": [
+        "wire: response_tag(tag_len) || whitened( ephemeral(32) || sealed_payload(3 + payload + pad + 16) )",
+        "There is no sealed static: the responder's identity is never on the wire at all.",
+        "1. response_tag_key    = derive(response_tag, 32)     \u003c- BOTH off the post-initiation ck,",
+        "2. response_whiten_key = derive(response_whiten, 32)     BEFORE any response secret is mixed. Order matters.",
+        "3. mixHash(responder_ephemeral_public)",
+        "4. ee = X25519(responder_ephemeral_private, initiator_ephemeral_public); mixSecret(ee, dh_ephemeral_ephemeral)",
+        "5. se = X25519(responder_ephemeral_private, initiator_static_public);    mixSecret(se, dh_static_ephemeral)",
+        "6. k3 = derive(stage_response, 32)",
+        "7. sealed_payload = ChaCha20-Poly1305(key = k3, nonce = 0^12, aad = h, plaintext = flags || payload_len || payload || pad)",
+        "8. mixHash(sealed_payload)      \u003c- AFTER the AEAD, not before",
+        "The chain state at the end of step 8 is what both ends carry into the transport keys."
+      ],
+      "cases": [
+        {
+          "name": "pinned_response",
+          "in": [
+            {
+              "name": "ck_after_initiation",
+              "type": "hex",
+              "value": "d9e17f9519ceaf69f891aa8b389fc61f46b92379646f44b232b76ef9cb5968b0"
+            },
+            {
+              "name": "h_after_initiation",
+              "type": "hex",
+              "value": "90fcfdbf5c73cb9c2fc09648cd51bd2f198cd79eb33c0647966812c850a66d4d"
+            },
+            {
+              "name": "initiator_ephemeral_public",
+              "type": "hex",
+              "value": "129d04ce08d82d347e969225d90ce5940e7465d4f78423e522ae79d4892a274e"
+            },
+            {
+              "name": "initiator_static_public",
+              "type": "hex",
+              "value": "d73b4f5570e4bfad37929b3e3eadd3d0ab47e1b0ebeb6bae780a60590a74604b"
+            },
+            {
+              "name": "responder_ephemeral_private",
+              "type": "hex",
+              "value": "aec2a448ee9aba5c8f5c50af989350e2a6111f068e05bb75feec1dfd630dbc1f"
+            },
+            {
+              "name": "responder_ephemeral_public",
+              "type": "hex",
+              "value": "775ede7ebf87961843a00fc8dbf99ef6f3a52f8247729d7b1896ffd3dc479b23"
+            },
+            {
+              "name": "tag_len",
+              "type": "int",
+              "value": "32"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": "ok"
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "response_tag_key",
+              "type": "hex",
+              "value": "b2e9cb9d06df5fb6f41ba55735cc34f97fd0304008923c21f8839c77768b6a24"
+            },
+            {
+              "name": "response_whiten_key",
+              "type": "hex",
+              "value": "c9743a9bc659dc702241c6a35350f3b4b17e4f2381ec251e9dfa7475ed85d613"
+            },
+            {
+              "name": "h5_after_ephemeral",
+              "type": "hex",
+              "value": "246bd2d2d663c2980929cb2a7cd59d100ef65573e674d01830f8499bfdf15c7d"
+            },
+            {
+              "name": "dh_ee",
+              "type": "hex",
+              "value": "8bf0f1fa78d7bcb301ab56943b66670c27bdf0615f118c02c482b33a58590c26"
+            },
+            {
+              "name": "ck4_after_ee",
+              "type": "hex",
+              "value": "b7be3c3e37631994e03b4915ebc165a826f4068dd6c7746fa35f145f7454a8c9"
+            },
+            {
+              "name": "dh_se",
+              "type": "hex",
+              "value": "c31ec5c292fdb784ef09d99bd47494b41f6e7293464fde68f3b5577f05278823"
+            },
+            {
+              "name": "ck5_after_se",
+              "type": "hex",
+              "value": "c27ffc068ecc773c02794a10e1633f851bfea0484d549ecdb8f1a5c90365214b"
+            },
+            {
+              "name": "k3_stage_response",
+              "type": "hex",
+              "value": "5f97d2f2d280ebe99272e4e55cdf16c2ae6112e5d99e9acaf2f668b4d9d468f6"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "0000026f6b"
+            },
+            {
+              "name": "sealed_payload",
+              "type": "hex",
+              "value": "52c8cd7fa16e7fd9d740ce41e5cd0a5e9f6b179124"
+            },
+            {
+              "name": "h6_final",
+              "type": "hex",
+              "value": "0f3ddd5c321350d8bf671604a4f7e3ae5ee9eed2aa84e98fbb8be90531a8e22c"
+            },
+            {
+              "name": "body",
+              "type": "hex",
+              "value": "775ede7ebf87961843a00fc8dbf99ef6f3a52f8247729d7b1896ffd3dc479b2352c8cd7fa16e7fd9d740ce41e5cd0a5e9f6b179124"
+            },
+            {
+              "name": "response_tag",
+              "type": "hex",
+              "value": "54ae01551b082fed9adecb1d16eb2c049aaa24279d9b6e49223f12f5c740716b"
+            },
+            {
+              "name": "whiten_keystream",
+              "type": "hex",
+              "value": "aec22503860c7ee7d677ed5be6f38ef39290c6b07c2066ab15ef4f03f50e701e291dc32e268a458525ac3a99b07dc3e33fb11ff09a"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "54ae01551b082fed9adecb1d16eb2c049aaa24279d9b6e49223f12f5c740716bd99cfb7d398be8ff95d7e2933d0a10056135e9323b52fbd00d79b0d02949eb3d7bd50e5187e43a5cf2ecf4d855b0c9bda0da0861be"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "85"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "traffic_keys",
+      "what": "The per-epoch, per-direction transport keys derived from the final handshake chaining key.",
+      "derivation": [
+        "info(E, dir, what) = \"winn3 epoch v1 e\" || decimal(E) || \" \" || dir || \" \" || what",
+        "                     dir is exactly \"i2r\" or \"r2i\"; what is exactly \"key\", \"salt\" or \"demux\".",
+        "                     decimal(E) has no padding: epoch 0 is \"e0\", epoch 10 is \"e10\".",
+        "key   = derive(info(E, dir, \"key\"),   32)",
+        "salt  = derive(info(E, dir, \"salt\"),   4)      \u003c- the nonce prefix; never transmitted",
+        "demux = derive(info(E, dir, \"demux\"), 32)      \u003c- keys the per-packet token",
+        "All three are non-advancing derives off the SAME ck. Epoch 0 is installed the moment the handshake completes.",
+        "Send/receive assignment is by role: the initiator sends i2r and receives r2i; the responder is the mirror.",
+        "The epoch number is inside every info string, so two epochs cannot share a key even if a future ratchet installed an epoch without advancing the chain."
+      ],
+      "cases": [
+        {
+          "name": "epoch0_i2r",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "c27ffc068ecc773c02794a10e1633f851bfea0484d549ecdb8f1a5c90365214b"
+            },
+            {
+              "name": "epoch",
+              "type": "int",
+              "value": "0"
+            },
+            {
+              "name": "direction",
+              "type": "utf8",
+              "value": "i2r"
+            }
+          ],
+          "out": [
+            {
+              "name": "info_key",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 i2r key"
+            },
+            {
+              "name": "key",
+              "type": "hex",
+              "value": "c912d5c135b467d9674be24c587bc8bd185de6e14186a42a509fd0b898227430"
+            },
+            {
+              "name": "info_salt",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 i2r salt"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "9749c6b9"
+            },
+            {
+              "name": "info_demux",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 i2r demux"
+            },
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "29cebe3829dcfc62bc8ba6f9835ac636e4e54e504f3a5ca48af2eafb2ca42ff2"
+            }
+          ]
+        },
+        {
+          "name": "epoch0_r2i",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "c27ffc068ecc773c02794a10e1633f851bfea0484d549ecdb8f1a5c90365214b"
+            },
+            {
+              "name": "epoch",
+              "type": "int",
+              "value": "0"
+            },
+            {
+              "name": "direction",
+              "type": "utf8",
+              "value": "r2i"
+            }
+          ],
+          "out": [
+            {
+              "name": "info_key",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 r2i key"
+            },
+            {
+              "name": "key",
+              "type": "hex",
+              "value": "4752c2880e0f27203899dececc88c347e90654a021915b9e3e5c68953a4892ed"
+            },
+            {
+              "name": "info_salt",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 r2i salt"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "152d81e5"
+            },
+            {
+              "name": "info_demux",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e0 r2i demux"
+            },
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "c761bccc2196f05689b96ee10231ed23029f29a66a9650e0c40f06605e847c7e"
+            }
+          ]
+        },
+        {
+          "name": "info_string_shape",
+          "note": "Pins that the epoch is rendered as unpadded decimal.",
+          "in": [
+            {
+              "name": "epoch",
+              "type": "int",
+              "value": "10"
+            },
+            {
+              "name": "direction",
+              "type": "utf8",
+              "value": "r2i"
+            }
+          ],
+          "out": [
+            {
+              "name": "info_key",
+              "type": "utf8",
+              "value": "winn3 epoch v1 e10 r2i key"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "what": "A transport message: the demux token that replaces every header field, and the AEAD around it.",
+      "derivation": [
+        "wire: demux_token(8) || ChaCha20-Poly1305 ciphertext+tag",
+        "There is NO counter on the wire, no session index, no type byte, no length field and no version. The counter is implicit in the token.",
+        "token_input = demux_label || counter(8 BE)",
+        "token       = HMAC-SHA-256(key = demux_key, token_input) truncated to 8 bytes",
+        "nonce       = nonce_salt(4) || counter(8 BE)                 total 12 bytes",
+        "aad         = token, exactly as it appears on the wire",
+        "inner       = payload_len(2 BE) || payload || pad(zero bytes)",
+        "message     = token || ChaCha20-Poly1305(key, nonce, inner, aad)",
+        "The receiver precomputes a forward window of expected tokens and looks the arriving token up; a consumed token is erased, which IS the replay filter.",
+        "Note the inner header is 2 bytes here and 3 in a handshake message: transport has no flags byte."
+      ],
+      "cases": [
+        {
+          "name": "counter_0",
+          "in": [
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "29cebe3829dcfc62bc8ba6f9835ac636e4e54e504f3a5ca48af2eafb2ca42ff2"
+            },
+            {
+              "name": "aead_key",
+              "type": "hex",
+              "value": "c912d5c135b467d9674be24c587bc8bd185de6e14186a42a509fd0b898227430"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "9749c6b9"
+            },
+            {
+              "name": "counter",
+              "type": "int",
+              "value": "0"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": "winn3 kat payload"
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "token_input",
+              "type": "hex",
+              "value": "77696e6e332064656d75782076310000000000000000"
+            },
+            {
+              "name": "demux_token",
+              "type": "hex",
+              "value": "240664fd9cdda2de"
+            },
+            {
+              "name": "nonce",
+              "type": "hex",
+              "value": "9749c6b90000000000000000"
+            },
+            {
+              "name": "aad",
+              "type": "hex",
+              "value": "240664fd9cdda2de"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "001177696e6e33206b6174207061796c6f6164"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "240664fd9cdda2defb167c8f979e0e9ee3506b1f3afc78a25da95f6b29c80daf514835de440773fe394d71"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "43"
+            }
+          ]
+        },
+        {
+          "name": "counter_1",
+          "in": [
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "29cebe3829dcfc62bc8ba6f9835ac636e4e54e504f3a5ca48af2eafb2ca42ff2"
+            },
+            {
+              "name": "aead_key",
+              "type": "hex",
+              "value": "c912d5c135b467d9674be24c587bc8bd185de6e14186a42a509fd0b898227430"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "9749c6b9"
+            },
+            {
+              "name": "counter",
+              "type": "int",
+              "value": "1"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": "winn3 kat payload"
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "token_input",
+              "type": "hex",
+              "value": "77696e6e332064656d75782076310000000000000001"
+            },
+            {
+              "name": "demux_token",
+              "type": "hex",
+              "value": "d03ba87c095ad159"
+            },
+            {
+              "name": "nonce",
+              "type": "hex",
+              "value": "9749c6b90000000000000001"
+            },
+            {
+              "name": "aad",
+              "type": "hex",
+              "value": "d03ba87c095ad159"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "001177696e6e33206b6174207061796c6f6164"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "d03ba87c095ad1594d5a51b45b97285e89701b47adca55d9f3da22f96630a17eb5d5543133d1dc79936ac3"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "43"
+            }
+          ]
+        },
+        {
+          "name": "counter_42_padded",
+          "in": [
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "29cebe3829dcfc62bc8ba6f9835ac636e4e54e504f3a5ca48af2eafb2ca42ff2"
+            },
+            {
+              "name": "aead_key",
+              "type": "hex",
+              "value": "c912d5c135b467d9674be24c587bc8bd185de6e14186a42a509fd0b898227430"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "9749c6b9"
+            },
+            {
+              "name": "counter",
+              "type": "int",
+              "value": "42"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": "abc"
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "20"
+            }
+          ],
+          "out": [
+            {
+              "name": "token_input",
+              "type": "hex",
+              "value": "77696e6e332064656d7578207631000000000000002a"
+            },
+            {
+              "name": "demux_token",
+              "type": "hex",
+              "value": "592f54c03b061bdd"
+            },
+            {
+              "name": "nonce",
+              "type": "hex",
+              "value": "9749c6b9000000000000002a"
+            },
+            {
+              "name": "aad",
+              "type": "hex",
+              "value": "592f54c03b061bdd"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "00036162630000000000000000000000000000000000000000"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "592f54c03b061bdd3ea79959af31dd30a7682156f831e9b0851f5a3814e555f81bf92e5f24d882d592e3f5188b7fe61a48"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "49"
+            }
+          ]
+        },
+        {
+          "name": "empty_payload",
+          "in": [
+            {
+              "name": "demux_key",
+              "type": "hex",
+              "value": "29cebe3829dcfc62bc8ba6f9835ac636e4e54e504f3a5ca48af2eafb2ca42ff2"
+            },
+            {
+              "name": "aead_key",
+              "type": "hex",
+              "value": "c912d5c135b467d9674be24c587bc8bd185de6e14186a42a509fd0b898227430"
+            },
+            {
+              "name": "nonce_salt",
+              "type": "hex",
+              "value": "9749c6b9"
+            },
+            {
+              "name": "counter",
+              "type": "int",
+              "value": "7"
+            },
+            {
+              "name": "payload",
+              "type": "utf8",
+              "value": ""
+            },
+            {
+              "name": "pad_len",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "token_input",
+              "type": "hex",
+              "value": "77696e6e332064656d75782076310000000000000007"
+            },
+            {
+              "name": "demux_token",
+              "type": "hex",
+              "value": "be99f90afe36bb25"
+            },
+            {
+              "name": "nonce",
+              "type": "hex",
+              "value": "9749c6b90000000000000007"
+            },
+            {
+              "name": "aad",
+              "type": "hex",
+              "value": "be99f90afe36bb25"
+            },
+            {
+              "name": "inner_plaintext",
+              "type": "hex",
+              "value": "0000"
+            },
+            {
+              "name": "message",
+              "type": "hex",
+              "value": "be99f90afe36bb258cd35effb14ee291e5cb9f1cfb2c4d5142d1"
+            },
+            {
+              "name": "message_len",
+              "type": "int",
+              "value": "26"
+            }
+          ]
+        },
+        {
+          "name": "overhead",
+          "in": null,
+          "out": [
+            {
+              "name": "demux_token_bytes",
+              "type": "int",
+              "value": "8"
+            },
+            {
+              "name": "inner_length_bytes",
+              "type": "int",
+              "value": "2"
+            },
+            {
+              "name": "aead_tag_bytes",
+              "type": "int",
+              "value": "16"
+            },
+            {
+              "name": "total_overhead",
+              "type": "int",
+              "value": "26"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ratchets",
+      "what": "The two in-band epoch ratchets. Both are a mixSecret followed by re-running the same three derives at E+1.",
+      "derivation": [
+        "post-quantum: ck \u003c- mixSecret(ml_kem_768_shared_secret, pq_ratchet); epoch \u003c- epoch + 1",
+        "rekey:        ck \u003c- mixSecret(x25519_shared_secret,     rekey_ratchet); epoch \u003c- epoch + 1",
+        "h is NOT touched by either ratchet. Only ck advances.",
+        "The message counter restarts at zero in every epoch, and the receive window is rebuilt from the new demux key.",
+        "Neither ratchet has a wire format of its own: the frames that carry them are ordinary transport frames (see the frames group)."
+      ],
+      "cases": [
+        {
+          "name": "pq_ratchet_epoch1",
+          "note": "ML-KEM-768 shared secrets are 32 bytes; a fixed byte pattern is used here so the vector does not depend on a KEM implementation.",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "c27ffc068ecc773c02794a10e1633f851bfea0484d549ecdb8f1a5c90365214b"
+            },
+            {
+              "name": "shared_secret",
+              "type": "hex",
+              "value": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
+            }
+          ],
+          "out": [
+            {
+              "name": "info",
+              "type": "utf8",
+              "value": "winn3 pq ratchet v1 | winn3 chain next v1"
+            },
+            {
+              "name": "ck_next",
+              "type": "hex",
+              "value": "8ab62ff70f09f3a7d984cc2f432f7c0a16e647df745b0037c4cfa832bdb85b0c"
+            },
+            {
+              "name": "epoch1_i2r_key",
+              "type": "hex",
+              "value": "d17df7707263d1f805a13804d36f2b905343d897c724f47f8d6bcb6c4ae7ede4"
+            },
+            {
+              "name": "epoch1_i2r_salt",
+              "type": "hex",
+              "value": "42d3a40c"
+            },
+            {
+              "name": "epoch1_i2r_demux",
+              "type": "hex",
+              "value": "393be60f952794b7f11814bdf65f0022e517c721d84a48f7a608169c4ae64bee"
+            }
+          ]
+        },
+        {
+          "name": "rekey_ratchet_epoch1",
+          "in": [
+            {
+              "name": "ck",
+              "type": "hex",
+              "value": "c27ffc068ecc773c02794a10e1633f851bfea0484d549ecdb8f1a5c90365214b"
+            },
+            {
+              "name": "shared_secret",
+              "type": "hex",
+              "value": "8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e"
+            }
+          ],
+          "out": [
+            {
+              "name": "info",
+              "type": "utf8",
+              "value": "winn3 rekey ratchet v1 | winn3 chain next v1"
+            },
+            {
+              "name": "ck_next",
+              "type": "hex",
+              "value": "f3e672f19bbcd7637f35b5c1c52aa110d375840eba1e18f32f5a56f6742e9b3c"
+            },
+            {
+              "name": "epoch1_r2i_key",
+              "type": "hex",
+              "value": "1c7147756deded35f9d262cfc89ff95ce393bcacd7e5f09b6fad0f5d12a7dbce"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "frames",
+      "what": "The TLV inside a transport message's plaintext payload.",
+      "derivation": [
+        "frame = type(1) || length(2 BE) || value",
+        "Type 0 is RESERVED and never valid, so a zero-filled buffer never parses as a frame stream.",
+        "Parsing is STRICT: a trailing partial frame, a zero type, or a length running past the buffer discards the whole message. Leniency would be a parsing differential between implementations, and a parsing differential is a fingerprint.",
+        "Frames are concatenated with no separator and no count. The stream ends when the buffer does."
+      ],
+      "cases": [
+        {
+          "name": "type_data",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "name": "type_pad",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "type_ping",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "name": "type_pong",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "name": "type_pq_ek",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "5"
+            }
+          ]
+        },
+        {
+          "name": "type_pq_ct",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "name": "type_rekey_init",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "7"
+            }
+          ]
+        },
+        {
+          "name": "type_rekey_ack",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "8"
+            }
+          ]
+        },
+        {
+          "name": "type_close",
+          "in": null,
+          "out": [
+            {
+              "name": "value",
+              "type": "int",
+              "value": "9"
+            }
+          ]
+        },
+        {
+          "name": "encode_two_frames",
+          "in": [
+            {
+              "name": "frame1",
+              "type": "utf8",
+              "value": "DATA:\"hello\""
+            },
+            {
+              "name": "frame2",
+              "type": "utf8",
+              "value": "PAD:4 zero bytes"
+            }
+          ],
+          "out": [
+            {
+              "name": "encoded",
+              "type": "hex",
+              "value": "01000568656c6c6f02000400000000"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elligator2",
+      "what": "The v1.1 ephemeral codec: an on-wire ephemeral indistinguishable from random bytes with NO shared secret. Opt-in; both ends must be configured for it, because nothing on this datapath is negotiated.",
+      "derivation": [
+        "Curve25519 in Montgomery form: v^2 = u^3 + A u^2 + u, A = 486662, p = 2^255 - 19, and the map's non-square Z = 2.",
+        "Field elements are encoded LITTLE-ENDIAN in 32 bytes, as X25519 requires.",
+        "FORWARD (wire -\u003e X25519 public key). Total: every 32-byte string names a point, so there is no input a decoder rejects and therefore no oracle in it.",
+        "  r  = little_endian(wire) with bits 254 and 255 CLEARED",
+        "  w  = 1 + Z*r^2                            (never zero, because -1/Z is a non-residue)",
+        "  x1 = -A * w^-1",
+        "  u  = x1        if g(x1) is a quadratic residue, where g(x) = x^3 + A x^2 + x",
+        "  u  = -x1 - A   otherwise",
+        "INVERSE (public key -\u003e wire). Defined for about half of all points; fails otherwise, and the caller redraws.",
+        "  fails if u = 0 or u = -A",
+        "  branch 0:  r^2 = -u / (Z * (u + A))          (u was produced by the x2 case)",
+        "  branch 1:  r^2 = -(u + A) / (Z * u)          (u was produced by the x1 case)",
+        "  fails if that value is not a residue; note the two branches succeed together or fail together, because their product is 1/Z^2.",
+        "  r = sqrt(r^2), canonicalised to r \u003c= (p-1)/2, then bits 254 and 255 are filled with SENDER RANDOMNESS.",
+        "KEY GENERATION. Per attempt: read 32 bytes for the scalar, then 1 byte of tweak.",
+        "  tweak bits 0-2: which of the eight points of E[8] to ADD to the public key",
+        "  tweak bit  3:   which branch of the inverse map to use",
+        "  tweak bits 6-7: copied into bits 254 and 255 of the representative",
+        "  If the inverse map fails, discard everything and draw again. Expected 2 attempts.",
+        "WHY THE TORSION IS ADDED. A representative decodes to a curve point and anyone can decode one. A plain X25519 public key is always in the prime-order subgroup; the point behind a random 32-byte string is so about one time in eight. Without a random 8-torsion component, ONE scalar multiplication per packet distinguishes an ephemeral from random bytes with no key at all. Adding T of order dividing 8 is free because every peer clamps: 8k(P+T) = 8kP, so the shared secret is unchanged.",
+        "RESIDUAL BIAS: the 9 field values in ((p-1)/2, 2^254) can never occur, i.e. about 2^-250 of the space.",
+        "The wire width is 32 bytes, unchanged, so no length in this protocol moves."
+      ],
+      "cases": [
+        {
+          "name": "parameters",
+          "in": null,
+          "out": [
+            {
+              "name": "p",
+              "type": "dec",
+              "value": "57896044618658097711785492504343953926634992332820282019728792003956564819949"
+            },
+            {
+              "name": "A",
+              "type": "dec",
+              "value": "486662"
+            },
+            {
+              "name": "Z",
+              "type": "dec",
+              "value": "2"
+            },
+            {
+              "name": "half_p",
+              "type": "dec",
+              "value": "28948022309329048855892746252171976963317496166410141009864396001978282409974"
+            },
+            {
+              "name": "sqrt_minus_one",
+              "type": "dec",
+              "value": "19681161376707505956807079304988542015446066515923890162744021073123829784752"
+            }
+          ]
+        },
+        {
+          "name": "torsion_0",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "0"
+            },
+            {
+              "name": "point",
+              "type": "utf8",
+              "value": "identity"
+            }
+          ]
+        },
+        {
+          "name": "torsion_1",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "1"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "325606250916557431795983626356110631294008115727848805560023387167927233504"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "32026303591712962751241307547882981359278212717910236697706316503764922500307"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "e0eb7a7c3b41b8ae1656e3faf19fc46ada098deb9c32b1fd866205165f49b800"
+            }
+          ]
+        },
+        {
+          "name": "torsion_2",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "2"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "1"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "48802004052532134862652268456126542835229456083994414501085850622543968879637"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "0100000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "name": "torsion_3",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "3"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "39382357235489614581723060781553021112529911719440698176882885853963445705823"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "10506421237558716435988711236408671798265365380393424752549290025458740468278"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "5f9c95bca3508c24b1d0b1559c83ef5b04445cc4581c8e86d8224eddd09f1157"
+            }
+          ]
+        },
+        {
+          "name": "torsion_4",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "4"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "0"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "0"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "name": "torsion_5",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "5"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "39382357235489614581723060781553021112529911719440698176882885853963445705823"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "47389623381099381275796781267935282128369626952426857267179501978497824351671"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "5f9c95bca3508c24b1d0b1559c83ef5b04445cc4581c8e86d8224eddd09f1157"
+            }
+          ]
+        },
+        {
+          "name": "torsion_6",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "6"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "1"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "9094040566125962849133224048217411091405536248825867518642941381412595940312"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "0100000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "name": "torsion_7",
+          "in": null,
+          "out": [
+            {
+              "name": "index",
+              "type": "int",
+              "value": "7"
+            },
+            {
+              "name": "u",
+              "type": "dec",
+              "value": "325606250916557431795983626356110631294008115727848805560023387167927233504"
+            },
+            {
+              "name": "v",
+              "type": "dec",
+              "value": "25869741026945134960544184956460972567356779614910045322022475500191642319642"
+            },
+            {
+              "name": "u_wire",
+              "type": "hex",
+              "value": "e0eb7a7c3b41b8ae1656e3faf19fc46ada098deb9c32b1fd866205165f49b800"
+            }
+          ]
+        },
+        {
+          "name": "map_zero",
+          "in": [
+            {
+              "name": "wire",
+              "type": "hex",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "out": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "name": "map_one",
+          "in": [
+            {
+              "name": "wire",
+              "type": "hex",
+              "value": "0100000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "out": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "9cdb525555555555555555555555555555555555555555555555555555555555"
+            }
+          ]
+        },
+        {
+          "name": "map_top_bits_only",
+          "in": [
+            {
+              "name": "wire",
+              "type": "hex",
+              "value": "00000000000000000000000000000000000000000000000000000000000000c0"
+            }
+          ],
+          "out": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "name": "map_all_ff",
+          "in": [
+            {
+              "name": "wire",
+              "type": "hex",
+              "value": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ],
+          "out": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "80e5132b658f7f451b2b658f7f451b2b658f7f451b2b658f7f451b2b658f7f45"
+            }
+          ]
+        },
+        {
+          "name": "map_kat_pattern",
+          "in": [
+            {
+              "name": "wire",
+              "type": "hex",
+              "value": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+            }
+          ],
+          "out": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "5c8e8fbbd09dbe54e6b190821ac8589612d52740fef7b3b78dcdace52e74a72f"
+            }
+          ]
+        },
+        {
+          "name": "unmap_branch_0",
+          "in": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "536c823af784bbd71bc60229c649a41521e7e06548702355b392233a71a05c67"
+            },
+            {
+              "name": "branch",
+              "type": "int",
+              "value": "0"
+            }
+          ],
+          "out": [
+            {
+              "name": "result",
+              "type": "utf8",
+              "value": "ok"
+            },
+            {
+              "name": "representative",
+              "type": "dec",
+              "value": "7308672330520738438062522980888744139334456572375042460896468874426095397003"
+            },
+            {
+              "name": "representative_wire",
+              "type": "hex",
+              "value": "8b682e93efd2d9f09cebf00a5330483ab9faccb62eece2901f13059edb8f2810"
+            },
+            {
+              "name": "maps_back_to",
+              "type": "hex",
+              "value": "536c823af784bbd71bc60229c649a41521e7e06548702355b392233a71a05c67"
+            }
+          ]
+        },
+        {
+          "name": "unmap_branch_1",
+          "in": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "536c823af784bbd71bc60229c649a41521e7e06548702355b392233a71a05c67"
+            },
+            {
+              "name": "branch",
+              "type": "int",
+              "value": "1"
+            }
+          ],
+          "out": [
+            {
+              "name": "result",
+              "type": "utf8",
+              "value": "ok"
+            },
+            {
+              "name": "representative",
+              "type": "dec",
+              "value": "26719653282249559227660632924522765675073044542400686116335341752385714204946"
+            },
+            {
+              "name": "representative_wire",
+              "type": "hex",
+              "value": "1231ff4968dbc431cb201a9eda26165c483826b0a83b7ac1c858d0fcaec9123b"
+            },
+            {
+              "name": "maps_back_to",
+              "type": "hex",
+              "value": "536c823af784bbd71bc60229c649a41521e7e06548702355b392233a71a05c67"
+            }
+          ]
+        },
+        {
+          "name": "unmap_zero_has_no_representative",
+          "note": "The all-zero wire maps forward to u = 0. Nothing in the codec rejects it — rejecting inputs is what would make it an oracle — so the refusal comes from X25519's all-zero shared-secret check, one layer up.",
+          "in": [
+            {
+              "name": "x25519_public",
+              "type": "hex",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "out": [
+            {
+              "name": "result",
+              "type": "utf8",
+              "value": "no representative"
+            }
+          ]
+        },
+        {
+          "name": "keygen_pinned_reader",
+          "note": "decoded_public differs from clean_x25519_public by an element of E[8]. That is deliberate; both give the same X25519 shared secret against any clamped peer scalar.",
+          "in": [
+            {
+              "name": "reader_seed",
+              "type": "utf8",
+              "value": "winn3-kat-elligator"
+            },
+            {
+              "name": "reader",
+              "type": "utf8",
+              "value": "SHA-256(seed || counter_8_BE) blocks, counter from 0"
+            }
+          ],
+          "out": [
+            {
+              "name": "scalar",
+              "type": "hex",
+              "value": "4f8e606b0a20a003f53e085a68e0e89bed07814943b6df085f2fba28ed2579fd"
+            },
+            {
+              "name": "clean_x25519_public",
+              "type": "hex",
+              "value": "ecb262d0014638dad14fe73e8df7015f4efd180197962671206304ae79fadb49"
+            },
+            {
+              "name": "representative",
+              "type": "hex",
+              "value": "82903be3fd520e4295524e93359375726c3540c335955c2d2e9342d41541ef4b"
+            },
+            {
+              "name": "decoded_public",
+              "type": "hex",
+              "value": "ecb262d0014638dad14fe73e8df7015f4efd180197962671206304ae79fadb49"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

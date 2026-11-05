@@ -1,0 +1,36 @@
+[Unit]
+Description=Win's VPN proof Xray client runtime with tun xray0
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+After=network-online.target
+Wants=network-online.target
+# Client runtime only. The root-owned config must create tun inbound xray0.
+# The broker never accepts caller hosts, ports, paths, or secrets.
+ConditionFileNotEmpty=/etc/winn/proof-client/xray-client.json
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/xray run -c /etc/winn/proof-client/xray-client.json
+TimeoutStartSec=30
+TimeoutStopSec=15
+Restart=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+BindPaths=/dev/net/tun
+DeviceAllow=/dev/net/tun rw
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/winsvpn-proof
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,72 @@
+{
+  "test_control_plane_deepseek_round2": {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "exit_code": 0
+  },
+  "test_control_plane_round6": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "exit_code": 0
+  },
+  "test_control_plane_round4": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "exit_code": 0
+  },
+  "test_control_plane_round5": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "exit_code": 0
+  },
+  "website_security_audit": {
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "exit_code": 0
+  },
+  "test_crypto_payments_spain": {
+    "command": [
+      "python3",
+      "server/test_crypto_payments_spain.py"
+    ],
+    "exit_code": 0
+  },
+  "test_account_expiry_revocation_hub": {
+    "command": [
+      "python3",
+      "server/test_account_expiry_revocation_hub.py"
+    ],
+    "exit_code": 0
+  },
+  "test_account_deletion_hub": {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "exit_code": 0
+  },
+  "test_control_plane_round7": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "exit_code": 0
+  },
+  "test_winn3_descriptor_hub": {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "exit_code": 0
+  }
+}

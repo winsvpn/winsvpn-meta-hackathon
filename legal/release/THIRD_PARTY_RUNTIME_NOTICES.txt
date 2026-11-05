@@ -1,0 +1,152 @@
+WIN'S VPN THIRD-PARTY RUNTIME NOTICES
+Release 1.0.17+34
+Generated inventory version 2026-08-25.v3
+pubspec.lock sha256 5e8c17b7a3ad77a734257c19773ce126ac9931cc8b397fa7045b1516cf2019df
+
+Win's VPN contains proprietary first-party application code and separately
+licensed components. The names below identify compatibility and attribution;
+none of the named projects sponsors or endorses Win's VPN.
+
+Owner/legal approval of the proprietary license, company-rights chain, and
+copyleft election is OWNER-BLOCKED: ABSENT. External publication evidence
+for the designated source archive is OWNER-BLOCKED: ABSENT.
+
+PROTOCOL ORDER
+
+Winn Protocol v3 is the primary tunnel. Winn Protocol v1 is the compatibility
+fallback and tries the current reviewed AmneziaWG path before the current
+reviewed Xray path. Wear OS and browser companion packages do not contain a VPN
+engine and must not claim that they do.
+
+FIRST-PARTY OPEN-SOURCE ENGINE
+
+Winn Protocol v3, Win's VPN 1.0.17+34 release tree
+Copyright (C) 2025-2026 Win's VPN Inc.
+License: AGPL-3.0-or-later, or a separate commercial license from Win's VPN Inc.
+Source and network-use offer: SOURCE_OFFER.txt
+Full license: licenses/AGPL-3.0-or-later.txt
+
+AMNEZIAWG COMPONENTS
+
+amneziawg-go v3.1.20260828
+Commit: b5928efb6ca19f0153958460c3d141f04abc5c2e
+License: MIT
+Platforms: Android phone/TV, Apple, Windows, Linux, and server runtime
+Full notice: licenses/MIT-amneziawg-go.txt
+
+amneziawg-android v3.1.20260814
+Commit: 5c16489e2cd9ed3a0a7a27c7445bba5238132f86
+License: Apache-2.0
+Platforms: Android phone and TV
+Full license: licenses/Apache-2.0.txt
+
+amneziawg-apple v3.1.20260814
+Commit: fe2e2d7ebb835a0a2ad1d8de75094a6de134da4d
+License: MIT
+Platforms: iOS and macOS
+Full notice: licenses/MIT-amneziawg-apple.txt
+
+amneziawg-tools v3.1.20260812
+Commit: ee0f0a9aa34ff0a0da4b3433b9512781cfe02843
+License: GPL-2.0, with identified source files also carrying
+LGPL-2.1-or-later terms
+Platforms: Windows and Linux Winn v1 AWG fallback
+Linux release archive SHA-256
+919e9d0a367c7c72f9c16b7d0a9e4840b943628353b2210a33cb4b582785ba56
+Full license and author notice: licenses/GPL-2.0-amneziawg-tools.txt
+Written offer: SOURCE_OFFER.txt
+
+AmneziaWG Windows client 3.1.0
+Commit: ca5dd3b983bd19c335ab095ccd21fc2f804ec968
+Unsigned source-artifact SHA-256
+12525f397d957659354df03ac1e9568170d8842aa8fa0d16942d8a59d7307d41
+AmneziaWG Windows library v3.1.20260814
+Commit: e90531d15802cb976773f3b63443bc281f738ca3
+License: MIT
+Platform: Windows maintenance/runtime integration
+The amneziawg-go MIT notice accompanies these components.
+
+XRAY COMPONENTS
+
+XTLS/Xray-core v26.9.30
+License: MPL-2.0
+Platforms: Windows, Android phone/TV, and Linux Winn v1 Xray fallback
+Full license: licenses/MPL-2.0.txt
+Source availability: SOURCE_OFFER.txt
+
+amnezia-xray-core v1.260924.0
+Commit: 77e5d55a796bafe17c1b5f2a9d9c590fd2a9f5f3
+License: MPL-2.0
+Platforms: iOS and macOS Winn v1 Xray fallback
+Modification: hostname-safe patch to transport/internet/tls/ech.go
+Full license: licenses/MPL-2.0.txt
+Modified Source Code Form: SOURCE_OFFER.txt
+
+amnezia-libxray v1.0.3
+Commit: e8cc06d7427251fa549093e7cc32c28b0f5fbafa
+License: MIT
+Platforms: iOS and macOS Xray C API wrapper
+Full notice: licenses/MIT-amnezia-libxray.txt
+
+WINDOWS-ONLY REDISTRIBUTABLES
+
+Wintun prebuilt binaries
+Copyright (C) 2018-2021 WireGuard LLC. All Rights Reserved.
+License: proprietary Wintun Prebuilt Binaries License
+The DLL is redistributed unmodified and used only through its permitted API.
+Full terms: licenses/Wintun-Prebuilt-Binaries-License.txt
+
+Microsoft Visual C++ Redistributable
+License: Microsoft proprietary redistributable terms applicable to the signed
+Microsoft package. It is a prerequisite installer, not Win's VPN code.
+Its exact signed bytes and architecture are bound by the Windows release gate.
+Owner/counsel redistribution evidence remains OWNER-BLOCKED: ABSENT.
+
+FLUTTER AND DART
+
+Flutter release artifacts contain a generated flutter_assets/NOTICES.Z file.
+That file is the complete generated license registry for the exact Flutter SDK,
+engine artifacts, direct Dart packages, and transitive Dart packages included
+by the build. The legal gate requires it to be present, valid gzip, and to name
+every direct runtime dependency resolved by pubspec.lock:
+
+  country_flags 4.1.2
+  crypto 3.0.7
+  cryptography 2.9.0
+  decimal 3.2.6
+  flutter and flutter_localizations from the reviewed Flutter SDK
+  flutter_map 8.3.2
+  http 1.6.0
+  latlong2 0.10.1
+  path 1.9.1
+
+The generated registry also carries notices for transitive packages and native
+Flutter engine components. It is exposed in the application through Settings,
+Open source licenses. The bundled country_flags assets retain their MIT
+attribution, including the embedded flag-icons artwork; the detailed asset
+notice is in THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md.
+
+WEAR OS COMPANION
+
+The Wear OS package contains no Winn, AmneziaWG, or Xray engine. It uses
+AndroidX, Jetpack Compose, Wear Compose, Kotlin coroutines, and Google Play
+services Wearable at the exact Gradle-resolved versions. Apache-2.0 notices for
+the AndroidX/Kotlin components and applicable Google SDK terms must accompany
+the Wear package. The release gate rejects a Wear legal manifest that claims a
+VPN engine is present.
+
+BROWSER COMPANIONS
+
+The Chrome, Edge, and Firefox companion runtime is first-party JavaScript and
+uses no registry runtime dependencies. A pinned esbuild executable transforms
+JavaScript at build time but is not included in the store package. The browser
+legal bundle therefore contains the Win's VPN software license and controlling
+terms but does not claim that Winn, AmneziaWG, Xray, or esbuild ships inside the
+extension.
+
+PARKED OR ABSENT COMPONENTS
+
+The Mullvad Windows split-tunnel driver and hev-socks5-tunnel/lwIP are not
+shipping components. They must not appear as bundled runtime identities in a
+release receipt. Reintroducing either component requires a new license and
+provenance review before packaging.

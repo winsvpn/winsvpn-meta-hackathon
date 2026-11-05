@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mirrors the wear_os pattern: exclude all five domains for the legacy
+  full-backup-content format (used on API < 31) so no app data leaves the
+  device via adb backup or OEM transfer.
+-->
+<full-backup-content>
+    <exclude domain="root" />
+    <exclude domain="file" />
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+    <exclude domain="external" />
+</full-backup-content>

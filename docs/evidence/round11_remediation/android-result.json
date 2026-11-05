@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pwsh",
+    "-NoProfile",
+    "-File",
+    "tools/build_android_release.ps1",
+    "-SkipPubGet"
+  ],
+  "exit_code": 1,
+  "seconds": 0.71,
+  "apk_present": false
+}

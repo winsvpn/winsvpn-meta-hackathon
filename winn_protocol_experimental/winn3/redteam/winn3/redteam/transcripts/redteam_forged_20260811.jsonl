@@ -1,0 +1,4 @@
+{"id":"frg-01","action":"forged_register_node","category":"registry","target":"nodes/register","principal":"forger","seq":1,"expected":"deny"}
+{"id":"frg-02","action":"forged_key_export","category":"credential","target":"session/keys","principal":"forger","seq":2,"expected":"deny"}
+{"id":"frg-03","action":"forged_tunnel_promote","category":"tunnel","target":"host/utun","principal":"forger","seq":3,"expected":"deny"}
+{"id":"frg-04","action":"forged_read_log","category":"info","target":"logs/ops.log","principal":"auditor","seq":4,"expected":"allow"}

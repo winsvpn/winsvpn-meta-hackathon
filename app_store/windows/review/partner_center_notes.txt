@@ -1,0 +1,45 @@
+Microsoft Partner Center notes for Win's VPN 1.0.17+34
+(product 1.0.17, four-part 1.0.17.34).
+
+Identity:
+- Product name: Win's VPN
+- Publisher: Win's VPN Inc
+- Canonical release: 1.0.17+34 from pubspec.yaml and
+  docs/rulings/RELEASE_IDENTITY_MAP_20260824.json
+- Production MSIX identity 1.0.17.34 is fail-closed and is not an upload target
+
+Package type:
+- Intended production route: Authenticode-signed offline Inno Setup Win32 EXE. Not MSIX.
+- Website x64: WinsVPN-Setup.exe
+- Partner Center x64: WinsVPN-PartnerCenter.exe
+- Native ARM64 uses distinct -arm64 filenames and is not this x64 packet
+- Current Authenticode leaf: OWNER-BLOCKED: ABSENT
+- Partner Center enrollment: OWNER-BLOCKED: ABSENT
+- Listing/screenshot inventory: owner-blocked; screenshot set OWNER-BLOCKED: ABSENT
+- Private symbol/obfuscation receipts: unpublished under
+  .artifacts/private-release-symbols/windows/x64/1.0.17+34
+- Exact installer SHA-256: OWNER-BLOCKED: ABSENT
+- Versioned HTTPS direct URL: OWNER-BLOCKED: ABSENT
+
+Protocol (local Windows engines):
+- Primary: Winn v3 (winn-datapath.exe and winsvpn_winn3_engine.exe)
+- Ordered Winn v1 compatibility path: AWG then Xray
+- A served Winn v3 lead attempt cannot be skipped
+
+Privacy / export / age:
+- Privacy policy: https://www.winsvpn.org/privacy/
+- Tracking: no. Browsing history, DNS query history, traffic content, and
+  destination activity are not collected.
+- Export-compliance answers: OWNER-BLOCKED: ABSENT
+- IARC / age rating answers: OWNER-BLOCKED: ABSENT
+
+Reviewer path:
+1. Install with /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /RESTARTEXITCODE=3010 /SP-
+2. Reboot if setup returns 3010.
+3. Launch Win's VPN, set a six-digit PIN, and connect.
+4. Confirm Winn v3 is attempted first.
+5. Disconnect and confirm no residual WinsVPN* or AmneziaWGTunnel$winsvpn services.
+
+Test account: OWNER-BLOCKED: ABSENT. This field is not completed evidence.
+Test regions/routes: OWNER-BLOCKED: ABSENT. This field is not completed evidence.
+This package never uploads.

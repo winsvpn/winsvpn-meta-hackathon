@@ -1,0 +1,86 @@
+{
+  "actions": {
+    "connect-cover-awg": {
+      "final_observation_keys": [
+        "latest_handshake_utc",
+        "node",
+        "protocol",
+        "result"
+      ],
+      "remote_helper_data_keys": [
+        "node",
+        "protocol",
+        "result"
+      ]
+    },
+    "connect-cover-xray": {
+      "final_observation_keys": [
+        "node",
+        "protocol",
+        "result"
+      ],
+      "remote_helper_data_keys": [
+        "node",
+        "protocol",
+        "result"
+      ]
+    },
+    "connect-primary": {
+      "final_observation_keys": [
+        "attempts",
+        "bytes_rx",
+        "bytes_tx",
+        "interface",
+        "status_delta"
+      ],
+      "remote_helper_data_keys": [
+        "attempts"
+      ]
+    },
+    "probe-awg-block": {
+      "final_observation_keys": [
+        "attempt_events",
+        "attempts",
+        "awg_interface",
+        "control_id",
+        "xray_bytes_rx",
+        "xray_bytes_tx"
+      ],
+      "remote_helper_data_keys": [
+        "attempt_events",
+        "attempts",
+        "control_id"
+      ]
+    },
+    "probe-winn3-block": {
+      "final_observation_keys": [
+        "attempt_events",
+        "attempts",
+        "control_id"
+      ],
+      "remote_helper_data_keys": [
+        "attempt_events",
+        "attempts",
+        "control_id"
+      ]
+    },
+    "probe-cover-withdrawn": {
+      "final_observation_keys": [
+        "attempt_events",
+        "attempts",
+        "control_id",
+        "refusal_code",
+        "same_node_downgrade_attempts"
+      ],
+      "remote_helper_data_keys": [
+        "attempt_events",
+        "attempts",
+        "control_id",
+        "refusal_code",
+        "same_node_downgrade_attempts"
+      ]
+    }
+  },
+  "contract": "winsvpn-gcp-proof-action-data-v1",
+  "schema_version": 1
+}

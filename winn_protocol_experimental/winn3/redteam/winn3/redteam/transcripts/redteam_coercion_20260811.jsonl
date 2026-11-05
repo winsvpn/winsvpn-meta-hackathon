@@ -1,0 +1,4 @@
+{"id":"coer-01","action":"coerce_unlock_pin","category":"credential","target":"phone/pin","principal":"attacker","seq":1,"expected":"deny"}
+{"id":"coer-02","action":"forced_keystore_read","category":"credential","target":"android/keystore","principal":"attacker","seq":2,"expected":"deny"}
+{"id":"coer-03","action":"duress_reveal_cert","category":"credential","target":"apple/certs","principal":"attacker","seq":3,"expected":"deny"}
+{"id":"coer-04","action":"coerce_resign_descriptor","category":"credential","target":"descriptor/v2","principal":"attacker","seq":4,"expected":"deny"}

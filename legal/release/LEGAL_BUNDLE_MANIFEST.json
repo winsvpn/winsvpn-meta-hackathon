@@ -1,0 +1,563 @@
+{
+  "app_release": "1.0.17+34",
+  "bundle_path": "legal/release/LEGAL_BUNDLE_MANIFEST.json",
+  "components": {
+    "amnezia-libxray": {
+      "identity": "v1.0.3 commit e8cc06d7427251fa549093e7cc32c28b0f5fbafa",
+      "license": "MIT",
+      "platforms": [
+        "ios",
+        "macos"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amnezia-libxray"
+    },
+    "amnezia-xray-core": {
+      "identity": "v1.260924.0 commit 77e5d55a796bafe17c1b5f2a9d9c590fd2a9f5f3 plus hostname-safe ech.go patch",
+      "license": "MPL-2.0",
+      "platforms": [
+        "ios",
+        "macos"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amnezia-xray-core"
+    },
+    "amneziawg-android": {
+      "identity": "v3.1.20260814 commit 5c16489e2cd9ed3a0a7a27c7445bba5238132f86",
+      "license": "Apache-2.0",
+      "platforms": [
+        "android",
+        "android-tv"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amneziawg-android"
+    },
+    "amneziawg-apple": {
+      "identity": "v3.1.20260814 commit fe2e2d7ebb835a0a2ad1d8de75094a6de134da4d",
+      "license": "MIT",
+      "platforms": [
+        "ios",
+        "macos"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amneziawg-apple"
+    },
+    "amneziawg-go": {
+      "identity": "v3.1.20260828 commit b5928efb6ca19f0153958460c3d141f04abc5c2e",
+      "license": "MIT",
+      "platforms": [
+        "android",
+        "android-tv",
+        "ios",
+        "linux",
+        "macos",
+        "windows"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amneziawg-go"
+    },
+    "amneziawg-tools": {
+      "identity": "v3.1.20260812 commit ee0f0a9aa34ff0a0da4b3433b9512781cfe02843",
+      "license": "GPL-2.0 with identified LGPL-2.1-or-later files",
+      "platforms": [
+        "linux",
+        "windows"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amneziawg-tools"
+    },
+    "amneziawg-windows-client": {
+      "identity": "3.1.0 commit ca5dd3b983bd19c335ab095ccd21fc2f804ec968",
+      "license": "MIT",
+      "platforms": [
+        "windows"
+      ],
+      "repository": "https://github.com/amnezia-vpn/amneziawg-windows-client"
+    },
+    "browser-companion-runtime": {
+      "identity": "first-party JavaScript; no registry runtime dependencies; esbuild is build-only",
+      "license": "Win's VPN proprietary software license",
+      "platforms": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "repository": "not redistributed as third-party runtime"
+    },
+    "flutter-dart-runtime": {
+      "identity": "pubspec.lock sha256 5e8c17b7a3ad77a734257c19773ce126ac9931cc8b397fa7045b1516cf2019df plus package NOTICES.Z",
+      "license": "per-component generated notices",
+      "platforms": [
+        "android",
+        "android-tv",
+        "ios",
+        "linux",
+        "macos",
+        "windows"
+      ],
+      "repository": "https://github.com/flutter/flutter"
+    },
+    "winn-protocol-v3": {
+      "identity": "Win's VPN 1.0.17+34 release source",
+      "license": "AGPL-3.0-or-later or separate commercial license; packaged client elects AGPL notice",
+      "platforms": [
+        "android",
+        "android-tv",
+        "ios",
+        "linux",
+        "macos",
+        "windows"
+      ],
+      "repository": "release source archive bound by SOURCE_OFFER.txt"
+    },
+    "wins-vpn-application": {
+      "identity": "Win's VPN 1.0.17+34 proprietary application portions",
+      "license": "Win's VPN proprietary software license",
+      "platforms": [
+        "android",
+        "android-tv",
+        "chrome",
+        "edge",
+        "firefox",
+        "ios",
+        "linux",
+        "macos",
+        "wear-os",
+        "windows"
+      ],
+      "repository": "not licensed as third-party software"
+    },
+    "wintun-prebuilt": {
+      "identity": "unmodified signed Wintun prebuilt DLL selected by Windows artifact custody",
+      "license": "Wintun Prebuilt Binaries License",
+      "platforms": [
+        "windows"
+      ],
+      "repository": "https://www.wintun.net/"
+    },
+    "xray-core": {
+      "identity": "XTLS/Xray-core v26.9.30",
+      "license": "MPL-2.0",
+      "platforms": [
+        "android",
+        "android-tv",
+        "linux",
+        "windows"
+      ],
+      "repository": "https://github.com/XTLS/Xray-core"
+    }
+  },
+  "contract": "winsvpn-release-legal-bundle-v1",
+  "files": {
+    "APP_PRIVACY_POLICY.txt": {
+      "repository_source": "legal/APP_PRIVACY_POLICY.txt",
+      "sha256": "63953d943026c9c651de9bf861346749319a52889b116fed339ef4d347c9e64e"
+    },
+    "MASTER_LEGAL_DOCUMENT.txt": {
+      "repository_source": "legal/MASTER_LEGAL_DOCUMENT.txt",
+      "sha256": "38f1cb8c7ac12b7b5ce7f65d3791b85c6ae8c62b1d0072706f775f7108d6e6cf"
+    },
+    "SOURCE_OFFER.txt": {
+      "repository_source": "legal/release/SOURCE_OFFER.txt",
+      "sha256": "61610691f9916afe559b6fa116bf0c4865472837fc3169916c2e30e9bc4bce0d"
+    },
+    "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md": {
+      "repository_source": "docs/THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+      "sha256": "87ee26c40c5af94e2034879b28dfaec90a4da7007b582ca81cfa926896b6c5d6"
+    },
+    "THIRD_PARTY_RUNTIME_NOTICES.txt": {
+      "repository_source": "legal/release/THIRD_PARTY_RUNTIME_NOTICES.txt",
+      "sha256": "ef085d10bda42d6577a6d140a8afb5e9f76c3e4fdbb098a03cc1c7124bd25136"
+    },
+    "WINS_VPN_SOFTWARE_LICENSE.txt": {
+      "repository_source": "legal/release/WINS_VPN_SOFTWARE_LICENSE.txt",
+      "sha256": "1b2ce31da8944ee51d4a2eef87352a8ed45d2881aad2de0a5c9cd53160354438"
+    },
+    "licenses/AGPL-3.0-or-later.txt": {
+      "repository_source": "winn_protocol_experimental/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    "licenses/Apache-2.0.txt": {
+      "repository_source": "legal/release/licenses/Apache-2.0.txt",
+      "sha256": "08d5037f7853d17380540e9673e6e0e850283a1a74d932e111954a4a0448b746"
+    },
+    "licenses/GPL-2.0-amneziawg-tools.txt": {
+      "repository_source": "installer/windows/licenses/amneziawg-tools-GPL-2.0.txt",
+      "sha256": "2234a66e7f25489d8682d10d6bbb2558bb2a15e83dc4fc49048f985c85bd3cfc"
+    },
+    "licenses/MIT-amnezia-libxray.txt": {
+      "repository_source": "legal/release/licenses/MIT-amnezia-libxray.txt",
+      "sha256": "b976920613d872432ba58dc3fb3d8af938fc58317061ab73c0beaa82dcb5e045"
+    },
+    "licenses/MIT-amneziawg-apple.txt": {
+      "repository_source": "legal/release/licenses/MIT-amneziawg-apple.txt",
+      "sha256": "3378038deb7a445ec2585f8effde710c55a3235526d884aaa829825252a59ec3"
+    },
+    "licenses/MIT-amneziawg-go.txt": {
+      "repository_source": "legal/release/licenses/MIT-amneziawg-go.txt",
+      "sha256": "4e576a3791a1aff5feda52c1fb9745404c17a8de5e1d94d88eac0bfdc3912ff7"
+    },
+    "licenses/MPL-2.0.txt": {
+      "repository_source": "installer/windows/licenses/Xray-core-MPL-2.0.txt",
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    "licenses/Wintun-Prebuilt-Binaries-License.txt": {
+      "repository_source": "installer/windows/licenses/Wintun-Prebuilt-Binaries-License.txt",
+      "sha256": "d9dd00871d2303b9d9172c879aeb08c3ff36e7f4e1e9ceb46b8e36c2fcddfffb"
+    }
+  },
+  "flutter_notice_markers": [
+    "country_flags",
+    "crypto",
+    "cryptography",
+    "decimal",
+    "flutter_map",
+    "http",
+    "latlong2",
+    "path"
+  ],
+  "owner_legal_approval": {
+    "company_rights_chain": "OWNER-BLOCKED: ABSENT",
+    "copyleft_license_election": "OWNER-BLOCKED: ABSENT",
+    "proprietary_license": "OWNER-BLOCKED: ABSENT",
+    "status": "OWNER-BLOCKED: ABSENT"
+  },
+  "platforms": {
+    "android": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-android v3.1.20260814 -- Android tunnel library",
+        "Xray-core v26.9.30"
+      ],
+      "required_components": [
+        "amneziawg-android",
+        "amneziawg-go",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application",
+        "xray-core"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/Apache-2.0.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "requires_flutter_notices": true
+    },
+    "android-tv": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-android v3.1.20260814 -- Android tunnel library",
+        "Xray-core v26.9.30"
+      ],
+      "required_components": [
+        "amneziawg-android",
+        "amneziawg-go",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application",
+        "xray-core"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/Apache-2.0.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "requires_flutter_notices": true
+    },
+    "chrome": {
+      "forbidden_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-android",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "amneziawg-tools",
+        "amneziawg-windows-client",
+        "winn-protocol-v3",
+        "wintun-prebuilt",
+        "xray-core"
+      ],
+      "forbidden_in_app_markers": [],
+      "in_app_markers": [],
+      "required_components": [
+        "browser-companion-runtime",
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt"
+      ],
+      "requires_flutter_notices": false
+    },
+    "edge": {
+      "forbidden_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-android",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "amneziawg-tools",
+        "amneziawg-windows-client",
+        "winn-protocol-v3",
+        "wintun-prebuilt",
+        "xray-core"
+      ],
+      "forbidden_in_app_markers": [],
+      "in_app_markers": [],
+      "required_components": [
+        "browser-companion-runtime",
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt"
+      ],
+      "requires_flutter_notices": false
+    },
+    "firefox": {
+      "forbidden_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-android",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "amneziawg-tools",
+        "amneziawg-windows-client",
+        "winn-protocol-v3",
+        "wintun-prebuilt",
+        "xray-core"
+      ],
+      "forbidden_in_app_markers": [],
+      "in_app_markers": [],
+      "required_components": [
+        "browser-companion-runtime",
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt"
+      ],
+      "requires_flutter_notices": false
+    },
+    "ios": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-apple v3.1.20260814",
+        "amnezia-libxray v1.0.3",
+        "amnezia-xray-core v1.260924.0"
+      ],
+      "required_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/MIT-amnezia-libxray.txt",
+        "licenses/MIT-amneziawg-apple.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "requires_flutter_notices": true
+    },
+    "linux": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-tools",
+        "v3.1.20260812",
+        "Xray-core v26.9.30"
+      ],
+      "required_components": [
+        "amneziawg-go",
+        "amneziawg-tools",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application",
+        "xray-core"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/GPL-2.0-amneziawg-tools.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "requires_flutter_notices": true
+    },
+    "macos": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-apple v3.1.20260814",
+        "amnezia-libxray v1.0.3",
+        "amnezia-xray-core v1.260924.0"
+      ],
+      "required_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/MIT-amnezia-libxray.txt",
+        "licenses/MIT-amneziawg-apple.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "requires_flutter_notices": true
+    },
+    "wear-os": {
+      "forbidden_components": [
+        "amnezia-libxray",
+        "amnezia-xray-core",
+        "amneziawg-android",
+        "amneziawg-apple",
+        "amneziawg-go",
+        "amneziawg-tools",
+        "amneziawg-windows-client",
+        "winn-protocol-v3",
+        "wintun-prebuilt",
+        "xray-core"
+      ],
+      "forbidden_in_app_markers": [],
+      "in_app_markers": [],
+      "required_components": [
+        "wins-vpn-application"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/Apache-2.0.txt"
+      ],
+      "requires_flutter_notices": false
+    },
+    "windows": {
+      "forbidden_components": [],
+      "forbidden_in_app_markers": [
+        "hev-socks5-tunnel / lwIP"
+      ],
+      "in_app_markers": [
+        "Winn Protocol",
+        "GNU Affero General Public License",
+        "amneziawg-go",
+        "v3.1.20260828",
+        "amneziawg-tools",
+        "v3.1.20260812",
+        "amneziawg-windows-client 3.1.0",
+        "Xray-core v26.9.30",
+        "Wintun"
+      ],
+      "required_components": [
+        "amneziawg-go",
+        "amneziawg-tools",
+        "amneziawg-windows-client",
+        "flutter-dart-runtime",
+        "winn-protocol-v3",
+        "wins-vpn-application",
+        "wintun-prebuilt",
+        "xray-core"
+      ],
+      "required_files": [
+        "APP_PRIVACY_POLICY.txt",
+        "MASTER_LEGAL_DOCUMENT.txt",
+        "SOURCE_OFFER.txt",
+        "THIRD_PARTY_NOTICES_AND_COMPONENT_INVENTORY.md",
+        "THIRD_PARTY_RUNTIME_NOTICES.txt",
+        "WINS_VPN_SOFTWARE_LICENSE.txt",
+        "licenses/AGPL-3.0-or-later.txt",
+        "licenses/GPL-2.0-amneziawg-tools.txt",
+        "licenses/MIT-amneziawg-go.txt",
+        "licenses/MPL-2.0.txt",
+        "licenses/Wintun-Prebuilt-Binaries-License.txt"
+      ],
+      "requires_flutter_notices": true
+    }
+  },
+  "publication_evidence": {
+    "live_source_archive": "OWNER-BLOCKED: ABSENT",
+    "source_archive_sha256": "OWNER-BLOCKED: ABSENT",
+    "source_archive_url": "https://downloads.winsvpn.org/source/wins-vpn-1.0.17.tar.gz",
+    "status": "OWNER-BLOCKED: ABSENT"
+  },
+  "schema_version": 1
+}

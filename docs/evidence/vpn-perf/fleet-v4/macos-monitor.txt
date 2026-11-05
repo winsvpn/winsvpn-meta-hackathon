@@ -1,0 +1,3 @@
+/tmp/fleet-monitor.sh:4: no matches found: /tmp/fleet-speed-evidence/snap-*.json
+04:35:35 route: 0/1 link#27 UCSg utun7 
+default link#27 UCSg utun7 

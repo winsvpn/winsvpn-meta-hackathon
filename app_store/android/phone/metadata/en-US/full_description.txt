@@ -1,0 +1,16 @@
+Win's VPN is a user-initiated encrypted VPN for Android phones and tablets.
+
+The tunnel uses Winn v3 as the product's primary protocol. Winn v1 AWG
+fallback is the compatibility path after a served Winn v3 attempt. A served
+Winn v3 lead attempt cannot be skipped. Direct AWG is not a separate request
+site.
+
+Tap the power control to start the VPN, approve Android's VpnService prompt,
+and disconnect from the app or the persistent VPN notification at any time.
+Split tunneling is the on-device picker named Exclude Apps From VPN (Split
+Tunneling). Installed-app inventory stays on the device.
+
+The Play listing name is Win's VPN. The installed application label is the
+Calculator disguise. Calculator camouflage is phone-only.
+
+Privacy policy: https://www.winsvpn.org/privacy/

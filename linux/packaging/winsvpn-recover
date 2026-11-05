@@ -1,0 +1,78 @@
+#!/bin/sh
+set -u
+
+failed=0
+removed=0
+
+command -v ip >/dev/null 2>&1 || exit 127
+if ip link show dev winsvpn >/dev/null 2>&1 ||
+   ip link show dev winsvpn3 >/dev/null 2>&1; then
+    echo "Recovery refused while a tunnel interface is present." >&2
+    exit 65
+fi
+
+for tool in iptables ip6tables; do
+    command -v "$tool" >/dev/null 2>&1 || continue
+    rules="$("$tool" -w 5 -S 2>/dev/null)" || {
+        failed=1
+        continue
+    }
+
+    for chain in WINSVPN_KS WINSVPN_KS3 WINSVPN_RGA WINSVPN_RGB; do
+        chain_rules="$(printf '%s\n' "$rules" | awk -v chain="$chain" '
+          ($1 == "-N" || $1 == "-A") && $2 == chain { print }
+        ')"
+        [ -n "$chain_rules" ] || continue
+
+        case "$chain" in
+            WINSVPN_KS3) tag=winsvpn-killswitch3 ;;
+            WINSVPN_KS) tag=winsvpn-killswitch ;;
+            *) tag=winsvpn-reconnect-guard ;;
+        esac
+
+        if ! printf '%s\n' "$chain_rules" | awk -v tag="$tag" '
+          $1 == "-N" { next }
+          {
+            owned = 0
+            for (i = 1; i < NF; i++) {
+              if ($i != "--comment") continue
+              value = $(i + 1)
+              gsub(/^"|"$/, "", value)
+              if (value == tag ||
+                  (tag == "winsvpn-killswitch" &&
+                   value == tag "-empty-family") ||
+                  (tag == "winsvpn-reconnect-guard" &&
+                   (value == tag "-dhcp" || value == tag "-endpoint"))) {
+                owned = 1
+              }
+            }
+            if (!owned) exit 1
+          }
+        '; then
+            echo "Recovery refused an unowned firewall chain." >&2
+            failed=1
+            continue
+        fi
+
+        if ! "$tool" -w 5 -F "$chain"; then
+            failed=1
+            continue
+        fi
+        removed=1
+
+        while "$tool" -w 5 -C OUTPUT -m comment --comment "$tag" \
+            -j "$chain" >/dev/null 2>&1; do
+            "$tool" -w 5 -D OUTPUT -m comment --comment "$tag" \
+                -j "$chain" || {
+                failed=1
+                break
+            }
+        done
+        "$tool" -w 5 -X "$chain" >/dev/null 2>&1 || failed=1
+    done
+done
+
+if [ "$removed" -eq 1 ]; then
+    echo "Owned leftover firewall rules were removed."
+fi
+exit "$failed"

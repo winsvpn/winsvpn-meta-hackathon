@@ -1,0 +1,5 @@
+{
+  "kind": "erase_all_billing",
+  "params": [],
+  "policy": {"name": "default", "version": 3}
+}

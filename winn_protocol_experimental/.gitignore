@@ -1,0 +1,18 @@
+/bin/
+/build/
+/lab/
+/evidence/runtime/
+*.log
+*.test
+coverage.out
+
+# Key material must never be committed. No rule previously covered this: a
+# cover certificate and its private key were written into the working tree
+# during the cover-certificate work, and scripts/obtain_cover_cert.sh will
+# write cover-key.pem into any --out-dir it is given, including this one.
+# Certificates are public and stay trackable; private keys do not.
+*.key
+*-key.pem
+*-privkey.pem
+cover-cert.pem
+cover-fullchain.pem

@@ -1,0 +1,3 @@
+before1: 71701241 B/s (25000000 bytes in 0.348669s)
+before2: 57215308 B/s (25000000 bytes in 0.436946s)
+before3: 36029700 B/s (25000000 bytes in 0.693872s)

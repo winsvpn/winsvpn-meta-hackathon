@@ -1,0 +1,154 @@
+#!/bin/sh
+# ipscrub pre-push gate for wins_vpn -- FAIL CLOSED.
+#
+# Ported from the proven gate in the `wins/docs` repository
+# (tools/ipscrub/pre-push + tools/ipscrub/ipscrub.py, 2026-08-06).
+#
+# WHAT IT DOES
+#   Refuses any push that would UPLOAD a globally routable IP address (v4 or
+#   v6) or WireGuard private/preshared key material to the remote. Scope is the
+#   push delta -- objects reachable from the ref being pushed but not already
+#   on the remote -- because this repository's already-pushed history is full of
+#   addresses and a whole-history gate would block every push forever.
+#
+# WHERE IT LIVES
+#   The TRACKED copy is tools/ipscrub/pre-push. It is installed into
+#   .git/hooks/pre-push by:
+#
+#       sh tools/ipscrub/install-hooks.sh
+#
+#   That install step is not optional and is not automatic: .git/hooks/ is not
+#   version controlled, so a fresh clone has NO gate until someone runs it.
+#   Committing this file is what makes the gate recoverable and reviewable; the
+#   one command is what makes it live in a given checkout.
+#
+# WHY THE HOOK IS COPIED AND core.hooksPath IS NOT SET
+#   core.hooksPath would keep the hook automatically fresh, but it is exclusive
+#   -- it replaces .git/hooks entirely, silently disabling every other hook a
+#   developer has or later installs -- and it makes the gate BRANCH-DEPENDENT:
+#   check out any branch that predates tools/ipscrub and the hook simply is not
+#   found, so the push runs unguarded, silently. A gate that vanishes on
+#   `git checkout main` is worse than one that goes stale.
+#
+#   Freshness is bought a different way instead. This wrapper is only a
+#   launcher; the logic that actually changes -- ipscrub.py and the allowlist --
+#   is resolved from the WORKING TREE first, so a `git pull` improves the gate
+#   immediately. The copy beside this file is the fallback that guarantees the
+#   gate still exists on branches where tools/ipscrub does not. Trigger pinned,
+#   logic fresh.
+#
+# THE PACKED SCAN, AND WHY THIS HOOK IS WHERE IT LIVES
+#   ipscrub prints one status line per run saying whether the packed-value scan
+#   -- the one that finds an address stored as raw 4/16 bytes rather than as
+#   text -- is ON or OFF. It is OFF unless a node map is configured, and until
+#   2026-08-07 nothing anywhere configured one, so it was off everywhere and
+#   said nothing. Arm it once per clone:
+#
+#       git config ipscrub.nodeMap <path OUTSIDE this repository>
+#
+#   The path is per-clone local state in .git/config and is never pushed; the
+#   FILE stays in the no-remote archive. A path inside the repository is
+#   refused outright -- that file lists this project's own addresses, and
+#   putting it here to detect them here would be the disclosure itself.
+#
+#   This hook, not CI, is where that check belongs: CI runs after the objects
+#   are already on the remote, and a CI secret would hand the address list to
+#   the very service the gate is defending against.
+#
+# Any failure -- missing interpreter, missing scanner, crash, unreadable ref
+# list, or a node map that is configured but unusable -- aborts the push. A gate
+# that opens when it breaks is not a gate.
+
+set -u
+
+BAR='========================================================================'
+REMOTE_NAME="${1:-origin}"
+
+die() {
+    printf '\n%s\n' "$BAR" >&2
+    printf 'PUSH BLOCKED -- ipscrub pre-push gate could not verify this push\n' >&2
+    printf '%s\n\n' "$BAR" >&2
+    printf '%s\n\n' "$1" >&2
+    printf 'This hook fails closed on purpose: it cannot confirm the absence of\n' >&2
+    printf 'infrastructure addresses, so it refuses the push rather than guess.\n' >&2
+    printf 'Repair the checkout (sh tools/ipscrub/install-hooks.sh), or set\n' >&2
+    printf 'IPSCRUB_ALLOW_PUSH=1 to override -- which is a deliberate decision\n' >&2
+    printf 'to publish unverified content.\n' >&2
+    printf '%s\n' "$BAR" >&2
+    exit 1
+}
+
+if [ "${IPSCRUB_ALLOW_PUSH:-0}" = "1" ]; then
+    printf 'ipscrub: gate OVERRIDDEN by IPSCRUB_ALLOW_PUSH=1. Addresses may be published.\n' >&2
+    exit 0
+fi
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "Not inside a git working tree."
+
+HOOKDIR=$(git rev-parse --git-path hooks 2>/dev/null) || die "Cannot locate .git/hooks."
+case "$HOOKDIR" in /*) ;; *) HOOKDIR="$ROOT/$HOOKDIR" ;; esac
+
+# Directory this script is actually running from, whichever copy that is.
+SELFDIR=$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd) || SELFDIR="$HOOKDIR"
+
+# Resolve the scanner AND its allowlist as a unit, from the same directory --
+# never one from the working tree and the other from .git/hooks. A scanner and
+# the allowlist it was calibrated against belong together.
+#
+# Order of preference:
+#   1. $ROOT/tools/ipscrub  -- the tracked copy; updates with `git pull`.
+#   2. beside this script   -- the installed copy; always present once
+#                              install-hooks.sh has run, so the gate survives a
+#                              checkout of any branch predating tools/ipscrub.
+#   3. $HOOKDIR             -- belt and braces if $0 was mangled.
+SCANNER=""
+ALLOWLIST=""
+SOURCE=""
+for dir in "$ROOT/tools/ipscrub" "$SELFDIR" "$HOOKDIR"; do
+    if [ -f "$dir/ipscrub.py" ] && [ -f "$dir/ipscrub-allowlist.txt" ]; then
+        SCANNER="$dir/ipscrub.py"
+        ALLOWLIST="$dir/ipscrub-allowlist.txt"
+        case "$dir" in
+            "$ROOT/tools/ipscrub") SOURCE="tracked working tree" ;;
+            *)                     SOURCE="installed copy in $dir" ;;
+        esac
+        break
+    fi
+done
+
+[ -n "$SCANNER" ] || die "Could not find a complete ipscrub install (ipscrub.py +
+ipscrub-allowlist.txt together) in any of:
+    $ROOT/tools/ipscrub
+    $SELFDIR
+    $HOOKDIR
+Without the allowlist every published resolver and provider range would block,
+the gate would cry wolf, and someone would switch it off. Refusing to run
+degraded. Run:  sh tools/ipscrub/install-hooks.sh"
+
+PY=""
+for candidate in python3 /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        PY=$(command -v "$candidate")
+        break
+    fi
+done
+[ -n "$PY" ] || die "No python3 interpreter found on PATH or at the usual locations."
+
+printf 'ipscrub: scanning the push delta (scanner: %s)\n' "$SOURCE" >&2
+
+# git feeds the hook one line per ref on stdin:
+#   <local ref> <local sha> <remote ref> <remote sha>
+# Passed straight through. ipscrub scans OBJECTS, not final trees, because a
+# redaction commit layered on top leaves the original blob reachable from the
+# tip being pushed -- it would still upload, and it must not satisfy this gate.
+"$PY" "$SCANNER" --allowlist "$ALLOWLIST" prepush \
+      --repo "$ROOT" --remote-name "$REMOTE_NAME"
+status=$?
+
+if [ "$status" -eq 0 ]; then
+    exit 0
+elif [ "$status" -eq 1 ]; then
+    exit 1   # findings; ipscrub already printed the report
+else
+    die "The scanner exited with status $status (an internal error, not a clean result)."
+fi

@@ -1,0 +1,745 @@
+#!/usr/bin/env bash
+#
+# winn-spa-nft - install, inspect and REVERT the nftables gate that
+# winn-knockd's Single Packet Authorization grants feed.
+#
+# This script owns every firewall rule involved. winn-knockd itself only ever
+# adds an element to a set; it writes no rule and deletes nothing. Splitting it
+# this way is deliberate: the dangerous half is a short, reviewable shell script
+# an operator can read in full before running it on the only live node.
+#
+# ---------------------------------------------------------------------------
+# THE REVERT, FIRST, BECAUSE IT IS THE THING YOU WILL WANT AT 3AM
+# ---------------------------------------------------------------------------
+#
+#   nft delete table inet winn_spa
+#
+# That is the whole revert. It is atomic, it needs no knock, no key and not this
+# daemon, and because the table is dedicated to SPA it provably cannot disturb
+# any other rule -- including the node's iptables ruleset and SSH, which this
+# change never gates. `winn-spa-nft revert` runs exactly that plus timer
+# cleanup.
+#
+# ---------------------------------------------------------------------------
+# RULE ORDER IS LOAD-BEARING
+# ---------------------------------------------------------------------------
+#
+# The chain is, in this exact order:
+#
+#   1. iif lo accept                          loopback, always first
+#   2. <port> ip saddr @set update @set accept authorized: SLIDE then admit
+#   3. <port> ct state established,related     pre-existing flows only
+#   4. <port> counter drop                     everyone else: silence
+#
+# Rule 2 MUST precede rule 3. An `accept` is a terminating verdict, so whichever
+# of them matches first ends evaluation. An earlier version had rule 3 first and
+# globally scoped, which meant tunnel traffic was accepted there and rule 2's
+# `update` never ran -- the authorization window never slid, and every source
+# was hard-de-authorized `grace` after its FIRST knock while its traffic kept
+# flowing on conntrack alone. Measured over 48s of one active flow: the
+# established rule counted 32->192 packets, update stayed frozen at 1, and the
+# element decayed 31s->23s->15s->7s->EXPIRED. With the order below, the same
+# flow held its element at ~40s indefinitely.
+#
+# Rule 3 exists ONLY so that installing the gate does not cut a session that was
+# already up. It adds nothing to the allow set, so such a flow lives exactly as
+# long as its conntrack entry; `seed` is what actually migrates those sessions
+# into the set. A scanner's probe is state NEW and is dropped.
+#
+# ---------------------------------------------------------------------------
+# WHY LOOPBACK IS EXEMPT
+# ---------------------------------------------------------------------------
+#
+# On this fleet nginx fronts Xray on tcp/80 and tcp/443, and Xray forwards the
+# decapsulated stream to 127.0.0.1:9110. Any gate that caught loopback would
+# break the stealth transport for every user on it. This is the single most
+# likely way to take the node down with this change, so it is the FIRST rule in
+# the chain and it is tested.
+#
+set -euo pipefail
+
+readonly FAMILY="${WINN_SPA_FAMILY:-inet}"
+readonly TABLE="${WINN_SPA_TABLE:-winn_spa}"
+readonly SET_V4="${WINN_SPA_SET_V4:-spa_allow_v4}"
+readonly SET_V6="${WINN_SPA_SET_V6:-}"
+
+# Ports the gate protects. Space-separated. THERE IS NO DEFAULT, DELIBERATELY.
+#
+# An earlier version defaulted WINN_SPA_UDP_PORTS to 9110, and that was the most
+# dangerous line in this tool. udp/9110 is AmneziaWG, reached only by the
+# direct-awg path, and direct-awg is STRUCTURALLY INCAPABLE of knocking:
+# knockdial.New accepts only a SocketKindPacket dialer (knockdial.go:202-203),
+# only H3Dialer is one, and cmd/winn-datapath refuses a carrier profile supplied
+# alongside direct-awg outright (openWithProfile). So gating 9110 locks out
+# every client that can reach it, with no client anywhere able to open it again.
+#
+# The correct target is the CARRIER port, which is the only port a knock-capable
+# client dials. Beware that it differs by layer:
+#   * 9443 is cmd/winn-carrier-server's compiled-in default
+#     (cmd/winn-carrier-server/main.go:101, -addr ":9443").
+#   * 8443 is what wins_data_plane_setup_ONETOUCH.sh:6700 overrides it to
+#     (WINN_CARRIER_LISTEN_PORT_DEFAULT), which is what a script-deployed node
+#     actually listens on.
+# Confirm which one THIS node uses -- `ss -lntup | grep winn-carrier-server` --
+# and pass it explicitly. Guessing wrong in either direction is a lockout, which
+# is why nothing is assumed here.
+readonly UDP_PORTS="${WINN_SPA_UDP_PORTS:-}"
+readonly TCP_PORTS="${WINN_SPA_TCP_PORTS:-}"
+
+# Ports this tool refuses to gate outright, because no client that reaches them
+# can knock. Refusal rather than a warning: the failure mode is a fleet-wide
+# lockout and a comment is not a guard.
+#
+# HARDCODED, with no environment override, exactly like the port 22 refusal
+# below. An earlier version read this from ${WINN_SPA_UDP_PORTS_FORBIDDEN},
+# which meant `WINN_SPA_UDP_PORTS_FORBIDDEN=1 WINN_SPA_UDP_PORTS=9110 apply`
+# emitted the full gate on udp/9110 and exited 0 -- refuting the comment
+# directly above it, and via the same env-var mechanism install-prereqs teaches
+# operators to put in an env file. Lifting this now genuinely does require
+# editing this line, which forces the review that adding a knock path to
+# direct-awg would need anyway.
+readonly PORTS_FORBIDDEN="9110"
+
+# How long an authorization survives SILENCE. The kernel re-arms it on every
+# matching packet (rule 2), so an active tunnel never ages out and this is not a
+# session limit.
+#
+# 30m, not internal/knock's 90s, and it must match winn-knockd's -grace. The
+# costs are asymmetric: too long merely leaves a proven key-holder's address
+# admitted a while longer, too short is a lockout for a phone whose screen was
+# off. 90s is shorter than both a mobile doze interval and the 120s
+# nf_conntrack_udp_timeout_stream that would otherwise mask the problem.
+readonly GRACE="${WINN_SPA_GRACE:-30m}"
+
+# Cap on the allow set. A bounded set cannot be grown without limit by an
+# attacker who has somehow obtained the key.
+readonly SET_SIZE="${WINN_SPA_SET_SIZE:-65535}"
+
+# Minutes until the unattended auto-revert fires. `commit` cancels it.
+readonly AUTOREVERT_MIN="${WINN_SPA_AUTOREVERT_MIN:-30}"
+
+readonly NFT="${WINN_SPA_NFT:-/usr/sbin/nft}"
+readonly STATE_DIR="${WINN_SPA_STATE_DIR:-/etc/winn/spa}"
+readonly COMMIT_FLAG="${STATE_DIR}/COMMITTED"
+readonly AUTOREVERT_UNIT="winn-spa-autorevert"
+
+die() { printf 'winn-spa-nft: %s\n' "$*" >&2; exit 1; }
+info() { printf 'winn-spa-nft: %s\n' "$*"; }
+
+require_root() {
+  [[ "${EUID}" -eq 0 ]] || die "must run as root"
+}
+
+require_nft() {
+  [[ -x "${NFT}" ]] || die "nft(8) not found at ${NFT}; install nftables"
+}
+
+# Refuse any port token that is not a plain decimal port number. The tokens
+# are spliced into `dport <token>` in the rendered ruleset, where nft also
+# accepts ranges ("20-30") and service names ("ssh"): either spelling would
+# walk straight past the exact-string port 22 and PORTS_FORBIDDEN refusals
+# below while gating exactly the ports those refusals exist to protect.
+# Plain numbers only, so the guards see the same value nft does.
+assert_ports_are_numeric() {
+  local port
+  for port in ${TCP_PORTS} ${UDP_PORTS}; do
+    [[ "${port}" =~ ^[0-9]+$ ]] || die \
+      "refusing port '${port}': WINN_SPA_TCP_PORTS/WINN_SPA_UDP_PORTS take plain decimal port numbers only (no ranges, no service names), so the port 22 and forbidden-port refusals cannot be bypassed by an nft spelling they do not recognise."
+    (( 10#${port} >= 1 && 10#${port} <= 65535 )) || die \
+      "refusing port '${port}': not a valid TCP/UDP port (1-65535)."
+  done
+}
+
+# Refuse, loudly and always, to gate the SSH port. An operator who typo'd 22
+# into WINN_SPA_TCP_PORTS on the only reachable node would lock themselves out
+# of the machine they need in order to fix it. Checked for UDP too, so a
+# transposed variable name cannot slip it past.
+assert_no_ssh() {
+  local port
+  for port in ${TCP_PORTS} ${UDP_PORTS}; do
+    [[ "${port}" != "22" ]] || die \
+      "refusing to gate port 22. SSH must stay reachable; this change does not put SSH behind SPA."
+  done
+}
+
+# Refuse table names that belong to iptables-nft / distro firewalls. Revert is
+# `nft delete table ${FAMILY} ${TABLE}`. `filter` is where iptables-nft stores
+# WINN3GW-FORWARD; `inet filter` is firewalld/ufw-nft. Deleting those is not
+# an SPA revert. HARDCODED, no env override — same reason PORTS_FORBIDDEN is.
+assert_dedicated_table() {
+  case "${TABLE}" in
+    filter|nat|mangle|raw|security)
+      die "refusing table name ${TABLE}: that is a reserved netfilter base table.
+SPA revert is \`nft delete table ${FAMILY} ${TABLE}\`, which would destroy
+WINN3GW-* (iptables-nft \`ip filter\`) or the host firewall (\`inet filter\`),
+not just SPA. Use the default table winn_spa."
+      ;;
+  esac
+}
+
+# Refuse any port with no knock-capable client path. See PORTS_FORBIDDEN.
+# Checks BOTH lists, so `WINN_SPA_TCP_PORTS=9110` cannot slip past a UDP-only
+# check -- the same reason assert_no_ssh checks both.
+assert_no_unknockable_ports() {
+  local port forbidden
+  for port in ${UDP_PORTS} ${TCP_PORTS}; do
+    for forbidden in ${PORTS_FORBIDDEN}; do
+      [[ "${port}" != "${forbidden}" ]] || die \
+"refusing to gate udp/${port}.
+
+That port is reached only by the direct-awg path, which CANNOT SEND A KNOCK:
+  - knockdial.New accepts only a SocketKindPacket dialer (knockdial.go:202-203)
+  - only the HTTP/3 carrier dialer is one
+  - cmd/winn-datapath refuses a carrier profile supplied with direct-awg
+
+Gating it therefore locks out every client that can reach it, permanently, with
+no client anywhere able to knock it open again. Gate the CARRIER port instead
+(8443 on a script-deployed node, 9443 for a bare winn-carrier-server -- confirm
+with: ss -lntup | grep winn-carrier-server)."
+    done
+  done
+}
+
+assert_ports_present() {
+  [[ -n "${UDP_PORTS}${TCP_PORTS}" ]] || die \
+"no ports configured, and there is no default.
+
+Set WINN_SPA_UDP_PORTS and/or WINN_SPA_TCP_PORTS to the CARRIER port this node
+actually listens on. Confirm it first:
+
+  ss -lntup | grep winn-carrier-server
+
+It is 8443 on a node deployed by wins_data_plane_setup_ONETOUCH.sh and 9443 for
+a bare winn-carrier-server. Do NOT gate udp/9110 -- see the refusal in this
+script for why."
+}
+
+table_exists() {
+  "${NFT}" list table "${FAMILY}" "${TABLE}" >/dev/null 2>&1
+}
+
+# dump_set_elements prints the bare addresses currently in a set, comma
+# separated, suitable for splicing into an `add element` statement. The
+# remaining timeouts are deliberately NOT carried over: re-adding with the set's
+# default timeout gives every preserved source a full fresh window, which errs
+# toward keeping a live user connected rather than toward expiring them during
+# an operator action.
+dump_set_elements() {
+  local set_name="$1"
+  [[ -n "${set_name}" ]] || return 0
+  # Parses nft's own text form, which looks like:
+  #   elements = { 172.24.0.3 expires 1m29s972ms, 198.51.100.2 expires 4s }
+  # possibly wrapped across lines. Takes the first token of each comma-separated
+  # entry (the address) and drops the timeout/expires annotations.
+  "${NFT}" list set "${FAMILY}" "${TABLE}" "${set_name}" 2>/dev/null \
+    | tr '\n' ' ' \
+    | sed -n 's/.*elements = {\([^}]*\)}.*/\1/p' \
+    | tr ',' '\n' \
+    | awk '{ if ($1 != "") print $1 }' \
+    | paste -sd, -
+}
+
+# ---------------------------------------------------------------------------
+
+render_ruleset() {
+  local port
+
+  printf 'table %s %s {\n' "${FAMILY}" "${TABLE}"
+
+  if [[ -n "${SET_V4}" ]]; then
+    cat <<EOF
+  set ${SET_V4} {
+    type ipv4_addr
+    flags dynamic,timeout
+    timeout ${GRACE}
+    size ${SET_SIZE}
+  }
+EOF
+  fi
+  if [[ -n "${SET_V6}" ]]; then
+    cat <<EOF
+  set ${SET_V6} {
+    type ipv6_addr
+    flags dynamic,timeout
+    timeout ${GRACE}
+    size ${SET_SIZE}
+  }
+EOF
+  fi
+
+  # priority -10: ahead of the filter hook the node's iptables ruleset uses, so
+  # the decision is made before that ruleset spends work on the packet. It does
+  # NOT override it -- netfilter runs every base chain registered at a hook, and
+  # a drop in any of them wins, so this table can only ever tighten the node's
+  # existing policy and can never open something the node's own firewall closed.
+  # ------------------------------------------------------------------
+  # THE TRACK CHAIN: the sliding window, structurally guaranteed to run.
+  #
+  # A separate base chain at an EARLIER priority, containing only the update
+  # statement and no verdict. Because it issues no verdict, evaluation falls
+  # through to `policy accept` and the packet carries on to the input chain
+  # below; because it is a base chain of its own, nothing the input chain does
+  # can prevent it running.
+  #
+  # THE EXPLICIT `timeout` IN THE UPDATE IS LOAD-BEARING. `update @set
+  # { ip saddr }` with no timeout re-arms the element from the SET DEFAULT and
+  # silently DISCARDS whatever per-element timeout the daemon granted -- while
+  # `nft list set` keeps DISPLAYING the granted value. Measured: set default
+  # 10s, element added with `timeout 600s`, one matching packet, and the element
+  # dropped to `expires 7s967ms` while still printing `timeout 10m`. That made
+  # the daemon's -grace apply only to the initial grant and this script's GRACE
+  # govern every refresh, so an operator who set one and not the other got a
+  # window that silently collapsed on the first tunnel packet, with their
+  # primary diagnostic showing the wrong number throughout.
+  #
+  # winn-knockd additionally refuses to start if its -grace does not equal the
+  # set's timeout, so the two values cannot diverge at all.
+  # ------------------------------------------------------------------
+  printf '  chain track {\n'
+  printf '    type filter hook input priority filter - 20; policy accept;\n'
+  emit_track_rules() {
+    local proto="$1" port="$2"
+    if [[ -n "${SET_V4}" ]]; then
+      printf '    %s dport %s ip saddr @%s update @%s { ip saddr timeout %s } counter\n' \
+        "${proto}" "${port}" "${SET_V4}" "${SET_V4}" "${GRACE}"
+    fi
+    if [[ -n "${SET_V6}" ]]; then
+      printf '    %s dport %s ip6 saddr @%s update @%s { ip6 saddr timeout %s } counter\n' \
+        "${proto}" "${port}" "${SET_V6}" "${SET_V6}" "${GRACE}"
+    fi
+  }
+  for port in ${UDP_PORTS}; do emit_track_rules udp "${port}"; done
+  for port in ${TCP_PORTS}; do emit_track_rules tcp "${port}"; done
+  printf '  }\n'
+
+  printf '  chain input {\n'
+  printf '    type filter hook input priority filter - 10; policy accept;\n'
+
+  # ------------------------------------------------------------------
+  # THE SLIDING WINDOW LIVES IN ITS OWN BASE CHAIN, ABOVE. NOT HERE.
+  #
+  # `accept` is a TERMINATING verdict, but it only ends the chain it is IN --
+  # netfilter still runs every other base chain registered at the same hook. So
+  # putting the `update` in a separate, earlier, non-terminating base chain
+  # makes it unconditionally reached, regardless of how the rules below are
+  # ordered or what accepts a packet first.
+  #
+  # That converts what used to be a load-bearing comment into a structural
+  # invariant. The original bug was exactly this: `ct state established,related
+  # accept` sat ahead of the update rule in THIS chain, so tunnel traffic was
+  # accepted before the update ran and the window never slid. Measured over 48s
+  # of one active flow: established 32->192 packets, update frozen at 1, element
+  # decaying 31s->23s->15s->7s->EXPIRED. With the update in its own chain, the
+  # same buggy ordering here still holds the element at ~30s of 30s.
+  #
+  # The update cannot authorize anyone: it is gated on `ip saddr @set`, so it
+  # only ever refreshes an element that already exists.
+  # ------------------------------------------------------------------
+
+  # 1. Loopback, always, before anything else. Xray forwards to 127.0.0.1:9110,
+  #    and gating that would break the stealth transport for every user on it.
+  printf '    iif lo accept\n'
+
+  # 2. Authorized sources are admitted. Refreshing their deadline is the track
+  #    chain's job, not this rule's.
+  emit_port_rules() {
+    local proto="$1" port="$2"
+    if [[ -n "${SET_V4}" ]]; then
+      printf '    %s dport %s ip saddr @%s counter accept\n' \
+        "${proto}" "${port}" "${SET_V4}"
+    fi
+    if [[ -n "${SET_V6}" ]]; then
+      printf '    %s dport %s ip6 saddr @%s counter accept\n' \
+        "${proto}" "${port}" "${SET_V6}"
+    fi
+  }
+  for port in ${UDP_PORTS}; do emit_port_rules udp "${port}"; done
+  for port in ${TCP_PORTS}; do emit_port_rules tcp "${port}"; done
+
+  # 3. Established flows that are NOT in the allow set. This exists only so that
+  #    installing the gate does not cut off a session that was already up before
+  #    it existed. It is scoped to the gated ports (the old version accepted
+  #    established traffic globally, which was broader than intended), and it
+  #    deliberately does NOT add anything to the set: such a flow lives exactly
+  #    as long as its conntrack entry and must knock to be renewed. `seed` is
+  #    what actually migrates those sessions into the set.
+  for port in ${UDP_PORTS}; do
+    printf '    udp dport %s ct state established,related counter accept\n' "${port}"
+  done
+  for port in ${TCP_PORTS}; do
+    printf '    tcp dport %s ct state established,related counter accept\n' "${port}"
+  done
+
+  # 4. Everyone else, on the gated ports only: silence. Counters are attached so
+  #    `status` can show that the gate is actually doing something, which is the
+  #    difference between "SPA is running" and "SPA appears to be running".
+  #
+  #    The drop is qualified by address family, and only for families that have
+  #    an allow set. Without this an `inet` table with only an IPv4 accept rule
+  #    would drop IPv6 with NO authorization path at all -- unrecoverable on any
+  #    node with IPv6 enabled. If a family has no set, this table leaves it
+  #    entirely alone and the node's own firewall governs it.
+  emit_drop() {
+    local proto="$1" port="$2"
+    if [[ -n "${SET_V4}" ]]; then
+      printf '    meta nfproto ipv4 %s dport %s counter drop\n' "${proto}" "${port}"
+    fi
+    if [[ -n "${SET_V6}" ]]; then
+      printf '    meta nfproto ipv6 %s dport %s counter drop\n' "${proto}" "${port}"
+    fi
+  }
+  for port in ${UDP_PORTS}; do emit_drop udp "${port}"; done
+  for port in ${TCP_PORTS}; do emit_drop tcp "${port}"; done
+
+  printf '  }\n'
+  printf '}\n'
+}
+
+# ---------------------------------------------------------------------------
+
+cmd_render() {
+  assert_ports_are_numeric
+  assert_no_ssh
+  assert_no_unknockable_ports
+  assert_ports_present
+  assert_dedicated_table
+  render_ruleset
+}
+
+cmd_apply() {
+  require_root; require_nft
+  assert_ports_are_numeric
+  assert_no_ssh
+  assert_no_unknockable_ports
+  assert_ports_present
+  assert_dedicated_table
+
+  # ------------------------------------------------------------------
+  # tcp/80 and tcp/443 are NOT gated by default, on purpose.
+  #
+  # The whole premise of this node's cover profile (internal/coverlisten,
+  # internal/decoy, the nginx cover site) is that tcp/443 answers like an
+  # ordinary website. A host that serves a certificate for a real hostname
+  # but whose 443 is black to everyone without a key is MORE anomalous than
+  # one that answers, not less -- and gating 80 additionally breaks ACME
+  # renewal. SPA and the cover story are two different, mutually exclusive
+  # answers to the same threat; see docs/SPA_DESIGN.md §7.
+  #
+  # udp/9110 would be the opposite case -- an open UDP port that only ever
+  # replies to a valid WireGuard handshake has no cover story at all -- except
+  # that nothing which reaches it can knock, so this tool refuses it outright.
+  # See assert_no_unknockable_ports.
+  # ------------------------------------------------------------------
+  if [[ -n "${TCP_PORTS}" ]]; then
+    info "WARNING: gating tcp/${TCP_PORTS// /, } will make this node's cover website unreachable"
+    info "         to anyone without a knock, and will break ACME renewal on tcp/80."
+  fi
+
+  mkdir -p "${STATE_DIR}"
+  chmod 700 "${STATE_DIR}"
+
+  if [[ -z "${SET_V6}" ]]; then
+    info "NOTE: IPv6 has no allow set, so this table does not touch IPv6 at all."
+    info "      The gated ports remain reachable over IPv6 if the node has it."
+  fi
+
+  local rendered
+  rendered="$(render_ruleset)"
+
+  # Preserve live authorizations across a re-apply. Replacing the table drops
+  # its sets with it, so without this an `apply` on an already-gated node
+  # de-authorizes every currently-connected user at once -- the operator runs
+  # what looks like an idempotent command and causes an outage.
+  local saved_v4="" saved_v6=""
+  if table_exists; then
+    saved_v4="$(dump_set_elements "${SET_V4}")"
+    saved_v6="$(dump_set_elements "${SET_V6}")"
+    local kept=0
+    [[ -n "${saved_v4}" ]] && kept=$((kept + 1))
+    [[ -n "${saved_v6}" ]] && kept=$((kept + 1))
+    [[ "${kept}" -gt 0 ]] && info "preserving existing authorizations across re-apply"
+  fi
+
+  # Validate before committing. `nft -c -f` type-checks the whole ruleset
+  # without installing any part of it, so a syntax error cannot leave the node
+  # with half a gate.
+  printf '%s\n' "${rendered}" | "${NFT}" -c -f - \
+    || die "ruleset failed validation; nothing was applied"
+
+  # Replace atomically: delete-then-add-then-restore inside ONE nft transaction,
+  # so there is no instant where the ports are gated by a partially-built chain
+  # and no instant where a live user is missing from the allow set.
+  {
+    if table_exists; then printf 'delete table %s %s\n' "${FAMILY}" "${TABLE}"; fi
+    printf '%s\n' "${rendered}"
+    [[ -n "${saved_v4}" ]] && \
+      printf 'add element %s %s %s { %s }\n' \
+        "${FAMILY}" "${TABLE}" "${SET_V4}" "${saved_v4}"
+    [[ -n "${saved_v6}" ]] && \
+      printf 'add element %s %s %s { %s }\n' \
+        "${FAMILY}" "${TABLE}" "${SET_V6}" "${saved_v6}"
+    true
+  } | "${NFT}" -f - || die "failed to apply ruleset"
+
+  info "applied: table ${FAMILY} ${TABLE}"
+  [[ -n "${UDP_PORTS}" ]] && info "  gating udp: ${UDP_PORTS}"
+  [[ -n "${TCP_PORTS}" ]] && info "  gating tcp: ${TCP_PORTS}"
+  info "  established flows and loopback are exempt"
+
+  info ""
+  if arm_autorevert; then
+    info "AUTO-REVERT IS ARMED: this gate removes itself in ${AUTOREVERT_MIN} minutes"
+    info "unless you run:  winn-spa-nft commit"
+  else
+    info "AUTO-REVERT IS *NOT* ARMED (no systemd). You must verify and revert by hand."
+  fi
+  info "Revert now with: winn-spa-nft revert"
+}
+
+cmd_revert() {
+  require_root; require_nft
+  assert_dedicated_table
+  disarm_autorevert
+  if table_exists; then
+    "${NFT}" delete table "${FAMILY}" "${TABLE}" \
+      || die "FAILED to delete table ${FAMILY} ${TABLE} -- run 'nft delete table ${FAMILY} ${TABLE}' by hand NOW"
+    info "reverted: table ${FAMILY} ${TABLE} deleted; no port is gated by SPA"
+  else
+    info "nothing to revert: table ${FAMILY} ${TABLE} is not present"
+  fi
+  rm -f "${COMMIT_FLAG}"
+}
+
+cmd_commit() {
+  require_root
+  table_exists || die "refusing to commit: table ${FAMILY} ${TABLE} is not installed"
+  mkdir -p "${STATE_DIR}"; chmod 700 "${STATE_DIR}"
+  : > "${COMMIT_FLAG}"
+  disarm_autorevert
+  info "committed: the timed auto-revert is cancelled."
+  info ""
+  info "This does NOT make the gate survive a reboot, and nothing in this tool"
+  info "ever writes it to /etc/nftables.conf. A reboot drops the table and the"
+  info "node comes back UNGATED -- which is the intended fail-open behaviour,"
+  info "not an oversight. Re-run 'apply' after a reboot if you want it back."
+  info ""
+  info "Revert now with: winn-spa-nft revert"
+}
+
+cmd_status() {
+  require_nft
+  # Refusing without root is not pedantry. `nft list table` fails with EPERM for
+  # a non-root user, table_exists swallows that, and the old code then printed
+  # "NOT INSTALLED ... No port is gated" and exited 0 -- while the gate was in
+  # fact installed and dropping traffic. That is the one diagnostic an operator
+  # reads during an outage, and it confidently said the opposite of the truth.
+  if [[ "${EUID}" -ne 0 ]]; then
+    printf 'SPA gate: UNKNOWN -- this command cannot read nftables as a non-root user.\n'
+    printf 'Re-run as root. Refusing to guess, because a wrong answer here reads\n'
+    printf 'as "nothing is gated" during an outage.\n'
+    return 2
+  fi
+  if ! table_exists; then
+    printf 'SPA gate: NOT INSTALLED (no table %s %s). No port is gated.\n' \
+      "${FAMILY}" "${TABLE}"
+    return 0
+  fi
+  printf 'SPA gate: INSTALLED\n'
+  if [[ -f "${COMMIT_FLAG}" ]]; then
+    printf 'Auto-revert: cancelled (committed)\n'
+  elif systemctl is-active --quiet "${AUTOREVERT_UNIT}.timer" 2>/dev/null; then
+    printf 'Auto-revert: ARMED -- %s\n' \
+      "$(systemctl show -p TimersCalendar,NextElapseUSecRealtime --value "${AUTOREVERT_UNIT}.timer" 2>/dev/null | head -1)"
+  else
+    printf 'Auto-revert: not armed\n'
+  fi
+  printf '\n'
+  "${NFT}" list table "${FAMILY}" "${TABLE}"
+}
+
+# seed pre-authorizes the source addresses AmneziaWG currently has live peers
+# on, so installing the gate cannot strand a connected user whose conntrack
+# entry has already lapsed. It reads endpoints from the running container and
+# never from a config file, because only the running interface knows where a
+# peer actually is right now.
+cmd_seed() {
+  require_root; require_nft
+  assert_dedicated_table
+  table_exists || die "table ${FAMILY} ${TABLE} is not installed; run apply first"
+  [[ -n "${SET_V4}" || -n "${SET_V6}" ]] || die "no IPv4 or IPv6 set configured"
+
+  local container="${AWG_CONTAINER_NAME:-amnezia-awg2}"
+  local endpoints seeded=0 ip target_set
+  endpoints="$(docker exec "${container}" awg show awg0 endpoints 2>/dev/null | awk '{print $2}' || true)"
+  [[ -n "${endpoints}" ]] || { info "no live AmneziaWG peer endpoints found; nothing seeded"; return 0; }
+
+  while read -r endpoint; do
+    [[ -n "${endpoint}" && "${endpoint}" != "(none)" ]] || continue
+    ip="${endpoint%:*}"          # strip :port
+    ip="${ip#[}"; ip="${ip%]}"   # strip IPv6 brackets if present
+    target_set="${SET_V4}"
+    [[ "${ip}" == *:* ]] && target_set="${SET_V6}"   # IPv6 endpoint
+    [[ -n "${target_set}" ]] || continue             # no set for this family
+    "${NFT}" add element "${FAMILY}" "${TABLE}" "${target_set}" \
+      "{ ${ip} timeout ${GRACE} }" 2>/dev/null && seeded=$((seeded + 1)) || true
+  done <<< "${endpoints}"
+
+  info "seeded ${seeded} currently-connected peer address(es) into ${SET_V4:-(no v4 set)} ${SET_V6:-(no v6 set)}"
+}
+
+# ---------------------------------------------------------------------------
+# Auto-revert: a one-shot timer that removes the gate unless an operator has
+# explicitly committed. This is the time-box that makes trying SPA on a live
+# node survivable -- if the operator loses their own access, or simply walks
+# away, the node returns to its previous behaviour without intervention.
+# ---------------------------------------------------------------------------
+
+# Returns 0 if the auto-revert was actually armed, 1 if it could not be. The
+# caller must not claim the node is protected by a timer that does not exist.
+arm_autorevert() {
+  command -v systemctl >/dev/null 2>&1 || return 1
+  rm -f "${COMMIT_FLAG}"
+  local self; self="$(readlink -f "$0")"
+
+  cat > "/etc/systemd/system/${AUTOREVERT_UNIT}.service" <<EOF
+[Unit]
+Description=Winn SPA unattended auto-revert (removes the SPA nftables gate)
+Documentation=file://${self}
+
+[Service]
+Type=oneshot
+# The table this apply installed, so the revert removes that table and not the
+# default one when WINN_SPA_FAMILY/TABLE/NFT/STATE_DIR were overridden.
+Environment="WINN_SPA_FAMILY=${FAMILY}" "WINN_SPA_TABLE=${TABLE}" "WINN_SPA_NFT=${NFT}" "WINN_SPA_STATE_DIR=${STATE_DIR}"
+# Only reverts if the operator has NOT committed. Committing removes the timer
+# as well, so this is belt and braces.
+ExecStart=/bin/sh -c '[ -f ${COMMIT_FLAG} ] || ${self} revert'
+EOF
+
+  cat > "/etc/systemd/system/${AUTOREVERT_UNIT}.timer" <<EOF
+[Unit]
+Description=Winn SPA unattended auto-revert timer
+
+[Timer]
+OnActiveSec=${AUTOREVERT_MIN}min
+AccuracySec=10s
+RemainAfterElapse=no
+Unit=${AUTOREVERT_UNIT}.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  systemctl daemon-reload
+  systemctl start "${AUTOREVERT_UNIT}.timer"
+}
+
+disarm_autorevert() {
+  command -v systemctl >/dev/null 2>&1 || return 0
+  systemctl stop "${AUTOREVERT_UNIT}.timer" 2>/dev/null || true
+  systemctl disable "${AUTOREVERT_UNIT}.timer" 2>/dev/null || true
+}
+
+# install-prereqs creates everything the shipped systemd unit expects but that
+# nothing else in this tree creates: the service user, the state directory, and
+# the environment file. It deliberately does NOT create the key file -- that is
+# generated out of band by the owner and copied in, and a tool that generated it
+# would be a tool that had it.
+cmd_install_prereqs() {
+  require_root
+  id -u winn-knockd >/dev/null 2>&1 || {
+    useradd --system --no-create-home --shell /usr/sbin/nologin winn-knockd \
+      2>/dev/null || adduser -S -D -H -s /sbin/nologin winn-knockd 2>/dev/null || \
+      die "could not create the winn-knockd system user"
+    info "created system user winn-knockd"
+  }
+  mkdir -p "${STATE_DIR}"
+  chmod 700 "${STATE_DIR}"
+  chown root:root "${STATE_DIR}"
+
+  if [[ ! -f "${STATE_DIR}/knockd.env" ]]; then
+    cat > "${STATE_DIR}/knockd.env" <<EOF
+# winn-knockd environment. See cmd/winn-knockd -h.
+#
+# WINN_SPA_LISTEN is the knock socket, NOT the port being protected.
+WINN_SPA_LISTEN=0.0.0.0:9111
+# MUST match every client exactly. A mismatch fails closed and is SILENT.
+WINN_SPA_PACKET_SIZE=256
+# MUST match WINN_SPA_GRACE used with winn-spa-nft apply.
+WINN_SPA_GRACE=30m
+# MUST match the values used with winn-spa-nft apply; the unit, its
+# ExecStopPost revert and the watchdog all read them from here.
+WINN_SPA_FAMILY=${FAMILY}
+WINN_SPA_TABLE=${TABLE}
+WINN_SPA_SET_V4=${SET_V4}
+WINN_SPA_SET_V6=${SET_V6}
+EOF
+    chmod 640 "${STATE_DIR}/knockd.env"
+    info "wrote ${STATE_DIR}/knockd.env (review it before starting the unit)"
+  fi
+
+  if [[ ! -f "${STATE_DIR}/spa.keys" ]]; then
+    info ""
+    info "STILL MISSING: ${STATE_DIR}/spa.keys"
+    info "Generate it OUT OF BAND (32 random bytes, hex, one key per line, most"
+    info "current first), copy it here, then: chmod 400 ${STATE_DIR}/spa.keys"
+    info "This tool does not generate it on purpose -- a tool that generated the"
+    info "deployment's shared credential would be a tool that had it."
+  fi
+  info ""
+  info "Prerequisites done. The gate is NOT installed; run 'apply' for that."
+}
+
+usage() {
+  cat <<'EOF'
+winn-spa-nft - nftables gate for Winn Single Packet Authorization
+
+USAGE
+  winn-spa-nft <command>
+
+COMMANDS
+  install-prereqs
+           Create the winn-knockd system user, state dir and env file. Does not
+           install the gate and does not create the key.
+  render   Print the ruleset that would be applied. Changes nothing. Run this
+           first, and read it.
+  apply    Install the ruleset atomically and ARM a timed auto-revert.
+  commit   Cancel the auto-revert. Run only after verifying a real client can
+           still connect.
+  revert   Delete the table. Total, atomic, needs no knock and no key.
+  status   Show whether the gate is installed, whether auto-revert is armed,
+           and the live ruleset with drop counters.
+  seed     Pre-authorize the addresses AmneziaWG currently has live peers on.
+
+ENVIRONMENT
+  WINN_SPA_UDP_PORTS     NO DEFAULT -- the carrier port this node listens on
+  WINN_SPA_TCP_PORTS     NO DEFAULT -- ditto (80/443 should NOT be gated)
+
+  There is no default port on purpose. Gate the CARRIER port (8443 on a
+  script-deployed node, 9443 for a bare winn-carrier-server -- confirm with
+  `ss -lntup | grep winn-carrier-server`). udp/9110 is REFUSED: direct-awg
+  cannot knock, so gating it is an unrecoverable lockout.
+  WINN_SPA_GRACE         default "30m"  (MUST equal winn-knockd's -grace;
+                                         the daemon refuses to start otherwise)
+  WINN_SPA_AUTOREVERT_MIN default "30"
+  WINN_SPA_FAMILY        default "inet"
+  WINN_SPA_TABLE         default "winn_spa"
+  WINN_SPA_SET_V4        default "spa_allow_v4"
+  WINN_SPA_SET_V6        default ""       (IPv6 disabled)
+
+THE REVERT
+  nft delete table inet winn_spa
+EOF
+}
+
+case "${1:-}" in
+  install-prereqs) cmd_install_prereqs ;;
+  render)  cmd_render ;;
+  apply)   cmd_apply ;;
+  commit)  cmd_commit ;;
+  revert)  cmd_revert ;;
+  status)  cmd_status ;;
+  seed)    cmd_seed ;;
+  ''|-h|--help|help) usage ;;
+  *) usage; die "unknown command: $1" ;;
+esac

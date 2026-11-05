@@ -1,0 +1,29 @@
+The alternative GitHub link implemented inside the_resolveActiveGateway() method is a raw GitHub Gist URL.
+
+When scrambled using your custom XOR encryption pass with the salt string "W1NS_V12_SALT_2024", the variable encGist decodes directly to:
+
+[https://gist.githubusercontent.com/winsvpn/325d9caf5c3cda5d6f933e0ac5ba8a02/raw/active-gateway.txt](https://gist.githubusercontent.com/winsvpn/325d9caf5c3cda5d6f933e0ac5ba8a02/raw/active-gateway.txt)
+
+How it behaves in the architecture
+
+Dynamic Failover Routing: If your primary censorship-resistant backend gateway routing layer handles are blocked, the mobile client falls back to hitting this raw Gist file over GitHub's distributed content delivery network infrastructure.
+
+Decoupled API Discovery: The app reads the raw plaintext string value inside that Gist file to dynamically locate your latest functional server IP or failover cloud routing hub (such as your Netlify mirror fallback endpoint), preventing the application from being orphaned when core server nodes face aggressive state inspection blocks.
+
+
+
+app-cloud-sync.net serves as the primary domain for the Central Control Plane API of Win's VPN. It acts as the central brain and routing synchronization hub that links your Flutter mobile front-end application to your global network of regional data plane exit nodes.
+
+Here is exactly what that domain and its underlying API are handling in your network infrastructure:
+
+🧠 Core Operations Managed by app-cloud-sync.net
+
+User Authentication & Device Verification (/verify): When a user enters their 12-digit secure activation token into the app, the client queries this domain to validate the account status, check the subscription expiration date, and strictly enforce the 2-device limit. It also checks the hardware_hash to ensure accounts are locked to the original device's make and model.
+
+Global Node Registry & Heartbeats (/api/v1/nodes/...): When you spin up a new regional data plane node (such as the Chicago or France exit nodes) and run your master deployment script, the server automatically uses this domain to register its public IP, obfuscated ports, and AmneziaWG public keys. It also listens for periodic server heartbeats to detect and flag high network congestion.
+
+Session Lifecycle Control (/logout): When an operator or user taps "Deactivate Device" inside the application UI, it fires a request to this endpoint to cleanly wipe that specific device's hardware footprint, active session tokens, and internal VPN IP assignments from the central database ledger.
+
+Automated Payment & Provisioning Webhooks (/webhook/paypal): It processes instant payment notifications directly from PayPal. The moment a customer purchases a 1-month, 1-year, or lifetime access tier, a background task on this domain instantly generates a new 12-digit secure login token and dispatches an automated HTML activation email to the subscriber using SMTP2GO.
+
+Global Announcement Delivery: It hosts the administrative control panel that allows you to push immediate global announcements or toggle "System Maintenance Mode" across all active user application dashboards simultaneously.

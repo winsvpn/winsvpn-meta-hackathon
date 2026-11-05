@@ -1,0 +1,79 @@
+[Unit]
+Description=Winn Protocol unlinkable carrier-token issuer
+Documentation=file:///usr/local/share/doc/winn-protocol/SECURITY.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=winn-token-issuer
+Group=winn-token-issuer
+EnvironmentFile=/etc/winn/token-issuer.env
+LoadCredential=server.pem:/etc/winn/credentials/token-issuer-server.pem
+LoadCredential=server-key.pem:/etc/winn/credentials/token-issuer-server-key.pem
+LoadCredential=ech-server-keys.json:/etc/winn/credentials/token-issuer-ech-server-keys.json
+LoadCredential=ca.pem:/etc/winn/credentials/ca.pem
+LoadCredential=device-registry.json:/etc/winn/credentials/device-registry.json
+LoadCredential=cover.pem:/etc/winn/credentials/cover.pem
+LoadCredential=cover-key.pem:/etc/winn/credentials/cover-key.pem
+LoadCredential=privacy-token-private-key.pem:/etc/winn/credentials/privacy-token-private-key.pem
+LoadCredential=audit.key:/etc/winn/credentials/token-issuer-audit.key
+ExecStart=/usr/local/libexec/winn/winn-token-issuer \
+  -addr ${WINN_TOKEN_ISSUER_LISTEN} \
+  -cert %d/server.pem \
+  -key %d/server-key.pem \
+  -ech-keys %d/ech-server-keys.json \
+  -cover-cert %d/cover.pem \
+  -cover-key %d/cover-key.pem \
+  -client-ca %d/ca.pem \
+  -device-registry %d/device-registry.json \
+  -privacy-token-private-key %d/privacy-token-private-key.pem \
+  -audit-log /var/log/winn-token-issuer/audit.jsonl \
+  -audit-key %d/audit.key \
+  -suite ${WINN_TOKEN_ISSUER_SUITE} \
+  -replay-limit ${WINN_TOKEN_ISSUER_REPLAY_LIMIT} \
+  -rate-burst ${WINN_TOKEN_ISSUER_RATE_BURST} \
+  -rate-per-minute ${WINN_TOKEN_ISSUER_RATE_PER_MINUTE} \
+  -rate-max-keys ${WINN_TOKEN_ISSUER_RATE_MAX_KEYS} \
+  -max-concurrent ${WINN_TOKEN_ISSUER_MAX_CONCURRENT}
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGTERM
+LogsDirectory=winn-token-issuer
+LogsDirectoryMode=0700
+RuntimeDirectory=winn-token-issuer
+RuntimeDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateMounts=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RemoveIPC=yes
+SystemCallArchitectures=native
+ReadWritePaths=/var/log/winn-token-issuer /run/winn-token-issuer
+LimitNOFILE=4096
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target

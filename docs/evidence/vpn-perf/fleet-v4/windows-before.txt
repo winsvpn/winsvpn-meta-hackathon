@@ -1,0 +1,1 @@
+speed_download=80519447 bytes/s size=25000000 time_total=0.310503 remote_ip=172.66.0.218EXIT_%ERRORLEVEL%

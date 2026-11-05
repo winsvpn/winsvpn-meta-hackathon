@@ -1,0 +1,4 @@
+# Win's VPN website mirrors: alternative routing for censorship circumvention.
+# One verified HTTPS origin per line. Do not advertise an origin until both its
+# root document and releases/downloads.json return the expected WinsVPN content.
+https://winsvpn.pages.dev

@@ -1,0 +1,13 @@
+# Gradle wrapper launchers and bootstrap jars are release-producer inputs.
+# Keep them tracked so a fresh checkout runs the reviewed, hash-pinned wrapper.
+/.gradle
+/captures/
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks

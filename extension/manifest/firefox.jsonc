@@ -1,0 +1,66 @@
+// Firefox fragment, merged over base.jsonc.
+//
+// When routing is armed, chosen sites are blocked, not sent unprotected.
+//
+// tools/verify_firefox.py can exercise a built package in Firefox. A historical
+// run does not verify these package bytes; current runtime evidence must name
+// the tested artifact. tools/checks.py and tools/assert_firefox_zip.py check
+// the manifest and package independently of live browser testing.
+{
+  // Store-visible product identity. The Gecko id below remains the stable
+  // native-messaging and update identity; changing the display name does not
+  // create a different add-on.
+  "name": "Win's VPN Proxy",
+
+  // This extension is a local proxy controller for the desktop tunnel, not a
+  // standalone VPN. Keep the dependency visible in Firefox's own add-on UI.
+  "description": "Routes chosen sites through Win's VPN. Requires its desktop app to be installed, running, and connected. Not a VPN on its own.",
+
+  "action": {
+    "default_title": "Win's VPN Proxy"
+  },
+
+  // Firefox MV3 runs a non-persistent background *script* (an event page)
+  // rather than a service worker. This is the single largest structural
+  // difference between the targets, and it is why the background entry point
+  // registers all its listeners synchronously at the top level: that is what
+  // both an event page and a service worker require, so one file satisfies
+  // both without a branch.
+  "background": {
+    "scripts": ["src/background/background.js"],
+    "type": "module"
+  },
+
+  // An explicit id is required for a Firefox extension that uses storage and
+  // native messaging, and the native-messaging host manifest names this id in
+  // its `allowed_extensions` list. That list is what stops any other extension
+  // on the machine from talking to the desktop bridge.
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "companion@winsvpn.org",
+      // Keep the repository's reviewed minimum and data collection declaration.
+      // Current store requirements need separate verification before submission.
+      // Native messaging stays on-device with the desktop app.
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+
+  // Firefox now uses webRequest for proxy authentication, the same mechanism
+  // Chromium uses, over a plaintext loopback hop. The previous design used
+  // proxy.onRequest's proxyAuthorizationHeader over TLS, which required a
+  // certificate in the profile's cert9.db. The ruling of 2026-08-07 removed that
+  // design: a CA-classified trust record that survives uninstall is not
+  // acceptable, even with CA:FALSE. webRequest is the alternative path. It carries
+  // the same permission cost Chromium already pays: observation of auth
+  // challenges only, and it is limited to onAuthRequired.
+  //
+  // Host permissions remain OPTIONAL (not granted at install) and are requested
+  // from a click in the options page. Without them neither the routing nor the
+  // authentication event fires, so the extension fails closed.
+  "permissions": ["webRequest", "webRequestAuthProvider"],
+
+  "optional_host_permissions": ["<all_urls>"]
+}

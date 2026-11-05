@@ -1,0 +1,24 @@
+# Hash-locked, binary-only dependency lock for .github/workflows/test-and-validate.yml
+# (audit finding L-5: "GitHub validation installs unpinned Pillow").
+#
+# Install with:
+#   python -m pip install --require-hashes --only-binary=:all: -r tools/validation-requirements.lock
+#
+# Pillow is the only dependency the validation job needs; its own PyPI metadata
+# declares zero mandatory (non-extra) install_requires, so one wheel hash for
+# the exact CI target is sufficient for --require-hashes to resolve cleanly.
+#
+# Pinned/reviewed: 2026-07-23, queried directly from https://pypi.org/pypi/Pillow/json
+#   - Version 12.3.0 is PyPI's current `info.version` (latest, not yanked).
+#   - Wheel: pillow-12.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+#     (matches this workflow's runner: ubuntu-24.04 / x86_64, Python 3.14 per
+#     actions/setup-python in test-and-validate.yml).
+#   - requires_python for this release is ">=3.10"; not yanked at query time.
+#   - sha256 below was copied verbatim from PyPI's JSON API `digests.sha256`
+#     field for that exact wheel file, not from any third-party mirror.
+#
+# To refresh: bump the version, re-fetch https://pypi.org/pypi/Pillow/json,
+# copy the new cp314 manylinux x86_64 wheel's digests.sha256 verbatim, and
+# update the comment above with the new query date.
+Pillow==12.3.0 \
+    --hash=sha256:251bf95b67017e27b13d82f5b326234ca62d70f9cf4c2b9032de2358a3b12c7b

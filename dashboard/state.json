@@ -1,0 +1,59 @@
+{
+  "schema_version": 8,
+  "release": "1.0.17+34",
+  "refresh_seconds": 5,
+  "max_evidence_age_seconds": 86400,
+  "cross_store": {
+    "receipt_schema_version": 2,
+    "release_input_index": ".artifacts/release-inputs/RELEASE_INPUT_INDEX.json",
+    "receipt_directory": ".artifacts/upload-receipts",
+    "required_upload_targets": [
+      "android-phone-tablet-aab",
+      "android-tv-aab",
+      "wear-os-aab",
+      "ios-app-store-ipa",
+      "macos-app-store-pkg",
+      "windows-x64-installer",
+      "windows-x64-partner-center",
+      "windows-arm64-installer",
+      "windows-arm64-partner-center",
+      "linux-x64-package",
+      "linux-arm64-package",
+      "linux-flathub-manifest",
+      "linux-snap-manifest",
+      "chrome-extension-package",
+      "edge-extension-package",
+      "firefox-extension-package"
+    ],
+    "optional_upload_targets": ["macos-developer-id-app"]
+  },
+  "dimensions": [
+    {"id": "engineering", "label": "Engineering verification", "weight": 20},
+    {"id": "artifact", "label": "Release artifact", "weight": 20},
+    {"id": "signing", "label": "Signing verification", "weight": 20},
+    {"id": "store_metadata", "label": "Store metadata", "weight": 20},
+    {"id": "runtime_proof", "label": "Runtime proof", "weight": 20}
+  ],
+  "targets": [
+    {"id": "windows-x86", "label": "Windows x64", "group": "Desktop applications", "upload_targets": ["windows-x64-installer", "windows-x64-partner-center"], "optional_upload_targets": []},
+    {"id": "windows-arm64", "label": "Windows arm64", "group": "Desktop applications", "upload_targets": ["windows-arm64-installer", "windows-arm64-partner-center"], "optional_upload_targets": []},
+    {"id": "macos-x86", "label": "macOS x86", "group": "Desktop applications", "upload_targets": ["macos-app-store-pkg"], "optional_upload_targets": ["macos-developer-id-app"]},
+    {"id": "macos-arm64", "label": "macOS arm64", "group": "Desktop applications", "upload_targets": ["macos-app-store-pkg"], "optional_upload_targets": ["macos-developer-id-app"]},
+    {"id": "linux-x86", "label": "Linux x64", "group": "Desktop applications", "upload_targets": ["linux-x64-package", "linux-flathub-manifest", "linux-snap-manifest"], "optional_upload_targets": []},
+    {"id": "linux-arm64", "label": "Linux arm64", "group": "Desktop applications", "upload_targets": ["linux-arm64-package", "linux-flathub-manifest", "linux-snap-manifest"], "optional_upload_targets": []},
+    {"id": "ios", "label": "iOS", "group": "Mobile applications", "upload_targets": ["ios-app-store-ipa"], "optional_upload_targets": []},
+    {"id": "android", "label": "Android", "group": "Mobile applications", "upload_targets": ["android-phone-tablet-aab", "android-tv-aab"], "optional_upload_targets": []},
+    {"id": "chrome-extension", "label": "Chrome extension", "group": "Browser extensions", "upload_targets": ["chrome-extension-package", "edge-extension-package"], "optional_upload_targets": []},
+    {"id": "firefox-extension", "label": "Firefox extension", "group": "Browser extensions", "upload_targets": ["firefox-extension-package"], "optional_upload_targets": []},
+    {"id": "watch-wear-os", "label": "Wear OS", "group": "Wearables", "upload_targets": ["wear-os-aab"], "optional_upload_targets": []},
+    {"id": "apple-watch-watchos", "label": "Apple Watch/watchOS", "group": "Wearables", "upload_targets": ["ios-app-store-ipa"], "optional_upload_targets": []},
+    {"id": "control-hub", "label": "control hub", "group": "Server deployment", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "data-plane", "label": "data plane", "group": "Server deployment", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "core-double-vpn", "label": "core/double-VPN", "group": "Server deployment", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "smart-router", "label": "Smart Router", "group": "Server deployment", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "gcp-three-server-proof", "label": "Three-server GCP proof", "group": "Server deployment", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "signing-store-metadata", "label": "Signing and store metadata", "group": "Release governance", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "winn-v3", "label": "Winn v3", "group": "Protocols", "upload_targets": [], "optional_upload_targets": []},
+    {"id": "winn-v1-awg-xray", "label": "Winn v1 AWG/Xray", "group": "Protocols", "upload_targets": [], "optional_upload_targets": []}
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "winn-phase1-auto-impairment-profiles/v1",
+  "protocol_version": "winn/3",
+  "frozen_at_utc": "2026-07-24T23:05:00Z",
+  "attempts_per_readiness_per_profile": 10000,
+  "readiness_classes": [
+    "warm",
+    "cold"
+  ],
+  "measurement_rule": {
+    "warm": "The scored boundary begins after a fresh verified generation is fully prepared and trust state is committed.",
+    "cold": "The scored boundary begins before fresh verified assembly; preparation, trust-state commit, and click share one non-resettable three-second parent deadline."
+  },
+  "traffic_control_rule": {
+    "shape": "symmetric",
+    "delay": "Apply half the declared RTT to client and server egress.",
+    "loss": "Apply q=1-sqrt(1-p) independently to client and server egress, where p is the declared round-trip loss fraction.",
+    "capacity": "Apply the declared capacity independently to client and server egress.",
+    "queue": "netem"
+  },
+  "score_gate": {
+    "failures": 0,
+    "p50_millis_max": 800,
+    "p95_millis_max": 1500,
+    "p99_millis_max": 3000,
+    "individual_attempt_millis_max": 3000
+  },
+  "profiles": [
+    {
+      "id": "baseline",
+      "rtt_millis": 0,
+      "loss_fraction": 0,
+      "capacity_mbps": 0,
+      "purpose": "Unimpaired private-lab control."
+    },
+    {
+      "id": "nominal-30ms-0.1pct-100mbps",
+      "rtt_millis": 30,
+      "loss_fraction": 0.001,
+      "capacity_mbps": 100,
+      "purpose": "Typical well-performing access network."
+    },
+    {
+      "id": "constrained-100ms-1pct-25mbps",
+      "rtt_millis": 100,
+      "loss_fraction": 0.01,
+      "capacity_mbps": 25,
+      "purpose": "Constrained mobile or congested access network."
+    },
+    {
+      "id": "envelope-edge-250ms-3pct-10mbps",
+      "rtt_millis": 250,
+      "loss_fraction": 0.03,
+      "capacity_mbps": 10,
+      "purpose": "Declared Phase 1 usability-envelope edge."
+    }
+  ]
+}

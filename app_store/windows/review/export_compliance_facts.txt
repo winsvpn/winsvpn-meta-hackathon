@@ -1,0 +1,53 @@
+Microsoft Store / Partner Center Export Compliance Facts To Review
+
+Do not treat this as legal advice. Use it as an engineering fact sheet before
+answering Partner Center encryption and export questions for Win's VPN
+1.0.17+34 (product 1.0.17 / four-part 1.0.17.34).
+
+Facts from the current app:
+- The app is a VPN client.
+- The app uses encryption for VPN tunneling and secure network communication.
+- Primary tunnel: Winn Protocol v3 on the local Windows datapath.
+- Ordered Winn v1 compatibility path: AWG then Xray after a served Winn v3
+  attempt. Direct AWG or Xray is not a separate request site.
+- Local Windows engines include winn-datapath.exe, winsvpn_winn3_engine.exe,
+  winsvpn_awg_engine.exe, amneziawg.exe, awg.exe, and xray.exe.
+- The app is not a medical, military, or government-only app.
+- The app is intended for general consumer/business privacy and network
+  security use.
+- There is no current 1.0.17+34 signed website or Partner Center installer.
+  Unsigned local EXEs, development MSIX identities, and historical 1.0.14+29
+  files cannot carry an encryption declaration or export-compliance receipt.
+- Partner Center encryption, export, and IARC answers remain
+  OWNER-BLOCKED: ABSENT until owner/legal review completes them in the
+  owner-held Partner Center account.
+
+Owner/legal confirmation still required:
+- Final Partner Center answer for whether the product uses cryptography or
+  encryption.
+- Whether the app qualifies for an available mass-market or standard-encryption
+  exception.
+- Whether any additional U.S. or destination-country filing is required for
+  this exact VPN build.
+- Whether every enabled Xray transport/protocol is treated as industry-standard
+  or non-standard cryptography for U.S. export/import purposes.
+
+Current primary-source requirements:
+- BIS places encryption software in Category 5, Part 2 and states that the
+  applicable classification, reporting, end-user, end-use, and destination
+  requirements must be determined before relying on License Exception ENC.
+- Microsoft Store listing and Partner Center questionnaires still require an
+  owner answer. Silence in this packet is not an approved exemption.
+
+Primary references:
+- https://www.bis.gov/learn-support/encryption-controls
+- https://learn.microsoft.com/en-us/windows/apps/publish/store-policies
+
+Recommended operational stance:
+- Answer encryption questions conservatively.
+- Do not claim "no encryption" for this app.
+- Do not claim an exemption, CCATS, or completed Partner Center export
+  declaration until owner/legal review records that answer outside this
+  repository.
+- Keep any export-compliance documents outside source control if they contain
+  account-specific or legal filing information.

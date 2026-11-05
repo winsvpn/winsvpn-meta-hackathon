@@ -1,0 +1,130 @@
+[
+  {
+    "path": "lib/main.dart",
+    "sha256": "e30910e1d465dc14861cf666c70007517af8d3c9ea8900d416343c6eb0d42da4",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "d3c2d9fbb460a952bfa21fe4eaad75af668bc53c4c2201494c767bd908025aa8"
+  },
+  {
+    "path": "lib/owned_keyboard_listener.dart",
+    "sha256": "ddfe8dad6689da3cea0d832ab6b4aaf96162ac0b3710fbb0f1640b3cedd197d7",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": null
+  },
+  {
+    "path": "lib/tv_dpad_support.dart",
+    "sha256": "167d0a2d8bdacaff20bf18664918894c9bb35096487d21b1bd3248fff715d6fa",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "bfef18d320a78a0d5e5fe8439d2d227a826ac5b8a596d20c0be71a83fce8f0cb"
+  },
+  {
+    "path": "lib/vpn_power_control.dart",
+    "sha256": "8ac71f119633a960c09de7f5212abeec89444a76da81b75c9b5db303b1b2243a",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "1e3526e4c908f767146fe45c30eb80f3f0ec68c7be7d1bd2599e202a892a8316"
+  },
+  {
+    "path": "linux/runner/linux_tunnel_backend.cc",
+    "sha256": "41dc0e99760479820df054da490876f6b43160ca79ea529010eff5e4d63f720e",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "559030b209b25c66075e77dac7f583899ab239b3fe10fb0cf00ee3c5b00e0d34"
+  },
+  {
+    "path": "server/test_control_plane_round11.py",
+    "sha256": "df3183c5f5f90cb5c28bd89ec7b84acc3dea6e06daf2a68ef8c9bcbefede4835",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": null
+  },
+  {
+    "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+    "sha256": "d44269c39d045a6b558591d183a9abfff40720d18d89308aed409d0c3c548c04",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "f41b1fbcbb67a00cdce4c1e51ead02c6cd1ba9fca0c257542c479b91ec7089a5"
+  },
+  {
+    "path": "test/owned_keyboard_listener_test.dart",
+    "sha256": "01b86cf7d0b5b2985adeaf06b8071a069525c952ba037a01d86d96e22526d948",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": null
+  },
+  {
+    "path": "tools/native_messaging/host/bin/wins_bridge_host.dart",
+    "sha256": "40ac34fb8dfdaafe3bf4e2de7d2d0540f98cb8e3707eecb2dff0dd39db8b385c",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "eec5fe5f056561c22f3db13a497eb1ed922a108c356f2a2b36391d0b1f45facb"
+  },
+  {
+    "path": "tools/native_messaging/host/test/wins_bridge_host_origins_test.dart",
+    "sha256": "afa878f706efffb9ae62e536b3f20cc8fa8bf7111e8ac9d6c9e3df9ffd65da1f",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": null
+  },
+  {
+    "path": "tools/native_messaging/native_host_layout.py",
+    "sha256": "46eae4f8360ceccc415f480f82269b36eb1167c7b5461ae50ba4c233204a41a7",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "9de6f1cb56ac9210ffb53fe00a84fa2566d99a6c7eb6d0470abd3164f0911958"
+  },
+  {
+    "path": "tools/native_messaging/render_host_manifest.py",
+    "sha256": "b4a5024f4c86b01ed916a35aa5b802a34db6be23d34658734214f5de2b453e3e",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "b8dc4935509cbe68788739d29b735a3cbeb468484ef27609598d9471f91804da"
+  },
+  {
+    "path": "tools/native_messaging/test_native_host_registration.py",
+    "sha256": "7e2e2685d366880b835e7c4201146d5addbfdf6ac99a904224d33f5dc8487eec",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "003befe87d7d13cd7a9a86cca846d2ce2789531e3f06c6913871389d430d262d"
+  },
+  {
+    "path": "tools/test_linux_round7.py",
+    "sha256": "6cc45a6e418d7e21fd445a6623a8f52282819ae153c046b347d3feb980fffb08",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "fbbec3cb5e8d4cb4908ca191071db6b99ddb2697f8a4e56f3db1a30be0aae558"
+  },
+  {
+    "path": "winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go",
+    "sha256": "a707852fe27d6d62284da20946eba6e546654f2177ef287d1fe81e815b52358e",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": "90823d6cbbadc0226271cd6021a03f58ed66f60d52407ee1cc4997d29d8d5dc7"
+  },
+  {
+    "path": "winn_protocol_experimental/cmd/winn3-gateway/peer_registry_round11_test.go",
+    "sha256": "9e42c0194309c7a005e6d54dc8020183db3e1136bba6e09eed0716202cc6946a",
+    "crlf": 0,
+    "carriage_returns": 0,
+    "added_long_dashes": 0,
+    "before_sha256": null
+  }
+]

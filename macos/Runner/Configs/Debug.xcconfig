@@ -1,0 +1,6 @@
+#include "../../Flutter/Flutter-Debug.xcconfig"
+#include "Warnings.xcconfig"
+// Reaches the PacketTunnel target's Debug configuration, whose
+// baseConfigurationReference is this file. See Signing.xcconfig.
+#include "Signing.defaults.xcconfig"
+#include? "Signing.xcconfig"

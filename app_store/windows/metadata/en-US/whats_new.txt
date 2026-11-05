@@ -1,0 +1,9 @@
+Win's VPN 1.0.17+34 (product 1.0.17 / 1.0.17.34)
+
+Winn v3 is the primary protocol. If Winn v3 cannot connect, this version uses
+the Winn v1 compatibility path: AWG then Xray.
+
+Website x64, Partner Center x64, website ARM64, and Partner Center ARM64 are
+distinct required upload targets. Native ARM64 remains pending-owner-evidence.
+This listing is not an MSIX package. No current signed 1.0.17+34 installer is
+attached.

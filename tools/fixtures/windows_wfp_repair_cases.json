@@ -1,0 +1,217 @@
+{
+  "provider_guid": "21e1dab8-b9db-43c0-b343-eb9365c7bdd2",
+  "pinned": {
+    "baseline": {
+      "guid": "21e068a2-2851-43c5-8a29-7afe3f260384",
+      "names": [
+        "WinsVPN Split Tunnel Baseline",
+        "Win's VPN Split Tunnel Baseline"
+      ]
+    },
+    "dns": {
+      "guid": "e65841b6-82f6-4d55-bde2-61f84d4508d4",
+      "names": [
+        "WinsVPN Split Tunnel DNS",
+        "Win's VPN Split Tunnel DNS"
+      ]
+    }
+  },
+  "pair_repair_cases": [
+    {
+      "name": "samsung_dynamic_pair_is_repaired_to_upstream_priorities",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65533,
+        "delete_result": "success"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65532,
+        "delete_result": "success"
+      },
+      "expected": "repair"
+    },
+    {
+      "name": "canonical_pair_at_absolute_maximum",
+      "occupied_weights": [],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65535,
+        "delete_result": "not_called"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "Win's VPN Split Tunnel DNS",
+        "actual_weight": 65534,
+        "delete_result": "not_called"
+      },
+      "expected": "keep"
+    },
+    {
+      "name": "owned_pair_below_a_free_gap_is_repaired",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65532,
+        "delete_result": "success"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65531,
+        "delete_result": "success"
+      },
+      "expected": "repair"
+    },
+    {
+      "name": "foreign_maximum_does_not_shift_pinned_pair",
+      "occupied_weights": [65535],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65534,
+        "delete_result": "success"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65533,
+        "delete_result": "success"
+      },
+      "expected": "repair"
+    },
+    {
+      "name": "missing_baseline_recreates_pair",
+      "occupied_weights": [65535, 65534],
+      "baseline": {"missing": true},
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65532,
+        "delete_result": "success"
+      },
+      "expected": "repair"
+    },
+    {
+      "name": "foreign_provider_at_pinned_key",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": false,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65533,
+        "delete_result": "not_called"
+      },
+      "dns": {"missing": true},
+      "expected": "fail_closed"
+    },
+    {
+      "name": "foreign_name_at_pinned_key",
+      "occupied_weights": [65535, 65534],
+      "baseline": {"missing": true},
+      "dns": {
+        "provider_matches": true,
+        "display_name": "Another VPN DNS",
+        "actual_weight": 65532,
+        "delete_result": "not_called"
+      },
+      "expected": "fail_closed"
+    },
+    {
+      "name": "owned_name_swapped_between_pinned_keys",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65533,
+        "delete_result": "not_called"
+      },
+      "dns": {"missing": true},
+      "expected": "fail_closed"
+    },
+    {
+      "name": "active_filters_block_owned_repair",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65532,
+        "delete_result": "in_use"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65531,
+        "delete_result": "success"
+      },
+      "expected": "fail_closed"
+    },
+    {
+      "name": "engine_error_blocks_owned_repair",
+      "occupied_weights": [65535, 65534],
+      "baseline": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel Baseline",
+        "actual_weight": 65532,
+        "delete_result": "success"
+      },
+      "dns": {
+        "provider_matches": true,
+        "display_name": "WinsVPN Split Tunnel DNS",
+        "actual_weight": 65531,
+        "delete_result": "engine_error"
+      },
+      "expected": "fail_closed"
+    }
+  ],
+  "transaction_cases": [
+    {
+      "name": "both_samsung_sublayers_repair",
+      "stage_results": [true, true, true],
+      "commit_result": true,
+      "expected": "commit"
+    },
+    {
+      "name": "dns_repair_failure_rolls_back_baseline",
+      "stage_results": [true, true, false],
+      "commit_result": false,
+      "expected": "abort"
+    },
+    {
+      "name": "commit_failure_rolls_back_all_repairs",
+      "stage_results": [true, true, true],
+      "commit_result": false,
+      "expected": "abort"
+    }
+  ],
+  "provider_cleanup_cases": [
+    {
+      "name": "foreign_provider_is_retained",
+      "provider_name_matches": false,
+      "delete_result": "not_called",
+      "expected": "retain_success"
+    },
+    {
+      "name": "owned_unused_provider_is_deleted",
+      "provider_name_matches": true,
+      "delete_result": "success",
+      "expected": "delete_success"
+    },
+    {
+      "name": "owned_in_use_provider_is_retained",
+      "provider_name_matches": true,
+      "delete_result": "in_use",
+      "expected": "retain_success"
+    },
+    {
+      "name": "owned_provider_unknown_delete_error_aborts",
+      "provider_name_matches": true,
+      "delete_result": "engine_error",
+      "expected": "fail_closed"
+    }
+  ]
+}

@@ -1,0 +1,221 @@
+[
+  {
+    "name": "flutter-analyze-delivery",
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:59:55.522531+00:00",
+    "log": "flutter-analyze-delivery.log",
+    "exit_code": 0,
+    "seconds": 2.72
+  },
+  {
+    "name": "flutter-test-delivery",
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:59:58.239520+00:00",
+    "log": "flutter-test-delivery.log",
+    "exit_code": 0,
+    "seconds": 14.39
+  },
+  {
+    "name": "test_control_plane_deepseek_round2",
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:47.922894+00:00",
+    "log": "test_control_plane_deepseek_round2.log",
+    "exit_code": 0,
+    "seconds": 1.7
+  },
+  {
+    "name": "test_control_plane_round4",
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:49.624609+00:00",
+    "log": "test_control_plane_round4.log",
+    "exit_code": 0,
+    "seconds": 2.72
+  },
+  {
+    "name": "test_control_plane_round5",
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:52.347141+00:00",
+    "log": "test_control_plane_round5.log",
+    "exit_code": 0,
+    "seconds": 2.72
+  },
+  {
+    "name": "test_control_plane_round6",
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:55.068720+00:00",
+    "log": "test_control_plane_round6.log",
+    "exit_code": 0,
+    "seconds": 2.52
+  },
+  {
+    "name": "test_control_plane_round7",
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:57.590511+00:00",
+    "log": "test_control_plane_round7.log",
+    "exit_code": 0,
+    "seconds": 5.38
+  },
+  {
+    "name": "test_control_plane_round8",
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:02.970815+00:00",
+    "log": "test_control_plane_round8.log",
+    "exit_code": 0,
+    "seconds": 2.83
+  },
+  {
+    "name": "test_control_plane_round9",
+    "command": [
+      "python3",
+      "server/test_control_plane_round9.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:05.803305+00:00",
+    "log": "test_control_plane_round9.log",
+    "exit_code": 0,
+    "seconds": 1.5
+  },
+  {
+    "name": "test_winn3_descriptor_hub",
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:07.302076+00:00",
+    "log": "test_winn3_descriptor_hub.log",
+    "exit_code": 0,
+    "seconds": 20.07
+  },
+  {
+    "name": "test_account_deletion_hub",
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:27.372665+00:00",
+    "log": "test_account_deletion_hub.log",
+    "exit_code": 0,
+    "seconds": 3.23
+  },
+  {
+    "name": "donor-final",
+    "command": [
+      "python3",
+      "server/test_donor_acknowledgment_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:56:57.663434+00:00",
+    "log": "donor-final.log",
+    "exit_code": 0,
+    "seconds": 7.75
+  },
+  {
+    "name": "website",
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:46:35.598041+00:00",
+    "log": "website.log",
+    "exit_code": 0,
+    "seconds": 0.4
+  },
+  {
+    "name": "rulings-delivery",
+    "command": [
+      "sh",
+      "tools/verify_rulings.sh"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:02:03.275678+00:00",
+    "log": "rulings-delivery.log",
+    "exit_code": 0,
+    "seconds": 2.98
+  },
+  {
+    "name": "apple-contract",
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:46:35.598378+00:00",
+    "log": "apple-contract.log",
+    "exit_code": 0,
+    "seconds": 0.08
+  },
+  {
+    "name": "apple-wiring",
+    "command": [
+      "python3",
+      "tools/test_apple_standalone_v3_wiring.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:46:35.598481+00:00",
+    "log": "apple-wiring.log",
+    "exit_code": 0,
+    "seconds": 0.09
+  },
+  {
+    "name": "windows-awg",
+    "command": [
+      "python3",
+      "tools/test_windows_awg_runtime_validation.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:46:35.682798+00:00",
+    "log": "windows-awg.log",
+    "exit_code": 0,
+    "seconds": 0.08
+  },
+  {
+    "name": "go-all",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started": "2026-09-13T20:46:35.766747+00:00",
+    "log": "go-all.log",
+    "exit_code": 0,
+    "seconds": 57.37
+  }
+]

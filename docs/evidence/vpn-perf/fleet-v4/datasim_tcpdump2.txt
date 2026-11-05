@@ -1,0 +1,13 @@
+sudo: unable to resolve host <DATA_SIM_INTERNAL_HOST>: Name or service not known
+tcpdump: data link type LINUX_SLL2
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+04:25:27.758201 ens4  In  IP <WINPC_EGRESS_IP>.52652 > 10.128.0.13.9110: UDP, length 148
+04:25:28.158646 ens4  In  IP <WINPC_EGRESS_IP>.52652 > 10.128.0.13.9110: UDP, length 148
+04:25:28.559197 ens4  In  IP <WINPC_EGRESS_IP>.52652 > 10.128.0.13.9110: UDP, length 148
+04:25:28.959326 ens4  In  IP <WINPC_EGRESS_IP>.52652 > 10.128.0.13.9110: UDP, length 148
+04:25:29.360481 ens4  In  IP <WINPC_EGRESS_IP>.52652 > 10.128.0.13.9110: UDP, length 148
+
+5 packets captured
+6 packets received by filter
+0 packets dropped by kernel

@@ -1,0 +1,103 @@
+﻿id,block,kind,english_source,burmese_translation,figures_that_must_survive,translator_note
+001,hdr.org,verbatim,WIN’S VPN INC.,WIN’S VPN INC.,,"DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+002,hdr.status,label,501(c)(3) PUBLIC CHARITY · IRC SECTION 509(a)(2),,501 3 509 2,"IRS classification, paired with 'private foundation' later. Keep the two distinct."
+003,hdr.exempt,label,"EXEMPT SINCE JUNE 11, 2026",,11 2026,
+004,hdr.taxyear,label,TAX YEAR 2026,,2026,
+005,ttl.kicker,label,"FOR PROSPECTIVE DONORS · GENERAL INFORMATION, NOT TAX ADVICE",,,
+006,ttl.title,heading,WHAT A DONATION IS WORTH AT TAX TIME,,,
+007,ttl.sub,prose,"The federal rules for the 2026 tax year, four worked examples, and the caveat that applies to most filers.",,2026,"TRAP. 'filers' = people who file a United States federal tax return. NOT 'informer', 'notifier', 'reporter', or 'one who informs'. The machine attempt returned 'informers/notifiers'. Same word in callout.head."
+008,body.salutation,label,"Dear Prospective Donor,",,,
+009,body.p1,prose,Thank you for considering a gift to Win’s VPN Inc.,,,
+010,body.p1,prose,"Before you give, we would rather you knew exactly what a charitable deduction does and does not do.",,,
+011,body.p2,prose,"What follows is the federal law for the 2026 tax year in plain terms, with worked examples.",,2026,
+012,body.p2,prose,"It is general information, not advice about your return, and not a prediction of what any gift will be worth to you.",,,Disclaimer. Must stay a clear denial that this is tax advice.  Keep the denial explicit. This protects the organization.
+013,callout.head,heading,READ THIS FIRST: MOST FILERS GET NO ITEMIZED DEDUCTION FOR A CHARITABLE GIFT,,,'filers' = people who file a US federal tax return. See ttl.sub. Keep this line's force: it is the single most important sentence on the page and it must stay blunt.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+014,callout.body,prose,A charitable deduction reduces the income you are taxed on.,,,
+015,callout.body,prose,"It is not a credit, and it does not cut your tax bill dollar for dollar.",,,"'credit' here = tax credit, a subtraction from tax owed. Distinct from 'deduction', a subtraction from taxable income. The whole letter turns on this distinction; use two clearly different Burmese terms and keep them consistent everywhere."
+016,callout.body,prose,"Most people who file a federal return do not itemize, because the 2026 standard deduction ($16,100 single, $32,200 married filing jointly, $24,150 head of household) is larger than everything they could itemize.",,"2026 $16,100 $32,200 $24,150",Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+017,callout.body,prose,"If that describes you, an itemized charitable deduction is worth nothing to you.",,,"TRAP. 'worth nothing' is deliberate and absolute. Do NOT soften to 'is not valuable', 'may not be useful', or 'has little benefit'. The machine attempt softened it. The reader must understand the deduction is worth zero, not merely small.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+018,callout.body,prose,"One narrow exception begins with tax year 2026: a filer who takes the standard deduction may still deduct up to $1,000 of cash gifts, or $2,000 on a joint return.",,"2026 $1,000 $2,000",Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.
+019,callout.body,prose,That ceiling is the entire benefit.,,,
+020,callout.body,prose,"Please give because you want the work funded, not because you expect the government to hand the money back.",,,"TRAP. 'the work' = the charity's programme activity, the thing the organization does. It must NOT become 'business', 'company', or 'trade'. A 501(c)(3) has no business to fund. A back-translation of the machine attempt returned 'businesses' here."
+021,arith.head,heading,HOW THE ARITHMETIC WORKS,,,
+022,arith.body,prose,"Your approximate saving is the deductible amount multiplied by your marginal tax rate, the rate that applies to your top dollar of income.",,,"The rate applying to the top dollar of income, not the average rate. Do not simplify to 'tax rate'."
+023,arith.body,prose,Two 2026 rules fix the deductible amount before that multiplication happens.,,2026,
+024,arith.body,prose,"If you itemize, only the giving above 0.5% of your adjusted gross income counts.",,0.5%,"Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym."
+025,arith.body,prose,"If you do not itemize, the $1,000 or $2,000 ceiling above applies.",,"$1,000 $2,000",Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+026,arith.body,prose,"A $1,000 gift never comes back as $1,000.",,"$1,000 $1,000",
+027,tbl.head,heading,"FOUR ILLUSTRATIONS, WITH EVERY ASSUMPTION WRITTEN OUT",,,
+028,tbl.col.gift,label,GIFT,,,
+029,tbl.col.assumptions,label,ASSUMPTIONS,,,
+030,tbl.col.deduct,label,AMOUNT YOU MAY DEDUCT,,,
+031,tbl.col.rate,label,ASSUMED MARGINAL RATE,,,
+032,tbl.col.reduction,label,REDUCTION IN FEDERAL TAX,,,
+033,tbl.col.netcost,label,APPROXIMATE NET COST,,,
+034,row1.gift,figure,$100,$100,$100,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+035,row1.assume,label,"Single filer, about $60,000 AGI, takes the standard deduction",,"$60,000","Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+036,row1.deduct,figure,$100,$100,$100,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+037,row1.note,label,"within the $1,000 non-itemizer cap",,"$1,000","Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  The $1,000 / $2,000 ceiling for people who take the standard deduction."
+038,row1.rate,figure,12%,12%,12%,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+039,row1.reduction,label,about $12,,$12,"Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+040,row1.netcost,label,about $88,,$88,"Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+041,row2.gift,figure,"$1,000","$1,000","$1,000","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+042,row2.assume,label,"Single filer, about $95,000 AGI, takes the standard deduction",,"$95,000","Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+043,row2.deduct,figure,"$1,000","$1,000","$1,000","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+044,row2.note,label,exactly at the non-itemizer cap,,,"Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  The $1,000 / $2,000 ceiling for people who take the standard deduction."
+045,row2.rate,figure,22%,22%,22%,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+046,row2.reduction,label,about $220,,$220,"Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+047,row2.netcost,label,about $780,,$780,"Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+048,row3.gift,figure,"$10,000","$10,000","$10,000","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+049,row3.assume,label,"Married filing jointly, $300,000 AGI, itemizes deductions",,"$300,000",Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+050,row3.deduct,figure,"$8,500","$8,500","$8,500","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+051,row3.note,label,"0.5% AGI floor removes $1,500",,"0.5% $1,500",The 0.5% floor. 'removes' = this much of the gift stops being deductible.
+052,row3.rate,figure,24%,24%,24%,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+053,row3.reduction,label,"about $2,040",,"$2,040","Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+054,row3.netcost,label,"about $7,960",,"$7,960","Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+055,row4.gift,figure,"$100,000","$100,000","$100,000","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+056,row4.assume,label,"Single filer, $600,000 AGI, itemizes deductions",,"$600,000",Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+057,row4.deduct,figure,"$97,000","$97,000","$97,000","DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+058,row4.note,label,"0.5% AGI floor removes $3,000",,"0.5% $3,000",The 0.5% floor. 'removes' = this much of the gift stops being deductible.
+059,row4.rate,figure,35%,35%,35%,"DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+060,row4.reduction,label,"about $33,950",,"$33,950","Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+061,row4.netcost,label,"about $66,050",,"$66,050","Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+062,tbl.footnote,prose,Every figure above is an illustration resting on the assumptions in its own row.,,,
+063,tbl.footnote,prose,It is not a prediction about you and not a promise that you will save anything.,,,Keep the denial explicit. This protects the organization.
+064,tbl.footnote,prose,"Change the filing status, the income, whether the donor itemizes, or the marginal rate, and the result changes; the marginal rates are assumed rather than derived from the incomes shown.",,,Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.
+065,tbl.footnote,prose,"The four gift amounts match the donor recognition tiers we plan to build (Bronze $100, Silver $1,000, Gold $10,000, Diamond $100,000) but those tiers are planned only.",,"$100 $1,000 $10,000 $100,000",The recognition tiers do not exist yet. Keep the denial.
+066,tbl.footnote,prose,"No badge, certificate, or tier exists today, and a gift made now does not earn one.",,,Keep the denial: a gift now earns no badge.
+067,ceil.head,heading,"CEILINGS, THE CARRYFORWARD, AND THE RECEIPT YOU NEED",,,
+068,ceil.lead,label,A ceiling based on your income.,,,
+069,ceil.body,prose,"For cash gifts to a public charity such as Win’s VPN Inc., the deduction generally cannot exceed 60% of adjusted gross income, and ceilings of 50%, 30%, or 20% apply to other kinds of gifts.",,60% 50% 30% 20%,"Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym.  IRS classification, paired with 'private foundation' later. Keep the two distinct."
+070,ceil.body,prose,Anything above the ceiling is not lost: it carries over to the next 5 tax years.,,5,Carryforward. The unused amount is not lost; it moves to later years. Keep the figure 5 as a Western Arabic digit.
+071,ceil.body,prose,(IRS Publication 526.),,526,
+072,ack.lead,label,Gifts of $250 or more need our written acknowledgment.,,$250,"Term of art: the receipt the charity must issue. Not 'confirmation', 'thanks', or 'agreement'. Same rendering in ack.lead and ack.body."
+073,ack.body,prose,"The IRS does not allow a deduction for any single gift of $250 or more without a contemporaneous written acknowledgment from the charity, and it has to reach you by the earlier of the date you file that year’s return or that return’s due date including extensions.",,$250,"Term of art: the receipt the charity must issue. Not 'confirmation', 'thanks', or 'agreement'. Same rendering in ack.lead and ack.body.  Legal term: obtained in time, before the filing deadline described in the same sentence. Do not drop it and do not translate it as 'modern'."
+074,ack.body,prose,"If you gave $250 or more and did not receive one from us, please email support@winsvpn.org and we will issue it.",,$250,
+075,ack.body,prose,(IRS Publication 1771.),,1771,
+076,cannot.head,heading,WHAT THIS LETTER CANNOT TELL YOU,,,
+077,cannot.body,prose,"Deductibility depends on your own circumstances: your filing status, your adjusted gross income, whether you itemize, what else you deducted, and what other gifts you made that year.",,,"Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym."
+078,cannot.body,prose,State and local treatment of charitable giving varies by state and does not follow the federal rules.,,,State and local rules differ from federal rules. Do not merge the two levels of government into one word.
+079,cannot.body,prose,Win’s VPN Inc. does not provide tax advice and cannot tell you what a gift will be worth to you.,,,
+080,cannot.body,prose,"Please ask a tax professional, and check the rules yourself at irs.gov.",,,
+081,sign.closing,label,"Sincerely,",,,
+082,sign.org,verbatim,Win’s VPN Inc.,Win’s VPN Inc.,,"DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+083,sign.orgsuffix,label,· a 501(c)(3) tax-exempt public charity,,501 3,"IRS classification, paired with 'private foundation' later. Keep the two distinct."
+084,fine.print,prose,Win’s VPN Inc. is exempt from federal income tax under Internal Revenue Code Section 501(c)(3).,,501 3,
+085,fine.print,prose,"The determination letter is dated July 21, 2026; the effective date of exemption is June 11, 2026, so a contribution made on or after that date falls inside the exempt period.",,21 2026 11 2026,
+086,fine.print,prose,"It is classified as a public charity under Section 509(a)(2) rather than a private foundation, uses a December 31 accounting period, and files an annual Form 990-series return.",,509 2 31 990,"IRS classification, paired with 'private foundation' later. Keep the two distinct."
+087,fine.print,prose,"Contributions are deductible under IRC Section 170 to the extent allowed by law, and it is qualified to receive tax-deductible bequests, devises, transfers, or gifts under Section 2055, 2106, or 2522.",,170 2055 2106 2522,
+088,fine.print,prose,Tax-exempt status is a determination about the organization.,,,This sentence denies any government endorsement of the VPN product. Keep the denial intact; it is the honest framing the letter exists for.
+089,fine.print,prose,"It is not an IRS review, approval, or endorsement of the Win’s VPN service, its security, or its performance.",,,
+090,fine.print,prose,"Check the status yourself with the IRS Tax Exempt Organization Search at apps.irs.gov/app/eos, searching the organization name, Win’s VPN Inc.; recently approved organizations can take time to appear there, so not yet finding a listing is expected rather than a warning sign.",,,"Explains why a lookup may find nothing. Keep it, or a reader who fails to find the listing will conclude the charity is fake."
+091,fine.print,prose,"Sources: IRS Publications 526 and 1771, IRS Topic no. 506, and Rev. Proc. 2025-32.",,526 1771 506 2025 32,
+092,fine.print,prose,Dollar figures are for the 2026 tax year and change annually.,,2026,
+093,fine.print,prose,"Issued August 3, 2026.",,3 2026,
+094,footer.domain,verbatim,winsvpn.org,winsvpn.org,,"DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+095,notice.governing,prose,This Burmese text is a translation provided for convenience.,,,
+096,notice.governing,prose,The English version of this letter is the governing text.,,,
+097,notice.governing,prose,"If the Burmese and the English differ, the English version controls.",,,"Legal clause. 'controls' = prevails, governs, takes precedence. Not 'manages' or 'operates'."
+098,notice.scope,prose,What follows is United States federal tax law.,,,
+099,notice.scope,prose,It changes what a person owes only if that person files a United States federal income tax return.,,,
+100,notice.scope,prose,"Most readers in Myanmar do not file one, and for them a gift to Win’s VPN Inc. reduces no tax at all.",,,
+101,notice.scope,prose,The English version of this letter does not say so; it was written for readers who file in the United States.,,,
+102,notice.scope,prose,A gift is still a gift; it is simply not a deduction outside the United States tax system.,,,

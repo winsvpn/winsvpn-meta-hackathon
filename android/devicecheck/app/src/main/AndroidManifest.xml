@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Throwaway verification harness. These are the permissions the SHIPPING
+         app already declares; nothing new is requested here, and
+         android/app/src/main/AndroidManifest.xml is not touched. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- On-device app-identity / signing gate. Injected into the debug flavour
+         (org.winsvpn.app.debug, debug-signed with the same key as this harness)
+         so it can read that package's own signing certificate. Cross-package
+         signature reads are restricted since API 28, so the check FAILS CLOSED
+         rather than guessing. Run:
+         adb -s ZY22GTV6Z3 shell am instrument -w -r
+             org.winsvpn.devicecheck/org.winsvpn.devicecheck.AppIdSigningCheck -->
+    <instrumentation
+        android:name="org.winsvpn.devicecheck.AppIdSigningCheck"
+        android:targetPackage="org.winsvpn.app.debug"
+        android:label="Winn app-id/signing gate" />
+
+    <application
+        android:allowBackup="false"
+        android:label="Winn device check"
+        android:supportsRtl="true">
+
+        <activity
+            android:name="org.winsvpn.devicecheck.CheckActivity"
+            android:exported="true"
+            android:label="Winn device check">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- The AmneziaWG AAR declares its own VpnService. This harness runs
+             its own, exactly as the shipping app does, so the AAR's is removed
+             the same way android/app/src/main/AndroidManifest.xml removes it. -->
+        <service
+            android:name="org.amnezia.awg.backend.AbstractBackend$VpnService"
+            tools:node="remove" />
+
+        <service
+            android:name="org.winsvpn.devicecheck.CheckVpnService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <!-- The winn3 staged-posture check. Separate service, separate logcat
+             tag, no engine binary and no gateway: WINN3_TUN_LAYER_20260808.md
+             §4 is a contract about what the HOST configures, which is the half
+             that can be proved with nothing on any wire. -->
+        <service
+            android:name="org.winsvpn.devicecheck.V3PostureCheckService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

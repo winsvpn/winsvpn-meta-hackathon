@@ -1,0 +1,10 @@
+{
+  "command": [
+    "./gradlew",
+    ":app:lintPhoneDebug",
+    ":app:testPhoneDebugUnitTest",
+    "--offline"
+  ],
+  "exit_code": 1,
+  "seconds": 28.62
+}

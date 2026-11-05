@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:28.994888+00:00",
+    "exit_code": 0,
+    "seconds": 3.04,
+    "log": "flutter-analyze.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:32.031339+00:00",
+    "exit_code": 0,
+    "seconds": 16.18,
+    "log": "flutter-test.log"
+  }
+]

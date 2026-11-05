@@ -1,0 +1,17 @@
+# Direct runtime pins for the Smart Router image. Test-only packages stay out
+# of this file so they never enter the production closure. Secrets, VCS URLs,
+# and unpinned lines are forbidden.
+#
+# Hashed lock regeneration (repo root, reviewed base image, latest stable pip-tools):
+#   docker run --rm -v "$PWD:/work" -w /work \
+#     python:3.14.7-slim-trixie@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4 \
+#     bash -c 'pip install --no-cache-dir pip-tools==7.6.1 &&
+#       pip-compile --allow-unsafe --generate-hashes --no-strip-extras \
+#         --pip-args "--only-binary=:all:" \
+#         --output-file=router/requirements.lock router/requirements.txt'
+#
+# Versions below were the latest non-yanked PyPI stables on 2026-10-06.
+fastapi==0.142.2
+uvicorn==0.54.0
+pydantic==2.13.5
+httpx2==2.13.1

@@ -1,0 +1,771 @@
+================================================================================
+WIN'S VPN — MASTER LEGAL DOCUMENT (CANONICAL SOURCE OF TRUTH)
+================================================================================
+
+Document control
+  Master version:        2026-08-31.v4
+  Derived surfaces:      APP_PRIVACY_POLICY.txt and SERVER_LEGAL_DOCUMENT.txt
+                         (2026-08-31.v4); WEBSITE_PRIVACY.html,
+                         web/privacy/index.html, and web/terms/index.html
+                         (2026-08-31.v4); web/billing/index.html;
+                         web/trusted-contact/index.html; web/vdp/index.html;
+                         and the browser-extension privacy policy.
+  Effective:             31 August 2026
+  Controlling language:  English. Translations are convenience-only.
+  Owner:                 Win's VPN Inc. (operator) / Win Empire LLC (builder)
+  Approval status:       OWNER APPROVED 2026-08-31; COUNSEL REVIEW PENDING.
+                         This does not state or imply counsel reviewed it.
+
+Purpose of this master document
+  This is the single authoritative source for every legal and privacy statement
+  Win's VPN publishes. Each customer-facing surface is DERIVED from the sections
+  below and must never contradict them. If a derived surface and this master
+  disagree, this master governs and the derived surface must be corrected.
+
+Derivation map (which surface uses which sections)
+  In-app bundled Privacy Policy (shown before activation) ....... §§1-16, 22
+  In-app clickwrap legal terms (lib/main.dart) .................. §§1-9, 15-22
+  Server clickwrap legal document (accepted at activation) ...... §§4-9, 13, 16, 19-22
+  Website Privacy Policy page (/privacy/) ....................... §§1-8, 10-16, 22
+  Website Terms of Service page (/terms/) ....................... §§2, 3, 9, 17-22
+  Website Billing and Refund Terms page (/billing/) ............. §§9, 11
+  Website Trusted Contact Notice page (/trusted-contact/) ....... §16.4
+  Browser-extension privacy policy .............................. §§4-8, 13-15, 22
+  Google Play Data Safety form ................................... §23.1
+  Apple App Store privacy "nutrition labels" ..................... §23.2
+  Microsoft Store privacy disclosures ............................ §23.3
+  Linux store metadata (Flathub / Snap) .......................... §23.4
+  Vulnerability Disclosure Program page .......................... §12
+  Referral and prepaid pages ..................................... §§10, 11
+
+Versioning rule
+  The in-app clickwrap terms carry their own version string and document hash,
+  recorded with each acceptance. This master carries the master version above.
+  Material change to any fact here requires a new master version string, a new
+  effective date, and regeneration of every affected derived surface.
+
+--------------------------------------------------------------------------------
+§1  COMPANY IDENTITY AND TAX STATUS
+--------------------------------------------------------------------------------
+1.1  Win's VPN Inc. operates the Win's VPN service. Win Empire LLC designs and
+     builds the software, websites, scripts, and infrastructure used by the
+     service.
+1.2  Win's VPN Inc. is a Florida nonprofit corporation, filing document number
+     N26000008302, business phone (424) 946-7876, principal operations in
+     Florida.
+1.3  The Internal Revenue Service determined, in a letter dated 21 July 2026,
+     that Win's VPN Inc. is exempt from federal income tax under Internal
+     Revenue Code §501(c)(3), effective 11 June 2026, and classified it as a
+     public charity under §509(a)(2) rather than a private foundation. The
+     Employer Identification Number is 42-3223917.
+1.4  Donors may deduct contributions under IRC §170, and Win's VPN Inc. is
+     qualified to receive tax-deductible bequests, devises, transfers, or gifts
+     under §§2055, 2106, or 2522. Contributions are deductible to the extent
+     allowed by law; deductibility depends on each donor's own circumstances;
+     Win's VPN Inc. does not provide tax advice.
+1.5  Win's VPN Inc. uses a 31 December accounting period and files an annual
+     Form 990-series return.
+1.6  Tax-exempt status is a determination about the organization. It is not an
+     IRS review, approval, or endorsement of the Win's VPN service.
+
+--------------------------------------------------------------------------------
+§2  SERVICE DESCRIPTION
+--------------------------------------------------------------------------------
+2.1  Win's VPN is a privacy, cybersecurity, and anti-censorship technology
+     service. It provides an encrypted tunnel from the user's device to a Win's
+     VPN gateway, with optional Double VPN, split tunneling, and censorship
+     circumvention features.
+2.2  Availability, speed, routing, compatibility, server locations, and payment
+     features may vary by region, network, censorship conditions, device,
+     platform, and maintenance status.
+2.3  The service is provided without a guarantee that every network, country,
+     website, app, streaming service, device, or censorship system will be
+     reachable at all times.
+
+--------------------------------------------------------------------------------
+§3  ACCEPTANCE OF TERMS
+--------------------------------------------------------------------------------
+3.1  By activating or using Win's VPN, the user agrees to use the service
+     lawfully, not attack or abuse the services or infrastructure, and accepts
+     the Terms, the Verified No Log Policy, the Acceptable Use Policy, the Hold
+     Harmless Agreement, the Limitation of Liability, and the Electronic Records
+     consent.
+3.2  Account use requires clickwrap acceptance of the current legal terms inside
+     the app before activation. Consent to the bundled Privacy Policy is
+     requested inside the app before the optional processing described in this
+     document begins.
+3.3  Before the user accepts the bundled Privacy Policy, the app uses only
+     protected local settings needed to remember that choice and does not read a
+     device hardware identifier, retrieve coarse public-IP location, fetch nodes
+     or other network data, run tunnel or speed-test smoke checks, or request
+     battery-optimization changes.
+
+--------------------------------------------------------------------------------
+§4  VERIFIED NO LOG POLICY
+--------------------------------------------------------------------------------
+4.1  Win's VPN does not collect or keep VPN activity logs. Win's VPN does not
+     log browsing history, DNS query history, traffic contents, raw VPN traffic,
+     or user destination activity.
+4.2  The only limited service metadata stored is the minimum needed to operate
+     the service: account status, payment/referral status, legal acceptance
+     evidence, security/abuse-prevention records, privacy-preserving
+     device-limit metadata for enforcing the three-device limit, and the
+     free-access connection events described in §4.5.
+4.3  Transient connection/session state is cleared when the VPN disconnects.
+4.4  The service is designed and operated so that VPN activity data is not
+     written to disk at a gateway or the hub. This describes how Win's VPN is
+     built and run. It is not a claim that the operator is technically
+     incapable of logging.
+4.5  Free-access connection events. When a free-access session is verified or
+     signed out, the service writes one event record containing the shared
+     free-access account identity, a device bucket, a one-way hash of the
+     source IP address, the device public-key fingerprint, platform and device
+     model, the gateway selected, whether censorship-resistant transport was
+     requested, a one-way hash of the user agent, and the time. The record
+     shows that a connection was set up and which gateway served it, never what
+     was done through it. It contains no browsing history, DNS query history,
+     traffic contents, or destination activity. It is retained for 30 days and
+     erased with the account. Paid accounts do not generate these records.
+4.6  "Verified No Log Policy" is Win's VPN's name for the commitments in this
+     section. As of this version they have not been independently audited or
+     attested. The word "Verified" does not state or imply otherwise.
+
+--------------------------------------------------------------------------------
+§5  DATA COLLECTED BY THE APP
+--------------------------------------------------------------------------------
+5.1  Random app-install identifier. After the user accepts the bundled Privacy
+     Policy, the app generates a random app-install identifier on the device and
+     transmits it to Win's VPN with account or free-access identity and device
+     details (device model, platform, app version, locale, selected location,
+     capability flags). The identifier is created locally on first run and is
+     not derived from a device hardware identifier or an advertising identifier.
+     On Android, Windows, and Linux it is kept in the app's private storage and
+     reinstalling produces a new one; on Apple platforms it is kept in the
+     device keychain and can survive a reinstall on the same device. It may be
+     linked to the account for app functionality, account management, the
+     three-device limit, fraud prevention, security, and abuse prevention. It is
+     not used for advertising or tracking, sold, or shared for advertising. The
+     hub protects the retained device-limit value; it is deleted or overwritten
+     when the device is deactivated, replaced, or no longer needed.
+5.2  Device cryptographic identity. The app generates a long-lived cryptographic
+     key pair on first use of each account and derives a public key from it. The
+     public key is transmitted to Win's VPN with every account verification and
+     configuration renewal request, not only at activation, and is used as a
+     persistent identifier for connection provisioning, the three-device limit,
+     and abuse prevention. It is a long-lived linkable identifier: it stays the
+     same across app relaunches and reconnects and therefore functions as a
+     repeatable device marker, not a one-time token. It is not derived from
+     hardware identifiers or advertising identifiers. The private key never
+     leaves the device; only the derived public key is transmitted. The key pair
+     is stored locally in the app's private storage or the platform keychain,
+     and the corresponding account-side record is deleted or overwritten when
+     the device is deactivated, replaced, or no longer needed.
+5.3  Additional data categories. The app sends the device locale, the VPN
+     location selected, and capability flags describing which features the build
+     and platform support, so the service can return a working configuration.
+     The legal acceptance record also stores the email address supplied for a
+     paid or manual account, a one-way hash of the user agent, and the locale.
+     Where payment is made through PayPal, the payer name and the PayPal payer,
+     subscription, plan, and purchase references supplied by PayPal are stored
+     with the account.
+5.4  Coarse public-IP location and map. Only after the user asks to show the
+     approximate-location map, and before the VPN connects, the app asks
+     compiled first-party Win's VPN origins and gateways for an IP-derived map
+     scene. Cloudflare's network-metadata endpoint
+     (speed.cloudflare.com/meta) is the final fallback. Win's VPN and any
+     fallback endpoint receive the pre-VPN connection IP and ordinary request
+     metadata. On Apple platforms Apple Maps receives the requested map region
+     and connection IP. On other platforms a first-party Win's VPN endpoint
+     serves OpenStreetMap-derived tiles, so its upstream sees the Win's VPN
+     server rather than the device. Win's VPN does not request device GPS for
+     this feature or retain the returned IP, city, postal code, or map-view
+     history. The most recent coarse coordinates may remain in the app's
+     protected local settings on the device. They are not transmitted to
+     Win's VPN. On Android, Windows, and Linux they are removed by clearing the
+     app's data or uninstalling the app; on Apple platforms they are held in
+     the device keychain and can survive a reinstall on the same device.
+5.5  Live public-IP display. After the user accepts the bundled Privacy Policy,
+     and while the app is disconnected, it may query the third-party service
+     api.ipify.org to display the device's current public IP address next to the
+     connection status indicator. That service receives the connection IP and
+     ordinary request metadata; no account number, device identifier, or other
+     app data is sent. The request is never made while a VPN tunnel is active.
+5.6  Speed-test endpoints. When the user starts the in-app speed test, the app
+     measures throughput by downloading from and uploading to third-party test
+     servers: speed.cloudflare.com and cachefly.cachefly.net for every region,
+     and, for nodes in the western United States,
+     losangeles.ca.speedtest.frontier.com,
+     lsanca-speedtest-ookla-02.st.charter.com, and speedtest.lax2.sonic.net.
+     Each server receives the connection IP, ordinary request metadata, and the
+     transferred measurement traffic; no account number, device identifier, or
+     other app data is included. These requests occur only while the user runs
+     the speed test.
+5.7  Gateway recovery and third-party connections. So the app can still reach a
+     working gateway when the usual DNS or CDN paths are censored, it requests a
+     small gateway-recovery file hosted on GitHub at raw.githubusercontent.com.
+     GitHub necessarily receives the connection IP and ordinary request metadata
+     for that request. The file can only select among gateways already built
+     into the signed app, and no account number, device identifier, or other
+     user data is sent. This request is made only after the user accepts the
+     bundled Privacy Policy.
+5.8  Split-tunneling selections. Selected split-tunneling package identifiers
+     stay in protected local settings and are passed locally to the
+     operating-system VPN service; the full installed-app inventory is not
+     uploaded. See §16.2 for the Android installed-app disclosure.
+5.9  Website data. The public website may collect: email address when provided
+     for paid/manual accounts or support, prepaid redemption codes submitted on
+     the website, security vulnerability reports submitted through the disclosure
+     form, support messages the user sends, and website analytics or
+     ad-conversion events when consented to on the website. Website marketing
+     tracking is separate from VPN tunnel traffic and does not track what users
+     do through the VPN.
+5.10 Diagnostics and crash information. The app contains no third-party crash
+     or analytics SDK and does not upload crash reports. A distribution
+     platform may provide aggregated crash or diagnostic information to the
+     developer under its own controls. Support messages and diagnostic detail
+     are processed only when the user or platform supplies them.
+
+--------------------------------------------------------------------------------
+§6  ABUSE PREVENTION AND RATE LIMITING
+--------------------------------------------------------------------------------
+6.1  To throttle repeated failed attempts and protect accounts, gateways, and
+     infrastructure, the service keeps short-lived request counters and
+     security-event records keyed to a hashed form of the source IP address,
+     device identifier, or account number rather than to the value itself.
+6.2  These records exist only for security, fraud prevention, abuse response,
+     and device-limit enforcement. They are not used to profile a user, are not
+     used for advertising, and never contain VPN traffic, browsing history, DNS
+     query history, or destination activity.
+
+--------------------------------------------------------------------------------
+§7  DATA USE AND SHARING
+--------------------------------------------------------------------------------
+7.1  Use. User data is used to activate accounts, enforce the three-device
+     limit, provide free and paid VPN access, operate split tunneling, process
+     payments, donations, and prepaid redemptions, credit referrals, send
+     account/service emails, document legal acceptance, detect abuse or attacks,
+     triage and answer security vulnerability reports, answer support requests,
+     improve reliability, and comply with lawful obligations.
+7.2  Sharing. Apart from the third parties the app or website contacts directly
+     as described in §§5 and 8, data may be shared only with service providers that support those
+     purposes: PayPal for payment processing; SMTP2GO for transactional email;
+     Google Play or other app stores for store review and platform services;
+     hosting/CDN/security providers for infrastructure and attack defense; and
+     legal or governmental authorities only when required by valid legal process.
+     GitHub hosts the gateway-recovery file and therefore receives the
+     connection IP and ordinary request metadata when the app fetches it; Win's
+     VPN sends GitHub no account, device, or user data.
+7.3  Win's VPN does not sell personal or sensitive user data. Win's VPN does not
+     share VPN browsing history, DNS query history, traffic contents, or
+     destination activity because it is not designed to collect those records.
+
+--------------------------------------------------------------------------------
+§8  SERVICE PROVIDERS
+--------------------------------------------------------------------------------
+8.1  PayPal. Card payments are processed by PayPal. Card data is entered on
+     PayPal-hosted payment pages and handled by PayPal's PCI DSS compliant
+     payment infrastructure; Win's VPN does not store card numbers or process
+     raw card data on its servers.
+8.2  Cryptocurrency. Where cryptocurrency payment is offered and enabled, it is
+     processed through a BTCPay Server instance or a Monero wallet service.
+     Public exchange-rate data is retrieved from Kraken and CoinGecko, and a
+     delivery email address is required for Monero orders.
+8.3  SMTP2GO. Transactional email is delivered through SMTP2GO.
+8.4  Cloudflare. Cloudflare provides hosting, content delivery, and security for
+     the website and necessarily receives connection metadata, including the
+     coarse country and region derived from the connection IP address, which the
+     website uses to display a regional map to visitors.
+8.5  GitHub. Hosts the gateway-recovery file described in §5.7.
+8.6  Map providers. Apple Maps on Apple platforms. On other platforms, a
+     first-party Win's VPN endpoint serves tiles derived from OpenStreetMap; the
+     upstream tile provider sees the Win's VPN server, not the user's device
+     (§5.4).
+8.7  Speed-test operators. Cloudflare, CacheFly, Frontier, Charter, and Sonic
+     (§5.6).
+8.8  ipify. api.ipify.org for the live public-IP display (§5.5).
+8.9  Website AI assistant. Where enabled, the message typed into the assistant
+     and recent turns of that conversation are sent to the third-party AI
+     provider that powers it, currently Google's Gemini API, to generate a
+     reply. Sensitive personal information should not be entered into the
+     assistant.
+8.10 All providers in this section act as service providers for the purposes
+     described and do not receive VPN traffic, browsing history, DNS queries, or
+     destination activity.
+
+--------------------------------------------------------------------------------
+§9  PAYMENT TERMS
+--------------------------------------------------------------------------------
+9.1  The 1 Month and 1 Year plans are recurring PayPal subscriptions. The
+     amount, billing interval, first charge date, and funding source shown by
+     PayPal at authorization control. A price increase applies only to a later
+     billing period after any notice and consent required by PayPal or law.
+9.2  Recurring plans are charged through PayPal. When offered and enabled,
+     Apple Pay or Google Pay through PayPal may fund a one-time pass. BTCPay
+     for Bitcoin or Dash, or a Monero wallet service, may fund any displayed
+     term as a single 30-day, 365-day, or ten-year payment. Cryptocurrency
+     payments do not renew, cannot be charged back, and are not covered by
+     PayPal buyer protection. A prepaid card code is redeemed once for the
+     term carried by that code.
+     Cryptocurrency account details are delivered by email. Monero requires an
+     email before issuing a payment address. Bitcoin or Dash can continue to
+     BTCPay without an email, but a confirmed payment with no email is not
+     provisioned automatically and requires manual help from support@winsvpn.org.
+9.3  Cancel before the next billing date in PayPal Settings under Payments,
+     Subscriptions and saved businesses, or Automatic Payments, by selecting
+     Win's VPN and canceling the automatic payment. Cancellation stops future
+     renewals and does not automatically refund earlier charges. Access ends
+     when PayPal reports a cancellation, suspension, expiration, or failed
+     payment. Canceling partway through a period already paid for ends access
+     at that point, not at the end of the period, and the unused part is not
+     refunded or credited. Access resumes only if PayPal later reports the
+     subscription active again.
+9.4  Payments, subscriptions, lifetime passes with or without tech support,
+     prepaid card redemptions, and donations are final and non-refundable to
+     the maximum extent permitted by law. This does not limit non-waivable
+     rights or PayPal buyer-protection rules. A full refund, chargeback, or
+     reversal may end funded access; a partial refund does not automatically
+     end it. A refund, reversal, cancellation, suspension, or failed payment
+     also removes referral bonus days funded by that payment from both affected
+     accounts. Billing and refund requests go to support@winsvpn.org.
+9.5  Access starts after payment, required network confirmations, and, for
+     cryptocurrency, delivery of a valid email address complete.
+     Where consumer law provides a cancellation or withdrawal period for a
+     distance service, including a fourteen-day right in the European Union or
+     United Kingdom, checkout is
+     the buyer's request that service start immediately during that period.
+     Where the right still applies, a proportional charge may apply for service
+     already supplied. Any remaining right may be exercised by writing to
+     support@winsvpn.org within the applicable period.
+9.6  Lifetime access is a one-time payment and means ten years of account
+     validity starting when payment is confirmed, not the buyer's lifetime or
+     the life of the service. The versions with and without tech support grant
+     the same validity term. Bundled tech support is email help for account
+     access, installation, and ordinary use during that term. It has no promised
+     response time and does not include custom engineering, device or network
+     repair, or third-party product support. It is not transferable or sold
+     separately. Donations do not create or renew VPN access.
+9.7  Win's VPN Inc. is the seller of record. Checkout controls the displayed
+     currency. Unless checkout says otherwise, prices exclude taxes, currency
+     conversion charges, and fees added by the buyer's payment provider.
+
+--------------------------------------------------------------------------------
+§10  REFERRAL PROGRAM
+--------------------------------------------------------------------------------
+10.1 Referral links take the form /referral/<code>. The code is read from the
+     link address in the browser and passed to Win's VPN when a plan is
+     purchased through it.
+10.2 If an account is created that way, the referring account is recorded
+     against the referred account so the 20% account-validity bonus can be
+     granted to both, and reversed if the funding payment is later refunded,
+     cancelled, or reversed.
+10.3 Referral records are account-to-account only; they do not record what
+     either person does through the VPN.
+
+--------------------------------------------------------------------------------
+§11  PREPAID REDEMPTION CODES
+--------------------------------------------------------------------------------
+11.1 When a prepaid card code is entered on the website, the code is sent to
+     Win's VPN so it can be checked and exchanged for account credentials.
+11.2 A redemption code is a bearer credential until it is used: it is submitted
+     in the request body rather than in the page address, and each code can be
+     redeemed only once. The card itself never carries an account number or PIN.
+11.3 A redeemed code is treated as account and payment provisioning data and is
+     handled under the retention terms in §13.
+11.4 Redemption creates a new account with its own account number and setup key;
+     it does not add time to an existing account. A code or print batch that
+     carries an expiry date is declined after that date. A batch withdrawn from
+     circulation is also declined. A lost, damaged, disclosed, expired,
+     withdrawn, or already-redeemed code is not replaced or refunded to the
+     maximum extent permitted by law.
+
+--------------------------------------------------------------------------------
+§12  SECURITY VULNERABILITY DISCLOSURE
+--------------------------------------------------------------------------------
+12.1 The Vulnerability Disclosure Program page invites security researchers to
+     report weaknesses by email to security@winsvpn.org. The page does not
+     claim that its withdrawn web form delivers a report.
+12.2 The reporter controls what identifying and technical information the email
+     contains. Win's VPN uses it only to triage, reproduce, fix, and credit the
+     reported issue and to correspond with the reporter. Reporting is voluntary,
+     and a researcher may ask not to be named.
+12.3 The machine-readable security contact is published at
+     /.well-known/security.txt.
+12.4 Good-faith research that follows the published program rules is authorized.
+     Win's VPN will not initiate or support legal action for compliant research
+     and will state that it was authorized if a third party brings an action.
+     This safe harbor does not cover accessing another person's data, degrading
+     service for users, extortion, or activity outside the published scope.
+12.5 The program asks researchers to allow 90 days for coordinated remediation.
+     It does not require indefinite silence. The current program states a target
+     of acknowledging reports within five business days and providing an initial
+     assessment and intended action within fifteen business days. These are
+     operational targets, not guaranteed response times.
+
+--------------------------------------------------------------------------------
+§13  SECURE HANDLING, RETENTION, AND DELETION
+--------------------------------------------------------------------------------
+13.1 Secure handling. App-to-service and website communications use encrypted
+     transport where supported, VPN traffic is encrypted from the device to the
+     tunnel endpoint, production secrets are stored outside public source in
+     root-owned server configuration, and operational identifiers are hashed or
+     bucketed where practical. Access to production systems is limited to
+     authorized administrators, and backups/security logs are protected by
+     server access controls.
+13.2 Default retention periods (may be shortened or extended where required):
+       App-collected operational data no longer needed ...... 90 days
+       Security and abuse-prevention event records .......... up to 180 days
+       Payment order records ................................ up to 180 days
+       Device records that become inactive .................. about 45 days
+       Free-access connection events ........................ 30 days
+       Declined redemption events ........................... 30 days
+       Payment and referral link click records .............. 90 days
+       System backups ....................................... 30 days
+       Backup manifests ..................................... up to 365 days
+     Payment records flagged for manual review are retained until that review is
+     resolved. Account, payment, referral, and legal acceptance records are
+     otherwise retained only while needed to operate the account, satisfy
+     accounting or legal obligations, prevent fraud or abuse, resolve disputes,
+     or document acceptance of the legal terms.
+13.3 Device-limit metadata is deleted or overwritten when the device is
+     deactivated, replaced, or no longer needed for active account operation.
+
+--------------------------------------------------------------------------------
+§14  USER CHOICES AND RIGHTS
+--------------------------------------------------------------------------------
+14.1 Withdrawing consent. Consent can be withdrawn at any time by tapping
+     Deactivate Device (which ends the session on that device and frees its
+     slot), by clearing the app's data, or by uninstalling the app. Each stops
+     further collection from that device. Split-tunneling selections can be
+     removed at any time in the app's settings. To withdraw consent for data the
+     service already holds, or to object to its further processing, email
+     privacy@winsvpn.org. Website analytics and advertising-conversion events
+     are processed only where consent has been given on the website.
+14.2 Access and correction. Requests for access to or correction of personal
+     data are handled by email at privacy@winsvpn.org or support@winsvpn.org.
+     Send the request from the email address associated with the account, or
+     include the account number, so the request can be verified.
+14.3 Deleting your account from inside the app. Account deletion is a
+     self-service feature. Open the app on an activated device and choose
+     Delete Account, shown directly below Deactivate Device on the main account
+     screen. The app states the rule that applies, shows a plain warning that
+     deletion is permanent, and requires a second explicit confirmation before
+     anything is sent. No account is ever deleted on the strength of an account
+     number alone: every step is authenticated with the individual device's own
+     credential.
+14.4 Multi-device confirmation. So a single lost or stolen device cannot destroy
+     an account, deletion normally requires confirmation from two different
+     active devices. The exact rule is derived from the number of devices
+     actually active on the account at the moment requested:
+       Three active devices: any two must confirm (a lost or broken device does
+         not prevent deletion).
+       Two active devices: both must confirm.
+       One active device: that device confirms and the account enters a
+         seven-day waiting period, after which the account and its data are
+         erased automatically. Signing in on any device during those seven days
+         and choosing Cancel Deletion stops it.
+       No active devices: there is no device that can authorise the erase.
+         Activate a device with the account number and setup key, then delete
+         the account from it, or write to the addresses in §22.
+     While a deletion is pending, the app shows how many confirmations have been
+     received out of the number required, and any active device on the account
+     can cancel it. Deactivating a device is not the same as deleting an
+     account: deactivation removes only that device's record and frees its slot
+     toward the three-device limit.
+14.5 What deletion erases. When a deletion completes, the following are
+     permanently deleted, not merely marked inactive or hidden: the account
+     record (account number, any account email address, account status,
+     expiration date, referral code, and the stored hash of the account setup
+     key); every device record on the account (each device's stored WireGuard
+     private key, public key, pre-shared key, assigned tunnel IP address, device
+     model, and device credential); any Double VPN assignment for those devices;
+     the account's legal-acceptance records; any free-access event records tied
+     to the account; and any unclaimed prepaid-redemption fulfilment record or
+     queued delivery email for the account. The corresponding VPN peers are also
+     removed from the gateway servers, so the tunnel stops working rather than
+     merely losing its database entry. Deletion is immediate and irreversible:
+     any remaining paid time, lifetime access, tech-support access, or referral
+     bonus is forfeited and is not refunded, and referral links shared by the
+     user stop working.
+14.6 What is retained after deletion, and why. Deletion is not total erasure
+     everywhere. The following are kept because Win's VPN is required or
+     entitled to keep them:
+       Payment and donation records (PayPal, BTCPay, and Monero order records
+         and payment webhook records, including the buyer email supplied at
+         checkout) are retained for tax, accounting, and audit reasons. Win's
+         VPN Inc. is a 501(c)(3) organisation that must file an annual
+         Form 990-series return and substantiate contributions, and payment
+         records are also needed to resolve chargebacks and disputes. This
+         includes the written acknowledgment issued for a charitable
+         contribution (the donor name, any donor email address, the amount, and
+         the date or dates of the gift), because that document is the
+         substantiation the IRS requires a charity to be able to produce. An
+         acknowledgment belongs to the donor rather than to an account, so
+         deleting an account does not remove it.
+       Prepaid redemption records. The record that a particular prepaid code was
+         redeemed is retained so the same code cannot be redeemed twice. The
+         account number on that record is replaced by a one-way pseudonym. A
+         separate append-only redemption audit log is protected against
+         modification and deletion by a database-level control that exists
+         specifically to stop tampering, so entries in that log, which can
+         include the account number, are retained for the life of the log.
+       Referral records. A referral links two accounts, and deleting one must
+         not corrupt or silently orphan the other party's record. The referral
+         record is kept, but the deleted account's number is replaced with a
+         one-way pseudonym. The referrer keeps bonus days already granted: the
+         payment that funded the referral still stands, and a third party
+         should not lose service time because someone else exercised a privacy
+         right. If that funding payment is later refunded, cancelled, or
+         reversed, the bonus can still be reversed.
+       Security and abuse-prevention records are keyed to hashed forms of an IP
+         address, device identifier, or account number rather than to the values
+         themselves, are held in a separate store for up to 180 days, and are
+         retained for security, fraud prevention, and abuse response.
+       Short-lived rate-limit counters are keyed to one-way hashes, contain no
+         account number or address, and expire on their own.
+       A deletion audit record is written so Win's VPN can demonstrate that the
+         deletion happened. It is deliberately built not to contain the data
+         being deleted: it stores one-way references and counts only, and holds
+         no account number, email address, device identifier, IP address, or key
+         material.
+       Backups made before the deletion are kept on their normal schedule
+         (§13.2) and age out on that schedule.
+     None of the retained records are used for advertising or profiling, and
+     none contain VPN activity: no browsing history, DNS query history, traffic
+     contents, or destination activity is logged in the first place, so none of
+     it survives deletion either.
+14.7 Statutory rights. Where applicable law provides rights of access,
+     correction, deletion, portability, restriction, objection, withdrawal of
+     consent, appeal, or complaint to a regulator, a user may exercise them by
+     writing to privacy@winsvpn.org. Win's VPN will verify and answer the
+     request within the period required by applicable law. Exercising a
+     non-waivable privacy right does not waive that right or authorize unlawful
+     discrimination. Legal bases, transfer mechanisms, representative duties,
+     and jurisdiction-specific exceptions remain subject to counsel review;
+     this paragraph does not claim an exemption or appointment.
+
+--------------------------------------------------------------------------------
+§15  CHILDREN'S PRIVACY
+--------------------------------------------------------------------------------
+15.1 Win's VPN is intended for adults and is not directed to children. The
+     service does not knowingly collect personal data from children under 13,
+     or under the higher minimum age that applies in the user's country where
+     local law sets one.
+15.2 If a parent or guardian believes a child has provided personal data to
+     Win's VPN, email privacy@winsvpn.org and the data will be deleted.
+
+--------------------------------------------------------------------------------
+§16  PLATFORM-SPECIFIC DISCLOSURES
+--------------------------------------------------------------------------------
+16.1 Android VpnService. On Android, Win's VPN uses Android VpnService as a
+     core user-facing VPN function. After the user starts a connection and
+     approves Android's standard VPN permission prompt, VpnService creates an
+     encrypted device-level tunnel to a Win's VPN endpoint, routes selected
+     device traffic through that tunnel, supports user-selected split-tunneling
+     exclusions, and shows the Android VPN indicator/notification while active.
+     Win's VPN does not use VpnService to inject ads, monetize traffic,
+     manipulate advertising, sell traffic data, or collect browsing history, DNS
+     query history, traffic contents, or destination activity.
+16.2 Android installed-app visibility for split tunneling. When an Android user
+     opens Exclude Apps From VPN (Split Tunneling), Win's VPN first shows a
+     separate installed-app access disclosure. The app accesses installed
+     application names, icons, and package identifiers only after the user
+     affirmatively chooses Continue; choosing Not now leaves the inventory
+     untouched and the VPN remains usable without per-app exclusions. The
+     installed-app inventory is used locally so the user can search for and
+     select apps to exclude from the VPN. The full inventory is not uploaded to
+     Win's VPN, shared with third parties, sold, or used for advertising or
+     analytics. Only the package identifiers the user selects are retained in
+     local app settings and passed locally to Android VpnService to apply those
+     exclusions. The user can remove selections in the split-tunneling picker,
+     or delete all locally retained selections by clearing Win's VPN app data or
+     uninstalling the app.
+16.3 Camouflage safety mode. Android and iOS launcher icon camouflage and
+     Android/iOS in-app calculator camouflage are user-safety features for
+     high-risk censorship environments, including Burma/Myanmar, where a
+     visible VPN interface can expose users to retaliation. On Android and iOS
+     both are applied automatically once a device is activated and cannot be
+     switched off in the app; the real interface is shown after the PIN is
+     entered. Android TV and desktop builds have neither. They do not hide malicious activity,
+     iOS may display an operating-system confirmation when changing the icon,
+     Android's VPN notification remains user-controlled, and the operating
+     system's VPN status remains visible while a tunnel is active.
+16.4 Trusted contact and duress response. Win's VPN does not ship this
+     feature. There is no duress code, no duress wipe, and no trusted-contact
+     alert on any platform, including Android and iOS. No duress credential can
+     be enrolled, no trusted-contact phone number or email is requested or
+     stored, the Android release build declares no SMS permission and sends no
+     SMS, and the app transmits no contact, coordinate, or alert to Win's VPN
+     servers or to any third party.
+
+--------------------------------------------------------------------------------
+§17  ACCESS TYPES
+--------------------------------------------------------------------------------
+17.1 Free access, trial access, donated access, and administrator-granted
+     premium access are discretionary, non-paid, revocable access.
+17.2 To the maximum extent permitted by law, users of free, trial, donated, or
+     administrator-granted access receive the service without paid-service
+     remedies, waive claims against Win's VPN Inc. and Win Empire LLC arising
+     from that discretionary access, and remain responsible for their own
+     conduct, misuse, local-law compliance, and third-party claims.
+
+--------------------------------------------------------------------------------
+§18  ACCEPTABLE USE
+--------------------------------------------------------------------------------
+18.1 Customers may use Win's VPN for lawful privacy, security, education, and
+     anti-censorship purposes.
+18.2 Customers may not use the service for attacks, unauthorized access, fraud,
+     spam, malware, harassment, child exploitation, copyright infringement,
+     torrenting, payment or device-limit evasion, or any activity that violates
+     applicable law or harms people, networks, platforms, or infrastructure.
+18.3 The service must not be used for unlawful activity, abuse, torrenting,
+     malware, intrusion, spam, copyright infringement, payment or device-limit
+     evasion, or activity that harms third parties.
+18.4 Win's VPN may suspend access, preserve evidence, cooperate with lawful
+     process when required, and seek recovery of damages, costs, and fees caused
+     by misuse, abuse, attacks, or unlawful conduct.
+
+--------------------------------------------------------------------------------
+§19  SOFTWARE OWNERSHIP, OPEN SOURCE, AND QUALITY CONTROL
+--------------------------------------------------------------------------------
+19.1 Win's VPN uses a mix of Win Empire LLC proprietary code, configuration,
+     deployment automation, and third-party open-source components such as
+     tunnel and networking software. Required third-party notices are preserved
+     where applicable. Those upstream projects are separate from Win's VPN Inc.
+     and Win Empire LLC and do not sponsor or endorse Win's VPN. Win's VPN does
+     not claim ownership of upstream third-party projects.
+19.2 Win Empire LLC maintains an internal IP and open-source license compliance
+     program intended to preserve third-party notices, track licenses, separate
+     proprietary code from upstream code, and block releases with known
+     unresolved license conflicts.
+19.3 Win's VPN Inc. and Win Empire LLC maintain written quality control, change
+     management, release testing, customer acceptance, and company signoff
+     procedures for production releases. Customer acceptance is captured through
+     the clickwrap process before activation. Company signoff is documented
+     separately in internal release records and is represented by a
+     server-generated acceptance certificate ID and HMAC signature.
+
+--------------------------------------------------------------------------------
+§20  INSURANCE AND RISK TRANSFER
+--------------------------------------------------------------------------------
+20.1 Win's VPN Inc. and Win Empire LLC maintain insurance-readiness controls and
+     may seek cyber or Technology Errors and Omissions coverage. No statement in
+     these terms represents that a particular policy is currently bound or in
+     force. Coverage must be confirmed from a current binder or issued policy.
+20.2 If insurance coverage exists, it is governed only by the issued policy and is for the
+     named insureds only. Insurance does not create a service warranty, direct
+     claim right, third-party beneficiary status, guaranteed recovery, or higher
+     liability cap for any customer or third party.
+
+--------------------------------------------------------------------------------
+§21  HOLD HARMLESS AND LIMITATION OF LIABILITY
+--------------------------------------------------------------------------------
+21.1 Hold harmless. To the maximum extent permitted by law, the customer agrees
+     to defend, indemnify, and hold harmless Win's VPN Inc., Win Empire LLC, and
+     their owners, officers, employees, contractors, and affiliates from claims,
+     losses, damages, liabilities, fees, penalties, and expenses arising from
+     the customer's misuse of the service, violation of these terms, unlawful
+     activity, or violation of third-party rights.
+21.2 Limitation of liability. To the maximum extent permitted by law, Win's VPN
+     Inc. and Win Empire LLC disclaim indirect, incidental, special,
+     consequential, exemplary, punitive, lost-profit, lost-data,
+     business-interruption, censorship, connectivity, speed, geolocation,
+     payment-provider, app-store, and third-party-service damages.
+21.3 No term in §§17 or 21 waives a right or remedy that applicable law does not
+     permit the customer to waive. The service is provided without a guarantee
+     that every network, country, site, app, device, or censorship system will
+     remain reachable or compatible.
+
+--------------------------------------------------------------------------------
+§22  GOVERNING LAW, ELECTRONIC RECORDS, AND CONTACT
+--------------------------------------------------------------------------------
+22.1 Governing law. These terms are governed by the laws of the State of
+     Florida, United States, without regard to conflict-of-law principles,
+     except where non-waivable consumer protection laws require otherwise.
+22.2 Electronic records and clickwrap acceptance. By checking the required boxes
+     in the app and continuing activation, the customer consents to electronic
+     records and agrees that the clickwrap acceptance, timestamp, document
+     version, document hash, account or free-access identity, device bucket,
+     source IP bucket, platform, app version, and server HMAC certificate form
+     the service acceptance record.
+22.3 International data transfers. Win's VPN Inc. is established in Florida,
+     United States, and the service is operated from the United States. VPN
+     gateway nodes are located in a number of other countries so that users can
+     select a location. Where the service is used from outside the United
+     States, the account, payment, security, and legal acceptance data described
+     in this document is transferred to and processed in the United States, and
+     may also be processed by the service providers named here in the countries
+     where they operate. Those transfers are made because they are necessary to
+     provide the service requested. VPN traffic itself is not logged and is not
+     transferred for these purposes.
+22.4 Contact.
+       Privacy and data deletion requests .... privacy@winsvpn.org
+       Account and billing support ........... support@winsvpn.org
+       Security vulnerability reports ........ Vulnerability Disclosure Program
+       Business phone ........................ (424) 946-7876
+
+--------------------------------------------------------------------------------
+§23  STORE-SPECIFIC COMPLIANCE DERIVATIONS
+--------------------------------------------------------------------------------
+This section states what each distribution surface must present and which master
+sections supply each fact. Derived surfaces must be regenerated from these
+sections whenever the master version changes.
+
+§23.1  Google Play
+  Privacy policy URL (required): website Privacy Policy page (§ all).
+  Data Safety form answers (must match these facts):
+    Location: approximate/coarse location collected transiently (§5.4); not
+      precise GPS; not linked to identity; not shared except connection IP to
+      the location/map endpoint.
+    Personal info: email collected only for paid/manual accounts or support
+      (§5.3, §5.9).
+    Device or other IDs: random app-install identifier (§5.1) and device
+      cryptographic public key (§5.2); not hardware or advertising IDs; not
+      used for advertising.
+    Financial info: payment confirmation metadata from PayPal (§5.3); card
+      numbers never touch Win's VPN servers (§8.1).
+    Web browsing / VPN activity: NOT collected (§4).
+    App activity / other actions: free-access connection events (§4.5), linked
+      to the free-access identity for App Functionality and Fraud Prevention,
+      Security, and Compliance; not shared.
+    Installed apps: full inventory NOT uploaded; only user-selected
+      split-tunneling package IDs kept locally (§5.8, §16.2).
+    Data encrypted in transit: YES (§13.1).
+    Can request data deletion: YES (§14.3–14.6).
+  VpnService declaration: core user-facing VPN function (§16.1).
+  Installed-app (package visibility) declaration: split-tunneling justification
+    (§16.2).
+  Families policy: not applicable; app not directed to children (§15).
+
+§23.2  Apple App Store
+  Privacy "nutrition labels" (App Store Connect):
+    Data Linked to You: User ID, Device ID, Coarse Location, and Product
+      Interaction, all for App Functionality. Product Interaction covers the
+      selected VPN location, stealth-mode choice, and Double VPN choice sent
+      with account and device identifiers. The app contains no analytics SDK.
+    Data Not Linked to You: none declared by the Apple app.
+    Purchase History: not collected by the Apple app. Diagnostics are not
+      uploaded by the app.
+    Tracking: NO. No data is used for advertising or tracking; no ATT prompt
+      required (§5.1, §7.3).
+  Privacy policy URL: required; website Privacy Policy page.
+  Guideline 5.1.1(v) account deletion: satisfied by in-app Delete Account
+    (§14.3–14.6).
+  Bundled in-app Privacy Policy: shown before activation (§3.3).
+  Guideline 5.4 commitment: Win's VPN does not sell, use, or disclose VPN
+    traffic or VPN activity data to third parties for any purpose. Providers
+    named in §§5 and 8 process only disclosed non-VPN functions.
+
+§23.3  Microsoft Store
+  Privacy policy URL: required; website Privacy Policy page.
+  Personal data handling: as in §§4–7 and §13.
+  Account deletion: available in-app (§14.3).
+
+§23.4  Linux stores (Flathub / Snap)
+  Privacy policy URL in store metadata: website Privacy Policy page.
+  No platform data-safety form is required by these stores; the website policy
+    and §§4–7 govern. Desktop builds use the same identifiers and disclosures as
+    other platforms (§5.1, §5.2).
+
+--------------------------------------------------------------------------------
+END OF MASTER LEGAL DOCUMENT - version 2026-08-31.v4
+================================================================================

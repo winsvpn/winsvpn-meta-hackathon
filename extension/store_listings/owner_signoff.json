@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-browser-extension-owner-signoff-v1",
+  "status": "BLOCKED",
+  "canonical_release": "1.0.17+34",
+  "package_version": "1.0.17",
+  "submission_approved": false,
+  "upload_authorized": false,
+  "credentials_authorized": false,
+  "listing_screenshot_inventory": "owner-blocked",
+  "native_host_chromium_identity": "owner_authenticated_draft",
+  "blockers": [
+    "Chrome and Edge owner-authenticated draft IDs are not published store listings",
+    "Portal upload remains unauthorized and no package has been submitted",
+    "Native-host Chrome and Edge allowed_origins bind draft identities only, not publication evidence",
+    "No current unsigned Chrome, Edge, or Firefox upload archive receipt for the 1.0.17+34 browser packages",
+    "Store screenshots and promotional artwork are owner-blocked",
+    "Store category, Firefox Add-ons license, and privacy-practices portal answers are owner-blocked",
+    "AMO and Chrome Web Store reviewer-source disclosure for whitespace-only minified JavaScript is owner-blocked",
+    "Listing upload-receipt issuer public key is not owner-pinned",
+    "Developer account and portal upload remain owner-authorized only",
+    "Listing, review, and release-candidate evidence stay BLOCKED without owner or store proof"
+  ]
+}

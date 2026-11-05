@@ -1,0 +1,19 @@
+{
+  "tests_run": 11,
+  "failing_assertions": 16,
+  "errors": 1,
+  "failed_tests": [
+    "test_control_plane_round12.AdmissionTests.test_capability_refusal_precedes_remote_install",
+    "test_control_plane_round12.AdmissionTests.test_concurrent_activation_has_one_preparer_and_one_assignment",
+    "test_control_plane_round12.AdmissionTests.test_descriptor_eligibility_refusal_precedes_remote_install",
+    "test_control_plane_round12.AdmissionTests.test_invalid_obfuscation_refuses_before_remote_install",
+    "test_control_plane_round12.AdmissionTests.test_missing_route_refuses_before_remote_install",
+    "test_control_plane_round12.PaymentTests.test_early_settlement_retries_then_uses_bound_lifetime_price_once",
+    "test_control_plane_round12.PaymentTests.test_inflight_deliveries_retry_but_terminal_duplicates_acknowledge",
+    "test_control_plane_round12.PaymentTests.test_lifetime_purchase_is_not_repriced_at_settlement",
+    "test_control_plane_round12.SecurityHelperTests.test_journal_advances_only_after_all_returned_lines_are_processed",
+    "test_control_plane_round12.SecurityHelperTests.test_journal_errors_keep_existing_and_missing_checkpoints",
+    "test_control_plane_round12.SecurityHelperTests.test_sqlite_helpers_close_connections_on_success_and_errors"
+  ],
+  "expected": "All selected behavioral tests must reject old source"
+}

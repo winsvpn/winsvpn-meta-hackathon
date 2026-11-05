@@ -1,0 +1,7 @@
+{
+  "baseline": "saved pre-edit control-plane source",
+  "tests": 4,
+  "failures": 12,
+  "errors": 0,
+  "expected_rejection": true
+}

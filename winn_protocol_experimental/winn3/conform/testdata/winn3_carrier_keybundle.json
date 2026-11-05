@@ -1,0 +1,30 @@
+{
+  "format": "winn3.carrier-keybundle.v1",
+  "derivation": {
+    "kdf": "HKDF-SHA256-X25519",
+    "domain": "winsvpn.winn3.carrier-keybundle",
+    "seed_fingerprint": "a45cfc717c9b141dece6788b2159ff83c31520c101ccaf2c3e3c992074c634d7"
+  },
+  "keys": [
+    {
+      "role": "client.wins-sea-01",
+      "public_key_hex": "b67518311c07bd8ced5170482108812b2715ddbecbda5aaafe60007cd0b83152",
+      "public_key_fingerprint": "d2473c71882318ef74708e37e16c8de7"
+    },
+    {
+      "role": "client.wins-sea-02",
+      "public_key_hex": "b6d7e13e5efe8f65468961367fd0654a98783ba931a662daf557df1effa54978",
+      "public_key_fingerprint": "59e9cf2ee431718120f8b7941d61b1dc"
+    },
+    {
+      "role": "gateway.wins-sea-01",
+      "public_key_hex": "462ed6a44df9aa442580b39923bfb3e866519a5f357c7e10e24836895e58a377",
+      "public_key_fingerprint": "82239a91e0e10ed7829a6335c848e452"
+    },
+    {
+      "role": "gateway.wins-sea-02",
+      "public_key_hex": "307b5bb9c07acff576498f9ea712ded210136e14a569e7dc005ab47a151f606d",
+      "public_key_fingerprint": "854bc9adc83b7db7bb374f50dd028a80"
+    }
+  ]
+}

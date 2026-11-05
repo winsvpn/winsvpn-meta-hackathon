@@ -1,0 +1,37 @@
+[Unit]
+Description=Win's VPN proof AmneziaWG userspace client
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+After=network-online.target
+Wants=network-online.target
+# Foreground userspace AWG client. The broker applies the root-owned
+# /etc/winn/proof-client/awg0.conf with a closed awg setconf argv and
+# never accepts caller hosts, ports, paths, or secrets.
+ConditionFileNotEmpty=/etc/winn/proof-client/awg0.conf
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/amneziawg-go -f awg0
+TimeoutStartSec=30
+TimeoutStopSec=15
+Restart=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+BindPaths=/dev/net/tun
+DeviceAllow=/dev/net/tun rw
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/winsvpn-proof
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

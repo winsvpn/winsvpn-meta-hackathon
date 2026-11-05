@@ -1,0 +1,76 @@
+package org.winsvpn.app
+
+import android.util.Log
+
+object SmartBoostNative {
+    private const val TAG = "WinsBoostNative"
+
+    private val loaded: Boolean = try {
+        System.loadLibrary("winsboostnative")
+        true
+    } catch (e: UnsatisfiedLinkError) {
+        Log.w(TAG, "Native Smart Boost core unavailable; using Kotlin scheduler", e)
+        false
+    }
+
+    fun isAvailable(): Boolean {
+        return loaded && runCatching { availableNative() }.getOrDefault(false)
+    }
+
+    fun versionOrFallback(): String {
+        return if (!loaded) {
+            "kotlin-fallback"
+        } else {
+            runCatching { version() }.getOrDefault("native-unavailable")
+        }
+    }
+
+    fun probeSocketBindingsOrNull(
+        service: VpnTunnelService,
+        host: String,
+        port: Int,
+        pathIds: IntArray,
+        networkHandles: LongArray,
+    ): String? {
+        if (!isAvailable()) return null
+        if (pathIds.isEmpty() || pathIds.size != networkHandles.size) return null
+        return runCatching {
+            probeSocketBindings(service, host, port, pathIds, networkHandles)
+        }.onFailure { error ->
+            Log.w(TAG, "Native Smart Boost v8 socket probe failed", error)
+        }.getOrNull()
+    }
+
+    fun choosePathIndexOrNull(
+        ids: IntArray,
+        rttsMs: LongArray,
+        sentLoads: LongArray,
+        capacitiesBps: LongArray,
+        failures: IntArray,
+        rxAgesMs: LongArray,
+    ): Int? {
+        if (!isAvailable()) return null
+        val index = runCatching {
+            choosePathIndex(ids, rttsMs, sentLoads, capacitiesBps, failures, rxAgesMs)
+        }.getOrDefault(-1)
+        return index.takeIf { it in ids.indices }
+    }
+
+    private external fun availableNative(): Boolean
+    external fun version(): String
+    private external fun probeSocketBindings(
+        service: VpnTunnelService,
+        host: String,
+        port: Int,
+        pathIds: IntArray,
+        networkHandles: LongArray,
+    ): String
+    private external fun choosePathIndex(
+        ids: IntArray,
+        rttsMs: LongArray,
+        sentLoads: LongArray,
+        capacitiesBps: LongArray,
+        failures: IntArray,
+        rxAgesMs: LongArray,
+    ): Int
+}

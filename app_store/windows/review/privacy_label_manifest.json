@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-windows-privacy-label-v1",
+  "canonical_release": "1.0.17+34",
+  "product_version": "1.0.17",
+  "four_part_version": "1.0.17.34",
+  "pubspec_version": "1.0.17+34",
+  "identity_map": "docs/rulings/RELEASE_IDENTITY_MAP_20260824.json",
+  "application_label": "Win's VPN",
+  "store_listing_name": "Win's VPN",
+  "privacy_policy_url": "https://www.winsvpn.org/privacy/",
+  "form_factor": "windows-x64",
+  "camouflage": false,
+  "tracking": false,
+  "data_collected": true,
+  "data_shared": false,
+  "listing_screenshot_inventory": "owner-blocked",
+  "owner_state": "OWNER-BLOCKED: ABSENT",
+  "export_compliance": "OWNER-BLOCKED: ABSENT",
+  "age_rating": "OWNER-BLOCKED: ABSENT",
+  "private_symbols_uploaded": false,
+  "msix_upload_target": false,
+  "purchase_history_disclosure": "Partner Center discloses the public website checkout. The app does not collect card data. Default Store builds do not embed direct PayPal plan buttons.",
+  "collected_categories": [
+    "device_or_other_ids",
+    "user_ids",
+    "email_address",
+    "approximate_location",
+    "purchase_history",
+    "app_info",
+    "diagnostics_if_sdk_report_proves"
+  ],
+  "not_collected": [
+    "browsing_history",
+    "dns_query_history",
+    "traffic_content",
+    "raw_vpn_traffic",
+    "destination_activity"
+  ],
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg", "xray"],
+    "required_local_engines": [
+      "winn-datapath.exe",
+      "winsvpn_winn3_engine.exe",
+      "winsvpn_awg_engine.exe",
+      "amneziawg.exe",
+      "awg.exe",
+      "xray.exe"
+    ]
+  }
+}

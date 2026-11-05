@@ -1,0 +1,12 @@
+# Direct runtime pins for the staging-hub image. Staging only; not release
+# evidence. Test-only packages stay out of this file so they never enter the
+# image closure. Secrets, VCS URLs, extra indexes, and unpinned lines are
+# forbidden.
+#
+# Hashed lock: staging-hub/requirements.lock (pip --require-hashes).
+# Versions below are exact current stables compatible with app.py imports
+# (httpx 0.28.1 is the last encode/httpx 0.x; fastapi/uvicorn match the
+# reviewed 2026-10-06 router pins).
+fastapi==0.142.2
+uvicorn==0.54.0
+httpx==0.28.1

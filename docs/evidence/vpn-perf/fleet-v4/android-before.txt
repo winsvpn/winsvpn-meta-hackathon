@@ -1,0 +1,12 @@
+=== BEFORE (no VPN) android-before run 1 ===
+2026-08-23T03:37:19Z
+http=200 bytes=25000000 speed_bps=38372926 time_s=0.651501
+2026-08-23T03:37:20Z
+=== BEFORE (no VPN) control run 2, 100MB ===
+2026-08-23T03:37:30Z
+http=403 bytes=1 speed_bps=10 time_s=0.095459
+2026-08-23T03:37:30Z
+=== BEFORE (no VPN) run 3, 25MB repeat ===
+2026-08-23T03:37:38Z
+http=200 bytes=25000000 speed_bps=57158273 time_s=0.437382
+2026-08-23T03:37:38Z

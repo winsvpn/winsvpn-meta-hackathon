@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.org/schemas/windows-lab-bundle-index-v1.json",
+  "title": "Win's VPN immutable nonpublishable Windows lab bundle index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "contract", "run_id", "created_at_utc",
+    "secret_material_redacted", "collector_closure_sha256",
+    "release_input_index_sha256", "platform_manifest_sha256",
+    "artifact_input_fingerprint_sha256", "build_receipt_sha256",
+    "producer_contract_sha256", "artifact_sha256",
+    "machine_evidence_path", "machine_evidence_sha256", "entries",
+    "evidence_class", "lab_only", "publication_authorized",
+    "public_release_gate_eligible", "unsigned_local_candidate", "sealed"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "contract": { "const": "winsvpn-windows-lab-bundle-index-v1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "created_at_utc": { "type": "string", "format": "date-time" },
+    "secret_material_redacted": { "const": true },
+    "evidence_class": { "const": "nonpublishable_lab" },
+    "lab_only": { "const": true },
+    "publication_authorized": { "const": false },
+    "public_release_gate_eligible": { "const": false },
+    "unsigned_local_candidate": { "const": true },
+    "collector_closure_sha256": { "$ref": "#/$defs/sha256" },
+    "release_input_index_sha256": { "$ref": "#/$defs/sha256" },
+    "platform_manifest_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_input_fingerprint_sha256": { "$ref": "#/$defs/sha256" },
+    "build_receipt_sha256": { "$ref": "#/$defs/sha256" },
+    "producer_contract_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "machine_evidence_path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+    "machine_evidence_sha256": { "$ref": "#/$defs/sha256" },
+    "entries": {
+      "type": "array", "minItems": 1, "maxItems": 512,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "sha256", "size_bytes", "contract", "sequence", "step_nonce"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "size_bytes": { "type": "integer", "minimum": 1, "maximum": 536870912 },
+          "contract": { "type": "string", "maxLength": 96 },
+          "sequence": { "type": "integer", "minimum": 1, "maximum": 512 },
+          "step_nonce": { "type": "string", "format": "uuid" }
+        }
+      }
+    },
+    "sealed": { "const": true }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

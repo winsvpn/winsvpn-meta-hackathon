@@ -1,0 +1,67 @@
+{
+  "format": "winn-cloud-cost/v1",
+  "observed_at": "2026-07-24T13:47:00Z",
+  "accounts": [
+    {
+      "provider": "upcloud",
+      "currency": "EUR",
+      "available_credit_micros": 217000000,
+      "current_charges_micros": 293000000,
+      "historical_usage_micros": 276370000,
+      "source": "authenticated UpCloud Usage console at 2026-07-24T13:47Z: balance EUR 217.00, July ongoing usage EUR 293.00, daily use EUR 50.57, projected exhaustion 2026-07-28. Inventory shows exactly the project 4-core Chicago gateway plus the owner's 48-core training server. SSH verified the large server was not idle: an EMBER2024 generation-2 training process was sustaining about 42 CPU cores, so it was intentionally left running."
+    },
+    {
+      "provider": "vultr",
+      "currency": "USD",
+      "available_credit_micros": 255000000,
+      "current_charges_micros": 250000,
+      "source": "last authenticated Vultr API observation: balance -255 (promotional credit), pending_charges 0.25 as of the first hour after provisioning. At 2026-07-24T13:47Z the portal required a CAPTCHA, so no newer billing figure is claimed; all three nodes remained SSH-reachable and were serving the acceptance workload."
+    }
+  ],
+  "resources": [
+    {
+      "provider": "vultr",
+      "resource_id": "winn-control-atl",
+      "role": "controller",
+      "phase": "phase1",
+      "region": "atl",
+      "currency": "USD",
+      "rate_micros": 76000,
+      "billing_period_seconds": 3600,
+      "quantity": 1
+    },
+    {
+      "provider": "vultr",
+      "resource_id": "winn-entry-nyc",
+      "role": "entry",
+      "phase": "phase1",
+      "region": "ewr",
+      "currency": "USD",
+      "rate_micros": 76000,
+      "billing_period_seconds": 3600,
+      "quantity": 1
+    },
+    {
+      "provider": "vultr",
+      "resource_id": "winn-entry-mia",
+      "role": "entry",
+      "phase": "phase1",
+      "region": "mia",
+      "currency": "USD",
+      "rate_micros": 60000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    },
+    {
+      "provider": "upcloud",
+      "resource_id": "winn-exit-chi",
+      "role": "exit",
+      "phase": "phase1",
+      "region": "us-chi1",
+      "currency": "EUR",
+      "rate_micros": 52000000,
+      "billing_period_seconds": 2592000,
+      "quantity": 1
+    }
+  ]
+}

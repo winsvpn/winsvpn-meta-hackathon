@@ -1,0 +1,17 @@
+{
+ "captured_utc": "2026-08-23T04:07:29.272380+00:00",
+ "sessions": 1,
+ "admitted": 23,
+ "sessions_built": 23,
+ "datagrams": 49801,
+ "carrying": 1,
+ "carriage_proven": true,
+ "messages_sent": 76552,
+ "messages_received": 28200,
+ "pipe_sent": 76552,
+ "pipe_delivered": 28200,
+ "inner_packets_delivered": 136309,
+ "session_states": [
+  "established"
+ ]
+}

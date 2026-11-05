@@ -1,0 +1,2715 @@
+--- a/winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go
+@@ -19,19 +19,23 @@
+ // The file is deliberately public material only. It contains no private key,
+ // admission secret, account number, device id, or customer metadata.
+ //
+-// The hub replaces the file atomically. Each new handshake reloads it, so a
+-// newly enrolled or revoked peer does not require a gateway restart. Existing
+-// sessions keep the binding established at their authenticated handshake; the
+-// normal session lifetime bounds retirement exactly as it does for a removed
+-// WireGuard peer whose already-delivered packets are in flight.
++// The hub replaces the file atomically. Active forwarding checks for updates
++// once per second and checks expiration on every packet in both directions.
++// A new handshake always requests a fresh snapshot.
+ type peerRegistry struct {
+ 	path     string
+ 	prefix   netip.Prefix
+ 	reserved map[netip.Addr]struct{}
+ 
+-	mu     sync.RWMutex
+-	byKey  map[[32]byte]netip.Addr
+-	byAddr map[netip.Addr][32]byte
++	mu       sync.RWMutex
++	byKey    map[[32]byte]netip.Addr
++	byAddr   map[netip.Addr][32]byte
++	notAfter map[[32]byte]int64
++
++	refreshMu  sync.Mutex
++	lastCheck  time.Time
++	lastFile   os.FileInfo
++	refreshErr error
+ }
+ 
+ type peerRegistryDocument struct {
+@@ -64,9 +68,70 @@
+ // malformed update therefore cannot partially authorize a peer or split the
+ // key and address views.
+ func (r *peerRegistry) reload() error {
+-	raw, err := os.ReadFile(r.path)
++	r.refreshMu.Lock()
++	defer r.refreshMu.Unlock()
++	err := r.reloadLocked()
++	r.finishRefreshLocked(err)
++	return err
++}
++
++func (r *peerRegistry) refresh() error {
++	r.refreshMu.Lock()
++	defer r.refreshMu.Unlock()
++	if time.Since(r.lastCheck) < time.Second {
++		return r.refreshErr
++	}
++	info, err := os.Stat(r.path)
++	if err == nil && r.refreshErr == nil && r.lastFile != nil &&
++		os.SameFile(info, r.lastFile) && info.Size() == r.lastFile.Size() &&
++		info.ModTime().Equal(r.lastFile.ModTime()) && info.Mode() == r.lastFile.Mode() {
++		r.lastCheck = time.Now()
++		return nil
++	}
++	if err == nil {
++		err = r.reloadLocked()
++	}
++	r.finishRefreshLocked(err)
++	return err
++}
++
++// The caller holds refreshMu. Clear all indexes on failure so a lookup that
++// just passed refresh cannot use stale bindings after another refresh fails.
++func (r *peerRegistry) finishRefreshLocked(err error) {
++	r.refreshErr = err
++	r.lastCheck = time.Now()
++	if err != nil {
++		r.mu.Lock()
++		r.byKey = nil
++		r.byAddr = nil
++		r.notAfter = nil
++		r.mu.Unlock()
++		r.lastFile = nil
++	}
++}
++
++// The caller holds refreshMu, so concurrent handshakes cannot publish an
++// older snapshot after a newer one. Only complete snapshots are published.
++func (r *peerRegistry) reloadLocked() error {
++	file, err := os.Open(r.path)
++	if err != nil {
++		return fmt.Errorf("opening peer registry: %w", err)
++	}
++	defer file.Close()
++	info, err := file.Stat()
++	if err != nil {
++		return fmt.Errorf("stat peer registry: %w", err)
++	}
++	const maximumRegistryBytes = 1024 * 1024
++	if !info.Mode().IsRegular() || info.Size() > maximumRegistryBytes {
++		return errors.New("peer registry is not a bounded regular file")
++	}
++	raw, err := io.ReadAll(io.LimitReader(file, maximumRegistryBytes+1))
+ 	if err != nil {
+ 		return fmt.Errorf("reading peer registry: %w", err)
++	}
++	if len(raw) > maximumRegistryBytes {
++		return errors.New("peer registry exceeds the size limit")
+ 	}
+ 	dec := json.NewDecoder(bytes.NewReader(raw))
+ 	dec.DisallowUnknownFields()
+@@ -83,6 +148,7 @@
+ 	}
+ 	byKey := make(map[[32]byte]netip.Addr, len(doc.Peers))
+ 	byAddr := make(map[netip.Addr][32]byte, len(doc.Peers))
++	notAfter := make(map[[32]byte]int64, len(doc.Peers))
+ 	for i, entry := range doc.Peers {
+ 		if entry.NotAfter == nil || *entry.NotAfter < 0 {
+ 			return fmt.Errorf("peer registry entry %d has an invalid not_after", i)
+@@ -114,11 +180,14 @@
+ 		}
+ 		byKey[key] = addr
+ 		byAddr[addr] = key
++		notAfter[key] = *entry.NotAfter
+ 	}
+ 	r.mu.Lock()
+ 	r.byKey = byKey
+ 	r.byAddr = byAddr
++	r.notAfter = notAfter
+ 	r.mu.Unlock()
++	r.lastFile = info
+ 	return nil
+ }
+ 
+@@ -137,7 +206,7 @@
+ }
+ 
+ func (r *peerRegistry) innerForPeer(peer []byte) (netip.Addr, bool) {
+-	if len(peer) != 32 {
++	if len(peer) != 32 || r.refresh() != nil {
+ 		return netip.Addr{}, false
+ 	}
+ 	var candidate [32]byte
+@@ -149,6 +218,10 @@
+ 	// /24 and therefore bounded to at most 254 entries.
+ 	for key, addr := range r.byKey {
+ 		if subtle.ConstantTimeCompare(key[:], candidate[:]) == 1 {
++			expires, present := r.notAfter[key]
++			if !present || (expires != 0 && time.Now().Unix() >= expires) {
++				return netip.Addr{}, false
++			}
+ 			return addr, true
+ 		}
+ 	}
+--- a/winn_protocol_experimental/cmd/winn3-gateway/forward.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/forward.go
+@@ -99,8 +99,9 @@
+ // would route the first client's replies into the second client's authenticated
+ // session.
+ type forwardTable struct {
+-	mu     sync.Mutex
+-	byAddr map[netip.Addr]*driver.Loop
++	registry *peerRegistry
++	mu       sync.Mutex
++	byAddr   map[netip.Addr]*driver.Loop
+ 
+ 	learned    uint64
+ 	forgotten  uint64
+@@ -147,12 +148,26 @@
+ 	t.mu.Unlock()
+ }
+ 
+-// lookup returns the session currently attributed to addr, if any.
++// lookup returns the session currently authorized for addr, if any. Registry
++// checks run without the table lock, since a refresh can read from disk.
+ func (t *forwardTable) lookup(addr netip.Addr) (*driver.Loop, bool) {
+ 	t.mu.Lock()
+-	defer t.mu.Unlock()
+ 	loop, ok := t.byAddr[addr]
+-	return loop, ok
++	t.mu.Unlock()
++	if !ok || loop == nil {
++		return nil, false
++	}
++	if t.registry != nil {
++		sess := loop.Session()
++		if sess == nil {
++			return nil, false
++		}
++		expected, allowed := t.registry.innerForPeer(sess.PeerStatic())
++		if !allowed || expected != addr {
++			return nil, false
++		}
++	}
++	return loop, true
+ }
+ 
+ // forwardTableStats is a snapshot for the status document.
+--- a/winn_protocol_experimental/cmd/winn3-gateway/main.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/main.go
+@@ -819,6 +819,7 @@
+ 
+ 	if opts.forward {
+ 		table := newForwardTable()
++		table.registry = registry
+ 		sharedDev, err := newSharedGatewayTun(opts.forwardIf, assign.V4, forwardPrefixLen, sizing.InnerMTU, table)
+ 		if err != nil {
+ 			// Fail closed: nothing has bound the UDP socket's job away yet
+--- a/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
+@@ -0,0 +1,356 @@
++package main
++
++import (
++	"bytes"
++	"encoding/base64"
++	"errors"
++	"fmt"
++	"io"
++	"net/netip"
++	"os"
++	"path/filepath"
++	"strings"
++	"sync"
++	"testing"
++	"time"
++
++	"winsvpn.local/winnprotocol/winn3/carrier"
++	"winsvpn.local/winnprotocol/winn3/core"
++	"winsvpn.local/winnprotocol/winn3/driver"
++	"winsvpn.local/winnprotocol/winn3/session"
++)
++
++type authorityFixture struct {
++	registry *peerRegistry
++	table    *forwardTable
++	device   *gatewayForwardDevice
++	writer   *fakeInnerWriter
++	loop     *driver.Loop
++	key      []byte
++	addr     netip.Addr
++	body     string
++}
++
++// Establish real session drivers so both forwarding directions must check the
++// authenticated client key. No kernel TUN or network socket is needed.
++func newAuthorityFixture(t *testing.T, expires int64) *authorityFixture {
++	t.Helper()
++	dir := t.TempDir()
++	if err := runKeygen(dir, io.Discard); err != nil {
++		t.Fatal(err)
++	}
++	key := readTestKey(t, filepath.Join(dir, "client.pub"))
++	body := fmt.Sprintf(`{"version":1,"peers":[{"static_public":%q,"inner_v4":"10.10.0.2","not_after":%d}]}`,
++		base64.StdEncoding.EncodeToString(key), expires)
++	r, err := newPeerRegistry(writeRegistry(t, body), netip.MustParsePrefix("10.10.0.0/24"))
++	if err != nil {
++		t.Fatal(err)
++	}
++	gwCfg, err := buildSessionConfig(serveOptions{
++		staticPath: filepath.Join(dir, "static.key"),
++		admission:  filepath.Join(dir, "admission.key"),
++		gatewayID:  testGatewayID,
++	}, r)
++	if err != nil {
++		t.Fatal(err)
++	}
++	clientKey, err := core.NewStaticKey(readTestKey(t, filepath.Join(dir, "client.key")))
++	if err != nil {
++		t.Fatal(err)
++	}
++	gatewayKey, err := core.NewPublicKey(readTestKey(t, filepath.Join(dir, "static.pub")))
++	if err != nil {
++		t.Fatal(err)
++	}
++	sizing, err := driver.NewSizing(testPathMTU, carrier.ClassUDP)
++	if err != nil {
++		t.Fatal(err)
++	}
++	newLoop := func(cfg session.Config, build func(driver.Config) (*driver.Loop, error)) *driver.Loop {
++		pipe, err := carrier.NewPipe(carrier.PipeConfig{Class: carrier.ClassUDP, PathMTU: testPathMTU})
++		if err != nil {
++			t.Fatal(err)
++		}
++		t.Cleanup(func() { _ = pipe.Close() })
++		loop, err := build(driver.Config{Session: cfg, Sizing: sizing, Carrier: pipe})
++		if err != nil {
++			t.Fatal(err)
++		}
++		t.Cleanup(func() { _ = loop.Close() })
++		return loop
++	}
++	gw := newLoop(gwCfg, driver.NewGateway)
++	cli := newLoop(session.Config{
++		Core: gwCfg.Core, Static: clientKey, GatewayStatic: gatewayKey, Padding: core.PadBucket,
++	}, driver.NewClient)
++	for round := 0; round < 64; round++ {
++		for _, pair := range [][2]*session.Driver{{cli.Session(), gw.Session()}, {gw.Session(), cli.Session()}} {
++			for count := 0; count < 64; count++ {
++				msg, err := pair[0].Poll()
++				if err != nil {
++					t.Fatal(err)
++				}
++				if msg == nil {
++					break
++				}
++				if _, err := pair[1].Deliver(msg); err != nil {
++					t.Fatal(err)
++				}
++			}
++		}
++		if cli.Session().State() == session.StateEstablished && gw.Session().State() == session.StateEstablished {
++			break
++		}
++	}
++	if cli.Session().State() != session.StateEstablished || gw.Session().State() != session.StateEstablished ||
++		!bytes.Equal(gw.Session().PeerStatic(), key) {
++		t.Fatal("fixture failed to establish the authenticated client key")
++	}
++	table := newForwardTable()
++	table.registry = r
++	writer := &fakeInnerWriter{}
++	device := newGatewayForwardDevice(writer, table, sizing.InnerMTU, r)
++	device.bind(gw)
++	t.Cleanup(func() { _ = device.Close() })
++	f := &authorityFixture{r, table, device, writer, gw, key, netip.MustParseAddr("10.10.0.2"), body}
++	if _, err := device.WritePacket(ipv4Packet(t, f.addr.String(), "8.8.8.8")); err != nil {
++		t.Fatalf("initial authorized packet: %v", err)
++	}
++	f.checkForwarding(t, true)
++	return f
++}
++
++func (f *authorityFixture) checkForwarding(t *testing.T, allowed bool) {
++	t.Helper()
++	// Check return routing first: it must refresh authority even when no
++	// client packet or new handshake has arrived since the registry changed.
++	if got, ok := f.table.lookup(f.addr); ok != allowed || (ok && got != f.loop) {
++		t.Errorf("return lookup allowed = %v, want %v", ok, allowed)
++	}
++	before := len(f.writer.written)
++	pkt := ipv4Packet(t, f.addr.String(), "8.8.8.8")
++	n, err := f.device.WritePacket(pkt)
++	if allowed {
++		if err != nil || n != len(pkt) || len(f.writer.written) != before+1 {
++			t.Fatalf("authorized outbound write = %d, %v; writes = %d", n, err, len(f.writer.written))
++		}
++		if got, ok := f.table.lookup(f.addr); !ok || got != f.loop {
++			t.Fatal("authorized return lookup refused the learned session")
++		}
++	} else if !errors.Is(err, errGatewayPeerUnauthorized) || n != 0 || len(f.writer.written) != before {
++		t.Errorf("revoked outbound write = %d, %v; writes = %d, want unchanged %d", n, err, len(f.writer.written), before)
++	}
++}
++
++func replaceAuthority(t *testing.T, path, body string) {
++	t.Helper()
++	replacement := path + ".new"
++	if err := os.WriteFile(replacement, []byte(body), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	if err := os.Rename(replacement, path); err != nil {
++		t.Fatal(err)
++	}
++}
++
++// Advance only the refresh cadence, leaving expiration on the real clock.
++func dueAuthorityRefresh(r *peerRegistry) {
++	r.refreshMu.Lock()
++	r.lastCheck = time.Now().Add(-2 * time.Second)
++	r.refreshMu.Unlock()
++}
++
++func TestGatewayAuthorityExpiresWithoutFileChange(t *testing.T) {
++	t.Parallel()
++	expires := time.Now().Unix() + 3
++	f := newAuthorityFixture(t, expires)
++	time.Sleep(time.Until(time.Unix(expires, 0)))
++	// Keep refresh cached to prove expiry is checked on every inner lookup.
++	f.registry.refreshMu.Lock()
++	f.registry.lastCheck = time.Now()
++	f.registry.refreshMu.Unlock()
++	f.checkForwarding(t, false)
++}
++
++func TestGatewayAuthorityRevocationAndRestoration(t *testing.T) {
++	cases := map[string]func(*testing.T, string){
++		"removed_peer": func(t *testing.T, path string) { replaceAuthority(t, path, `{"version":1,"peers":[]}`) },
++		"missing_file": func(t *testing.T, path string) {
++			if err := os.Remove(path); err != nil {
++				t.Fatal(err)
++			}
++		},
++		"malformed_json": func(t *testing.T, path string) { replaceAuthority(t, path, `{"version":1,"peers":[`) },
++		"invalid_entry": func(t *testing.T, path string) {
++			replaceAuthority(t, path, `{"version":1,"peers":[{"static_public":"bad","inner_v4":"10.10.0.2","not_after":0}]}`)
++		},
++		"reassigned_address": func(t *testing.T, path string) {
++			_, key := registryKey(0x91)
++			replaceAuthority(t, path, `{"version":1,"peers":[{"static_public":"`+key+`","inner_v4":"10.10.0.2","not_after":0}]}`)
++		},
++		"oversized_file": func(t *testing.T, path string) { replaceAuthority(t, path, strings.Repeat(" ", 1024*1024+1)) },
++		"non_regular_file": func(t *testing.T, path string) {
++			if err := os.Remove(path); err != nil {
++				t.Fatal(err)
++			}
++			if err := os.Mkdir(path, 0o700); err != nil {
++				t.Fatal(err)
++			}
++		},
++	}
++	for name, revoke := range cases {
++		t.Run(name, func(t *testing.T) {
++			t.Parallel()
++			f := newAuthorityFixture(t, 0)
++			revoke(t, f.registry.path)
++			dueAuthorityRefresh(f.registry)
++			f.checkForwarding(t, false)
++			f.checkForwarding(t, false)
++			if name == "non_regular_file" {
++				if err := os.Remove(f.registry.path); err != nil {
++					t.Fatal(err)
++				}
++			}
++			replaceAuthority(t, f.registry.path, f.body)
++			dueAuthorityRefresh(f.registry)
++			f.checkForwarding(t, true)
++		})
++	}
++}
++
++func TestGatewayAuthorityRefreshCadenceAndCachedFailure(t *testing.T) {
++	t.Parallel()
++	f := newAuthorityFixture(t, 0)
++	f.registry.refreshMu.Lock()
++	f.registry.lastCheck = time.Now()
++	f.registry.refreshMu.Unlock()
++	replaceAuthority(t, f.registry.path, `{"version":1,"peers":[`)
++	f.checkForwarding(t, true)
++	time.Sleep(1100 * time.Millisecond)
++	f.checkForwarding(t, false)
++	replaceAuthority(t, f.registry.path, f.body)
++	// A cached read error stays closed until the next successful refresh.
++	f.checkForwarding(t, false)
++	time.Sleep(1100 * time.Millisecond)
++	f.checkForwarding(t, true)
++}
++
++func TestGatewayAuthorityRefreshDetectsIdentitySizeAndMtime(t *testing.T) {
++	for _, change := range []string{"identity", "size", "mtime"} {
++		t.Run(change, func(t *testing.T) {
++			t.Parallel()
++			f := newAuthorityFixture(t, 0)
++			old, err := os.Stat(f.registry.path)
++			if err != nil {
++				t.Fatal(err)
++			}
++			// A same-length replacement keeps the peer but changes its address.
++			body := strings.Replace(f.body, "10.10.0.2", "10.10.0.3", 1)
++			switch change {
++			case "identity":
++				replaceAuthority(t, f.registry.path, body)
++			case "size":
++				body += " "
++				fallthrough
++			case "mtime":
++				if err := os.WriteFile(f.registry.path, []byte(body), 0o600); err != nil {
++					t.Fatal(err)
++				}
++			}
++			mtime := old.ModTime()
++			if change == "mtime" {
++				mtime = mtime.Add(time.Second)
++			}
++			if err := os.Chtimes(f.registry.path, mtime, mtime); err != nil {
++				t.Fatal(err)
++			}
++			updated, err := os.Stat(f.registry.path)
++			if err != nil {
++				t.Fatal(err)
++			}
++			if os.SameFile(old, updated) != (change != "identity") ||
++				(old.Size() == updated.Size()) != (change != "size") ||
++				old.ModTime().Equal(updated.ModTime()) != (change != "mtime") {
++				t.Fatal("fixture did not isolate the requested metadata change")
++			}
++			dueAuthorityRefresh(f.registry)
++			if _, ok := f.table.lookup(f.addr); ok {
++				t.Fatal("return path reused an address no longer assigned to this peer")
++			}
++			if got, ok := f.registry.innerForPeer(f.key); !ok || got.String() != "10.10.0.3" {
++				t.Fatalf("replacement authority = %v, %v", got, ok)
++			}
++			if _, err := f.device.WritePacket(ipv4Packet(t, f.addr.String(), "8.8.8.8")); !errors.Is(err, errGatewayInnerSourceMismatch) {
++				t.Fatalf("old outbound address error = %v", err)
++			}
++		})
++	}
++}
++
++func TestGatewayAuthorityHandshakeBypassesRefreshCadence(t *testing.T) {
++	f := newAuthorityFixture(t, 0)
++	replaceAuthority(t, f.registry.path, `{"version":1,"peers":[]}`)
++	if err := f.registry.authorize(f.key); !errors.Is(err, errPeerNotAuthorized) {
++		t.Fatalf("immediate revoked handshake error = %v", err)
++	}
++	f.checkForwarding(t, false)
++	replaceAuthority(t, f.registry.path, f.body)
++	if err := f.registry.authorize(f.key); err != nil {
++		t.Fatalf("immediate restored handshake error = %v", err)
++	}
++	f.checkForwarding(t, true)
++}
++
++func TestGatewayAuthorityReturnLookupRequiresAuthenticatedKey(t *testing.T) {
++	f := newAuthorityFixture(t, 0)
++	unknown := netip.MustParseAddr("10.10.0.3")
++	unauthenticated := fakeLoop()
++	if !f.table.learn(unknown, unauthenticated) {
++		t.Fatal("fixture did not learn the unauthenticated loop")
++	}
++	if _, ok := f.table.lookup(unknown); ok {
++		t.Fatal("return lookup accepted a loop without an authenticated session")
++	}
++	f.table.forget(unknown, unauthenticated)
++	if !f.table.learn(unknown, f.loop) {
++		t.Fatal("fixture did not learn the wrong destination")
++	}
++	if _, ok := f.table.lookup(unknown); ok {
++		t.Fatal("return lookup accepted the peer at a different destination")
++	}
++}
++
++func TestGatewayAuthorityConcurrentRefreshAndLookups(t *testing.T) {
++	f := newAuthorityFixture(t, 0)
++	for _, allowed := range []bool{false, true, false, true} {
++		body := `{"version":1,"peers":[`
++		if allowed {
++			body = f.body
++		}
++		replaceAuthority(t, f.registry.path, body)
++		// A completed failed refresh must invalidate all previously published
++		// indexes. Concurrent refreshes and lookups must preserve that denial.
++		if err := f.registry.reload(); (err == nil) != allowed {
++			t.Fatalf("reload error = %v, allowed = %v", err, allowed)
++		}
++		var wg sync.WaitGroup
++		for worker := 0; worker < 8; worker++ {
++			wg.Add(1)
++			go func() {
++				defer wg.Done()
++				for i := 0; i < 16; i++ {
++					if err := f.registry.authorize(f.key); (err == nil) != allowed {
++						t.Errorf("concurrent authorize error = %v, allowed = %v", err, allowed)
++					}
++					if _, ok := f.registry.innerForPeer(f.key); ok != allowed {
++						t.Errorf("concurrent outbound authority = %v, want %v", ok, allowed)
++					}
++					if _, ok := f.table.lookup(f.addr); ok != allowed {
++						t.Errorf("concurrent return authority = %v, want %v", ok, allowed)
++					}
++				}
++			}()
++		}
++		wg.Wait()
++	}
++}
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -5888,6 +5888,7 @@
+ import math
+ import secrets
+ import shlex
++import shutil
+ import sqlite3
+ import smtplib
+ import ssl
+@@ -17833,12 +17834,17 @@
+     try:
+         # Heavy schema/migration/archive work runs ONCE, up front, so it is never on the
+         # batch-claim or per-order settle path and never overlaps a wallet-RPC call.
+-        with get_db() as conn:
+-            ensure_schema(conn)
+-        with get_db() as conn:
+-            if not acquire_monero_poll_db_lease(conn, lease_seconds):
+-                return {"enabled": True, "detail": "another Monero poll holds the lease", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": []}
+-            batch = claim_monero_poll_batch(conn, MONERO_SETTLE_BATCH_LIMIT, lease_token)
++        def prepare_batch():
++            with get_db() as conn:
++                ensure_schema(conn)
++            with get_db() as conn:
++                if not acquire_monero_poll_db_lease(conn, lease_seconds):
++                    return None
++                return claim_monero_poll_batch(conn, MONERO_SETTLE_BATCH_LIMIT, lease_token)
++
++        batch = await asyncio.to_thread(prepare_batch)
++        if batch is None:
++            return {"enabled": True, "detail": "another Monero poll holds the lease", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": []}
+         try:
+             semaphore = asyncio.Semaphore(MONERO_POLL_CONCURRENCY)
+ 
+@@ -17862,12 +17868,16 @@
+                 if exc is not None:
+                     errors.append({"order": mask_id(hub_order_id), "error": f"rpc_error:{type(exc).__name__}"})
+                     logger.warning("Monero RPC failed for order %s: %s", mask_id(hub_order_id), exc)
+-                    with get_db() as conn:
+-                        release_monero_order_lease(conn, hub_order_id, lease_token)
++                    def release_order():
++                        with get_db() as conn:
++                            release_monero_order_lease(conn, hub_order_id, lease_token)
++                    await asyncio.to_thread(release_order)
+                     continue
+                 try:
+-                    with get_db() as conn:
+-                        outcome = settle_one_monero_order(conn, hub_order_id, confirmed, seen, txh, now, lease_token)
++                    def settle_order():
++                        with get_db() as conn:
++                            return settle_one_monero_order(conn, hub_order_id, confirmed, seen, txh, now, lease_token)
++                    outcome = await asyncio.to_thread(settle_order)
+                 except Exception as exc:  # noqa: BLE001 - reported per order
+                     errors.append({"order": mask_id(hub_order_id), "error": str(exc)})
+                     logger.error("Monero settle failed for order %s: %s", mask_id(hub_order_id), exc)
+@@ -17881,8 +17891,10 @@
+                     manual += 1
+             return {"enabled": True, "checked": checked, "settled": settled, "expired": expired, "manual_review": manual, "errors": errors[:10]}
+         finally:
+-            with get_db() as conn:
+-                release_monero_poll_db_lease(conn)
++            def release_poll():
++                with get_db() as conn:
++                    release_monero_poll_db_lease(conn)
++            await asyncio.to_thread(release_poll)
+     finally:
+         _monero_poll_inflight.release()
+ 
+@@ -18367,7 +18379,7 @@
+     status = str(row["status"] or "")
+     raw_expiration = str(row["expiration_date"] or "").strip()
+     expires_at = parse_iso_datetime(raw_expiration)
+-    due = not raw_expiration or expires_at is None or utcnow() > expires_at
++    due = not raw_expiration or expires_at is None or utcnow() >= expires_at
+     if status == "active" and due:
+         conn.execute(
+             "UPDATE users SET status='expired' "
+@@ -18433,17 +18445,23 @@
+     return {"removed": removed, "retry": retry}
+ 
+ def sweep_expired_account_runtime(limit: int = 500) -> int:
++    now = utcnow()
++
++    def expiration_due(value) -> int:
++        expires_at = parse_iso_datetime(value)
++        return int(expires_at is None or expires_at <= now)
++
+     with get_db() as conn:
+         ensure_schema(conn)
+         conn.commit()
+         conn.execute("BEGIN IMMEDIATE")
++        conn.create_function("wins_account_expiration_due", 1, expiration_due, deterministic=True)
+         rows = conn.execute("""
+             SELECT account_number
+             FROM users u
+             WHERE (
+                 u.status='active'
+-                AND u.expiration_date IS NOT NULL
+-                AND u.expiration_date <= ?
++                AND wins_account_expiration_due(u.expiration_date)=1
+             ) OR (
+                 u.status='expired'
+                 AND EXISTS (
+@@ -18453,7 +18471,7 @@
+             )
+             ORDER BY u.expiration_date
+             LIMIT ?
+-        """, (utcnow().isoformat(), max(1, min(int(limit), 2000)))).fetchall()
++        """, (max(1, min(int(limit), 2000)),)).fetchall()
+         for row in rows:
+             expire_account_runtime_if_due(conn, row["account_number"])
+         conn.commit()
+@@ -18586,11 +18604,44 @@
+             logger.error("PayPal sync failed for subscription %s: %s", mask_id(sub_id), exc)
+     return {"enabled": True, "checked": checked, "updated": updated, "errors": errors[:10]}
+ 
+-async def expire_spa_window(ip: str, lease_seconds: int = 20):
+-    await asyncio.sleep(lease_seconds)
+-    for port in (8000,):
+-        subprocess.run(["iptables", "-D", "INPUT", "-p", "tcp", "-s", ip, "--dport", str(port), "-j", "ACCEPT"], check=False)
+-    logger.info("SPA direct-api window expired")
++def open_spa_window(ip: str) -> bool:
++    """Give systemd custody of expiry before opening a legacy API window."""
++    delete_rule = None
++    try:
++        source = str(ipaddress.IPv4Address(ip))
++        iptables = shutil.which("iptables")
++        systemd_run = shutil.which("systemd-run")
++        if not iptables or not systemd_run:
++            raise RuntimeError("SPA firewall tools unavailable")
++        lease = "winsvpn-spa-" + secrets.token_hex(16)
++        rule = ["-p", "tcp", "-s", source, "--dport", "8000",
++                "-m", "comment", "--comment", lease, "-j", "ACCEPT"]
++        delete_rule = [iptables, "-w", "5", "-D", "WINVPN-HUB-INPUT", *rule]
++        # A timer outlives hub cancellation or restart. Refuse to open unless
++        # its unique-rule cleanup is armed; no shell or caller-supplied unit.
++        subprocess.run(
++            [systemd_run, "--quiet", "--collect", "--unit=" + lease,
++             "--on-active=20s", "--timer-property=AccuracySec=1ms",
++             "--property=Type=exec",
++             "--", *delete_rule],
++            check=True, timeout=5, capture_output=True,
++        )
++        subprocess.run(
++            [iptables, "-w", "5", "-I", "WINVPN-HUB-INPUT", "1", *rule],
++            check=True, timeout=5, capture_output=True,
++        )
++        logger.info("SPA accepted")
++        return True
++    except Exception as exc:
++        # An insertion timeout has uncertain completion. Attempt immediate
++        # removal as well as the already-armed independent timer.
++        if delete_rule is not None:
++            try:
++                subprocess.run(delete_rule, check=False, timeout=5, capture_output=True)
++            except Exception:
++                logger.error("SPA immediate cleanup failed; timer retains custody")
++        logger.warning("SPA window refused: %s", type(exc).__name__)
++        return False
+ 
+ def prune_spa_nonces(now_mono: float) -> None:
+     expired = [nonce for nonce, expires_at in SPA_NONCES.items() if expires_at <= now_mono]
+@@ -18615,6 +18666,9 @@
+     return True
+ 
+ class SPAParamProtocol(asyncio.DatagramProtocol):
++    def __init__(self):
++        self.window_tasks = set()
++
+     def datagram_received(self, data, addr):
+         try:
+             payload_str = data.decode(errors="ignore").strip()
+@@ -18632,17 +18686,21 @@
+             if not valid_spa_payload(data_str):
+                 logger.warning("SPA rejected: stale, replayed, or malformed payload")
+                 return
+-            subprocess.run(["iptables", "-I", "INPUT", "1", "-p", "tcp", "-s", addr[0], "--dport", "8000", "-j", "ACCEPT"], check=False)
+-            asyncio.create_task(expire_spa_window(addr[0]))
+-            logger.info("SPA accepted")
++            task = asyncio.create_task(asyncio.to_thread(open_spa_window, addr[0]))
++            self.window_tasks.add(task)
++            task.add_done_callback(self.window_tasks.discard)
+         except Exception as exc:
+             logger.error("SPA engine exception: %s", exc)
++
++def initialize_hub_schema():
++    with get_db() as conn:
++        ensure_schema(conn)
++
+ 
+ @app.on_event("startup")
+ async def startup_event():
+     global _activation_delivery_task
+-    with get_db() as conn:
+-        ensure_schema(conn)
++    await asyncio.to_thread(initialize_hub_schema)
+     # D7/D15: the inner pool is pinned to EXACTLY /24 and an unusable pool
+     # refuses the boot. The rule itself lives in _winn3_inner_pool_or_reason();
+     # this line is the whole guard, deliberately. It used to be an inline
+@@ -19212,7 +19270,7 @@
+ 
+ @app.post("/api/site/ai-chat")
+ async def site_ai_chat(payload: SiteChatRequest, request: Request):
+-    if site_rate_limited(request, limit=20):
++    if await asyncio.to_thread(site_rate_limited, request, limit=20):
+         return {"answer": "I am getting a lot of questions from this connection. Please wait a minute and try again.", "mode": "rate_limited"}
+     message = (payload.message or "").strip()
+     if not message:
+@@ -20928,14 +20986,11 @@
+                 detail="Selected Winn Protocol v3 node cannot be served for this request.",
+             )
+         if served_winn3_descriptor and served_winn3_device:
+-            # Make the newly issued key/address pair durable before publishing
+-            # the complete authorization snapshot. If node sync fails the
+-            # client receives no descriptor, and a retry republishes the same
+-            # idempotent material. The gateway's handshake is fail-closed on a
+-            # key missing from this file, so returning first would create a
+-            # valid-looking configuration that can only disappear into silence.
+-            conn.commit()
++            # Publish while the admission transaction still owns its writer
++            # lock. A failed publication must not consume the activation key
++            # or commit a device whose bearer the client has never received.
+             if not sync_winn3_registry_to_node(conn, node_ssh_host, node["slug"]):
++                conn.rollback()
+                 mark_node_management_status(
+                     conn, node["slug"], "failed", "Winn3 peer registry sync failed"
+                 )
+@@ -21833,17 +21888,21 @@
+         completed += 1
+     return completed
+ 
++def sweep_due_account_deletions() -> int:
++    with get_db() as conn:
++        ensure_schema(conn)
++        conn.commit()
++        conn.execute("BEGIN IMMEDIATE")
++        return resolve_due_account_deletions(conn, None)
++
++
+ async def account_deletion_sweep_loop():
+     # Hourly, best-effort. Wrapped so a transient DB error can never take the
+     # control plane down; the next tick retries.
+     while True:
+         try:
+             await asyncio.sleep(3600)
+-            with get_db() as conn:
+-                ensure_schema(conn)
+-                conn.commit()
+-                conn.execute("BEGIN IMMEDIATE")
+-                completed = resolve_due_account_deletions(conn, None)
++            completed = await asyncio.to_thread(sweep_due_account_deletions)
+             if completed:
+                 logger.info("Account deletion sweep completed %s scheduled deletion(s)", completed)
+         except asyncio.CancelledError:
+@@ -24854,7 +24913,7 @@
+ 
+ @app.post("/admin/nodes/resync-peers")
+ async def admin_resync_node_peers(request: Request, x_admin_token: str = Header(...)):
+-    require_admin_token(x_admin_token, request, "resync node peers")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "resync node peers")
+     node_slug = (request.query_params.get("node_slug") or request.query_params.get("nodeslug") or "").strip()
+     content_type = request.headers.get("content-type", "")
+     if not node_slug and "application/json" in content_type:
+@@ -24867,7 +24926,7 @@
+     if not node_slug and ("application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type):
+         form = await request.form()
+         node_slug = str(form.get("node_slug") or form.get("nodeslug") or "").strip()
+-    return resync_active_peers_to_node(node_slug)
++    return await asyncio.to_thread(resync_active_peers_to_node, node_slug)
+ 
+ @app.post("/api/v1/nodes/{slug}/resync-peers")
+ def node_resync_own_peers(slug: str, request: Request, x_node_token: str = Header(...)):
+@@ -25331,6 +25390,10 @@
+ @app.post("/webhook/paypal")
+ async def paypal_webhook(request: Request, background_tasks: BackgroundTasks):
+     raw_body = await request.body()
++    return await asyncio.to_thread(_paypal_webhook_sync, request, background_tasks, raw_body)
++
++
++def _paypal_webhook_sync(request: Request, background_tasks: BackgroundTasks, raw_body: bytes):
+     try:
+         payload = json.loads(raw_body.decode() or "{}")
+     except Exception:
+@@ -25341,7 +25404,7 @@
+     if not (paypal_enabled() and PAYPAL_WEBHOOK_ID):
+         logger.warning("PayPal webhook ignored because PAYPAL_CLIENT_ID/PAYPAL_CLIENT_SECRET/PAYPAL_WEBHOOK_ID are not configured")
+         return {"status": "ignored", "event": event, "reason": "paypal_credentials_not_configured"}
+-    if not await asyncio.to_thread(verify_paypal_webhook_signature, dict(request.headers), raw_body, payload):
++    if not verify_paypal_webhook_signature(dict(request.headers), raw_body, payload):
+         security_alert(2, "invalid paypal webhook signature", request=request, details={
+             "event": event,
+             "event_id_hash": security_event_hash(payload.get("id", "")),
+@@ -25381,7 +25444,7 @@
+         if event in subscription_events and subscription_id:
+             # Never grant from webhook fields alone. Re-read the signed-in app's
+             # subscription object and require PayPal's definitive ACTIVE state.
+-            details = await asyncio.to_thread(fetch_paypal_subscription, subscription_id)
++            details = fetch_paypal_subscription(subscription_id)
+             merged = details
+             plan_id = str(merged.get("plan_id") or resource.get("plan_id") or "")
+             paypal_status = str(merged.get("status") or "UNKNOWN").upper()
+@@ -25422,7 +25485,7 @@
+             return {"status": "ok", "event": event, "created": created, "subscription_status": paypal_status}
+ 
+         if event in refund_events:
+-            terminal_refund, payment_references, refund_subscription_id = await asyncio.to_thread(paypal_refund_is_terminal, event, resource)
++            terminal_refund, payment_references, refund_subscription_id = paypal_refund_is_terminal(event, resource)
+             subscription_id = subscription_id or refund_subscription_id
+             if not terminal_refund:
+                 with get_db() as conn:
+@@ -25609,6 +25672,10 @@
+ @app.post("/webhook/btcpay")
+ async def btcpay_webhook(request: Request, background_tasks: BackgroundTasks):
+     raw_body = await request.body()
++    return await asyncio.to_thread(_btcpay_webhook_sync, request, background_tasks, raw_body)
++
++
++def _btcpay_webhook_sync(request: Request, background_tasks: BackgroundTasks, raw_body: bytes):
+     if not btcpay_enabled():
+         logger.warning("BTCPay webhook ignored because BTCPAY_* are not fully configured")
+         return {"status": "ignored", "reason": "btcpay_not_configured"}
+@@ -25788,14 +25855,14 @@
+ 
+ @app.post("/admin/paypal/sync")
+ async def admin_paypal_sync(request: Request, lookahead_hours: int = Form(default=PAYPAL_SYNC_LOOKAHEAD_HOURS), x_admin_token: str = Header(...)):
+-    require_admin_token(x_admin_token, request, "paypal sync")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "paypal sync")
+     return await asyncio.to_thread(sync_due_paypal_subscriptions, lookahead_hours)
+ 
+ @app.post("/admin/monero/poll")
+ async def admin_monero_poll(request: Request, background_tasks: BackgroundTasks, x_admin_token: str = Header(...)):
+     # The timer and manual poll share the sweep lease. Each settlement commits
+     # its activation outbox row atomically; no credential enters the response.
+-    require_admin_token(x_admin_token, request, "monero poll")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "monero poll")
+     if not monero_rpc_enabled():
+         return {"enabled": False, "detail": "Monero wallet RPC is not configured"}
+     return await run_monero_poll_sweep()
+@@ -27292,7 +27359,7 @@
+ async def admin_drain_redemption_outbox(request: Request, x_admin_token: str = Header(...)):
+     # Internal-only: the wins-redemption-outbox systemd timer curls it locally
+     # with the admin token, exactly like /admin/monero/poll.
+-    require_admin_token(x_admin_token, request, "redemption outbox drain")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "redemption outbox drain")
+     return await asyncio.to_thread(drain_redemption_outbox)
+ 
+ 
+@@ -27300,7 +27367,7 @@
+ async def admin_drain_donor_acknowledgment_outbox(request: Request, x_admin_token: str = Header(...)):
+     # Mirrors /admin/redemption/outbox/drain. The wins-donor-ack-outbox
+     # systemd timer curls this locally with the admin token.
+-    require_admin_token(x_admin_token, request, "donor acknowledgment outbox drain")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "donor acknowledgment outbox drain")
+     return await asyncio.to_thread(drain_donor_acknowledgment_outbox)
+ 
+ 
+@@ -27891,6 +27958,14 @@
+         logger.error("relay backlog notice failed: %s", type(exc).__name__)
+ 
+ 
++def notify_emergency_backlog():
++    with get_db() as conn:
++        ensure_schema(conn)
++        backlog = emergency_backlog_count(conn)
++    if backlog:
++        emergency_backlog_notice(backlog)
++
++
+ async def emergency_outbox_sweep_loop():
+     # The client wipes its copy on 2xx, so retrying is the hub's job from that
+     # moment on. Fully guarded: a failure here can never affect request
+@@ -27899,11 +27974,7 @@
+         try:
+             await asyncio.sleep(EMERGENCY_SWEEP_INTERVAL_SECONDS)
+             await asyncio.to_thread(drain_emergency_outbox)
+-            with get_db() as conn:
+-                ensure_schema(conn)
+-                backlog = emergency_backlog_count(conn)
+-            if backlog:
+-                emergency_backlog_notice(backlog)
++            await asyncio.to_thread(notify_emergency_backlog)
+         except asyncio.CancelledError:
+             raise
+         except Exception as exc:
+@@ -27924,7 +27995,16 @@
+     # log line that says a duress alert was attempted.
+     try:
+         body = await read_request_body_mapping(request)
+-
++    except HTTPException:
++        raise
++    except Exception as exc:
++        logger.error("relay parse failed: %s", type(exc).__name__)
++        raise HTTPException(status_code=503, detail="Unavailable")
++    return await asyncio.to_thread(_emergency_dispatch_sync, request, background_tasks, body)
++
++
++def _emergency_dispatch_sync(request: Request, background_tasks: BackgroundTasks, body: dict):
++    try:
+         # The app may include account_number / device_id / app_version, and may
+         # send a bearer token. NONE of them are read into a variable that is
+         # stored, logged, or composed into the outgoing message. The bearer token
+@@ -28044,7 +28124,7 @@
+ 
+ @app.post("/admin/emergency/outbox/drain")
+ async def admin_drain_emergency_outbox(request: Request, x_admin_token: str = Header(...)):
+-    require_admin_token(x_admin_token, request, "relay outbox drain")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "relay outbox drain")
+     return await asyncio.to_thread(drain_emergency_outbox)
+ 
+ # =============================================================================
+@@ -28813,7 +28893,7 @@
+ 
+ @app.post("/admin/hoppy-agent/outbox/drain")
+ async def admin_drain_hoppy_agent_outbox(request: Request, x_admin_token: str = Header(...)):
+-    require_admin_token(x_admin_token, request, "hoppy agent outbox drain")
++    await asyncio.to_thread(require_admin_token, x_admin_token, request, "hoppy agent outbox drain")
+     return await asyncio.to_thread(drain_hoppy_agent_mail_outbox)
+ 
+ 
+--- a/server/test_control_plane_round9.py
++++ b/server/test_control_plane_round9.py
+@@ -0,0 +1,304 @@
++#!/usr/bin/env python3
++"""Round 9 regressions using embedded production code and local SQLite.
++
++Gateway/provider publication is mocked. Descriptor signing uses real OpenSSL;
++no account, firewall, provider or remote-node action is performed.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++import base64
++from contextlib import contextmanager
++from datetime import datetime, timezone
++import json
++import logging
++import shutil
++import subprocess
++import threading
++import time
++import types
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_winn3_descriptor_hub as descriptor
++import test_winn3_serving_hub as serving
++
++
++class Round9Tests(unittest.TestCase):
++    def setUp(self):
++        def close_handlers(**kwargs):
++            for handler in kwargs.get('handlers', []):
++                handler.close()
++
++        with patch('logging.basicConfig', side_effect=close_handlers):
++            self.mod = descriptor.load_hub_with_ring(
++                DURABILITY_BARRIER_ENABLED=0, DURABILITY_BARRIER_REQUIRED=0,
++                WINN3_INNER_POOL_CIDR='10.10.0.0/24', WINN3_CANARY_NODE_SLUG='',
++                HIDE_CONTROL_ORIGIN=0,
++            )
++        self.mod.logger.propagate = False
++        self.mod.logger.addHandler(logging.NullHandler())
++        self.mod.security_alert = lambda *args, **kwargs: None
++        self.addCleanup(self.cleanup)
++
++    def cleanup(self):
++        for handler in list(self.mod.logger.handlers):
++            handler.close()
++            self.mod.logger.removeHandler(handler)
++        shutil.rmtree(self.mod._TMPDIR)
++
++    def test_expiry_selector_and_enforcer_agree(self):
++        now = datetime(2026, 9, 13, tzinfo=timezone.utc)
++        cases = [
++            (None, True), ('', True), ('zz-invalid', True), ('Lifetime Access', True),
++            (now.isoformat(), True), ('2026-09-13T01:00:00+02:00', True),
++            ('2026-09-12T23:30:00-02:00', False), ('2026-09-14T00:00:00Z', False),
++        ]
++        for value, due in cases:
++            with self.subTest(expiration=value):
++                harness.seed_account(self.mod, devices=1)
++                serving.seed_node(self.mod, slug='test-node')
++                with self.mod.get_db() as conn:
++                    conn.execute('DELETE FROM peer_revocations')
++                    conn.execute('UPDATE users SET expiration_date=?', (value,))
++                with patch.object(self.mod, 'utcnow', return_value=now):
++                    self.assertEqual(self.mod.sweep_expired_account_runtime(), int(due))
++                with self.mod.get_db() as conn:
++                    self.assertEqual(conn.execute('SELECT status FROM users').fetchone()[0],
++                                     'expired' if due else 'active')
++                    self.assertEqual(conn.execute('SELECT COUNT(*) FROM devices').fetchone()[0],
++                                     0 if due else 1)
++                    self.assertEqual(conn.execute('SELECT COUNT(*) FROM peer_revocations').fetchone()[0],
++                                     int(due))
++
++    def test_failed_registry_publication_preserves_activation_for_retry(self):
++        harness.seed_account(self.mod, devices=0)
++        descriptor.arm_activation(self.mod)
++        payload, signature = descriptor.envelope_for(descriptor.descriptor_payload())
++        descriptor.seed_node(self.mod, protocol_version='winn/3', protocol_params_json='{}',
++                             descriptor_json=json.dumps({'payload': payload, 'sig': signature}))
++        request = harness.FakeRequest(path='/verify', headers={
++            'x-wins-activation': descriptor.ACTIVATION_SECRET})
++        login = descriptor.build_login(self.mod, supports_winn3=True,
++                                       supports_winn3_descriptor=True)
++        original_digest = self.mod.token_digest(descriptor.ACTIVATION_SECRET)
++        publications = []
++
++        def publish(conn, node_ip, slug):
++            self.assertTrue(conn.in_transaction)
++            publications.append(self.mod.winn3_peer_registry_document(conn, slug))
++            self.assertEqual(len(publications[-1]['peers']), 1)
++            # The activation consumption and device are still invisible to readers.
++            with self.mod.get_db() as reader:
++                self.assertEqual(reader.execute('SELECT COUNT(*) FROM devices').fetchone()[0], 0)
++                self.assertEqual(reader.execute('SELECT activation_secret_hash FROM users').fetchone()[0],
++                                 original_digest)
++            return False
++
++        with patch.object(self.mod, 'sync_peer_to_node', return_value=True), patch.object(
++                self.mod, 'sync_winn3_registry_to_node', side_effect=publish):
++            with self.assertRaises(harness.HTTPException) as caught:
++                asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++        self.assertEqual(caught.exception.status_code, 503)
++        self.assertEqual(len(publications), 1)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM devices').fetchone()[0], 0)
++            row = conn.execute('SELECT activation_secret_hash, activation_secret_used_at FROM users').fetchone()
++            self.assertEqual(row[0], original_digest)
++            self.assertIsNone(row[1])
++            self.assertEqual(conn.execute('SELECT management_status FROM nodes').fetchone()[0], 'failed')
++            conn.execute("UPDATE nodes SET management_status='ok'")
++        with patch.object(self.mod, 'sync_peer_to_node', return_value=True), patch.object(
++                self.mod, 'sync_winn3_registry_to_node', return_value=True):
++            result = asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++        if hasattr(result, 'body'):
++            result = json.loads(result.body)
++        self.assertTrue(result['device_auth_token'])
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute('SELECT COUNT(*) FROM devices').fetchone()[0], 1)
++            self.assertTrue(conn.execute('SELECT activation_secret_used_at FROM users').fetchone()[0])
++            self.assertEqual(conn.execute('SELECT device_auth_token_hash FROM devices').fetchone()[0],
++                             self.mod.token_digest(result['device_auth_token']))
++
++    def test_ai_rate_limit_real_sqlite_contention_does_not_block_loop(self):
++        harness.seed_account(self.mod, devices=0)
++        request = harness.FakeRequest(path='/api/site/ai-chat')
++        payload = types.SimpleNamespace(message='private credentials', locale='en', history=[])
++        original_db = self.mod.get_db
++
++        @contextmanager
++        def bounded_wait_db():
++            with original_db() as conn:
++                conn.execute('PRAGMA busy_timeout=350')
++                yield conn
++
++        with self.mod.get_db() as blocker:
++            blocker.execute('BEGIN IMMEDIATE')
++            with patch.object(self.mod, 'get_db', bounded_wait_db), patch.object(
++                    self.mod, 'site_sensitive_question', return_value=True):
++                async def exercise():
++                    task = asyncio.create_task(self.mod.site_ai_chat(payload, request))
++                    start = time.monotonic()
++                    await asyncio.sleep(0.05)
++                    delay = time.monotonic() - start
++                    blocker.rollback()
++                    result = await task
++                    self.assertEqual(result['mode'], 'guardrail')
++                    self.assertLess(delay, 0.25, 'SQLite writer contention blocked the loop')
++                asyncio.run(exercise())
++
++    def test_webhooks_run_database_and_provider_work_in_worker(self):
++        loop_thread = threading.get_ident()
++        original_db = self.mod.get_db
++        observed = []
++
++        @contextmanager
++        def checked_db():
++            self.assertNotEqual(threading.get_ident(), loop_thread)
++            observed.append('db')
++            with original_db() as conn:
++                yield conn
++
++        class Request(harness.FakeRequest):
++            async def body(self):
++                self_thread = threading.get_ident()
++                if self_thread != loop_thread:
++                    raise AssertionError('ASGI body read moved off event loop')
++                return json.dumps(self._body).encode()
++
++        def fetch(invoice_id):
++            self.assertNotEqual(threading.get_ident(), loop_thread)
++            observed.append('provider')
++            return {'status': 'processing'}
++
++        self.mod.PAYPAL_WEBHOOK_ID = 'test-webhook'
++        with patch.object(self.mod, 'get_db', checked_db), patch.object(
++                self.mod, 'paypal_enabled', return_value=True), patch.object(
++                self.mod, 'verify_paypal_webhook_signature', return_value=True):
++            result = asyncio.run(self.mod.paypal_webhook(Request(body={
++                'id': 'ROUND9-EVENT', 'event_type': 'UNSUPPORTED', 'resource': {}}),
++                harness.BackgroundTasks()))
++            self.assertEqual(result['status'], 'ignored')
++        with patch.object(self.mod, 'get_db', checked_db), patch.object(
++                self.mod, 'btcpay_enabled', return_value=True), patch.object(
++                self.mod, 'verify_btcpay_webhook_signature', return_value=True), patch.object(
++                self.mod, 'btcpay_fetch_invoice', side_effect=fetch):
++            result = asyncio.run(self.mod.btcpay_webhook(Request(body={
++                'type': 'InvoiceSettled', 'invoiceId': 'ROUND9-INVOICE'}), harness.BackgroundTasks()))
++            self.assertEqual(result['status'], 'pending')
++        self.assertIn('db', observed)
++        self.assertIn('provider', observed)
++
++    def test_monero_claim_settlement_and_release_stay_off_loop(self):
++        owner = threading.get_ident()
++        original_db = self.mod.get_db
++        calls = []
++
++        @contextmanager
++        def checked_db():
++            self.assertNotEqual(threading.get_ident(), owner)
++            with original_db() as conn:
++                yield conn
++
++        def checked(name, result):
++            def call(*args):
++                self.assertNotEqual(threading.get_ident(), owner)
++                calls.append(name)
++                return result
++            return call
++
++        with patch.object(self.mod, 'get_db', checked_db), patch.object(
++                self.mod, 'monero_rpc_enabled', return_value=True), patch.object(
++                self.mod, 'acquire_monero_poll_db_lease', side_effect=checked('claim', True)), patch.object(
++                self.mod, 'claim_monero_poll_batch', return_value=[
++                    {'hub_order_id': 'round9-order', 'subaddress_index': 1}]), patch.object(
++                self.mod, 'monero_received_for_index', side_effect=checked('rpc', (1, 1, 'tx'))), patch.object(
++                self.mod, 'settle_one_monero_order', side_effect=checked('settle', {'status': 'settled'})), patch.object(
++                self.mod, 'release_monero_poll_db_lease', side_effect=checked('release', None)):
++            result = asyncio.run(self.mod.run_monero_poll_sweep())
++        self.assertEqual(result['settled'], 1)
++        self.assertEqual(calls, ['claim', 'rpc', 'settle', 'release'])
++
++    def test_admin_authentication_and_peer_resync_stay_off_loop(self):
++        owner = threading.get_ident()
++        request = harness.FakeRequest(body={'node_slug': 'round9-node'}, headers={
++            'content-type': 'application/json'})
++        calls = []
++        def checked(name, result):
++            def call(*args):
++                self.assertNotEqual(threading.get_ident(), owner)
++                calls.append((name, args))
++                return result
++            return call
++        with patch.object(self.mod, 'require_admin_token', side_effect=checked('auth', None)), patch.object(
++                self.mod, 'resync_active_peers_to_node', side_effect=checked('resync', {'ok': True})):
++            result = asyncio.run(self.mod.admin_resync_node_peers(request, 'test-token'))
++        self.assertEqual(result, {'ok': True})
++        self.assertEqual([name for name, _ in calls], ['auth', 'resync'])
++        self.assertEqual(calls[1][1], ('round9-node',))
++
++    def test_spa_arms_unique_systemd_cleanup_before_opening_owned_chain(self):
++        calls = []
++        def run(argv, **kwargs):
++            calls.append(argv)
++            self.assertEqual(kwargs['timeout'], 5)
++            return subprocess.CompletedProcess(argv, 0)
++        with patch.object(self.mod.shutil, 'which', side_effect=lambda name: '/usr/sbin/' + name), patch.object(
++                self.mod.subprocess, 'run', side_effect=run):
++            self.assertTrue(self.mod.open_spa_window('192.0.2.4'))
++            self.assertTrue(self.mod.open_spa_window('192.0.2.4'))
++        self.assertEqual(len(calls), 4)
++        for timer, insert in (calls[:2], calls[2:]):
++            self.assertIn('--on-active=20s', timer)
++            self.assertIn('--timer-property=AccuracySec=1ms', timer)
++            self.assertIn('-D', timer)
++            self.assertIn('-I', insert)
++            self.assertNotIn('INPUT', timer + insert)
++            self.assertIn('WINVPN-HUB-INPUT', timer)
++            self.assertIn('WINVPN-HUB-INPUT', insert)
++            self.assertEqual(timer[timer.index('--comment') + 1], insert[insert.index('--comment') + 1])
++        self.assertNotEqual(calls[0][calls[0].index('--comment') + 1],
++                            calls[2][calls[2].index('--comment') + 1])
++
++    def test_spa_schedule_failure_never_opens_and_insert_timeout_removes(self):
++        for failure_index in (0, 1):
++            calls = []
++            def run(argv, **kwargs):
++                index = len(calls)
++                calls.append(argv)
++                if index == failure_index:
++                    raise subprocess.TimeoutExpired(argv, 5)
++                return subprocess.CompletedProcess(argv, 0)
++            with self.subTest(failure_index=failure_index), patch.object(
++                    self.mod.shutil, 'which', side_effect=lambda name: '/usr/sbin/' + name), patch.object(
++                    self.mod.subprocess, 'run', side_effect=run):
++                self.assertFalse(self.mod.open_spa_window('192.0.2.4'))
++            if failure_index == 0:
++                self.assertTrue(all('-I' not in argv for argv in calls))
++            self.assertIn('-D', calls[-1])
++
++    def test_spa_datagram_offloads_firewall_and_rejects_replay(self):
++        key = b'round9-test-spa-secret'
++        self.mod.SPA_HMAC = base64.b64encode(key).decode()
++        self.mod.SPA_NONCES.clear()
++        data = f'{self.mod.SPA_MARKER}:{int(time.time())}:{"a" * 24}'
++        signature = base64.b64encode(self.mod.hmac.new(key, data.encode(), self.mod.hashlib.sha256).digest()).decode().rstrip('=')
++        seen = []
++        loop_thread = threading.get_ident()
++        def opened(ip):
++            self.assertNotEqual(threading.get_ident(), loop_thread)
++            seen.append(ip)
++            return True
++        async def exercise():
++            protocol = self.mod.SPAParamProtocol()
++            packet = (data + signature).encode()
++            protocol.datagram_received(packet, ('192.0.2.4', 41000))
++            protocol.datagram_received(packet, ('192.0.2.4', 41000))
++            await asyncio.gather(*protocol.window_tasks)
++        with patch.object(self.mod, 'open_spa_window', side_effect=opened):
++            asyncio.run(exercise())
++        self.assertEqual(seen, ['192.0.2.4'])
++
++
++if __name__ == '__main__':
++    unittest.main(verbosity=2)
+--- a/server/test_emergency_dispatch_hub.py
++++ b/server/test_emergency_dispatch_hub.py
+@@ -758,7 +758,7 @@
+     handler = mod.app.routes[("GET", "/admin/emergency/outbox")]
+     request = FakeRequest(headers={}, body={}, path="/admin/emergency/outbox",
+                           method="GET")
+-    result = asyncio.run(handler(request, os.environ["ADMIN_TOKEN"]))
++    result = handler(request, os.environ["ADMIN_TOKEN"])
+     blob = json.dumps(result)
+     assert CONTACT not in blob and "959123456789" not in blob
+     assert "16.871311" not in blob
+@@ -773,7 +773,7 @@
+     handler = mod.app.routes[("GET", "/admin/emergency/outbox")]
+     request = FakeRequest(headers={}, body={}, path="/admin/emergency/outbox",
+                           method="GET")
+-    expect_http(401, lambda: asyncio.run(handler(request, "wrong-token")))
++    expect_http(401, lambda: handler(request, "wrong-token"))
+ 
+ 
+ # ================================= runner =================================
+--- a/linux/runner/linux_tunnel_backend.cc
++++ b/linux/runner/linux_tunnel_backend.cc
+@@ -14,6 +14,8 @@
+ #include <glib.h>
+ #include <netdb.h>
+ #include <netinet/in.h>
++#include <poll.h>
++#include <signal.h>
+ #include <spawn.h>
+ #include <sys/socket.h>
+ #include <sys/stat.h>
+@@ -308,7 +310,7 @@
+ };
+ 
+ struct ProcResult {
+-  // -1 spawn failed; 0..255 decoded exit code; 128+signal when killed.
++  // -1 spawn/wait failed; 124 timeout; otherwise exit code or 128+signal.
+   int exit_status = -1;
+   std::string output;  // kCapture only
+ };
+@@ -323,9 +325,11 @@
+ // descriptor into a grandchild between pipe() and spawn(); and every
+ // posix_spawn_file_actions_* return code is checked so a failed action setup
+ // reports a spawn failure instead of spawning with partial plumbing.
+-ProcResult RunArgv(const std::vector<std::string>& argv, ProcOutput mode) {
++ProcResult RunArgv(
++    const std::vector<std::string>& argv, ProcOutput mode,
++    std::chrono::milliseconds timeout = std::chrono::seconds(15)) {
+   ProcResult result;
+-  if (argv.empty() || argv[0].empty()) {
++  if (argv.empty() || argv[0].empty() || timeout.count() <= 0) {
+     return result;
+   }
+   std::vector<char*> raw;
+@@ -338,9 +342,18 @@
+   posix_spawn_file_actions_t actions;
+   const bool actions_initialized =
+       posix_spawn_file_actions_init(&actions) == 0;
+-  bool actions_ok = actions_initialized;
++  posix_spawnattr_t attributes;
++  const bool attributes_initialized = posix_spawnattr_init(&attributes) == 0;
++  bool actions_ok = actions_initialized && attributes_initialized;
++  if (actions_ok) {
++    // Set the group before exec, without a parent/child setpgid race.
++    actions_ok =
++        posix_spawnattr_setflags(&attributes, POSIX_SPAWN_SETPGROUP) == 0 &&
++        posix_spawnattr_setpgroup(&attributes, 0) == 0;
++  }
+   bool spawned = false;
+   bool capture_overflow = false;
++  bool timed_out = false;
+   constexpr size_t kMaxCapturedBytes = 1024 * 1024;
+   int devnull_fd = -1;
+   int pipe_fds[2] = {-1, -1};
+@@ -363,6 +376,10 @@
+ #else
+     if (pipe(pipe_fds) == 0) {
+ #endif
++      // Only the reader is nonblocking; helpers retain blocking stdout/stderr.
++      const int flags = fcntl(pipe_fds[0], F_GETFL, 0);
++      actions_ok = flags >= 0 &&
++          fcntl(pipe_fds[0], F_SETFL, flags | O_NONBLOCK) == 0;
+       actions_ok &= posix_spawn_file_actions_adddup2(
+                         &actions, pipe_fds[1], STDOUT_FILENO) == 0;
+       actions_ok &= posix_spawn_file_actions_adddup2(
+@@ -377,58 +394,93 @@
+   }
+ 
+   pid_t pid = -1;
++  auto deadline = std::chrono::steady_clock::now() + timeout;
+   if (actions_ok &&
+-      posix_spawn(&pid, raw[0], &actions, nullptr, raw.data(),
++      posix_spawn(&pid, raw[0], &actions, &attributes, raw.data(),
+                   environ) == 0) {
+     spawned = true;
+   }
+   // The parent's copies of the plumbing are closed no matter how the spawn
+   // went, so a failed spawn leaks nothing.
+   if (pipe_fds[1] >= 0) close(pipe_fds[1]);
+-  if (spawned && pipe_fds[0] >= 0) {
+-    std::array<char, 256> buffer = {};
++  if (spawned) {
++    std::array<char, 4096> buffer = {};
+     std::string captured;
+-    for (;;) {
+-      const ssize_t read_bytes =
+-          read(pipe_fds[0], buffer.data(), buffer.size());
+-      if (read_bytes < 0) {
+-        // F-08: EINTR means "try again", not "end of stream".
+-        if (errno == EINTR) continue;
+-        break;
+-      }
+-      if (read_bytes == 0) break;
+-      const size_t chunk_bytes = static_cast<size_t>(read_bytes);
+-      if (!capture_overflow && chunk_bytes <= kMaxCapturedBytes - captured.size()) {
+-        captured.append(buffer.data(), chunk_bytes);
+-      } else {
+-        capture_overflow = true;
+-        captured.clear();
+-      }
+-    }
+-    close(pipe_fds[0]);
+-    result.output = Trim(captured);
+-  } else if (pipe_fds[0] >= 0) {
+-    close(pipe_fds[0]);
+-  }
+-  if (spawned) {
+     int status = 0;
+-    // F-08 + B-04 (audits 2026-08-28): waitpid is interrupted by any
+-    // unblocked signal (SIGCHLD for an unrelated child included); retry on
+-    // EINTR. And the status word is only meaningful when waitpid returned
+-    // THIS child's pid: a failed wait (ECHILD from a competing reaper or a
+-    // SIG_IGN'd SIGCHLD, or any other error) must report FAILURE, never
+-    // decode the untouched zero status as a clean exit 0 -- which turned a
+-    // dead privileged child into reported success in both audits' probes.
+     bool waited = false;
+     for (;;) {
+-      const pid_t waited_pid = waitpid(pid, &status, 0);
+-      if (waited_pid == pid) {
+-        waited = true;
+-        break;
++      const auto now = std::chrono::steady_clock::now();
++      if (now >= deadline) {
++        if (!timed_out) {
++          timed_out = true;
++          kill(-pid, SIGTERM);
++          deadline = now + std::chrono::seconds(2);
++        } else {
++          // Keep the leader unreaped throughout the grace period so its PID
++          // cannot be reused before this final group signal. Descendants may
++          // ignore TERM or close stdout while still running.
++          kill(-pid, SIGKILL);
++          // A group signal can succeed for a descendant but be denied for
++          // an elevated leader. Do not block on a child we cannot signal.
++          const int wait_options = kill(pid, SIGKILL) == 0 ? 0 : WNOHANG;
++          pid_t waited_pid;
++          do {
++            waited_pid = waitpid(pid, &status, wait_options);
++          } while (waited_pid < 0 && errno == EINTR);
++          waited = waited_pid == pid;
++          break;
++        }
+       }
+-      if (waited_pid < 0 && errno == EINTR) continue;
+-      break;  // Any other failure: NOT waited.
+-    }
++
++      if (pipe_fds[0] >= 0) {
++        const ssize_t read_bytes =
++            read(pipe_fds[0], buffer.data(), buffer.size());
++        if (read_bytes > 0) {
++          const size_t chunk_bytes = static_cast<size_t>(read_bytes);
++          if (!capture_overflow &&
++              chunk_bytes <= kMaxCapturedBytes - captured.size()) {
++            captured.append(buffer.data(), chunk_bytes);
++          } else {
++            capture_overflow = true;
++            captured.clear();
++          }
++          // Check the deadline after every chunk, even after overflow. An
++          // endless writer must not trap us in a drain-until-EAGAIN loop.
++          continue;
++        }
++        if (read_bytes < 0 && errno == EINTR) continue;
++        if (read_bytes == 0 || (errno != EAGAIN && errno != EWOULDBLOCK)) {
++          close(pipe_fds[0]);
++          pipe_fds[0] = -1;
++        }
++      }
++
++      // Defer reaping while descendants can hold the capture pipe open.
++      // EOF alone is insufficient: a quiet child may close both streams
++      // and hang. Decode only an exact-child wait, never an ECHILD failure.
++      if (pipe_fds[0] < 0 && !timed_out) {
++        const pid_t waited_pid = waitpid(pid, &status, WNOHANG);
++        if (waited_pid == pid) {
++          waited = true;
++          break;
++        }
++        if (waited_pid < 0 && errno != EINTR) break;
++      }
++
++      const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
++          deadline - std::chrono::steady_clock::now()).count();
++      const int wait_ms = static_cast<int>(std::max<int64_t>(
++          0, std::min<int64_t>(25, remaining)));
++      pollfd descriptor = {pipe_fds[0], POLLIN, 0};
++      // EINTR returns to the deadline check instead of restarting a full
++      // relative wait. A negative descriptor gives a bounded idle wait.
++      if (poll(&descriptor, 1, wait_ms) < 0 && errno != EINTR &&
++          pipe_fds[0] >= 0) {
++        close(pipe_fds[0]);
++        pipe_fds[0] = -1;
++      }
++    }
++    result.output = Trim(captured);
+     if (waited) {
+       if (WIFEXITED(status)) {
+         result.exit_status = WEXITSTATUS(status);
+@@ -441,14 +493,19 @@
+     // !waited leaves exit_status at its -1 default: spawn-succeeded-but-
+     // unreaped is a failure, and callers already treat nonzero as failure.
+   }
++  if (pipe_fds[0] >= 0) close(pipe_fds[0]);
+   if (devnull_fd >= 0) close(devnull_fd);
+   if (actions_initialized) {
+     posix_spawn_file_actions_destroy(&actions);
+   }
++  if (attributes_initialized) {
++    posix_spawnattr_destroy(&attributes);
++  }
+   if (capture_overflow) {
+     result.exit_status = 75;
+     result.output.clear();
+   }
++  if (timed_out) result.exit_status = 124;
+   return result;
+ }
+ 
+--- a/tools/test_linux_runargv_round9.py
++++ b/tools/test_linux_runargv_round9.py
+@@ -0,0 +1,404 @@
++#!/usr/bin/env python3
++"""Compile and run the production RunArgv against harmless Linux child fixtures.
++
++Requires Python 3 and a C++17 compiler. No Flutter, network, VPN, privilege
++elevation, or lifecycle operations are used. All generated files are temporary.
++The subreaper is test-only, letting us check and reap orphaned grandchildren.
++"""
++
++from pathlib import Path
++import os
++import shlex
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++
++
++ROOT = Path(__file__).resolve().parents[1]
++
++PREFIX = r'''
++#include <algorithm>
++#include <array>
++#include <cerrno>
++#include <chrono>
++#include <cctype>
++#include <cstdint>
++#include <cstdlib>
++#include <dirent.h>
++#include <fcntl.h>
++#include <fstream>
++#include <iostream>
++#include <poll.h>
++#include <signal.h>
++#include <spawn.h>
++#include <stdexcept>
++#include <string>
++#include <sys/prctl.h>
++#include <sys/time.h>
++#include <sys/wait.h>
++#include <thread>
++#include <unistd.h>
++#include <vector>
++extern char** environ;
++'''
++
++HARNESS = r'''
++using Clock = std::chrono::steady_clock;
++using namespace std::chrono_literals;
++
++void Require(bool condition, const char* message) {
++  if (!condition) throw std::runtime_error(message);
++}
++
++void WriteAll(int fd, const std::string& value) {
++  size_t offset = 0;
++  while (offset < value.size()) {
++    const ssize_t count = write(fd, value.data() + offset, value.size() - offset);
++    if (count < 0 && errno == EINTR) continue;
++    Require(count > 0, "fixture write failed");
++    offset += static_cast<size_t>(count);
++  }
++}
++
++void Record(const std::string& path, const char* role) {
++  const int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0600);
++  Require(fd >= 0, "fixture journal open failed");
++  WriteAll(fd, std::to_string(getpid()) + " " + std::to_string(getpgrp()) +
++                   " " + role + "\n");
++  close(fd);
++}
++
++void FinishOnTerm(int) { _exit(0); }
++volatile sig_atomic_t interrupts = 0;
++volatile sig_atomic_t terms = 0;
++void Interrupt(int) { interrupts = 1; }
++void ObserveTerm(int) { terms = 1; }
++
++int Fixture(const std::string& kind, const std::string& journal) {
++  Record(journal, "child");
++  Require(getpid() == getpgrp(), "spawn did not establish a dedicated group");
++  Require((fcntl(STDOUT_FILENO, F_GETFL) & O_NONBLOCK) == 0,
++          "helper stdout unexpectedly nonblocking");
++  if (kind == "quiet") return 0;
++  if (kind == "exit") return 37;
++  if (kind == "signal") { raise(SIGUSR1); return 99; }
++  if (kind == "capture") {
++    WriteAll(STDOUT_FILENO, " \tstdout\n");
++    WriteAll(STDERR_FILENO, "stderr \t\n");
++    return 0;
++  }
++  if (kind == "cap" || kind == "overflow") {
++    const std::string chunk(4096, 'x');
++    for (int i = 0; i < 256; ++i) WriteAll(STDOUT_FILENO, chunk);
++    if (kind == "overflow") WriteAll(STDERR_FILENO, "x");
++    return 0;
++  }
++  if (kind == "delayed") {
++    for (int i = 0; i < 8; ++i) {
++      WriteAll(STDOUT_FILENO, "x");
++      std::this_thread::sleep_for(20ms);
++    }
++    return 0;
++  }
++  if (kind == "resistant" || kind == "endless") signal(SIGTERM, SIG_IGN);
++  if (kind == "closed") { close(STDOUT_FILENO); close(STDERR_FILENO); }
++  if (kind.rfind("tree-", 0) == 0) {
++    signal(SIGTERM, kind == "tree-resistant" ? SIG_IGN : FinishOnTerm);
++    int ready[2];
++    Require(pipe2(ready, O_CLOEXEC) == 0, "fixture readiness pipe failed");
++    const pid_t grandchild = fork();
++    Require(grandchild >= 0, "fixture fork failed");
++    if (grandchild == 0) {
++      close(ready[0]);
++      signal(SIGTERM, SIG_IGN);
++      if (kind == "tree-closed") {
++        close(STDOUT_FILENO);
++        close(STDERR_FILENO);
++      }
++      Record(journal, "grandchild");
++      WriteAll(ready[1], "x");
++      close(ready[1]);
++      if (kind == "tree-noisy") {
++        for (;;) WriteAll(STDOUT_FILENO, std::string(4096, 'x'));
++      }
++      for (;;) pause();
++    }
++    close(ready[1]);
++    char byte;
++    Require(read(ready[0], &byte, 1) == 1, "fixture grandchild did not start");
++    close(ready[0]);
++    if (kind == "tree-held" || kind == "tree-noisy") return 0;
++  }
++  if (kind == "endless") {
++    for (;;) WriteAll(STDOUT_FILENO, std::string(4096, 'x'));
++  }
++  for (;;) pause();
++}
++
++int OpenFdCount() {
++  DIR* directory = opendir("/proc/self/fd");
++  Require(directory != nullptr, "cannot count descriptors");
++  int count = 0;
++  while (readdir(directory)) ++count;
++  closedir(directory);
++  return count;
++}
++
++void VerifyReaped(const std::string& journal, bool tree) {
++  std::ifstream input(journal);
++  pid_t pid, group;
++  std::string role;
++  int children = 0, grandchildren = 0;
++  while (input >> pid >> group >> role) {
++    Require(group != getpgrp(), "fixture shares caller process group");
++    int status = 0;
++    if (role == "child") {
++      ++children;
++      Require(pid == group, "fixture group leader mismatch");
++      Require(waitpid(pid, &status, WNOHANG) == -1 && errno == ECHILD,
++              "RunArgv did not reap its direct child");
++    } else {
++      ++grandchildren;
++      const auto deadline = Clock::now() + 1s;
++      pid_t waited;
++      do {
++        waited = waitpid(pid, &status, WNOHANG);
++        if (waited != 0) break;
++        std::this_thread::sleep_for(5ms);
++      } while (Clock::now() < deadline);
++      Require(waited == pid, "grandchild survived group cleanup");
++      Require(WIFSIGNALED(status) && WTERMSIG(status) == SIGKILL,
++              "TERM-resistant grandchild was not killed by escalation");
++    }
++    Require(kill(pid, 0) == -1 && errno == ESRCH, "fixture process still exists");
++  }
++  Require(children == 1, "missing direct-child fixture evidence");
++  Require(grandchildren == (tree ? 1 : 0), "missing grandchild fixture evidence");
++}
++
++void Timer(bool enabled) {
++  itimerval timer{};
++  if (enabled) {
++    timer.it_value.tv_usec = 1000;
++    timer.it_interval.tv_usec = 1000;
++  }
++  Require(setitimer(ITIMER_REAL, &timer, nullptr) == 0, "timer setup failed");
++}
++
++int main(int argc, char** argv) {
++  try {
++    Require(argc >= 4, "fixture arguments missing");
++    if (std::string(argv[1]) == "fixture") return Fixture(argv[2], argv[3]);
++    Require(prctl(PR_SET_CHILD_SUBREAPER, 1) == 0, "subreaper setup failed");
++    const std::string kind = argv[1], journal = argv[3];
++    const std::string output_mode = argv[2];
++    const auto mode = output_mode == "capture" ? ProcOutput::kCapture :
++        output_mode == "suppress" ? ProcOutput::kSuppress : ProcOutput::kInherit;
++    const int before_fds = OpenFdCount();
++    if (kind == "invalid") {
++      for (int i = 0; i < 30; ++i) {
++        Require(RunArgv({}, mode).exit_status == -1, "empty argv succeeded");
++        Require(RunArgv({""}, mode).exit_status == -1, "empty path succeeded");
++        Require(RunArgv({argv[0]}, mode, 0ms).exit_status == -1,
++                "zero timeout accepted");
++        Require(RunArgv({argv[0]}, mode, -1ms).exit_status == -1,
++                "negative timeout accepted");
++        Require(RunArgv({"/nonexistent-winsvpn-round9-fixture"}, mode).exit_status == -1,
++                "failed spawn succeeded");
++      }
++    } else {
++      const bool timed = kind == "hang" || kind == "closed" ||
++          kind == "resistant" || kind == "endless" || kind == "default" ||
++          kind.rfind("tree-", 0) == 0;
++      struct sigaction action{};
++      action.sa_handler = Interrupt;
++      sigemptyset(&action.sa_mask);
++      Require(sigaction(SIGALRM, &action, nullptr) == 0, "interrupt setup failed");
++      action.sa_handler = ObserveTerm;
++      Require(sigaction(SIGTERM, &action, nullptr) == 0, "TERM setup failed");
++      if (kind == "failed-wait") signal(SIGCHLD, SIG_IGN);
++      const bool interrupted = kind == "delayed" || kind == "resistant";
++      if (interrupted) Timer(true);
++      std::thread term_sender;
++      if (kind == "resistant") term_sender = std::thread([] {
++        std::this_thread::sleep_for(100ms);
++        kill(getpid(), SIGTERM);
++      });
++      const std::vector<std::string> args = {
++          argv[0], "fixture", kind == "default" ? "resistant" :
++              kind == "failed-wait" ? "quiet" : kind, journal};
++      const auto started = Clock::now();
++      const auto result = kind == "default" ? RunArgv(args, mode) :
++          RunArgv(args, mode, timed ? 300ms : 3s);
++      const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
++          Clock::now() - started).count();
++      Timer(false);
++      if (term_sender.joinable()) term_sender.join();
++      if (interrupted) Require(interrupts != 0, "EINTR stimulus did not run");
++      if (kind == "resistant") Require(terms != 0, "caller TERM was blocked");
++      else Require(terms == 0, "group cleanup signaled the caller");
++      const int expected = timed ? 124 : kind == "overflow" ? 75 :
++          kind == "exit" ? 37 : kind == "signal" ? 128 + SIGUSR1 :
++          kind == "failed-wait" ? -1 : 0;
++      Require(result.exit_status == expected, "wrong exit status");
++      if (timed) {
++        const long minimum = kind == "default" ? 17000 : 2300;
++        Require(elapsed >= minimum && elapsed < minimum + 1500,
++                "timeout or two-second grace deadline violated");
++      } else Require(elapsed < 2000, "normal completion was delayed");
++      std::string expected_output;
++      if (mode == ProcOutput::kCapture) {
++        if (kind == "capture") expected_output = "stdout\nstderr";
++        if (kind == "cap") expected_output = std::string(1024 * 1024, 'x');
++        if (kind == "delayed") expected_output = "xxxxxxxx";
++      }
++      Require(result.output == expected_output, "captured output changed or exceeded cap");
++      VerifyReaped(journal, kind.rfind("tree-", 0) == 0);
++      std::cout << kind << " " << output_mode << ": exit=" << result.exit_status
++                << " elapsed_ms=" << elapsed << " bytes=" << result.output.size() << "\n";
++    }
++    Require(OpenFdCount() == before_fds, "RunArgv leaked descriptors");
++    int status = 0;
++    Require(waitpid(-1, &status, WNOHANG) == -1 && errno == ECHILD,
++            "unexpected owned child remains");
++    return 0;
++  } catch (const std::exception& error) {
++    std::cerr << error.what() << "\n";
++    return 1;
++  }
++}
++'''
++
++
++@unittest.skipUnless(sys.platform.startswith("linux"), "Linux runtime required")
++class RunArgvRound9Tests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        compiler = shutil.which("c++")
++        if compiler is None:
++            raise RuntimeError("a C++17 compiler is required")
++        cls.temporary = tempfile.TemporaryDirectory(prefix="winsvpn-runargv-round9-")
++        cls.addClassCleanup(cls.temporary.cleanup)
++        cls.directory = Path(cls.temporary.name)
++        source = (ROOT / "linux/runner/linux_tunnel_backend.cc").read_text()
++        trim_start = source.index("std::string Trim(")
++        trim_end = source.index("\n}\n", trim_start) + 3
++        start = source.index("enum class ProcOutput {")
++        end = source.index("// Runs a COMPILE-TIME-CONSTANT shell script body.", start)
++        cls.production = source[trim_start:trim_end] + source[start:end]
++        cls.compiler = compiler
++        code = PREFIX + cls.production + HARNESS
++        path = cls.directory / "runargv.cc"
++        path.write_text(code, encoding="utf-8", newline="\n")
++        cls.binary = cls.directory / "runargv"
++        subprocess.run([compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
++                        "-pthread", *shlex.split(os.environ.get("CXXFLAGS", "")),
++                        str(path), "-o", str(cls.binary)], check=True, timeout=60)
++
++    def exercise(self, kind, mode="capture", binary=None):
++        with tempfile.TemporaryDirectory(dir=self.directory) as directory:
++            journal = Path(directory) / "pids"
++            try:
++                subprocess.run([str(binary or self.binary), kind, mode, str(journal)],
++                               check=True, timeout=22 if kind == "default" else 8)
++            finally:
++                # Only test-owned groups are eligible for emergency cleanup.
++                # Normally every recorded PID has already been reaped.
++                if journal.exists():
++                    for line in journal.read_text().splitlines():
++                        pid, group, _ = line.split()
++                        try:
++                            if os.getpgid(int(pid)) == int(group) != os.getpgrp():
++                                os.killpg(int(group), 9)
++                        except ProcessLookupError:
++                            pass
++
++    def test_normal_output_modes_and_exit_statuses(self):
++        for kind in ("quiet", "exit", "signal", "capture", "failed-wait"):
++            for mode in ("capture", "suppress", "inherit"):
++                with self.subTest(kind=kind, mode=mode):
++                    self.exercise(kind, mode)
++
++    def test_capture_limit_and_eintr_preserve_output(self):
++        for kind in ("cap", "overflow", "delayed"):
++            with self.subTest(kind=kind):
++                self.exercise(kind)
++
++    def test_invalid_arguments_and_spawn_failure_do_not_leak(self):
++        for mode in ("capture", "suppress", "inherit"):
++            with self.subTest(mode=mode):
++                self.exercise("invalid", mode)
++
++    def test_quiet_hang_in_every_output_mode_and_closed_streams(self):
++        for mode in ("capture", "suppress", "inherit"):
++            with self.subTest(mode=mode):
++                self.exercise("hang", mode)
++        self.exercise("closed")
++
++    def test_endless_writer_cannot_starve_deadline_after_overflow(self):
++        self.exercise("endless")
++
++    def test_term_resistant_child_with_eintr_and_caller_sigterm(self):
++        self.exercise("resistant")
++
++    def test_grandchildren_outlive_parent_or_close_pipe_or_write_forever(self):
++        for kind in ("tree-held", "tree-resistant", "tree-closed", "tree-noisy"):
++            with self.subTest(kind=kind):
++                self.exercise(kind)
++
++    def test_default_timeout_is_fifteen_seconds_plus_two_second_grace(self):
++        self.exercise("default")
++
++    def test_refused_signals_return_timeout_without_blocking_reap(self):
++        # Inject only kill(2) permission errors around the unchanged production
++        # extraction. The child, capture pipe, deadline and waits remain real.
++        denied_kill = r'''
++int RefuseKill(pid_t, int) { errno = EPERM; return -1; }
++#define kill RefuseKill
++'''
++        main = r'''
++int main(int argc, char** argv) {
++  Require(argc == 4, "fixture arguments missing");
++  if (std::string(argv[1]) == "fixture") {
++    Record(argv[3], "child");
++    for (;;) pause();
++  }
++  const int before_fds = OpenFdCount();
++  const auto started = Clock::now();
++  const auto result = RunArgv({argv[0], "fixture", "hang", argv[3]},
++                              ProcOutput::kCapture, 50ms);
++  const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
++      Clock::now() - started).count();
++  std::ifstream journal(argv[3]);
++  pid_t pid = -1, group = -1;
++  std::string role;
++  journal >> pid >> group >> role;
++  Require(pid > 1 && pid == group && group != getpgrp(), "fixture PID missing");
++  int status = 0;
++  const bool alive = waitpid(pid, &status, WNOHANG) == 0;
++  // Real signal and reap are test cleanup, outside the injected production.
++  Require(kill(-group, SIGKILL) == 0, "fixture cleanup signal failed");
++  Require(waitpid(pid, &status, 0) == pid, "fixture cleanup reap failed");
++  journal.close();
++  Require(alive, "signal denial was not exercised");
++  Require(result.exit_status == 124, "signal denial did not report timeout");
++  Require(elapsed >= 2050 && elapsed < 3550, "signal denial blocked final reap");
++  Require(OpenFdCount() == before_fds, "signal denial leaked descriptors");
++  std::cout << "refused signals: exit=124 elapsed_ms=" << elapsed << "\n";
++}
++'''
++        code = (PREFIX + denied_kill + self.production + "\n#undef kill\n" +
++                HARNESS[:HARNESS.index("int main(")] + main)
++        path = self.directory / "refused.cc"
++        binary = self.directory / "refused"
++        path.write_text(code, encoding="utf-8", newline="\n")
++        subprocess.run([self.compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
++                        "-pthread", *shlex.split(os.environ.get("CXXFLAGS", "")),
++                        str(path), "-o", str(binary)], check=True, timeout=60)
++        self.exercise("denied", binary=binary)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+--- a/ios/PacketTunnel/PacketTunnelProvider.swift
++++ b/ios/PacketTunnel/PacketTunnelProvider.swift
+@@ -47,6 +47,24 @@
+   private var activeConfig: WinsTunnelConfig?
+   private var activeEngineStatusFields: [String: Any] = [:]
+   private let lifecycleGate = WinsTunnelOperationGate()
++  private let winnMemoryWatchdogQueue = DispatchQueue(
++    label: "org.winsvpn.app.PacketTunnel.winn-memory-watchdog",
++    qos: .utility
++  )
++  // Owned by lifecycleGate, including timer identity checks and cancellation.
++  private var winnMemoryWatchdog: WinnMemoryWatchdog?
++
++  private final class WinnMemoryWatchdog {
++    let timer: DispatchSourceTimer
++
++    init(timer: DispatchSourceTimer) {
++      self.timer = timer
++    }
++
++    deinit {
++      timer.cancel()
++    }
++  }
+ 
+   /// True when a session of either kind is carrying.
+   private var anySessionRunning: Bool {
+@@ -62,6 +80,7 @@
+     var previousProvingEngine: WinsPacketTunnelEngine?
+     var previousProvingWinn3: WinsWinn3Datapath?
+     let lifecycleToken = lifecycleGate.begin {
++      stopWinnMemoryWatchdog()
+       previousEngine = packetEngine
+       previousWinn3 = winn3Datapath
+       previousProvingEngine = provingPacketEngine
+@@ -134,7 +153,7 @@
+         verifiedStatusFields.merge(memoryGate.statusFields) { _, new in new }
+         if let refusalReason = memoryGate.refusalReason {
+           os_log(
+-            "Refusing winn/3 start: %{public}@ (available=%{public}d required=%{public}d carrier=%{public}@). The NetworkExtension memory limit is ~50 MB on iOS 15+, which is now this project's floor: the deployment target was raised 13.0 -> 15.0 on 2026-08-11 for ITMS-90068, so the ~15 MB iOS 13/14 appex cohort no longer exists.",
++            "Refusing winn/3 start: %{public}@ (available=%{public}d required=%{public}d carrier=%{public}@). The project requires measured physical footprint to stay strictly below 15 MiB.",
+             log: logger,
+             type: .error,
+             refusalReason,
+@@ -295,6 +314,7 @@
+           guard self.lifecycleGate.performIfCurrent(lifecycleToken, action: {
+             self.packetEngine = engine
+             self.activeEngineStatusFields = statusFields
++            self.startWinnMemoryWatchdog(lifecycleToken: lifecycleToken)
+             self.writeProviderStatus(
+               stage: "engine_started",
+               config: parsedConfig,
+@@ -353,6 +373,19 @@
+     }
+   }
+ 
++  override func cancelTunnelWithError(_ error: Error?) {
++    // Cancel pending starts too, so no later handoff can re-arm the watchdog.
++    lifecycleGate.invalidate {
++      cancelTunnelUnderLifecycleGate(error)
++    }
++  }
++
++  /// The caller holds lifecycleGate through the actual cancellation request.
++  private func cancelTunnelUnderLifecycleGate(_ error: Error?) {
++    stopWinnMemoryWatchdog()
++    super.cancelTunnelWithError(error)
++  }
++
+   override func stopTunnel(
+     with reason: NEProviderStopReason,
+     completionHandler: @escaping () -> Void
+@@ -365,6 +398,7 @@
+     var configAtStop: WinsTunnelConfig?
+     var statusGenerationAtStop = ""
+     lifecycleGate.invalidate {
++      stopWinnMemoryWatchdog()
+       engineAtStop = packetEngine
+       winn3AtStop = winn3Datapath
+       provingEngineAtStop = provingPacketEngine
+@@ -1047,7 +1081,7 @@
+   /// appex.
+   private static let containedDevSessionSelfCancelSeconds = 15.0 * 60.0
+ 
+-  /// DEV-ONLY. The one `cancelTunnelWithError` in this provider.
++  /// DEV-ONLY. The contained-session deadline cancellation.
+   ///
+   /// # The gap it closes
+   ///
+@@ -1205,57 +1239,76 @@
+ 
+   // MARK: - Runtime appex memory gate (winn/3 only)
+ 
+-  /// Headroom the winn/3 DIRECT-AWG datapath must have before it is allowed to
+-  /// start, in bytes.
+-  ///
+-  /// # Why a runtime gate and not a deployment-target assumption
+-  ///
+-  /// The familiar "NetworkExtension providers get ~50 MB" figure is an **iOS 15+**
+-  /// fact. On iOS 13 and 14 a packet-tunnel provider's jetsam limit was roughly
+-  /// **15 MB**. This project's `IPHONEOS_DEPLOYMENT_TARGET` is 13.0 and the
+-  /// shipped appex's `MinimumOSVersion` is 13.0, so that older cohort is inside
+-  /// the supported set — and in Myanmar older hardware is the fleet, not the
+-  /// tail. A measured two-runtime winn/3 state of 14.2 MiB does not fit in
+-  /// ~15 MB alongside the NE baseline, the Swift host and the seam ring.
+-  ///
+-  /// Raising the deployment target would "fix" this by silently dropping those
+-  /// devices. That is a market decision belonging to the owner, not something
+-  /// an engineering change should do as a side effect. So instead this asks the
+-  /// SYSTEM what this process's real limit is, at the moment it matters:
+-  /// `os_proc_available_memory()` reports the bytes remaining before this
+-  /// process hits its own jetsam limit — the true number for this OS version,
+-  /// this device and this appex's actual loaded state, rather than any
+-  /// hardcoded guess.
+-  ///
+-  /// # Where the number comes from, and what it does NOT cover
+-  ///
+-  /// A preceding lane measured `TASK_VM_INFO.phys_footprint` on the real staged
+-  /// artifacts: 14.2 MiB for both Go runtimes plus a live winn/3 datapath under
+-  /// traffic, a marginal cost of ~8.1 MiB over the shipping AWG-only state, and
+-  /// bounded under 27 MB of traffic.
+-  ///
+-  /// That measurement is scoped to `direct-awg` — the `WinnTunnelCreate` path —
+-  /// and to a stand-in base. Two things it does not cover, both deliberate:
+-  ///
+-  ///  * The CARRIER path is a different call (`WinnTunnelCreateWithCarrier`)
+-  ///    which pulls in quic-go and circl ML-DSA, and the MASQUE transport passes
+-  ///    a default `quic.Config` with no receive-window caps, with no
+-  ///    `GOMEMLIMIT` or `SetGCPercent` anywhere in the module. Its footprint is
+-  ///    simply unmeasured, so this constant must never be applied to it — see
+-  ///    `WinsWinnAppexMemoryGate`, which refuses a carrier session by name
+-  ///    rather than letting the direct-awg number vouch for it.
+-  ///  * The real appex links a THIRD Go runtime (`WinsXrayVlessWsTransport`
+-  ///    alongside `WinsAmneziaWGPacketEngine`), initialised at load whether or
+-  ///    not stealth runs, so the true base is larger than the harness's
+-  ///    stand-in. This gate sidesteps that entirely by never doing headroom
+-  ///    arithmetic from a base figure: `os_proc_available_memory()` is measured
+-  ///    with all three runtimes already resident, so the unmeasured base is
+-  ///    already subtracted from the number this compares against.
+-  ///
+-  /// 8.1 MiB marginal, rounded up to 12 MiB for the variance the single
+-  /// measurement cannot describe. Erring high costs a refused dev session; the
+-  /// alternative costs a jetsam kill mid-session on someone's only phone.
++  /// Conservative marginal reserve for the measured direct-AWG and standalone
++  /// Winn datapaths. System headroom must accommodate this reserve before
++  /// network settings are installed. Physical footprint is measured separately.
++  /// The 15 MiB ceiling is project policy, independent of the OS jetsam limit.
+   private static let winnDirectAwgDatapathRequiredBytes = 12 * 1024 * 1024
++  private static let winnStrictPhysicalFootprintCeilingBytes = 15 * 1024 * 1024
++  private static let winnMemoryWatchdogIntervalSeconds = 1.0
++
++  /// Call only while lifecycleGate owns the current lifecycle operation.
++  private func stopWinnMemoryWatchdog() {
++    let watchdog = winnMemoryWatchdog
++    winnMemoryWatchdog = nil
++    watchdog?.timer.setEventHandler {}
++    watchdog?.timer.cancel()
++  }
++
++  /// Called inside each successful lifecycle handoff, before start completion.
++  private func startWinnMemoryWatchdog(lifecycleToken: UInt64) {
++    stopWinnMemoryWatchdog()
++    guard activeConfig?.winnEnabled == true else { return }
++    let timer = DispatchSource.makeTimerSource(queue: winnMemoryWatchdogQueue)
++    let watchdog = WinnMemoryWatchdog(timer: timer)
++    timer.schedule(
++      deadline: .now() + Self.winnMemoryWatchdogIntervalSeconds,
++      repeating: Self.winnMemoryWatchdogIntervalSeconds
++    )
++    timer.setEventHandler { [weak self, weak watchdog] in
++      guard let self, let watchdog else { return }
++      // Cancellation does not interrupt an in-flight dispatch handler. Keep
++      // the sample and cancel in the same critical section as begin/stop so
++      // an old handler cannot cancel a replacement session or its timer.
++      self.lifecycleGate.performIfCurrent(lifecycleToken) {
++        guard self.winnMemoryWatchdog === watchdog else { return }
++        let footprint = Self.physicalFootprintBytes()
++        if let footprint, footprint >= 0,
++           footprint < Self.winnStrictPhysicalFootprintCeilingBytes {
++          return
++        }
++        var fields: [String: Any] = [
++          "winn_memory_watchdog_canceled": true,
++          "winn_memory_watchdog_sample_failed": footprint == nil || (footprint ?? 0) < 0,
++          "winn_memory_watchdog_ceiling_exceeded":
++            (footprint ?? -1) >= Self.winnStrictPhysicalFootprintCeilingBytes,
++          "winn_memory_gate_physical_footprint_ceiling_bytes":
++            Self.winnStrictPhysicalFootprintCeilingBytes
++        ]
++        if let footprint {
++          fields["winn_memory_sample_phys_footprint_bytes"] = footprint
++        }
++        let error = Self.providerError(
++          code: 1038,
++          message: "The Winn session cannot remain below its strict physical memory ceiling.",
++          statusFields: fields
++        )
++        self.writeProviderStatus(
++          stage: "stopping",
++          config: self.activeConfig,
++          engineReady: false,
++          networkSettingsReady: true,
++          error: error,
++          extra: fields,
++          statusGeneration: self.activeStatusGeneration
++        )
++        // Already under lifecycleGate. Calling the override would re-enter it.
++        self.cancelTunnelUnderLifecycleGate(error)
++      }
++    }
++    winnMemoryWatchdog = watchdog
++    timer.resume()
++  }
+ 
+   /// Whether the winn/3 datapath may start, given the memory this process
+   /// actually has left.
+@@ -1272,9 +1325,9 @@
+     /// `[winn] carrier`, verbatim and lowercased. Empty for a pre-carrier config.
+     let carrier: String
+     let requiredBytes: Int
+-    /// `TASK_VM_INFO.phys_footprint` at the moment of the check. Recorded, never
+-    /// gated on: the headroom is the number that decides, the footprint is the
+-    /// number that makes the headroom interpretable afterwards.
++    let physicalFootprintCeilingBytes: Int
++    /// `TASK_VM_INFO.phys_footprint` must stay strictly below the project
++    /// ceiling, regardless of the OS-reported headroom.
+     let physicalFootprintBytes: Int?
+ 
+     /// A named, specific refusal, or nil when the session may proceed.
+@@ -1299,9 +1352,8 @@
+       // "cheapest correct change".
+       //
+       // The standalone v3 rollout uses this measured profile in Release.
+-      // Nothing else loosens: `availableBytes < requiredBytes` still runs for
+-      // every start, and the iOS deployment floor is 15.0, whose extension
+-      // memory budget is checked at runtime rather than assumed from the SDK.
++      // Both the available-memory reserve and strict physical footprint
++      // budget are checked for every start, independently of the SDK floor.
+       if !carrier.isEmpty, carrier != WinsTunnelConfig.supportedWinnCarrier {
+         if carrier != WinsTunnelConfig.supportedWinnCarrierWinn3 {
+           return "winn_carrier_memory_profile_unmeasured"
+@@ -1309,6 +1361,12 @@
+       }
+       guard let availableBytes else {
+         return "appex_available_memory_unknown"
++      }
++      guard let physicalFootprintBytes, physicalFootprintBytes >= 0 else {
++        return "appex_physical_footprint_unknown"
++      }
++      guard physicalFootprintBytes < physicalFootprintCeilingBytes else {
++        return "appex_physical_footprint_ceiling_reached"
+       }
+       if availableBytes < requiredBytes {
+         return "appex_available_memory_below_winn_datapath_requirement"
+@@ -1323,6 +1381,7 @@
+         "winn_memory_gate_checked": true,
+         "winn_memory_gate_allowed": allowed,
+         "winn_memory_gate_required_bytes": requiredBytes,
++        "winn_memory_gate_physical_footprint_ceiling_bytes": physicalFootprintCeilingBytes,
+         "winn_memory_gate_available_measured": availableBytes != nil,
+         "winn_memory_gate_carrier": carrier.isEmpty ? "direct-awg-implicit" : carrier
+       ]
+@@ -1403,6 +1462,7 @@
+         .trimmingCharacters(in: .whitespacesAndNewlines)
+         .lowercased(),
+       requiredBytes: Self.winnDirectAwgDatapathRequiredBytes,
++      physicalFootprintCeilingBytes: Self.winnStrictPhysicalFootprintCeilingBytes,
+       physicalFootprintBytes: Self.physicalFootprintBytes()
+     )
+   }
+@@ -1888,6 +1948,7 @@
+               }
+               self.packetEngine = engine
+               self.activeEngineStatusFields = promotedFields
++              self.startWinnMemoryWatchdog(lifecycleToken: lifecycleToken)
+               self.writeProviderStatus(
+                 stage: "engine_started",
+                 config: parsedConfig,
+@@ -2528,6 +2589,7 @@
+               }
+               self.winn3Datapath = datapath
+               self.activeEngineStatusFields = promotedFields
++              self.startWinnMemoryWatchdog(lifecycleToken: lifecycleToken)
+               self.writeProviderStatus(
+                 stage: "engine_started",
+                 config: config,
+--- a/tools/test_ios_winn_memory_watchdog.py
++++ b/tools/test_ios_winn_memory_watchdog.py
+@@ -0,0 +1,434 @@
++#!/usr/bin/env python3
++"""Execute production Swift memory gates and watchdogs without native engines.
++
++The watchdog, lifecycle gate, and footprint reader are extracted unchanged.
++A retained timer double delivers canceled callbacks deliberately; a second
++program uses real Dispatch timers. No NetworkExtension session is started.
++"""
++from __future__ import annotations
++
++import pathlib
++import re
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++
++ROOT = pathlib.Path(__file__).resolve().parents[1]
++PROVIDER = ROOT / "ios/PacketTunnel/PacketTunnelProvider.swift"
++
++
++def declaration(source: str, marker: str) -> str:
++    start = source.index(marker)
++    opening = source.index("{", start)
++    depth = 1
++    end = opening + 1
++    while depth:
++        depth += (source[end] == "{") - (source[end] == "}")
++        end += 1
++    return source[start:end]
++
++
++def swift_run(program: str, *, typecheck: bool = False) -> str:
++    compiler = shutil.which("swiftc")
++    if compiler is None:
++        raise unittest.SkipTest("Swift compiler unavailable")
++    with tempfile.TemporaryDirectory(prefix="winsvpn-memory-watchdog-") as directory:
++        path = pathlib.Path(directory)
++        source = path / "main.swift"
++        binary = path / "watchdog"
++        source.write_text(program, encoding="utf-8", newline="\n")
++        commands = [
++            ([compiler, "-swift-version", "5", str(source), "-o", str(binary)], 60),
++            ([str(binary)], 20),
++        ]
++        if typecheck:
++            commands = [([compiler, "-swift-version", "5", "-typecheck", str(source)], 60)]
++        for command, timeout in commands:
++            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
++            if result.returncode:
++                raise AssertionError(f"Swift check failed ({result.returncode}):\n"
++                                     f"{result.stdout}\n{result.stderr}")
++        return result.stdout
++
++
++BASE = r'''
++import Foundation
++import Dispatch
++
++struct WinsTunnelConfig {
++  static let supportedWinnCarrier = "direct-awg"
++  static let supportedWinnCarrierWinn3 = "winn3"
++  var winnEnabled = true
++}
++
++class RecordingProvider {
++  var errors: [NSError] = []
++  var onCancel: (() -> Void)?
++  func cancelTunnelWithError(_ error: Error?) {
++    errors.append(error! as NSError)
++    onCancel?()
++  }
++}
++
++final class MemorySamples {
++  let lock = NSLock()
++  var footprint: Int? = 0
++  var count = 0
++  var entered: DispatchSemaphore?
++  var release: DispatchSemaphore?
++  let sampled = DispatchSemaphore(value: 0)
++  func set(_ value: Int?) {
++    lock.lock()
++    footprint = value
++    lock.unlock()
++  }
++  func read() -> Int? {
++    lock.lock()
++    let value = footprint
++    count += 1
++    lock.unlock()
++    entered?.signal()
++    if let release {
++      precondition(release.wait(timeout: .now() + 5) == .success)
++    }
++    sampled.signal()
++    return value
++  }
++}
++'''
++
++# Keep canceled handlers and timer owners alive to model a handler already
++# delivered by Dispatch before cancel(), including replacement in one token.
++TIMER_DOUBLE = r'''
++final class DispatchSourceTimer {
++  var handler: (() -> Void)?
++  var delivered: (() -> Void)?
++  var canceled = false
++  var resumed = false
++  var interval: Double = 0
++  var deadline: DispatchTime = .now()
++  var retainedOwner: AnyObject?
++  func schedule(deadline: DispatchTime, repeating: Double) {
++    self.deadline = deadline
++    interval = repeating
++  }
++  func setEventHandler(handler: @escaping () -> Void) { self.handler = handler }
++  func resume() { resumed = true; delivered = handler }
++  func cancel() { canceled = true }
++  func fireDelivered() { delivered!() }
++}
++enum DispatchSource {
++  static var timers: [DispatchSourceTimer] = []
++  static func makeTimerSource(queue: DispatchQueue) -> DispatchSourceTimer {
++    let timer = DispatchSourceTimer()
++    timers.append(timer)
++    return timer
++  }
++}
++'''
++
++
++def harness(*, fake_timer: bool) -> str:
++    source = PROVIDER.read_text()
++    gate_source = (ROOT / "apple/WinsTunnelCore/WinsPacketTunnelEngine.swift").read_text()
++    gate = declaration(gate_source, "final class WinsTunnelOperationGate")
++    constants = "\n".join(re.findall(
++        r"^  private static let (?:winnDirectAwgDatapathRequiredBytes|"
++        r"winnStrictPhysicalFootprintCeilingBytes|winnMemoryWatchdogIntervalSeconds) = .+$",
++        source, re.MULTILINE,
++    ))
++    members = "\n".join(declaration(source, marker) for marker in (
++        "private final class WinnMemoryWatchdog",
++        "struct WinsWinnAppexMemoryGate",
++        "private func stopWinnMemoryWatchdog()",
++        "private func startWinnMemoryWatchdog(lifecycleToken:",
++        "override func cancelTunnelWithError(",
++        "private func cancelTunnelUnderLifecycleGate(",
++    ))
++    begin = declaration(source, "let lifecycleToken = lifecycleGate.begin {")
++    # Use the actual begin/stop capture blocks, which own watchdog teardown.
++    begin = begin[begin.index("{") + 1:-1]
++    stop = declaration(source, "override func stopTunnel(")
++    stop = declaration(stop, "lifecycleGate.invalidate {")
++    stop = stop[stop.index("{") + 1:-1]
++    return BASE + (TIMER_DOUBLE if fake_timer else "") + gate + '''
++final class Harness: RecordingProvider {
++  static let samples = MemorySamples()
++  let lifecycleGate = WinsTunnelOperationGate()
++  private let winnMemoryWatchdogQueue = DispatchQueue(label: "watchdog-test")
++  private var winnMemoryWatchdog: WinnMemoryWatchdog?
++  var activeConfig: WinsTunnelConfig?
++  var activeStatusGeneration = ""
++  var activeEngineStatusFields: [String: Any] = [:]
++  var packetEngine: Int?
++  var winn3Datapath: Int?
++  var provingPacketEngine: Int?
++  var provingWinn3Datapath: Int?
++  var statuses: [[String: Any]] = []
++''' + constants + "\n" + members + r'''
++  static func physicalFootprintBytes() -> Int? { samples.read() }
++  static func providerError(code: Int, message: String,
++                            statusFields: [String: Any]) -> NSError {
++    NSError(domain: "org.winsvpn.PacketTunnel", code: code, userInfo: statusFields)
++  }
++  func writeProviderStatus(stage: String, config: WinsTunnelConfig?,
++                           engineReady: Bool, networkSettingsReady: Bool,
++                           error: Error?, extra: [String: Any],
++                           statusGeneration: String) { statuses.append(extra) }
++  func statusGeneration(options: Int?) -> String { "new" }
++  func start(winn: Bool = true) -> UInt64 {
++    let options: Int? = nil
++    var previousEngine: Int?
++    var previousWinn3: Int?
++    var previousProvingEngine: Int?
++    var previousProvingWinn3: Int?
++    let token = lifecycleGate.begin {
++''' + begin + r'''
++      activeConfig = WinsTunnelConfig(winnEnabled: winn)
++    }
++    precondition(lifecycleGate.performIfCurrent(token) {
++      startWinnMemoryWatchdog(lifecycleToken: token)
++    })
++    return token
++  }
++  func stop() {
++    var engineAtStop: Int?
++    var winn3AtStop: Int?
++    var provingEngineAtStop: Int?
++    var provingWinn3AtStop: Int?
++    var configAtStop: WinsTunnelConfig?
++    var statusGenerationAtStop = ""
++    lifecycleGate.invalidate {
++''' + stop + r'''
++    }
++  }
++  func rearm(_ token: UInt64) {
++    precondition(lifecycleGate.performIfCurrent(token) {
++      startWinnMemoryWatchdog(lifecycleToken: token)
++    })
++  }
++  func retainedWatchdog() -> AnyObject? { winnMemoryWatchdog }
++  func watchdogExists() -> Bool { winnMemoryWatchdog != nil }
++}
++'''
++
++
++class IOSWinnMemoryWatchdogTests(unittest.TestCase):
++    def test_strict_startup_boundaries_and_unmeasured_inputs(self) -> None:
++        program = harness(fake_timer=True) + r'''
++let ceiling = 15 * 1024 * 1024
++let reserve = 12 * 1024 * 1024
++func check(_ footprint: Int?, _ expected: String?, available: Int? = Int.max,
++           required: Int = 12 * 1024 * 1024, carrier: String = "winn3") {
++  let gate = Harness.WinsWinnAppexMemoryGate(
++    availableBytes: available, carrier: carrier, requiredBytes: required,
++    physicalFootprintCeilingBytes: ceiling, physicalFootprintBytes: footprint)
++  precondition(gate.refusalReason == expected, "wrong refusal: \(String(describing: gate.refusalReason))")
++  precondition(gate.allowed == (expected == nil))
++  precondition(gate.statusFields["winn_memory_gate_physical_footprint_ceiling_bytes"] as? Int == ceiling)
++}
++check(0, nil)
++check(ceiling - reserve - 1, nil, available: reserve)
++check(ceiling - reserve, nil)
++check(ceiling - reserve + 1, nil)
++check(14 * 1024 * 1024, nil, available: reserve)
++check(ceiling - 1, nil)
++check(ceiling - 1, nil, required: 0)
++check(ceiling, "appex_physical_footprint_ceiling_reached", required: 0)
++check(ceiling + 1, "appex_physical_footprint_ceiling_reached")
++check(Int.max, "appex_physical_footprint_ceiling_reached")
++check(nil, "appex_physical_footprint_unknown")
++check(-1, "appex_physical_footprint_unknown")
++check(0, "appex_available_memory_unknown", available: nil)
++check(0, "appex_available_memory_below_winn_datapath_requirement", available: reserve - 1)
++check(0, "appex_available_memory_below_winn_datapath_requirement", available: reserve, required: Int.max)
++check(0, "winn_carrier_memory_profile_unmeasured", carrier: "unmeasured")
++check(0, nil, carrier: "direct-awg")
++check(0, nil, carrier: "")
++print("strict startup boundaries passed")
++'''
++        self.assertIn("strict startup boundaries passed", swift_run(program))
++
++    def test_watchdog_cancellation_and_replacement_races(self) -> None:
++        program = harness(fake_timer=True) + r'''
++let owner = Harness()
++let samples = Harness.samples
++let ceiling = 15 * 1024 * 1024
++samples.set(ceiling - 1)
++let token = owner.start()
++let first = DispatchSource.timers.last!
++first.retainedOwner = owner.retainedWatchdog()
++precondition(first.resumed && first.interval == 1.0)
++first.fireDelivered()
++precondition(owner.errors.isEmpty && !first.canceled)
++samples.set(ceiling)
++first.fireDelivered()
++precondition(owner.errors.count == 1 && owner.errors[0].code == 1038)
++precondition(owner.errors[0].userInfo["winn_memory_sample_phys_footprint_bytes"] as? Int == ceiling)
++precondition(first.canceled && !owner.watchdogExists())
++first.fireDelivered()
++precondition(owner.errors.count == 1)
++
++// A stopped source's already delivered callback cannot affect the next token.
++_ = owner.start()
++let second = DispatchSource.timers.last!
++second.retainedOwner = owner.retainedWatchdog()
++first.fireDelivered()
++precondition(owner.errors.count == 1 && !second.canceled)
++owner.stop()
++second.fireDelivered()
++precondition(owner.errors.count == 1 && second.canceled && !owner.watchdogExists())
++
++// Timer identity matters even if a source is replaced in the same generation.
++let sameToken = owner.start()
++let replaced = DispatchSource.timers.last!
++replaced.retainedOwner = owner.retainedWatchdog()
++owner.rearm(sameToken)
++let replacement = DispatchSource.timers.last!
++replaced.fireDelivered()
++precondition(owner.errors.count == 1 && !replacement.canceled)
++samples.set(nil)
++replacement.fireDelivered()
++precondition(owner.errors.count == 2 && owner.errors.last!.code == 1038)
++precondition(owner.errors.last!.userInfo["winn_memory_watchdog_sample_failed"] as? Bool == true)
++precondition(replacement.canceled)
++
++// Generation rejection also holds while the retained source identity matches.
++_ = owner.start()
++let invalidated = DispatchSource.timers.last!
++owner.lifecycleGate.invalidate()
++let sampleCount = samples.count
++invalidated.fireDelivered()
++precondition(owner.errors.count == 2 && samples.count == sampleCount)
++owner.stop()
++
++for footprint in [ceiling + 1, -1] {
++  _ = owner.start()
++  let timer = DispatchSource.timers.last!
++  samples.set(footprint)
++  timer.fireDelivered()
++  precondition(timer.canceled && owner.errors.last!.code == 1038)
++}
++
++// A non-Winn start tears down its predecessor without creating a watchdog.
++_ = owner.start()
++let beforeNonWinn = DispatchSource.timers.last!
++let timerCount = DispatchSource.timers.count
++_ = owner.start(winn: false)
++precondition(beforeNonWinn.canceled && DispatchSource.timers.count == timerCount)
++precondition(!owner.watchdogExists())
++
++// Other cancellation paths stop the timer and invalidate pending callbacks.
++let canceledToken = owner.start()
++let canceled = DispatchSource.timers.last!
++canceled.retainedOwner = owner.retainedWatchdog()
++owner.cancelTunnelWithError(NSError(domain: "other", code: 1019))
++precondition(canceled.canceled && !owner.lifecycleGate.isCurrent(canceledToken))
++let errorsBefore = owner.errors.count
++canceled.fireDelivered()
++precondition(owner.errors.count == errorsBefore)
++
++// Force begin() to race an in-flight sample. The old session is canceled
++// while the lifecycle lock still belongs to it; only then may begin proceed.
++samples.set(ceiling)
++let raceToken = owner.start()
++let racing = DispatchSource.timers.last!
++racing.retainedOwner = owner.retainedWatchdog()
++samples.entered = DispatchSemaphore(value: 0)
++samples.release = DispatchSemaphore(value: 0)
++let fireDone = DispatchSemaphore(value: 0)
++let beginEntered = DispatchSemaphore(value: 0)
++let beginDone = DispatchSemaphore(value: 0)
++owner.activeStatusGeneration = "old"
++owner.onCancel = { precondition(owner.activeStatusGeneration == "old") }
++DispatchQueue.global().async { racing.fireDelivered(); fireDone.signal() }
++precondition(samples.entered!.wait(timeout: .now() + 5) == .success)
++DispatchQueue.global().async {
++  beginEntered.signal()
++  _ = owner.start()
++  beginDone.signal()
++}
++precondition(beginEntered.wait(timeout: .now() + 5) == .success)
++precondition(beginDone.wait(timeout: .now() + 0.1) == .timedOut)
++samples.release!.signal()
++precondition(fireDone.wait(timeout: .now() + 5) == .success)
++precondition(beginDone.wait(timeout: .now() + 5) == .success)
++samples.entered = nil
++samples.release = nil
++owner.onCancel = nil
++precondition(owner.errors.count == errorsBefore + 1)
++precondition(!owner.lifecycleGate.isCurrent(raceToken))
++let newest = DispatchSource.timers.last!
++racing.fireDelivered()
++precondition(owner.errors.count == errorsBefore + 1 && !newest.canceled)
++owner.stop()
++print("watchdog cancellation, teardown, and lifecycle races passed")
++'''
++        self.assertIn("lifecycle races passed", swift_run(program))
++
++    def test_real_dispatch_timer_samples_periodically_then_stops(self) -> None:
++        program = harness(fake_timer=False) + r'''
++let owner = Harness()
++let samples = Harness.samples
++let canceled = DispatchSemaphore(value: 0)
++owner.onCancel = { canceled.signal() }
++samples.set(15 * 1024 * 1024 - 1)
++_ = owner.start()
++precondition(samples.sampled.wait(timeout: .now() + 4) == .success)
++precondition(samples.sampled.wait(timeout: .now() + 4) == .success)
++samples.set(15 * 1024 * 1024)
++precondition(canceled.wait(timeout: .now() + 4) == .success)
++owner.lifecycleGate.begin {
++  precondition(owner.errors.count == 1 && owner.errors[0].code == 1038)
++  precondition(!owner.watchdogExists())
++}
++// Drain the sample that triggered cancellation, then wait beyond one interval.
++precondition(samples.sampled.wait(timeout: .now() + 1) == .success)
++precondition(samples.sampled.wait(timeout: .now() + 1.2) == .timedOut)
++print("real one-second Dispatch timer sampled repeatedly and stopped")
++'''
++        self.assertIn("sampled repeatedly and stopped", swift_run(program))
++
++    def test_all_session_handoffs_and_startup_gate_are_wired(self) -> None:
++        source = PROVIDER.read_text()
++        handoffs = re.findall(
++            r"self\.(?:packetEngine = engine|winn3Datapath = datapath)\s+"
++            r"self.activeEngineStatusFields = \w+\s+"
++            r"self.startWinnMemoryWatchdog\(lifecycleToken: lifecycleToken\)", source)
++        self.assertEqual(len(handoffs), 3)
++        start = declaration(source, "override func startTunnel(")
++        self.assertLess(start.index("winnAppexMemoryGate(for:"),
++                        start.index("setTunnelNetworkSettings("))
++        gate = declaration(source, "private func winnAppexMemoryGate(for")
++        self.assertIn("guard config.winnEnabled", gate)
++        self.assertIn("requiredBytes: Self.winnDirectAwgDatapathRequiredBytes", gate)
++        self.assertIn("physicalFootprintCeilingBytes: Self.winnStrictPhysicalFootprintCeilingBytes", gate)
++        self.assertIn("physicalFootprintBytes: Self.physicalFootprintBytes()", gate)
++
++    @unittest.skipUnless(sys.platform == "darwin", "NetworkExtension requires Darwin")
++    def test_watchdog_typechecks_against_networkextension(self) -> None:
++        program = harness(fake_timer=False).replace(
++            "import Foundation", "import Foundation\nimport NetworkExtension", 1
++        ).replace("final class Harness: RecordingProvider",
++                  "final class Harness: NEPacketTunnelProvider")
++        swift_run(program, typecheck=True)
++
++    @unittest.skipUnless(sys.platform == "darwin", "TASK_VM_INFO requires Darwin")
++    def test_production_physical_footprint_reader(self) -> None:
++        reader = declaration(PROVIDER.read_text(), "private static func physicalFootprintBytes()")
++        program = "import Foundation\nfinal class Sampler {\n" + reader + r'''
++  static func verify() {
++    let footprint = physicalFootprintBytes()
++    precondition(footprint != nil && footprint! > 0)
++    print("production TASK_VM_INFO footprint reader passed")
++  }
++}
++Sampler.verify()
++'''
++        self.assertIn("footprint reader passed", swift_run(program))
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tools/test_apple_standalone_v3_wiring.py
++++ b/tools/test_apple_standalone_v3_wiring.py
+@@ -37,7 +37,7 @@
+ 
+     def test_node_binding_is_mandatory_and_duplicates_fail_before_parse(self) -> None:
+         core = (ROOT / "apple/WinsTunnelCore/WinsTunnelConfig.swift").read_text()
+-        self.assertIn("try validateUniqueWinnNodeBindings(rawConfig)", core)
++        self.assertIn("try validateUniqueWinnSecurityBindings(rawConfig)", core)
+         self.assertIn('key == "node" || key == "selected_node"', core)
+         self.assertIn("counts[key, default: 0] > 1", core)
+         for platform in ("ios", "macos"):
+@@ -47,12 +47,20 @@
+                 provider,
+                 platform,
+             )
+-            binding_start = provider.index("let selectedNode = normalized(")
+-            binding_end = provider.index("guard !descriptorNode.isEmpty", binding_start)
++            binding_start = provider.index("func winn3SelectedNodeIdentity(")
++            binding_end = provider.index('\n    let winn = config.sections["winn"]', binding_start)
+             binding = provider[binding_start:binding_end]
+-            self.assertIn('winn["selected_node"]', binding, platform)
+-            self.assertNotIn('winn["node_slug"]', binding, platform)
+-            self.assertNotIn('winn["location_slug"]', binding, platform)
++            self.assertIn(
++                "let selectedNode = winn3SelectedNodeIdentity(winn: winn, options: options)",
++                provider,
++                platform,
++            )
++            self.assertIn('"selected_node"', binding, platform)
++            # Persisted aliases may only confirm a transient selected identity.
++            self.assertIn("switch winn3ReadNodeIdentityValue(options?[key])", binding, platform)
++            self.assertIn("guard sawTransientIdentity, let bound else", binding, platform)
++            self.assertIn("switch winn3ReadNodeIdentityValue(winn[key])", binding, platform)
++            self.assertIn("if value != bound", binding, platform)
+             self.assertIn("descriptorNode == selectedNode", provider, platform)
+ 
+     def test_both_providers_refuse_persisted_ini_and_live_secrets(self) -> None:
+--- a/tools/test_apple_proving_ownership.py
++++ b/tools/test_apple_proving_ownership.py
+@@ -83,6 +83,9 @@
+   var activeConfig: WinsTunnelConfig?
+   var activeStatusGeneration = ""
+   var activeEngineStatusFields: [String: Any] = [:]
++  // The watchdog suite exercises timer behavior; this fixture observes stop ownership.
++  var memoryWatchdogStops = 0
++  func stopWinnMemoryWatchdog() {{ memoryWatchdogStops += 1 }}
+   static func canceledStartError() -> NSError {{ NSError(domain: "canceled", code: 1) }}
+   func register({resource}: MockEngine, lifecycleToken: UInt64, completionHandler: (Error?) -> Void) {{
+ {register}
+@@ -119,6 +122,7 @@
+ precondition(owner.{pending} === live)
+ precondition(owner.{active} == nil)
+ owner.stop {{ precondition(live.stopped && live.stopCount == 1) }}
++precondition(owner.memoryWatchdogStops == {1 if platform == "ios" else 0})
+ precondition(owner.{pending} == nil)
+ precondition(!owner.promote({resource}: live, lifecycleToken: token))
+ precondition(owner.{active} == nil)

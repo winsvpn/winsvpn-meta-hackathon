@@ -1,0 +1,63 @@
+Win's VPN macOS App Review Notes
+
+OWNER APPROVED 2026-08-31; COUNSEL REVIEW PENDING. This marking does not state
+or imply that counsel reviewed these notes.
+
+Bundle ID:
+org.winsvpn.app
+
+Purpose:
+Win's VPN is a VPN client that uses Apple's Network Extension Packet Tunnel
+framework to provide secure VPN connectivity. The PacketTunnel extension bundle
+ID is org.winsvpn.app.PacketTunnel. Winn v3 is the primary tunnel protocol; if
+Winn v3 cannot connect, the app uses the Winn v1 compatibility path with AWG
+(AmneziaWG) first, then Xray.
+
+Platform note:
+Calculator camouflage and the embedded non-VPN watchOS companion apply to
+the iOS app. The macOS app, like the iOS app, uses the device label Win's VPN
+and does not embed watchOS. This Mac app is not an Apple TV app.
+
+How to test:
+1. Install and launch the macOS build.
+2. Accept the app's legal/privacy prompts if they appear.
+3. Use Try Free Server when no paid account number is available.
+4. Click the normal connect action.
+5. Approve any macOS VPN/network permission prompt if it appears.
+6. Wait for the app to show connected/readiness status.
+7. Use the disconnect action and confirm the status returns to disconnected.
+
+Payment/purchase note:
+The Apple build's Premium Access Info button opens the developer's home page,
+https://www.winsvpn.org, in the user's browser. The app embeds no payment SDK,
+offers no in-app purchase, and does not open a checkout or payment page. Users
+can use an existing Win's VPN account number or Try Free Server.
+The mandatory pre-use clickwrap does describe the external PayPal recurring
+plan terms and displays the billing URL as plain text. It contains no tappable
+purchase control, and the app opens no purchase page.
+
+Privacy note:
+The app is designed not to collect browsing history, DNS query contents,
+traffic contents, destination activity logs, contacts, photos, health data, or
+precise location. Only after the user asks to show the approximate-location
+map, the disconnected app first asks compiled first-party Win's VPN origins and
+gateways for an IP-derived scene, then uses Cloudflare's coarse network metadata
+endpoint as the final fallback. The lookup is not automatic at launch. It then
+centers a standard Apple MapKit view, and Apple supplies the map tiles. The app
+reads only the coarse map-center fields and does not retain returned IP, city,
+or postal-code fields.
+The four linked App Functionality privacy types are Coarse Location, User ID,
+Device ID, and Product Interaction. They are not used for tracking. Product
+Interaction covers selected VPN location, stealth mode, and Double VPN choices
+sent with persistent account and device identifiers. Purchase History is not
+collected. Limited account/device/setup metadata is used for device limits,
+abuse prevention, legal acceptance, service access, and support.
+
+Current candidate status:
+There is no current 1.0.17+34 Apple candidate or runtime receipt. Historical
+signed-launch or live-tunnel results are not current App Review evidence and
+do not authorize upload.
+
+Support:
+https://www.winsvpn.org/support/
+support@winsvpn.org

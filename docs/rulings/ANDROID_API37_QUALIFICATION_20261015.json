@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "ruling_id": "ANDROID_API37_QUALIFICATION_20261015",
+  "decided_on": "2026-10-15",
+  "status": "partially_closed_pending_s21_evidence",
+  "authority": {
+    "record": ".agent/debates/_decisions/owner_ruling_ai_does_everything_20261014.md",
+    "owner_messages_2026_10_15": [
+      "Reject LAN gateways",
+      "Official emulators",
+      "Phone now, TV later",
+      "I think compatibility with all phones produced in the last 6 years is fine."
+    ]
+  },
+  "applies_to": "docs/rulings/ANDROID_API37_ADOPTION_20261006.json (not edited; tests read it)",
+  "release": "1.0.16+33",
+  "phase": "android_phone_only",
+  "requirements": [
+    {
+      "id": "build_tools_37",
+      "status": "closed_by_evidence",
+      "evidence": "tools/build_android_release_macos.sh holds build-tools/37.0.0/lib/apksigner.jar against digest 2defad215d7ff52968a409cde528cdaef7918b115e276b8e3378ca7a178e4180 (measured 2026-10-15 at ~/.local/android-sdk); the REVIEWED_BUILD_TOOLS_VERSION=\"36.0.0\" line is an unused variable"
+    },
+    {
+      "id": "local_network_product_decision",
+      "status": "closed_by_owner_decision",
+      "decision": "Private and LAN VPN gateways are not supported; lib/vpn_config_validation.dart refuses private and loopback endpoints; no Android 17 local-network permission work."
+    },
+    {
+      "id": "phone_runtime_evidence",
+      "status": "pending_s21",
+      "plan": "Google's official API 37 arm64 phone emulator images (standard and 16 KB pages)",
+      "evidence_ref": null
+    },
+    {
+      "id": "ct_ech_validation",
+      "status": "pending_s21",
+      "plan": "API 37 arm64 phone emulator",
+      "evidence_ref": null
+    },
+    {
+      "id": "full_native_abi_tests",
+      "status": "pending_s21_arm64_waived_other_abis",
+      "decision": "arm64-v8a runtime tests on the API 37 arm64 emulator; x86_64 and armeabi-v7a runtime tests waived because Apple silicon emulates arm64 guests only (owner keeps all engines for phones of the last six years); static checks of those engines still run",
+      "evidence_ref": null
+    },
+    {
+      "id": "android_tv_runtime_evidence",
+      "status": "deferred_out_of_phase",
+      "decision": "TV is not in this release (owner: Phone now, TV later); no API 37 TV image exists"
+    },
+    {
+      "id": "adaptive_tv_validation",
+      "status": "deferred_out_of_phase",
+      "decision": "TV is not in this release"
+    },
+    {
+      "id": "wear_os_runtime_evidence",
+      "status": "deferred_out_of_phase",
+      "decision": "Wear OS is not in this release (R-2)"
+    }
+  ]
+}

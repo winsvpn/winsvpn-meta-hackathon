@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round9.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:40:53.155691+00:00",
+    "exit_code": 0,
+    "seconds": 2.67,
+    "log": "control-plane-round9.log"
+  }
+]

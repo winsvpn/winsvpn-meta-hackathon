@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Single-colour layer for themed launcher icons. The system supplies the
+     tint, so this must be one flat shape with the glyph knocked out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,27 L75,35.5 L75,55 C75,68 66,77.5 54,83 C42,77.5 33,68 33,55 L33,35.5 Z M44,45 L48.5,64 L54,52 L59.5,64 L64,45 L59.5,45 L57.5,55 L54,47 L50.5,55 L48.5,45 Z" />
+</vector>

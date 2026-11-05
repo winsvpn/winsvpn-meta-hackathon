@@ -1,0 +1,35 @@
+{
+    "name": "Win's VPN",
+    "short_name": "Win's VPN",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#06111f",
+    "theme_color": "#0a4cff",
+    "description": "AI-powered, minimal-data VPN protection made in America. We collect no browsing activity or traffic logs; see the privacy policy for the full data practice.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

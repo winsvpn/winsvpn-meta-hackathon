@@ -1,0 +1,510 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+STATE_DIR="${WINS_NODE_SSH_RECOVERY_STATE_DIR:-/var/lib/winsvpn/ssh-recovery}"
+STATE_FILE="${STATE_DIR}/armed.env"
+CONFIRMED_FILE="${STATE_DIR}/confirmed.env"
+LOCK_FILE="${STATE_DIR}/guard.lock"
+RULES_FILE="${WINS_NODE_SSH_RECOVERY_RULES_FILE:-/etc/iptables/rules.v4}"
+NODE_ENV_FILE="${WINS_NODE_SSH_RECOVERY_NODE_ENV_FILE:-/root/node.env}"
+INSTALLER_PATH="${WINS_NODE_SSH_RECOVERY_INSTALLER_PATH:-/root/wins_data_plane_setup_ONETOUCH.sh}"
+BOOT_ID_FILE="${WINS_NODE_SSH_RECOVERY_BOOT_ID_FILE:-/proc/sys/kernel/random/boot_id}"
+TIMEOUT_SECONDS="${NODE_SSH_RECOVERY_TIMEOUT_SECONDS:-900}"
+IPTABLES_BIN="${IPTABLES_BIN:-iptables}"
+IPTABLES_SAVE_BIN="${IPTABLES_SAVE_BIN:-iptables-save}"
+WINS_FIREWALL_LOCK="${WINS_FIREWALL_LOCK:-/run/lock/wins-firewall.lock}"
+# wins_fw_lock / wins_fw_unlock: the firewall lock shared by every writer of
+# the live ruleset and rules.v4 (edge rebuild, SSH recovery and local-serving
+# guards, the Suricata queue watchdog, lane convergence scripts). A caller
+# that already holds it sets WINS_FIREWALL_LOCK_HELD=1 for its children.
+wins_fw_lock() {
+  [[ "${WINS_FIREWALL_LOCK_HELD:-0}" == "1" ]] && return 0
+  command -v flock >/dev/null 2>&1 || { printf 'wins-firewall: flock is missing; refusing an unserialized firewall change\n' >&2; return 1; }
+  mkdir -p "$(dirname "${WINS_FIREWALL_LOCK}")" 2>/dev/null || true
+  exec 7>>"${WINS_FIREWALL_LOCK}" || return 1
+  flock -w "${WINS_FIREWALL_LOCK_WAIT:-60}" 7 || { printf 'wins-firewall: lock %s is busy\n' "${WINS_FIREWALL_LOCK}" >&2; exec 7>&-; return 1; }
+}
+wins_fw_unlock() {
+  [[ "${WINS_FIREWALL_LOCK_HELD:-0}" == "1" ]] && return 0
+  flock -u 7 2>/dev/null || true
+  exec 7>&-
+}
+# wins_fw_persistable_save SAVE_BIN prints the live ruleset for rules.v4. While
+# the Suricata queue watchdog holds production queue rules removed (fail-open),
+# their lines are spliced back at the recorded positions, so a persisted file
+# never carries that temporary state; a WINVPN-INPUT that no longer matches
+# the watchdog's post-removal image is refused. Callers hold the firewall lock.
+wins_fw_persistable_save() {
+  local save_bin="$1" state="${WINS_NFQ_STATE_DIR:-/run/wins-suricata-nfq-watchdog}" saved live
+  saved="$("${save_bin}")" || return 1
+  if [[ -e "${state}/UNRECOVERABLE" ]]; then
+    printf 'wins-firewall: the queue watchdog raised UNRECOVERABLE (%s); refusing to persist\n' "$(cat "${state}/UNRECOVERABLE" 2>/dev/null)" >&2
+    return 1
+  fi
+  if [[ -e "${state}/pending/COMMIT" ]]; then
+    printf 'wins-firewall: the queue watchdog record is mid-promotion; refusing to persist until it settles\n' >&2
+    return 1
+  fi
+  if [[ ! -s "${state}/removed" ]]; then
+    printf '%s\n' "${saved}"
+    return 0
+  fi
+  live="$(awk '/^\*/ { t = $1 } t == "*filter" && index($0, "-A WINVPN-INPUT ") == 1' <<<"${saved}")"
+  if [[ "${live}" != "$(grep '^-A ' "${state}/chain.without" 2>/dev/null)" ]]; then
+    printf 'wins-firewall: WINVPN-INPUT differs from the queue watchdog post-removal image; refusing to persist\n' >&2
+    return 1
+  fi
+  awk -v rec="${state}/removed" '
+    BEGIN { while ((getline line < rec) > 0) { split(line, f, "\t"); spec[f[1] + 0] = f[2]; n++ } }
+    /^\*/ { table = $1 }
+    table == "*filter" && index($0, "-A WINVPN-INPUT ") == 1 {
+      while ((k + 1) in spec) { k++; print "-A WINVPN-INPUT " spec[k]; put++ }
+      k++; print; next
+    }
+    table == "*filter" && $0 == "COMMIT" { while ((k + 1) in spec) { k++; print "-A WINVPN-INPUT " spec[k]; put++ } }
+    { print }
+    END { if (put != n) exit 3 }
+  ' <<<"${saved}"
+}
+SYSTEMCTL_BIN="${SYSTEMCTL_BIN:-systemctl}"
+CHAIN=WINVPN-SSH-RECOVERY
+
+die() { printf 'wins-node-ssh-recovery-guard: %s\n' "$*" >&2; exit 1; }
+note() { printf 'wins-node-ssh-recovery-guard: %s\n' "$*"; }
+
+require_root() {
+  [[ "$(id -u)" == 0 ]] || die "root is required"
+}
+
+sync_path() {
+  sync -f "$1" 2>/dev/null || sync
+}
+
+secure_state_dir() {
+  [[ "${STATE_DIR}" == /* ]] || die "state directory must be absolute"
+  if [[ ! -e "${STATE_DIR}" ]]; then
+    install -d -o root -g root -m 700 "${STATE_DIR}"
+  fi
+  [[ -d "${STATE_DIR}" && ! -L "${STATE_DIR}" ]] || die "unsafe state directory"
+  [[ "$(stat -c '%u:%g:%a' "${STATE_DIR}")" == "0:0:700" ]] || die "state directory must be root:root 0700"
+}
+
+secure_regular_file() {
+  local path="$1" expected_mode="$2"
+  [[ -f "${path}" && ! -L "${path}" ]] || return 1
+  [[ "$(stat -c '%u:%g:%a:%h' "${path}")" == "0:0:${expected_mode}:1" ]]
+}
+
+lock_guard() {
+  local tmp
+  secure_state_dir
+  if [[ -e "${LOCK_FILE}" || -L "${LOCK_FILE}" ]]; then
+    secure_regular_file "${LOCK_FILE}" 600 || die "unsafe lock file"
+  else
+    tmp="$(mktemp "${STATE_DIR}/.guard.lock.XXXXXX")"
+    chmod 600 "${tmp}"
+    chown root:root "${tmp}"
+    sync_path "${tmp}"
+    mv -f -- "${tmp}" "${LOCK_FILE}"
+    sync_path "${STATE_DIR}"
+  fi
+  exec 9<>"${LOCK_FILE}"
+  if [[ -n "${WINS_NODE_SSH_RECOVERY_LOCK_WAIT:-}" ]]; then
+    [[ "${WINS_NODE_SSH_RECOVERY_LOCK_WAIT}" =~ ^[0-9]+$ ]] || die "invalid guard lock wait"
+    flock -w "${WINS_NODE_SSH_RECOVERY_LOCK_WAIT}" -x 9 || die "guard lock unavailable"
+  else
+    flock -x 9
+  fi
+  secure_regular_file "${LOCK_FILE}" 600 || die "lock file changed while acquiring it"
+}
+
+atomic_write_file() {
+  local target="$1" tmp
+  tmp="$(mktemp "${STATE_DIR}/.$(basename "${target}").XXXXXX")"
+  cat > "${tmp}"
+  chmod 600 "${tmp}"
+  chown root:root "${tmp}"
+  sync_path "${tmp}"
+  mv -f -- "${tmp}" "${target}"
+  sync_path "${STATE_DIR}"
+  secure_regular_file "${target}" 600 || die "atomic state write produced unsafe metadata"
+}
+
+state_value() {
+  local path="$1" key="$2"
+  awk -F= -v wanted="${key}" '$1 == wanted { value=substr($0, index($0, "=") + 1); count++ } END { if (count == 1) print value; else exit 1 }' "${path}"
+}
+
+current_boot_id() {
+  local value
+  value="$(cat "${BOOT_ID_FILE}")"
+  [[ "${value}" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] \
+    || die "invalid boot ID"
+  printf '%s' "${value}"
+}
+
+current_boottime_seconds() {
+  python3 - <<'PY'
+import time
+print(int(time.clock_gettime(time.CLOCK_BOOTTIME)))
+PY
+}
+
+current_installer_digest() {
+  [[ -f "${INSTALLER_PATH}" && ! -L "${INSTALLER_PATH}" ]] || die "installer path is not a regular non-symlink file"
+  sha256sum "${INSTALLER_PATH}" | awk '{print $1}'
+}
+
+current_tunnel_id() {
+  local value
+  [[ -f "${NODE_ENV_FILE}" && ! -L "${NODE_ENV_FILE}" ]] || die "node environment is unsafe or absent"
+  value="$(state_value "${NODE_ENV_FILE}" NODE_MANAGEMENT_TUNNEL_ID)" || die "management tunnel ID is missing or duplicated"
+  [[ "${value}" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] \
+    || die "management tunnel ID is malformed"
+  printf '%s' "${value}"
+}
+
+validate_source_ipv4() {
+  python3 - "$1" <<'PY'
+import ipaddress
+import sys
+
+try:
+    address = ipaddress.ip_address(sys.argv[1])
+except ValueError:
+    raise SystemExit(1)
+if (
+    address.version != 4
+    or not address.is_global
+    or address.is_multicast
+    or address.is_reserved
+    or address.is_loopback
+    or address.is_link_local
+    or address.is_unspecified
+):
+    raise SystemExit(1)
+print(address)
+PY
+}
+
+write_armed_state() {
+  atomic_write_file "${STATE_FILE}" <<EOF
+VERSION=1
+SOURCE_IPV4=${SOURCE_IPV4}
+ARM_BOOT_ID=${ARM_BOOT_ID}
+ARM_BOOTTIME_SECONDS=${ARM_BOOTTIME_SECONDS}
+TIMEOUT_SECONDS=${ARM_TIMEOUT_SECONDS}
+INSTALLER_SHA256=${INSTALLER_SHA256}
+TUNNEL_ID=${TUNNEL_ID}
+FIRED=${FIRED}
+EOF
+}
+
+load_armed_state() {
+  secure_regular_file "${STATE_FILE}" 600 || die "armed state is unsafe"
+  [[ "$(wc -l < "${STATE_FILE}" | tr -d ' ')" == 8 ]] || die "armed state has an unexpected field count"
+  VERSION="$(state_value "${STATE_FILE}" VERSION)" || die "invalid armed state version"
+  SOURCE_IPV4="$(state_value "${STATE_FILE}" SOURCE_IPV4)" || die "invalid armed source"
+  ARM_BOOT_ID="$(state_value "${STATE_FILE}" ARM_BOOT_ID)" || die "invalid armed boot ID"
+  ARM_BOOTTIME_SECONDS="$(state_value "${STATE_FILE}" ARM_BOOTTIME_SECONDS)" || die "invalid armed boottime"
+  ARM_TIMEOUT_SECONDS="$(state_value "${STATE_FILE}" TIMEOUT_SECONDS)" || die "invalid armed timeout"
+  INSTALLER_SHA256="$(state_value "${STATE_FILE}" INSTALLER_SHA256)" || die "invalid armed installer digest"
+  TUNNEL_ID="$(state_value "${STATE_FILE}" TUNNEL_ID)" || die "invalid armed tunnel ID"
+  FIRED="$(state_value "${STATE_FILE}" FIRED)" || die "invalid fired state"
+  [[ "${VERSION}" == 1 ]] || die "unsupported armed state version"
+  [[ "$(validate_source_ipv4 "${SOURCE_IPV4}")" == "${SOURCE_IPV4}" ]] || die "armed source is not globally routable IPv4"
+  [[ "${ARM_BOOT_ID}" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] \
+    || die "armed boot ID is malformed"
+  [[ "${ARM_BOOTTIME_SECONDS}" =~ ^[0-9]+$ ]] || die "armed boottime is malformed"
+  [[ "${ARM_TIMEOUT_SECONDS}" =~ ^[0-9]+$ ]] || die "armed timeout is malformed"
+  ((ARM_TIMEOUT_SECONDS >= 120 && ARM_TIMEOUT_SECONDS <= 3600)) || die "armed timeout is out of bounds"
+  [[ "${INSTALLER_SHA256}" =~ ^[0-9a-f]{64}$ ]] || die "armed installer digest is malformed"
+  [[ "${TUNNEL_ID}" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] \
+    || die "armed tunnel ID is malformed"
+  [[ "${FIRED}" == 0 || "${FIRED}" == 1 ]] || die "fired state is malformed"
+}
+
+ensure_chain_exists() {
+  "${IPTABLES_BIN}" -w 10 -n -L "${CHAIN}" >/dev/null 2>&1 || "${IPTABLES_BIN}" -w 10 -N "${CHAIN}"
+}
+
+verify_recovery_rule() {
+  local expected rules
+  expected="-A ${CHAIN} -s ${SOURCE_IPV4}/32 -p tcp -m tcp --dport 22 -j ACCEPT"
+  rules="$("${IPTABLES_BIN}" -w 10 -S "${CHAIN}" | grep '^-A ' || true)"
+  [[ "${rules}" == "${expected}" ]] || die "recovery chain is not the exact pinned /32 TCP 22 rule"
+}
+
+verify_recovery_base_jump() {
+  local first count
+  first="$("${IPTABLES_BIN}" -w 10 -S INPUT | awk '/^-A INPUT / {print; exit}')"
+  count="$("${IPTABLES_BIN}" -w 10 -S INPUT | grep -Fxc -- "-A INPUT -j ${CHAIN}" || true)"
+  [[ "${first}" == "-A INPUT -j ${CHAIN}" && "${count}" == 1 ]] \
+    || die "recovery jump is not the unique first base INPUT rule"
+}
+
+verify_recovery_base_jump_absent() {
+  local rules
+  rules="$("${IPTABLES_BIN}" -w 10 -S INPUT)"
+  ! grep -F -- "-A INPUT -j ${CHAIN}" <<<"${rules}" >/dev/null \
+    || die "recovery jump remains in base INPUT"
+}
+
+ensure_recovery_base_jump() {
+  # Existence is insufficient: Fail2Ban and provider hooks may insert their own
+  # rule at position 1 after arming. Delete every copy, then restore one exact
+  # jump at position 1 so no earlier DROP can bypass the recovery exception.
+  while "${IPTABLES_BIN}" -w 10 -C INPUT -j "${CHAIN}" 2>/dev/null; do
+    "${IPTABLES_BIN}" -w 10 -D INPUT -j "${CHAIN}"
+  done
+  "${IPTABLES_BIN}" -w 10 -I INPUT 1 -j "${CHAIN}"
+  verify_recovery_base_jump
+}
+
+remove_recovery_base_jump() {
+  while "${IPTABLES_BIN}" -w 10 -C INPUT -j "${CHAIN}" 2>/dev/null; do
+    "${IPTABLES_BIN}" -w 10 -D INPUT -j "${CHAIN}"
+  done
+  verify_recovery_base_jump_absent
+}
+
+verify_recovery_chain_closed() {
+  local rules
+  rules="$("${IPTABLES_BIN}" -w 10 -S "${CHAIN}" 2>/dev/null | grep '^-A ' || true)"
+  [[ -z "${rules}" ]] || die "recovery chain remains open"
+}
+
+verify_persisted_recovery_closed() {
+  local persisted_rules
+  [[ "${RULES_FILE}" == /* ]] || die "unsafe persisted firewall path"
+  if [[ ! -e "${RULES_FILE}" && ! -L "${RULES_FILE}" ]]; then
+    return 0
+  fi
+  secure_regular_file "${RULES_FILE}" 600 || die "unsafe persisted firewall file"
+  persisted_rules="$(
+    grep -E -- "^-A (INPUT -j ${CHAIN}([[:space:]]|$)|${CHAIN}([[:space:]]|$))" \
+      "${RULES_FILE}" || true
+  )"
+  [[ -z "${persisted_rules}" ]] || die "persisted recovery access remains open"
+}
+
+verify_recovery_fully_closed() {
+  verify_recovery_chain_closed
+  verify_recovery_base_jump_absent
+  verify_persisted_recovery_closed
+}
+
+# persist_firewall writes rules.v4 under the shared firewall lock, through
+# wins_fw_persistable_save, so it never persists the queue watchdog's
+# temporary rule-removed state (Round SU).
+persist_firewall() {
+  local rc
+  wins_fw_lock || { printf 'wins-node-ssh-recovery-guard: shared firewall lock unavailable; rules.v4 not written\n' >&2; return 1; }
+  if wins_late_failure_hold && ! wins_latch_rules_dominate; then
+    printf 'wins-firewall: late-failure persistence gate refused; rules.v4 unchanged\n' >&2
+    wins_fw_unlock
+    return 1
+  fi
+  persist_firewall_locked
+  rc=$?
+  wins_fw_unlock
+  return "${rc}"
+}
+
+persist_firewall_locked() {
+  local directory tmp
+  directory="$(dirname "${RULES_FILE}")"
+  [[ "${RULES_FILE}" == /* && ! -L "${directory}" ]] || { printf 'wins-node-ssh-recovery-guard: unsafe firewall persistence path\n' >&2; return 1; }
+  install -d -o root -g root -m 755 "${directory}"
+  if [[ -e "${RULES_FILE}" || -L "${RULES_FILE}" ]]; then
+    [[ -f "${RULES_FILE}" && ! -L "${RULES_FILE}" && "$(stat -c '%u:%g:%a:%h' "${RULES_FILE}")" == "0:0:600:1" ]] \
+      || { printf 'wins-node-ssh-recovery-guard: unsafe persisted firewall file\n' >&2; return 1; }
+  fi
+  tmp="$(mktemp "${directory}/.rules.v4.XXXXXX")"
+  wins_fw_persistable_save "${IPTABLES_SAVE_BIN}" > "${tmp}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: iptables-save failed or refused\n' >&2; return 1; }
+  grep -q '^COMMIT' "${tmp}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: iptables-save produced no rules; refusing to persist an empty firewall\n' >&2; return 1; }
+  chmod 600 "${tmp}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: cannot secure temp file\n' >&2; return 1; }
+  chown root:root "${tmp}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: cannot own temp file\n' >&2; return 1; }
+  sync_path "${tmp}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: cannot sync temp file\n' >&2; return 1; }
+  mv -f -- "${tmp}" "${RULES_FILE}" || { rm -f -- "${tmp}"; printf 'wins-node-ssh-recovery-guard: cannot install rules file\n' >&2; return 1; }
+  sync_path "${directory}" || return 1
+}
+
+ensure_recovery_rule() {
+  ensure_chain_exists
+  "${IPTABLES_BIN}" -w 10 -F "${CHAIN}"
+  "${IPTABLES_BIN}" -w 10 -A "${CHAIN}" -s "${SOURCE_IPV4}/32" -p tcp --dport 22 -j ACCEPT
+  verify_recovery_rule
+  ensure_recovery_base_jump
+  persist_firewall
+  verify_recovery_rule
+  verify_recovery_base_jump
+}
+
+close_recovery_rule() {
+  ensure_chain_exists
+  "${IPTABLES_BIN}" -w 10 -F "${CHAIN}"
+  remove_recovery_base_jump
+  verify_recovery_chain_closed
+  persist_firewall
+  verify_recovery_fully_closed
+}
+
+ensure_ssh_active() {
+  if "${SYSTEMCTL_BIN}" enable --now ssh.service; then
+    "${SYSTEMCTL_BIN}" is-active --quiet ssh.service || die "ssh.service did not become active"
+  elif "${SYSTEMCTL_BIN}" enable --now sshd.service; then
+    "${SYSTEMCTL_BIN}" is-active --quiet sshd.service || die "sshd.service did not become active"
+  else
+    die "neither ssh.service nor sshd.service could be enabled and started"
+  fi
+}
+
+confirmed_matches_current() {
+  local version digest tunnel confirmed_boot confirmed_epoch
+  secure_regular_file "${CONFIRMED_FILE}" 600 || return 1
+  [[ "$(wc -l < "${CONFIRMED_FILE}" | tr -d ' ')" == 5 ]] || return 1
+  version="$(state_value "${CONFIRMED_FILE}" VERSION 2>/dev/null || true)"
+  digest="$(state_value "${CONFIRMED_FILE}" INSTALLER_SHA256 2>/dev/null || true)"
+  tunnel="$(state_value "${CONFIRMED_FILE}" TUNNEL_ID 2>/dev/null || true)"
+  confirmed_boot="$(state_value "${CONFIRMED_FILE}" CONFIRMED_BOOT_ID 2>/dev/null || true)"
+  confirmed_epoch="$(state_value "${CONFIRMED_FILE}" CONFIRMED_EPOCH 2>/dev/null || true)"
+  [[ "${confirmed_boot}" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]] \
+    || return 1
+  [[ "${confirmed_epoch}" =~ ^[0-9]+$ ]] || return 1
+  [[ "${version}" == 1 && "${digest}" == "$(current_installer_digest)" && "${tunnel}" == "$(current_tunnel_id)" ]] || return 1
+  verify_recovery_fully_closed
+}
+
+arm_guard() {
+  local source client_port server_ip server_port extra
+  [[ "$#" == 0 ]] || die "arm takes no arguments"
+  [[ "${TIMEOUT_SECONDS}" =~ ^[0-9]+$ ]] || die "timeout is not an integer"
+  ((TIMEOUT_SECONDS >= 120 && TIMEOUT_SECONDS <= 3600)) || die "timeout must be between 120 and 3600 seconds"
+  if [[ -e "${STATE_FILE}" || -L "${STATE_FILE}" ]]; then
+    load_armed_state
+    die "already armed; refusing to extend or replace the original deadline"
+  fi
+  if [[ -e "${CONFIRMED_FILE}" || -L "${CONFIRMED_FILE}" ]]; then
+    if confirmed_matches_current; then
+      note "this installer and management tunnel are already externally confirmed"
+      return 0
+    fi
+    secure_regular_file "${CONFIRMED_FILE}" 600 || die "unsafe confirmed receipt"
+  fi
+  read -r source client_port server_ip server_port extra <<<"${SSH_CONNECTION:-}"
+  [[ -n "${source}" && -n "${client_port}" && -n "${server_ip}" && -n "${server_port}" && -z "${extra:-}" ]] \
+    || die "SSH_CONNECTION must contain exactly four fields"
+  [[ "${client_port}" =~ ^[0-9]+$ && "${server_port}" =~ ^[0-9]+$ ]] || die "SSH_CONNECTION ports are malformed"
+  ((client_port >= 1 && client_port <= 65535 && server_port >= 1 && server_port <= 65535)) \
+    || die "SSH_CONNECTION ports are out of range"
+  source="$(validate_source_ipv4 "${source}")" || die "deployment source is not globally routable IPv4"
+  "${SYSTEMCTL_BIN}" is-enabled --quiet wins-node-ssh-recovery-guard.timer || die "recovery timer is not enabled"
+  "${SYSTEMCTL_BIN}" is-active --quiet wins-node-ssh-recovery-guard.timer || die "recovery timer is not active"
+  SOURCE_IPV4="${source}"
+  ARM_BOOT_ID="$(current_boot_id)"
+  ARM_BOOTTIME_SECONDS="$(current_boottime_seconds)"
+  ARM_TIMEOUT_SECONDS="${TIMEOUT_SECONDS}"
+  INSTALLER_SHA256="$(current_installer_digest)"
+  TUNNEL_ID="$(current_tunnel_id)"
+  FIRED=0
+  rm -f -- "${CONFIRMED_FILE}"
+  write_armed_state
+  ensure_recovery_rule
+  note "armed for one pinned deployment source; deadline cannot be extended by re-arm"
+}
+
+check_guard() {
+  local now_boot now_boottime deadline changed=0
+  [[ "$#" == 0 ]] || die "check takes no arguments"
+  if [[ ! -e "${STATE_FILE}" && ! -L "${STATE_FILE}" ]]; then
+    verify_recovery_fully_closed
+    if [[ -e "${CONFIRMED_FILE}" || -L "${CONFIRMED_FILE}" ]]; then
+      confirmed_matches_current || die "confirmed receipt or closed-chain state is invalid"
+    fi
+    return 0
+  fi
+  load_armed_state
+  now_boot="$(current_boot_id)"
+  now_boottime="$(current_boottime_seconds)"
+  deadline=$((ARM_BOOTTIME_SECONDS + ARM_TIMEOUT_SECONDS))
+  if [[ "${now_boot}" != "${ARM_BOOT_ID}" ]] || ((now_boottime >= deadline)); then
+    if [[ "${FIRED}" != 1 ]]; then
+      FIRED=1
+      changed=1
+    fi
+    ensure_ssh_active
+  fi
+  ((changed == 0)) || write_armed_state
+  ensure_recovery_rule
+}
+
+confirm_guard() {
+  local confirmed_boot confirmed_epoch
+  [[ "$#" == 0 ]] || die "confirm takes no arguments"
+  [[ -e "${STATE_FILE}" && ! -L "${STATE_FILE}" ]] || die "no armed recovery state exists"
+  load_armed_state
+  [[ "${INSTALLER_SHA256}" == "$(current_installer_digest)" ]] \
+    || die "armed installer digest no longer matches; refusing confirmation"
+  [[ "${TUNNEL_ID}" == "$(current_tunnel_id)" ]] \
+    || die "armed management tunnel no longer matches; refusing confirmation"
+  close_recovery_rule
+  confirmed_boot="$(current_boot_id)"
+  confirmed_epoch="$(date +%s)"
+  atomic_write_file "${CONFIRMED_FILE}" <<EOF
+VERSION=1
+INSTALLER_SHA256=${INSTALLER_SHA256}
+TUNNEL_ID=${TUNNEL_ID}
+CONFIRMED_BOOT_ID=${confirmed_boot}
+CONFIRMED_EPOCH=${confirmed_epoch}
+EOF
+  verify_recovery_fully_closed
+  rm -f -- "${STATE_FILE}"
+  sync_path "${STATE_DIR}"
+  [[ ! -e "${STATE_FILE}" && ! -L "${STATE_FILE}" ]] || die "armed state removal failed"
+  verify_recovery_fully_closed
+  note "confirmed; pinned direct recovery ingress is closed"
+}
+
+status_guard() {
+  [[ "$#" == 0 ]] || die "status takes no arguments"
+  if [[ -e "${STATE_FILE}" || -L "${STATE_FILE}" ]]; then
+    load_armed_state
+    [[ "${INSTALLER_SHA256}" == "$(current_installer_digest)" ]] \
+      || die "armed installer digest does not match current bytes"
+    [[ "${TUNNEL_ID}" == "$(current_tunnel_id)" ]] \
+      || die "armed management tunnel does not match current state"
+    verify_recovery_rule
+    verify_recovery_base_jump
+    [[ "${FIRED}" == 1 ]] && printf 'fired\n' || printf 'armed\n'
+    return 0
+  fi
+  if [[ -e "${CONFIRMED_FILE}" || -L "${CONFIRMED_FILE}" ]]; then
+    confirmed_matches_current || die "confirmed receipt does not match current bytes/tunnel or chain is open"
+    printf 'confirmed\n'
+    return 0
+  fi
+  verify_recovery_fully_closed
+  printf 'unconfirmed\n'
+  return 3
+}
+
+guard_hold_firewall_lock() {
+  [[ "${WINS_FIREWALL_LOCK_HELD:-0}" == 1 ]] && return 0
+  wins_fw_lock || return 1
+  WINS_FIREWALL_LOCK_HELD=1
+}
+
+require_root
+lock_guard
+if [[ "${1:-}" != status ]] && ! guard_hold_firewall_lock; then
+  die "shared firewall lock unavailable; no latch or firewall mutation"
+fi
+case "${1:-}" in
+  arm) shift; arm_guard "$@" ;;
+  check) shift; check_guard "$@" ;;
+  confirm) shift; confirm_guard "$@" ;;
+  status) shift; status_guard "$@" ;;
+  *) die "usage: $0 {arm|check|confirm|status}" ;;
+esac

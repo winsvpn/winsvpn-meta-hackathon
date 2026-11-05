@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "last_reviewed": "2026-08-31",
+  "status_marking": "OWNER APPROVED 2026-08-31; COUNSEL REVIEW PENDING. This does not state or imply counsel review.",
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "privacy_policy_url": "https://www.winsvpn.org/privacy/",
+  "privacy_choices_url": "https://www.winsvpn.org/support/",
+  "apple_privacy_details_url": "https://developer.apple.com/app-store/app-privacy-details/",
+  "live_app_store_connect_sync": {
+    "apple_id": "6789417002",
+    "verified_at_utc": "2026-07-11T03:15:05Z",
+    "app_store_connect_updated": false,
+    "published_data_types": [
+      "Coarse Location",
+      "User ID",
+      "Device ID",
+      "Purchase History"
+    ],
+    "purpose": "App Functionality",
+    "linked_to_user": true,
+    "tracking": false,
+    "unfinished_data_type_setup": false,
+    "product_page_preview_categories": [
+      "Identifiers",
+      "Location",
+      "Purchases"
+    ],
+    "reconcile_note": "Purchase History is over-declared in the live App Store Connect answers. Source privacy manifests now omit Purchase History: the Apple app embeds no payment SDK, offers no in-app purchase and opens no checkout or payment page (its Premium Access Info button opens only the developer's home page, https://www.winsvpn.org); each account's paid-entitlement state is reflected server-side, which is not Apple's Purchase History category. Product Interaction is under-declared in the live App Store Connect answers. Source privacy manifests now declare Product Interaction as linked to the user, not used for tracking, purpose App Functionality, covering selected VPN location, stealth mode, and Double VPN choices sent with persistent account and device identifiers. The live App Store Connect answers were NOT re-synchronized for these changes (publish nothing). The next submission must remove Purchase History from the App Privacy answers and add Product Interaction. This file does not claim App Store Connect was updated."
+  },
+  "app_store_connect_summary": {
+    "data_used_to_track_you": false,
+    "tracking_domains": [],
+    "data_linked_to_user": [
+      {
+        "category": "Location",
+        "label": "Coarse Location",
+        "apple_manifest_data_type": "NSPrivacyCollectedDataTypeCoarseLocation",
+        "linked": true,
+        "tracking": false,
+        "purposes": [
+          "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+        ]
+      },
+      {
+        "category": "Identifiers",
+        "label": "Device ID",
+        "apple_manifest_data_type": "NSPrivacyCollectedDataTypeDeviceID",
+        "linked": true,
+        "tracking": false,
+        "purposes": [
+          "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+        ]
+      },
+      {
+        "category": "Identifiers",
+        "label": "User ID",
+        "apple_manifest_data_type": "NSPrivacyCollectedDataTypeUserID",
+        "linked": true,
+        "tracking": false,
+        "purposes": [
+          "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+        ]
+      },
+      {
+        "category": "Usage Data",
+        "label": "Product Interaction",
+        "apple_manifest_data_type": "NSPrivacyCollectedDataTypeProductInteraction",
+        "linked": true,
+        "tracking": false,
+        "purposes": [
+          "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+        ],
+        "covers": [
+          "selected VPN location",
+          "stealth mode",
+          "Double VPN"
+        ],
+        "source_payload_keys": [
+          "location",
+          "stealth_mode",
+          "double_vpn_enabled"
+        ]
+      }
+    ],
+    "data_not_linked_to_user": [],
+    "packet_tunnel_collected_data_types": [],
+    "framework_collected_data_types": [],
+    "coarse_location_status": "disclosed_linked_app_functionality",
+    "product_interaction_status": "source_truth_disclosed_linked_app_functionality_live_portal_under_declared",
+    "purchase_history_status": "source_truth_not_collected_live_portal_over_declared",
+    "diagnostics_uploaded_by_app": false
+  },
+  "binary_evidence": {
+    "source_host_collected_data_types": [
+      "NSPrivacyCollectedDataTypeCoarseLocation",
+      "NSPrivacyCollectedDataTypeDeviceID",
+      "NSPrivacyCollectedDataTypeUserID",
+      "NSPrivacyCollectedDataTypeProductInteraction"
+    ],
+    "archive_privacy_json": "build/apple/privacy/archive-privacy-manifests.json",
+    "archive_privacy_markdown": "build/apple/privacy/archive-privacy-manifests.md",
+    "expected_archives": [
+      {
+        "archive": "wins-vpn-ios.xcarchive",
+        "application_count": 1,
+        "privacy_manifest_count": 7,
+        "host_app_collected_data_types": [
+          "NSPrivacyCollectedDataTypeCoarseLocation",
+          "NSPrivacyCollectedDataTypeDeviceID",
+          "NSPrivacyCollectedDataTypeUserID"
+        ],
+        "packet_tunnel_collected_data_types": [],
+        "framework_collected_data_types": []
+      },
+      {
+        "archive": "wins-vpn-macos.xcarchive",
+        "application_count": 1,
+        "privacy_manifest_count": 6,
+        "host_app_collected_data_types": [
+          "NSPrivacyCollectedDataTypeCoarseLocation",
+          "NSPrivacyCollectedDataTypeDeviceID",
+          "NSPrivacyCollectedDataTypeUserID"
+        ],
+        "packet_tunnel_collected_data_types": [],
+        "framework_collected_data_types": []
+      }
+    ]
+  },
+  "source_privacy_manifests": {
+    "ios_host": "ios/Runner/PrivacyInfo.xcprivacy",
+    "ios_packet_tunnel": "ios/PacketTunnel/PrivacyInfo.xcprivacy",
+    "ios_watch": "ios/WinsWatch Watch App/PrivacyInfo.xcprivacy",
+    "macos_host": "macos/Runner/PrivacyInfo.xcprivacy",
+    "macos_packet_tunnel": "macos/PacketTunnel/PrivacyInfo.xcprivacy"
+  },
+  "apple_purchase_gate": {
+    "dart_define": "WINS_ENABLE_EXTERNAL_PAYMENT_LINKS",
+    "default_external_payment_links_enabled": false,
+    "owner_ruling": "2026-10-24: the Premium Access Info button opens the developer's home page in the user's browser in every build, the Apple build included. No payment SDK, no in-app purchase, no checkout or payment page.",
+    "premium_access_label": "Premium Access Info",
+    "premium_access_url": "https://www.winsvpn.org",
+    "widget_test_marker": "premium access opens the website home page in every build",
+    "forbidden_premium_action_markers": [
+      "_showPaymentOptions(",
+      "_launchPaymentURL(",
+      "_trackedPaymentUrl(",
+      "showModalBottomSheet(",
+      "/pay/",
+      "#get"
+    ],
+    "forbidden_payment_sdk_dependency_markers": [
+      "in_app_purchase",
+      "purchases_flutter",
+      "flutter_stripe",
+      "stripe_",
+      "braintree",
+      "paypal",
+      "square_in_app_payments",
+      "razorpay",
+      "flutter_paystack",
+      "pay_android",
+      "pay_ios"
+    ]
+  },
+  "forbidden_pubspec_dependency_markers": [
+    "firebase_analytics",
+    "firebase_crashlytics",
+    "google_mobile_ads",
+    "appsflyer",
+    "sentry_flutter",
+    "facebook_app_events",
+    "amplitude_flutter",
+    "mixpanel_flutter",
+    "segment_analytics",
+    "adjust_sdk"
+  ]
+}

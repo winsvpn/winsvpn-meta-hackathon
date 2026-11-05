@@ -1,0 +1,26 @@
+T-I RERUN — gateway-side posture (winn3-gateway.service journalctl on data-sim, SSH REDACTED_USER@<DATA_SIM_IP>)
+
+PRE-IOS BASELINE [08:26Z]: sessions=0 admitted=41 sessions_built=41 datagrams=50549 carrying=0
+
+iOS SESSION 1 (appex 2922, [~08:37:20Z]) — one-line posture samples, columns:
+sessions admitted carrying promoted carriage_proven rx tx msg_sent msg_recv states
+  1   48    1    0    True   0 0  2  2  ['established']     (admitted 47->48, session built+proven)
+
+iOS SESSION 2 (appex 2923, [08:39:39Z]) — snapshot taken [08:40:35Z]:
+  {"sessions":1,"admitted":50,"sessions_built":50,"carrying":1,"promoted":1,
+   "carriage_proven":true,"rx_packets":5,"rx_offered":5,"tx_packets":2,
+   "rx_device_writes":5,"messages_sent":16,"messages_received":7,
+   "session_states":["established"],"datagrams":50596,
+   "inner_packets_delivered":136470, "replayed_initiations":3}
+  => the iOS device keypair session CARRIED and was PROMOTED at the gateway;
+     every proof packet was validated+delivered (rx_offered == rx_packets, 0 invalid drops).
+
+AFTER SESSION END [08:44Z]: sessions=0 admitted=50 datagrams=50596 carrying=0
+  (gateway keeps counting; the contained dev session stopped by design after the proof)
+
+MAC CANARY PROBE SESSION (v3probe, [08:50-08:53Z]) — carrying with live echo counters:
+  samples: sessions=1 admitted=54 carrying=1 carriage_proven=true messages 30->42
+  inner_packets_delivered 136500->136511 (47 reflected ICMP echoes)
+
+FINAL POSTURE [08:53:38Z]: sessions=1 admitted=58 carrying=0 datagrams=50786
+  replayed_initiations=6 (lingering canary session entry; no carriage active)

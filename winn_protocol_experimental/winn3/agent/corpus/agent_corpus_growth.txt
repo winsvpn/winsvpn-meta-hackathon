@@ -1,0 +1,53 @@
+agent corpus growth -- gen_agent_corpus_real_utterances
+date: 2026-08-12T12:25Z UTC
+lane: gen_agent_corpus_real_utterances
+corpus: winn3/agent/corpus/sample_actions.jsonl
+canonical: source/wins_vpn/winn_protocol_experimental/winn3/agent/corpus/sample_actions.jsonl
+mirror: winn3/agent/corpus/sample_actions.jsonl
+transcript: winn3/redteam/transcripts/redteam_sre_20260811.jsonl
+canonical transcript: source/wins_vpn/winn_protocol_experimental/winn3/redteam/transcripts/redteam_sre_20260811.jsonl
+
+Counts:
+before=25
+appended=12
+after=37
+transcript_records=12
+seed breakdown: 20 valid (7 connect, 7 rotate_key, 6 report) + 5 invalid (unknown kind, missing host, missing algorithm, unexpected param, empty name)
+
+Mapping:
+Each redteam line fields Action/Category/Target/Principal/Id/Seq mapped onto agent Action struct:
+  kind = "report" for all 12 SRE records
+  params = [
+    {name:"action",value:<Action>},
+    {name:"category",value:<Category>},
+    {name:"target",value:<Target>},
+    {name:"principal",value:<Principal>},
+    {name:"redteam_id",value:<Id>},
+    {name:"seq",value:<Seq as string>}
+  ]
+  policy = {name:"default",version:3}
+Rationale: report allows any param names (Allowed empty), so full fidelity mapping preserves all three required fields without violating production contract. connect and rotate_key have closed Allowed sets (gateway_id,host and key_id,algorithm) and would reject extra params, so report is the only kind that can carry the full redteam shape while remaining schema-valid. The 5 invalid seed records test the negative path; the 12 SRE reports test realistic attacker shapes through a valid path to the policy engine.
+
+Em dash gate:
+tool: tools/agent_nodash.sh
+tool scans: winn3/agent and winn3/redteam/transcripts
+shell exit: 0
+output: agent_nodash: clean -- no em/en dash (U+2014/U+2013) under /Users/owner/Documents/wins/source/wins_vpn/winn_protocol_experimental/winn3/agent and /Users/owner/Documents/wins/source/wins_vpn/winn_protocol_experimental/winn3/redteam/transcripts
+go test gate: TestAgentCorpusNoEmOrEnDash PASS (exit 0)
+byte scan: no U+2014 (E2 80 94) and no U+2013 (E2 80 93) in corpus file (checked via grep -rP and Python byte scan)
+
+Backup:
+source backup: source/wins_vpn/winn_protocol_experimental/winn3/agent/corpus/sample_actions.jsonl.bak_20260811_gen_agent_corpus_real_utterances
+backup lines: 25
+backup sha256: 79ea7f60c9ee7f5270c15149ad5592cbfd889f3595adf3b747a71c9f9c2c348c
+mirror backup: winn3/agent/corpus/sample_actions.jsonl.bak_20260811_gen_agent_corpus_real_utterances (same sha)
+
+Verification:
+go test -count=1 ./winn3/agent/... => ok (0.239s)
+go test -count=1 -run TestAgentCorpusNoEmOrEnDash => PASS
+validator spot check: all 20 valid seed PASS, 5 invalid correctly rejected (ErrUnknownKind or ErrMalformed), all 12 SRE PASS as report
+python byte scan: clean
+file sizes: corpus 7.1K (37 lines), backup 3.5K (25 lines)
+
+No literal U+2014 or U+2013 appears in this file.
+

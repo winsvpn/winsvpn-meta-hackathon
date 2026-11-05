@@ -1,0 +1,31 @@
+TV banner verification - lane gen_tv_banner_320x180_mdpi
+Tree: source/wins_vpn/android/app/src/tv/res
+Method: sips -z roundtrip through a temp 960x540 source (ratio-preserved 16:9)
+Timestamp: 2026-08-11
+
+=== drawable-mdpi/banner.png (regenerated to 320x180) ===
+/Users/owner/Documents/wins/source/wins_vpn/android/app/src/tv/res/drawable-mdpi/banner.png
+  pixelWidth: 320
+  pixelHeight: 180
+
+=== drawable-xhdpi/banner.png (was 320x180, regenerated to correct 640x360) ===
+/Users/owner/Documents/wins/source/wins_vpn/android/app/src/tv/res/drawable-xhdpi/banner.png
+  pixelWidth: 640
+  pixelHeight: 360
+
+=== drawable-xhdpi/banner_alt.png (present, untouched) ===
+/Users/owner/Documents/wins/source/wins_vpn/android/app/src/tv/res/drawable-xhdpi/banner_alt.png
+  pixelWidth: 320
+  pixelHeight: 180
+
+=== drawable (default bucket) ===
+no banner.png present (contains launch_background.xml only)
+
+RESULT:
+  mdpi  banner.png = 320x180 px  (1x)  PASS
+  xhdpi banner.png = 640x360 px  (2x of 320x180 dp)  PASS
+  xhdpi banner_alt.png = 320x180 px  PASS
+
+Backups (sha-verified against originals at backup time):
+  res/drawable-mdpi/banner.png.bak_20260811_gen_tv_banner_320x180_mdpi  sha256=ff37ec601f146011574c6cca588ad0c77d10b947bd12cf3d432d993ffd162097
+  res/drawable-xhdpi/banner.png.bak_20260811_gen_tv_banner_320x180_mdpi  sha256=f05d84169b323457401dbfcc4a81f7242d40735f8b393a7718f80d5d4d157779

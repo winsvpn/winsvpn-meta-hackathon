@@ -1,0 +1,26 @@
+{
+  "closed": true,
+  "derived": true,
+  "driftPossible": false,
+  "enumLength": 3,
+  "match": true,
+  "perKindPresent": {
+    "connect": true,
+    "report": true,
+    "rotate_key": true
+  },
+  "proof": "JSONSchema derives enum from kindEnums populated from validKinds in init, so schema.json cannot drift",
+  "schemaEnum": [
+    "connect",
+    "rotate_key",
+    "report"
+  ],
+  "source": "winn3/agent/actionschema.go validKinds via JSONSchema reflection",
+  "validKinds": [
+    "connect",
+    "rotate_key",
+    "report"
+  ],
+  "validLength": 3,
+  "verifiedBy": "go test ./winn3/agent/... with TestSchemaArtifactDerivedFromTypes and TestActionSchemaGoldenKindEnumIsClosed and TestConformance_SchemaIsDraft202012"
+}

@@ -1,0 +1,96 @@
+Apple Export Compliance Facts To Review
+
+OWNER APPROVED 2026-08-31; COUNSEL REVIEW PENDING. This marking does not
+state or imply that counsel reviewed the classification or submission answers.
+
+Do not treat this as legal advice. Use it as an engineering fact sheet before
+answering App Store Connect export-compliance questions.
+
+Facts from the current app:
+- The app is a VPN client.
+- The app uses encryption for VPN tunneling and secure network communication.
+- The app uses Apple's Network Extension Packet Tunnel framework.
+- The primary tunnel protocol is Winn v3. Its packet engine uses an
+  industry-standard, published suite: X25519 key agreement (RFC 7748), the
+  NIST post-quantum key-encapsulation standard ML-KEM-768 (FIPS 203), and
+  the ChaCha20-Poly1305 AEAD (RFC 8439), with a SHA-256 transcript hash.
+  The Apple Release builds also compile three active Ed25519 (RFC 8032)
+  descriptor-verification public keys through the iOS and macOS Winn v3
+  descriptor-ring xcconfig files. The Winn v3 protocol separately defines an
+  optional Ed25519 plus
+  post-quantum ML-DSA-65 (NIST FIPS 204) dual-signature attestation leg,
+  but that leg is gated off in the Apple builds and is not active in the
+  iOS or macOS app.
+- The app includes local AWG/Xray packet-engine artifacts in Apple extension
+  bundles during release validation. AWG (AmneziaWG) and Xray are the Winn v1
+  compatibility path, used only when Winn v3 cannot connect, with AWG tried
+  first and Xray second.
+- The shipped protocol surface includes obfuscation and transport framing
+  outside the published cryptographic primitives: AmneziaWG randomized junk
+  and padding parameters, enabled Xray transports, Winn v3 handshake framing,
+  and single-packet authorization. The owner-approved answer therefore treats
+  proprietary or non-standard encryption as Yes pending counsel classification.
+- The app uses standard platform security APIs such as Apple Keychain for local
+  identity/key storage.
+- The app is not a medical, military, or government-only app.
+- The app is intended for general consumer/business privacy and network
+  security use.
+- There is no current 1.0.17+34 signed IPA or PKG. Unsigned, ad-hoc, Apple
+  Development, placeholder, or historical 1.0.14+29 identities cannot carry an
+  encryption declaration or export-compliance receipt.
+- The owner-approved conservative submission answer is
+  ITSAppUsesNonExemptEncryption=YES. A later signed IPA and PKG may carry that
+  answer only after exact-artifact verification. They must not carry an
+  ITSEncryptionExportComplianceCode until Apple issues one for accepted
+  documentation.
+- The signed-in App Information page currently has no approved encryption
+  declaration or uploaded document.
+- Apple TV is not a shipping surface for 1.0.17+34, so it has no export
+  declaration or encryption receipt.
+
+Owner decision recorded; counsel work still required:
+- The owner-approved answer to "Does your app use encryption?" is Yes.
+- No mass-market or standard-encryption exemption is claimed in the submission
+  answer sheet.
+- Whether Apple requires export documentation for this exact VPN build in the
+  selected countries/regions.
+- Whether every enabled Xray transport/protocol is treated as industry-standard
+  or non-standard cryptography for U.S. and French export/import purposes.
+- Whether the Winn v3 ML-DSA-65 post-quantum signature leg would be treated as
+  industry-standard (NIST-standardized) or non-standard cryptography for U.S.
+  and French export/import purposes if it were enabled; it is currently gated
+  off and not active in the iOS or macOS app.
+
+Current primary-source requirements:
+- Apple requires an export-compliance determination whenever an app uses,
+  accesses, contains, implements, or incorporates encryption.
+- Apple says industry-standard encryption implemented outside the operating
+  system requires a French encryption declaration when distributing in France.
+- Apple says proprietary or non-standard encryption additionally requires a
+  U.S. CCATS, as well as the French declaration for France.
+- Apple directs developers to populate the app description and manage App
+  Store availability before submitting required encryption documentation;
+  without those records Apple cannot determine whether the documents are
+  sufficient.
+- Apple says complete encryption-document submissions are evaluated case by
+  case and are expected to clear in approximately two business days.
+- BIS places encryption software in Category 5, Part 2 and states that the
+  applicable classification, reporting, end-user, end-use, and destination
+  requirements must be determined before relying on License Exception ENC.
+
+Primary references:
+- https://developer.apple.com/help/app-store-connect/manage-app-information/overview-of-export-compliance
+- https://developer.apple.com/help/app-store-connect/reference/export-compliance-documentation-for-encryption/
+- https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations
+- https://www.bis.gov/learn-support/encryption-controls
+
+Recommended operational stance:
+- Answer encryption questions conservatively.
+- Do not claim "no encryption" for this app.
+- Set ITSAppUsesNonExemptEncryption to YES for the owner-approved conservative
+  answer. Do not set it to NO or claim an exemption until the exact Winn v3 /
+  AWG / Xray build has a documented legal classification.
+- Complete Apple's questionnaire and any required document review before App
+  Review submission. Add Apple's compliance code only after Apple issues one.
+- Keep any export-compliance documents outside source control if they contain
+  account-specific or legal filing information.

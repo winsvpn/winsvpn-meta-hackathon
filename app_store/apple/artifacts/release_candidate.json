@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-24T00:00:00Z",
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "candidate_set_status": "no_current_candidate",
+  "upload_status": "not_uploaded",
+  "submission_package_validation_status": "no_current_candidate",
+  "notes": "There is no current 1.0.17+34 Apple App Store candidate set. This manifest previously mixed a 1.0.16+33 identity with complete_local_candidates while pointing at invalidated 1.0.14+29 IPA/PKG files. That contradictory state is retired. Owner authorization, runtime evidence, watch companion smoke, architecture inventory, privacy inventory, and final receipts remain unbound until a fresh iOS IPA with embedded watchOS companion and a fresh macOS PKG are produced from the frozen 1.0.17+34 source. Mutable /tmp logs are not final authority. No upload or App Review mutation is authorized.",
+  "artifacts": [
+    {
+      "platform": "ios",
+      "lane": "app_store_local",
+      "type": "ipa",
+      "path": "",
+      "size_bytes": 0,
+      "sha256": "",
+      "bundle_id": "org.winsvpn.app",
+      "packet_tunnel_bundle_id": "org.winsvpn.app.PacketTunnel",
+      "expected_current_bundle_id": "org.winsvpn.app",
+      "expected_current_packet_tunnel_bundle_id": "org.winsvpn.app.PacketTunnel",
+      "artifact_status": "no_current_candidate",
+      "upload_status": "not_uploaded",
+      "archive_export_log": "",
+      "verification_log": "",
+      "signing": {
+        "status": "unbound",
+        "contract": "apple-distribution",
+        "authority": "",
+        "team_id": ""
+      },
+      "embedded_watchos_companion": {
+        "status": "no_current_candidate",
+        "bundle_id": "org.winsvpn.app.watchkitapp",
+        "companion_bundle_id": "org.winsvpn.app",
+        "version": "1.0.17",
+        "build": "34",
+        "executable": "WinsWatch",
+        "executable_sha256": "",
+        "privacy_info_sha256": ""
+      }
+    },
+    {
+      "platform": "macos",
+      "lane": "app_store_local",
+      "type": "pkg",
+      "path": "",
+      "size_bytes": 0,
+      "sha256": "",
+      "bundle_id": "org.winsvpn.app",
+      "packet_tunnel_bundle_id": "org.winsvpn.app.PacketTunnel",
+      "expected_current_bundle_id": "org.winsvpn.app",
+      "expected_current_packet_tunnel_bundle_id": "org.winsvpn.app.PacketTunnel",
+      "artifact_status": "no_current_candidate",
+      "upload_status": "not_uploaded",
+      "archive_export_log": "",
+      "verification_log": "",
+      "signing": {
+        "status": "unbound",
+        "contract": "apple-distribution",
+        "authority": "",
+        "team_id": ""
+      },
+      "shipped_architecture_inventory": {
+        "required_architectures": [
+          "arm64",
+          "x86_64"
+        ],
+        "shipped": []
+      }
+    }
+  ],
+  "historical_non_authoritative": {
+    "note": "The following 1.0.14+29 files and hashes are retired snapshot history only. They are not current 1.0.17+34 candidates and must not be uploaded, attached, or reused as owner-authorization evidence.",
+    "retired_release": "1.0.14+29",
+    "retired_ios_path": ".artifacts/apple-final-sr-securestate-xray-20260720-final-apple2/artifacts/ios/WinsVPN-1.0.14+29-ios-app-store.ipa",
+    "retired_ios_sha256": "1f92c7e291f68ebbdc93586f8db49157fb35067971c3da569af9095cbd81d4a9",
+    "retired_macos_path": ".artifacts/apple-final-sr-securestate-xray-20260720-final-apple2/artifacts/macos/WinsVPN-1.0.14+29-macos-app-store.pkg",
+    "retired_macos_sha256": "b4c4ce430c61931306b3d151d4a19809285fa28266b38f233cdab48d90d46eec"
+  }
+}

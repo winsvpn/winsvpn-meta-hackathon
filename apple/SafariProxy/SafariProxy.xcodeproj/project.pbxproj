@@ -1,0 +1,794 @@
+// !$*UTF8*$!
+{
+	"archiveVersion" = 1;
+	"classes" = {
+	};
+	"objectVersion" = 56;
+	"objects" = {
+		"9D3678D486CFCA2896AF75ED" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.xcconfig";
+			"path" = "Config/Common.xcconfig";
+			"sourceTree" = "<group>";
+		};
+		"5DB30457AA0AF884ED480821" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.system-extension";
+			"path" = "org.winsvpn.safariproxy.network.systemextension";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+			"includeInIndex" = 0;
+		};
+		"81BB037812FD388404046A06" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Provider/main.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"A09A33BB22DF66067EDBE0CA" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "81BB037812FD388404046A06";
+		};
+		"FF37614C0DEF5D52F28ECA39" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Provider/TransparentProxyProvider.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"15AA811537B5AE7B8A6493D9" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FF37614C0DEF5D52F28ECA39";
+		};
+		"DC012B181F5317DCF00365C6" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Provider/DNSProxyProvider.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"36B9BFC58CC7AA40F020F969" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "DC012B181F5317DCF00365C6";
+		};
+		"C5709B9871ACC9B871D33FB0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Provider/SafariAppFlow.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"35AAA5887952AB0DB56E4295" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C5709B9871ACC9B871D33FB0";
+		};
+		"ACF41EC121B86992B7623589" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariForwardError.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"FB2DDE149E410ED527EAAC14" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ACF41EC121B86992B7623589";
+		};
+		"DF441FFDFBBEADE38AC670D3" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariPacketRuntime.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"BC5EA8A3DA45F12796A28DEE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "DF441FFDFBBEADE38AC670D3";
+		};
+		"A4CC333FE7692CDB58FD61DC" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariDNSWire.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"103749E97323753D51614168" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "A4CC333FE7692CDB58FD61DC";
+		};
+		"0EAD8F5590E4F539BA949865" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariDNSBroker.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"D8E99F8D99DC999EC7EB1172" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0EAD8F5590E4F539BA949865";
+		};
+		"56FA91DF71706998F9FE5247" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariSessionStore.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"C3A5494572ED489A0EC917FF" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "56FA91DF71706998F9FE5247";
+		};
+		"ADC67A007D74022D9DF01A22" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/ControlProtocol.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"27F1C603DEEAC4822188C71C" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ADC67A007D74022D9DF01A22";
+		};
+		"B11F69129842AE124CEBEBED" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/ControlKeychain.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"CE2D276D97CDAC4ADE9A918F" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B11F69129842AE124CEBEBED";
+		};
+		"6A7970298E0F279196680A6D" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/WinnPacketABI.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"36D685D03E2367AF9DD5DB74" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6A7970298E0F279196680A6D";
+		};
+		"F4E24534D3476A17A8D878D3" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("A09A33BB22DF66067EDBE0CA", "15AA811537B5AE7B8A6493D9", "36B9BFC58CC7AA40F020F969", "35AAA5887952AB0DB56E4295", "FB2DDE149E410ED527EAAC14", "BC5EA8A3DA45F12796A28DEE", "103749E97323753D51614168", "D8E99F8D99DC999EC7EB1172", "C3A5494572ED489A0EC917FF", "27F1C603DEEAC4822188C71C", "CE2D276D97CDAC4ADE9A918F", "36D685D03E2367AF9DD5DB74");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"A4263A68F39B5040E7920855" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).network";
+				"INFOPLIST_FILE" = "Config/Network-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/Network.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"OTHER_LDFLAGS" = ("$(inherited)", "-Wl,-force_load,$(SAFARI_ENGINE_ARCHIVE)", "-lresolv", "-framework", "Security");
+				"DEAD_CODE_STRIPPING" = "NO";
+				"PRODUCT_MODULE_NAME" = "SafariProxyNetwork";
+			};
+		};
+		"3CF22E22DC046FC84A049DE2" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).network";
+				"INFOPLIST_FILE" = "Config/Network-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/Network.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"OTHER_LDFLAGS" = ("$(inherited)", "-Wl,-force_load,$(SAFARI_ENGINE_ARCHIVE)", "-lresolv", "-framework", "Security");
+				"DEAD_CODE_STRIPPING" = "NO";
+				"PRODUCT_MODULE_NAME" = "SafariProxyNetwork";
+			};
+		};
+		"BE683BC53ACEBA77D2CA50E1" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("A4263A68F39B5040E7920855", "3CF22E22DC046FC84A049DE2");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"75FB5CEAD99D6012A90BD621" = {
+			"isa" = "PBXNativeTarget";
+			"name" = "SafariProxyNetwork";
+			"productName" = "SafariProxyNetwork";
+			"productReference" = "5DB30457AA0AF884ED480821";
+			"productType" = "com.apple.product-type.system-extension";
+			"buildConfigurationList" = "BE683BC53ACEBA77D2CA50E1";
+			"buildPhases" = ("F4E24534D3476A17A8D878D3");
+			"buildRules" = ();
+			"dependencies" = ();
+		};
+		"10D6B7EAB3B27E0EE104FEE1" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.app-extension";
+			"path" = "SafariWebMac.appex";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+			"includeInIndex" = 0;
+		};
+		"24BD47D5327D74C932162305" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ADC67A007D74022D9DF01A22";
+		};
+		"72F0EB204A11BAE86D993107" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B11F69129842AE124CEBEBED";
+		};
+		"EDD980F66198F59831FFA3F4" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/ControlClient.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"7C963296D20CC3A55F12B232" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "EDD980F66198F59831FFA3F4";
+		};
+		"FD3F1DA1251129A49535FDED" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "../../extension/safari/SafariWebExtensionHandler.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"5440A8A9DD8F3D5FFD58F544" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FD3F1DA1251129A49535FDED";
+		};
+		"B4B0C4ED2FA330B7F4758F5F" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("24BD47D5327D74C932162305", "72F0EB204A11BAE86D993107", "7C963296D20CC3A55F12B232", "5440A8A9DD8F3D5FFD58F544");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"CC10C8991A1E7FF1D57344DB" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.json";
+			"path" = "manifest.json";
+			"sourceTree" = "SAFARI_WEB_PACKAGE";
+		};
+		"EF999313A6CC12410FB04095" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "CC10C8991A1E7FF1D57344DB";
+		};
+		"9682569EA923E1FA55B1C89F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "folder";
+			"path" = "src";
+			"sourceTree" = "SAFARI_WEB_PACKAGE";
+		};
+		"10C3CE1024D1C062AA0FD416" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "9682569EA923E1FA55B1C89F";
+		};
+		"F09F5697D5AF5195197902F8" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("EF999313A6CC12410FB04095", "10C3CE1024D1C062AA0FD416");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"BF4E99BB7EF46F9C709DEA0C" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).web";
+				"INFOPLIST_FILE" = "Config/Web-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/MacWeb.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+			};
+		};
+		"451D0FAE3F1F3C195DC5070B" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).web";
+				"INFOPLIST_FILE" = "Config/Web-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/MacWeb.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+			};
+		};
+		"5EF90A12ED7BF4657F26EAE7" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("BF4E99BB7EF46F9C709DEA0C", "451D0FAE3F1F3C195DC5070B");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"0C98FB4B807B26D9BBEF0A40" = {
+			"isa" = "PBXNativeTarget";
+			"name" = "SafariWebMac";
+			"productName" = "SafariWebMac";
+			"productReference" = "10D6B7EAB3B27E0EE104FEE1";
+			"productType" = "com.apple.product-type.app-extension";
+			"buildConfigurationList" = "5EF90A12ED7BF4657F26EAE7";
+			"buildPhases" = ("B4B0C4ED2FA330B7F4758F5F", "F09F5697D5AF5195197902F8");
+			"buildRules" = ();
+			"dependencies" = ();
+		};
+		"55FA50F920157C51FE9AD0E5" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"path" = "SafariProxyMac.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+			"includeInIndex" = 0;
+		};
+		"2A97E9F3372C0E395073C392" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ADC67A007D74022D9DF01A22";
+		};
+		"4B7465D276145F359E7C538E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B11F69129842AE124CEBEBED";
+		};
+		"B0446CF4057EFD107E62328E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "EDD980F66198F59831FFA3F4";
+		};
+		"4704AE31546552741F0D1DE1" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/SafariProxyApp.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"82F5FAAD0C8E664E9606DE9C" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4704AE31546552741F0D1DE1";
+		};
+		"E94FA4E52148E847A96CF4FF" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/SafariConnection.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"243CA3EF26D9E3FB65B18772" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "E94FA4E52148E847A96CF4FF";
+		};
+		"0E9B50090CC6558F6128C601" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ACF41EC121B86992B7623589";
+		};
+		"D3FF615ECEC5737AB59CDD4D" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "56FA91DF71706998F9FE5247";
+		};
+		"13239B730FFC63624D92B8E0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariHubSession.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"672C420F3A6006232977C3DF" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "13239B730FFC63624D92B8E0";
+		};
+		"59CBE524FD47FA88F9C3395D" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariPinnedHubTransport.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"188CB011B414FD9A7E311814" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "59CBE524FD47FA88F9C3395D";
+		};
+		"5FF5CA4954C0D4C9A70151D2" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Shared/SafariHubTrustAnchors.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"C1DA89AEC99DE36AC5554566" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "5FF5CA4954C0D4C9A70151D2";
+		};
+		"1037C87D054D33E45982AB7C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "../../extension/safari/native/SafariProxyActivation.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"9956666C3B99C10F3F53472A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "1037C87D054D33E45982AB7C";
+		};
+		"B34890A5185F68DB9FF37617" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("2A97E9F3372C0E395073C392", "4B7465D276145F359E7C538E", "B0446CF4057EFD107E62328E", "82F5FAAD0C8E664E9606DE9C", "243CA3EF26D9E3FB65B18772", "0E9B50090CC6558F6128C601", "D3FF615ECEC5737AB59CDD4D", "672C420F3A6006232977C3DF", "188CB011B414FD9A7E311814", "C1DA89AEC99DE36AC5554566", "9956666C3B99C10F3F53472A");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"0BBFD59F04874BA3903BF551" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.xml";
+			"path" = "Resources/Legal.plist";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0DDFFFBC198E6E78BC171E1A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0BBFD59F04874BA3903BF551";
+		};
+		"6B6BCC9DA8EE3AC3A3981111" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("0DDFFFBC198E6E78BC171E1A");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"1E03970DEC8E80097841003C" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "244210E48437B6556980A702";
+			"proxyType" = 1;
+			"remoteGlobalIDString" = "0C98FB4B807B26D9BBEF0A40";
+			"remoteInfo" = "SafariWebMac";
+		};
+		"AAA941056D894B015FC62A04" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "0C98FB4B807B26D9BBEF0A40";
+			"targetProxy" = "1E03970DEC8E80097841003C";
+		};
+		"13B23284BBAB9329B0E0A514" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "10D6B7EAB3B27E0EE104FEE1";
+			"settings" = {
+				"ATTRIBUTES" = ("RemoveHeadersOnCopy");
+			};
+		};
+		"727E954321236AC2960FB4B4" = {
+			"isa" = "PBXCopyFilesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"dstPath" = "";
+			"dstSubfolderSpec" = 13;
+			"files" = ("13B23284BBAB9329B0E0A514");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"4EBC720B1B16BC05BCF16205" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "244210E48437B6556980A702";
+			"proxyType" = 1;
+			"remoteGlobalIDString" = "75FB5CEAD99D6012A90BD621";
+			"remoteInfo" = "SafariProxyNetwork";
+		};
+		"EB2C4B581F9DEB5808194F00" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "75FB5CEAD99D6012A90BD621";
+			"targetProxy" = "4EBC720B1B16BC05BCF16205";
+		};
+		"5553546C379BC53617497A62" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "5DB30457AA0AF884ED480821";
+			"settings" = {
+				"ATTRIBUTES" = ("RemoveHeadersOnCopy");
+			};
+		};
+		"227DD8B2E0385DE153D19AE4" = {
+			"isa" = "PBXCopyFilesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"dstPath" = "$(CONTENTS_FOLDER_PATH)/Library/SystemExtensions";
+			"dstSubfolderSpec" = 16;
+			"files" = ("5553546C379BC53617497A62");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"73CA98CC17C93405208629C0" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID)";
+				"INFOPLIST_FILE" = "Config/MacApp-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/MacApp.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"SKIP_INSTALL" = "NO";
+				"APPLICATION_EXTENSION_API_ONLY" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+			};
+		};
+		"545A7567F5E8165BA954430D" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "macosx";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID)";
+				"INFOPLIST_FILE" = "Config/MacApp-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/MacApp.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"SKIP_INSTALL" = "NO";
+				"APPLICATION_EXTENSION_API_ONLY" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+			};
+		};
+		"7F7744BDAC6699E7744D47BD" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("73CA98CC17C93405208629C0", "545A7567F5E8165BA954430D");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"BDB864DB0F09CEFE990579E7" = {
+			"isa" = "PBXNativeTarget";
+			"name" = "SafariProxyMac";
+			"productName" = "SafariProxyMac";
+			"productReference" = "55FA50F920157C51FE9AD0E5";
+			"productType" = "com.apple.product-type.application";
+			"buildConfigurationList" = "7F7744BDAC6699E7744D47BD";
+			"buildPhases" = ("B34890A5185F68DB9FF37617", "6B6BCC9DA8EE3AC3A3981111", "727E954321236AC2960FB4B4", "227DD8B2E0385DE153D19AE4");
+			"buildRules" = ();
+			"dependencies" = ("AAA941056D894B015FC62A04", "EB2C4B581F9DEB5808194F00");
+		};
+		"6960C79A336CC2422C9B86D8" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.app-extension";
+			"path" = "SafariWebiOS.appex";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+			"includeInIndex" = 0;
+		};
+		"95F2CC2C995E8BA5B70F3620" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "ADC67A007D74022D9DF01A22";
+		};
+		"9D02218E8EAC5954293C7018" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B11F69129842AE124CEBEBED";
+		};
+		"42BFDCA31DA622B0DD176805" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "EDD980F66198F59831FFA3F4";
+		};
+		"3E987ED459C30FC98D9C8111" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FD3F1DA1251129A49535FDED";
+		};
+		"55E9C4D36FD18D98C5A6F8D5" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("95F2CC2C995E8BA5B70F3620", "9D02218E8EAC5954293C7018", "42BFDCA31DA622B0DD176805", "3E987ED459C30FC98D9C8111");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"54ECC86D8FD4FCEBCDCAB7B6" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "CC10C8991A1E7FF1D57344DB";
+		};
+		"46FEE1D1F25116FFD9B7D042" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "9682569EA923E1FA55B1C89F";
+		};
+		"1A26403BAA76D8B2E665E6D1" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("54ECC86D8FD4FCEBCDCAB7B6", "46FEE1D1F25116FFD9B7D042");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"D8981A24C7697A2E5502D853" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).ios.web";
+				"INFOPLIST_FILE" = "Config/Web-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/iOSWeb.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+			};
+		};
+		"0AB62483A02FB7BCA5F663F1" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).ios.web";
+				"INFOPLIST_FILE" = "Config/Web-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/iOSWeb.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"SKIP_INSTALL" = "YES";
+				"APPLICATION_EXTENSION_API_ONLY" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+			};
+		};
+		"D311EFBF61219DA702D1A142" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("D8981A24C7697A2E5502D853", "0AB62483A02FB7BCA5F663F1");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"5B343026400C385718603208" = {
+			"isa" = "PBXNativeTarget";
+			"name" = "SafariWebiOS";
+			"productName" = "SafariWebiOS";
+			"productReference" = "6960C79A336CC2422C9B86D8";
+			"productType" = "com.apple.product-type.app-extension";
+			"buildConfigurationList" = "D311EFBF61219DA702D1A142";
+			"buildPhases" = ("55E9C4D36FD18D98C5A6F8D5", "1A26403BAA76D8B2E665E6D1");
+			"buildRules" = ();
+			"dependencies" = ();
+		};
+		"16338E73ADE29F198A7CA7FA" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"path" = "SafariProxyiOS.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+			"includeInIndex" = 0;
+		};
+		"147AAF96FA1B8ACC824BD9D3" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4704AE31546552741F0D1DE1";
+		};
+		"96D0A38ED80D37D3C8262D98" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("147AAF96FA1B8ACC824BD9D3");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"ED47A0B6FFEA775EF6F6BCF7" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "244210E48437B6556980A702";
+			"proxyType" = 1;
+			"remoteGlobalIDString" = "5B343026400C385718603208";
+			"remoteInfo" = "SafariWebiOS";
+		};
+		"804C8BBA870D81768A9CCC2C" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "5B343026400C385718603208";
+			"targetProxy" = "ED47A0B6FFEA775EF6F6BCF7";
+		};
+		"CB52B509C36B496E2D459073" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6960C79A336CC2422C9B86D8";
+			"settings" = {
+				"ATTRIBUTES" = ("RemoveHeadersOnCopy");
+			};
+		};
+		"920F9B648BD83AAC7D39B308" = {
+			"isa" = "PBXCopyFilesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"dstPath" = "";
+			"dstSubfolderSpec" = 13;
+			"files" = ("CB52B509C36B496E2D459073");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"6D7EC1D7823D4BBA382198E0" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).ios";
+				"INFOPLIST_FILE" = "Config/iOSApp-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/iOSApp.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"SKIP_INSTALL" = "NO";
+				"APPLICATION_EXTENSION_API_ONLY" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+			};
+		};
+		"5B6FFF2392D33669D6655041" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"baseConfigurationReference" = "9D3678D486CFCA2896AF75ED";
+			"buildSettings" = {
+				"SDKROOT" = "iphoneos";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(SAFARI_PROXY_BASE_ID).ios";
+				"INFOPLIST_FILE" = "Config/iOSApp-Info.plist";
+				"CODE_SIGN_ENTITLEMENTS" = "Config/iOSApp.entitlements";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"SKIP_INSTALL" = "NO";
+				"APPLICATION_EXTENSION_API_ONLY" = "NO";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"SUPPORTS_MACCATALYST" = "NO";
+			};
+		};
+		"3955EB19357A4E115811EC18" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("6D7EC1D7823D4BBA382198E0", "5B6FFF2392D33669D6655041");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"7BEA18A4521273830C858A4D" = {
+			"isa" = "PBXNativeTarget";
+			"name" = "SafariProxyiOS";
+			"productName" = "SafariProxyiOS";
+			"productReference" = "16338E73ADE29F198A7CA7FA";
+			"productType" = "com.apple.product-type.application";
+			"buildConfigurationList" = "3955EB19357A4E115811EC18";
+			"buildPhases" = ("96D0A38ED80D37D3C8262D98", "920F9B648BD83AAC7D39B308");
+			"buildRules" = ();
+			"dependencies" = ("804C8BBA870D81768A9CCC2C");
+		};
+		"0A3E27B8CA818264D75C8D81" = {
+			"isa" = "PBXGroup";
+			"children" = ("5DB30457AA0AF884ED480821", "10D6B7EAB3B27E0EE104FEE1", "55FA50F920157C51FE9AD0E5", "6960C79A336CC2422C9B86D8", "16338E73ADE29F198A7CA7FA");
+			"name" = "Products";
+			"sourceTree" = "<group>";
+		};
+		"19F479106CE8C3BA8C106518" = {
+			"isa" = "PBXGroup";
+			"children" = ("9D3678D486CFCA2896AF75ED", "81BB037812FD388404046A06", "FF37614C0DEF5D52F28ECA39", "DC012B181F5317DCF00365C6", "C5709B9871ACC9B871D33FB0", "ACF41EC121B86992B7623589", "DF441FFDFBBEADE38AC670D3", "A4CC333FE7692CDB58FD61DC", "0EAD8F5590E4F539BA949865", "56FA91DF71706998F9FE5247", "ADC67A007D74022D9DF01A22", "B11F69129842AE124CEBEBED", "6A7970298E0F279196680A6D", "EDD980F66198F59831FFA3F4", "FD3F1DA1251129A49535FDED", "CC10C8991A1E7FF1D57344DB", "9682569EA923E1FA55B1C89F", "4704AE31546552741F0D1DE1", "E94FA4E52148E847A96CF4FF", "13239B730FFC63624D92B8E0", "59CBE524FD47FA88F9C3395D", "5FF5CA4954C0D4C9A70151D2", "1037C87D054D33E45982AB7C", "0BBFD59F04874BA3903BF551", "0A3E27B8CA818264D75C8D81");
+			"sourceTree" = "<group>";
+		};
+		"2B23A31EEC75B029432F2445" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"buildSettings" = {
+			};
+		};
+		"07CA1E69F6068DEA30A4DA6B" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"buildSettings" = {
+			};
+		};
+		"B4E10CAA9C5E22150B71559C" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("2B23A31EEC75B029432F2445", "07CA1E69F6068DEA30A4DA6B");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Debug";
+		};
+		"244210E48437B6556980A702" = {
+			"isa" = "PBXProject";
+			"attributes" = {
+				"LastUpgradeCheck" = "2700";
+			};
+			"buildConfigurationList" = "B4E10CAA9C5E22150B71559C";
+			"compatibilityVersion" = "Xcode 14.0";
+			"developmentRegion" = "en";
+			"hasScannedForEncodings" = 0;
+			"knownRegions" = ("en", "Base");
+			"mainGroup" = "19F479106CE8C3BA8C106518";
+			"productRefGroup" = "0A3E27B8CA818264D75C8D81";
+			"projectDirPath" = "";
+			"projectRoot" = "";
+			"targets" = ("75FB5CEAD99D6012A90BD621", "0C98FB4B807B26D9BBEF0A40", "BDB864DB0F09CEFE990579E7", "5B343026400C385718603208", "7BEA18A4521273830C858A4D");
+		};
+	};
+	"rootObject" = "244210E48437B6556980A702";
+}

@@ -1,0 +1,348 @@
+# NOT AUTHORITATIVE (design v17 2.8, slice S6). A hand-kept reference of the
+# default unit shape, read by nobody at install time. The unit a node runs is
+# written by the gateway block of server/wins_data_plane_setup_ONETOUCH.sh. The
+# standalone installer it mentions below, server/wins_winn3_gateway_install.sh,
+# is a tombstone.
+[Unit]
+# The reachable winn/3 responder: one unconnected UDP socket, a demultiplexer,
+# and one winn3/driver responder loop per peer. See cmd/winn3-gateway's package
+# doc for what it is and, more importantly, what it is not.
+#
+# THIS FILE SHOWS THE DEFAULT SHAPE ONLY -- WINN3_GATEWAY_FORWARD=0 and
+# WINN3_GATEWAY_RESOLVER=0. SocketBindDeny=any plus UDP/TCP port 9111
+# were added 2026-08-12; everything else in this default shape is unchanged
+# since the unit was first written.
+# server/wins_winn3_gateway_install.sh's write_unit() is the ACTUAL generator
+# (this file is a hand-kept reference, read by nobody at install time) and,
+# since 2026-08-12, it emits materially different variants:
+#   WINN3_GATEWAY_FORWARD=1: CAP_NET_ADMIN, BindPaths=/dev/net/tun,
+#     DeviceAllow=/dev/net/tun rw, AF_NETLINK added to
+#     RestrictAddressFamilies, and FIVE more ExecStart flags (-forward,
+#     -accept-transit=true, -forward-if, -forward-cidr, -peer-registry).
+#     The registry is the root-owned, group-readable public-key to inner-IP
+#     authorization snapshot atomically published by the hub. Both it and
+#     -accept-transit=true are mandatory in forwarding mode. -accept-transit=true
+#     is not optional: the binary refuses to start under -forward without it
+#     (validateForwardMode in cmd/winn3-gateway/main.go), and its omission
+#     here is why the shipped forwarding unit had never started on any host.
+#   WINN3_GATEWAY_FORWARD=1 plus WINN3_GATEWAY_FORWARD_ASYNC=1 (rev3.4, off by
+#     default): ONE more ExecStart flag, -forward-async-write, right after
+#     -peer-registry, and no sandbox change. The binary refuses it without
+#     -forward, and keeps synchronous TUN writes below 2 usable CPUs, saying
+#     so in its "-forward-async-write" startup line. Baked at install time
+#     like -forward; there is no live env-file toggle.
+#   WINN3_GATEWAY_RESOLVER=1: three more ExecStart flags (-resolver,
+#     -resolver-upstream, -resolver-timeout). UDP needs no sandbox change --
+#     an ordinary outbound AF_INET UDP socket, which
+#     RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 already permits.
+#     FORWARD=1+RESOLVER=1 additionally grants CAP_NET_BIND_SERVICE on both
+#     CapabilityBoundingSet and AmbientCapabilities for the TCP/53 listen on
+#     -inner-v4 (write_unit), and SocketBindAllow=tcp:53. Resolver without
+#     forward must not gain either. SocketBindDeny=any plus
+#     SocketBindAllow=udp:<listen-port> (default 9111, not 51833) is in every
+#     variant. See write_unit() in that script for the exact text of all
+#     variants and STRENGTHENED (3) below for what forward mode costs that
+#     this default shape does not pay.
+#
+# WHAT THIS DEFAULT (WINN3_GATEWAY_FORWARD=0) SHAPE DOES NOT DO, stated here
+# because a systemd unit on a node that serves real users is read as a
+# production service: cmd/winn3-gateway terminates every session against an
+# IN-PROCESS REFLECTOR, not a kernel interface. It forwards nothing to the
+# internet. It proves reachability, handshake, session establishment and the
+# promotion predicate over a real network path. It carries no user traffic and
+# nothing about installing it entitles the control plane to serve winn/3 to
+# anyone. WINN3_GATEWAY_FORWARD=1 is what closes that gap, on a node an owner
+# has explicitly chosen to run it on -- see wins_winn3_gateway_install.sh's own
+# header comment before choosing it on a node carrying real users.
+Description=Winn Protocol v3 gateway (reachable multi-session responder; reflector inner side, carries no user traffic)
+Documentation=file:///usr/local/share/doc/winn-protocol/WINN3_GATEWAY.md
+After=network-online.target winn3-gateway-firewall.service
+Wants=network-online.target
+Requires=winn3-gateway-firewall.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=winn3-gateway
+Group=winn3-gateway
+EnvironmentFile=/etc/winn/winn3-gateway.env
+# GOMEMLIMIT is 80% of MemoryHigh (not of MemoryMax). The Go runtime
+# does not read cgroup MemoryMax/MemoryHigh; without this it paces GC
+# against host RAM. 80% of MemoryMax sits above MemoryHigh and would
+# let the heap grow into the cgroup throttle. The installer derives
+# this from WINN3_GATEWAY_MAX_SESSIONS at install (default 64 →
+# 2707842662 bytes, 80% of the 3228 MiB MemoryHigh below).
+# Re-run the install script after changing WINN3_GATEWAY_MAX_SESSIONS;
+# editing the env file and restarting does not retune MemoryMax or this
+# value.
+Environment=GOMEMLIMIT=2707842662
+
+# Seven credentials, each with one narrowly defined role.
+#
+# winn-carrier-server needs a TLS leaf, its key, an ECH key set, a cover leaf
+# and key, a client CA, a device registry, a PQ controller seed and an audit
+# key, plus five trust files. winn/3 is a standalone protocol with its own
+# handshake and its own crypto, so its entire secret surface is:
+#
+#   static.key     this end's 32-byte X25519 private key, hex-encoded
+#   admission.key  the admission secret
+#
+# LoadCredential copies each file's bytes VERBATIM into %d. That is
+# load-bearing for admission.key -- see the warning in the env file and in
+# cmd/winn3-gateway/main.go's buildSessionConfig.
+LoadCredential=static.key:/etc/winn/credentials/winn3-gateway-static.key
+LoadCredential=admission.key:/etc/winn/credentials/winn3-gateway-admission.key
+LoadCredential=cover.pem:/etc/winn/credentials/winn3-cover.pem
+LoadCredential=cover-key.pem:/etc/winn/credentials/winn3-cover-key.pem
+LoadCredential=ech-keys.json:/etc/winn/credentials/winn3-ech-keys.json
+LoadCredential=winn-leaf.pem:/etc/winn/credentials/winn3-winn-leaf.pem
+LoadCredential=winn-leaf-key.pem:/etc/winn/credentials/winn3-winn-leaf-key.pem
+# F-02 replay journal: the ONE writable path this unit gains, and only when
+# WINN3_GATEWAY_REPLAY_JOURNAL resolves on at install (the installer emits
+# these two rows in that case and nothing at all otherwise -- see
+# STRENGTHENED (2) and write_env_file()/emit_unit_text() in
+# server/wins_winn3_gateway_install.sh). The path is read by the binary from
+# WINN3_REPLAY_JOURNAL in the env file.
+StateDirectory=winn3-gateway
+StateDirectoryMode=0700
+RuntimeDirectory=winn3-gateway
+RuntimeDirectoryMode=0700
+ExecStartPre=+/bin/sh -c 'for f in static.key admission.key cover.pem cover-key.pem ech-keys.json winn-leaf.pem winn-leaf-key.pem; do install -m 0400 -o winn3-gateway -g winn3-gateway "$CREDENTIALS_DIRECTORY/$f" /run/winn3-gateway/$f; done'
+
+# -path-mtu is passed EXPLICITLY and is never allowed to default.
+#
+# Nothing in winn/3 negotiates the path MTU. Each end computes its own plan
+# floor from the number it was given, and a mismatch means the gateway refuses
+# legitimate messages -- silently, because an unauthenticated-looking datagram
+# is answered with nothing. A gateway left at the built-in 1280 facing a client
+# profile of 1500 computes a floor of 1232 against the client's 1452, and the
+# symptom is a client stuck in handshaking against a gateway whose own status
+# document looks perfectly healthy. The refusal counter and the rate-limited
+# stderr line in readLoop are the only evidence that exists, so the value has
+# to be a deliberate operator decision recorded in the env file, not a default
+# nobody chose.
+#
+# -forward* and -resolver* are OFF by default and appear only when the
+# corresponding WINN3_GATEWAY_FORWARD / WINN3_GATEWAY_RESOLVER env flag is 1 at
+# INSTALL time (baked into the unit by write_unit(), not read live from the env
+# file -- editing the env and restarting does nothing until the install script
+# is re-run, same bar as the forward lane). -forward-async-write follows the
+# same rule under WINN3_GATEWAY_FORWARD_ASYNC=1. UDP -resolver needs no capability.
+# TCP/53 needs CAP_NET_BIND_SERVICE, granted only when both flags are 1.
+ExecStart=/usr/local/libexec/winn/winn3-gateway \
+  -mode serve \
+  -listen ${WINN3_GATEWAY_LISTEN} \
+  -static /run/winn3-gateway/static.key \
+  -admission /run/winn3-gateway/admission.key \
+  -gateway-id ${WINN3_GATEWAY_ID} \
+  -inner-v4 ${WINN3_GATEWAY_INNER_V4} \
+  -plan ${WINN3_GATEWAY_PLAN} \
+  -path-mtu ${WINN3_GATEWAY_PATH_MTU} \
+  -cover-cert /run/winn3-gateway/cover.pem \
+  -cover-key /run/winn3-gateway/cover-key.pem \
+  -ech-keys /run/winn3-gateway/ech-keys.json \
+  -cert /run/winn3-gateway/winn-leaf.pem \
+  -key /run/winn3-gateway/winn-leaf-key.pem \
+  -max-sessions 64
+
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0077
+
+# ---------------------------------------------------------------------------
+# Sandbox
+# ---------------------------------------------------------------------------
+# This is winn-carrier-server.service's reviewed hardening, with three
+# DELIBERATE strengthenings that winn/3's smaller requirements make possible.
+# Each is noted where it differs, so a future reader can tell an improvement
+# from a transcription error.
+
+NoNewPrivileges=yes
+
+# STRENGTHENED (1): no capabilities at all.
+#
+# The carrier keeps CAP_NET_BIND_SERVICE because it binds 443. This binary
+# binds a high UDP port, so the DEFAULT shape needs no capability whatsoever --
+# not CAP_NET_ADMIN, not CAP_NET_RAW, not CAP_NET_BIND_SERVICE. An empty
+# CapabilityBoundingSet is stated rather than left implicit so that a later
+# change to a privileged port fails loudly here instead of being granted
+# silently. A socket unit or nftables redirect cannot bind -inner-v4:53:
+# that address does not exist until newSharedGatewayTun runs inside ExecStart.
+# write_unit therefore grants CAP_NET_BIND_SERVICE only when FORWARD=1 and
+# RESOLVER=1, on both bounding and ambient, never on this default shape.
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# AF_UNIX is retained even though the socket itself is AF_INET: Go's resolver
+# reaches nsswitch/NSS over AF_UNIX when WINN3_GATEWAY_LISTEN is written as a
+# hostname rather than a literal address. Pinning a literal address in the env
+# file is still the recommendation.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# systemd 255: a compromised process cannot stand up new listeners.
+# Default shape (this file): UDP and TCP listen port 9111. write_unit adds
+# SocketBindAllow=tcp:53 only at FORWARD=1 AND RESOLVER=1. Do not allow
+# udp:53 -- that is TUN-path, not a kernel bind. Do not allow tcp:53 on
+# this default shape -- there is no tun address.
+SocketBindDeny=any
+SocketBindAllow=udp:9111
+SocketBindAllow=tcp:9111
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateMounts=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+# ProcSubset=pid removed 2026-08-29: the bind proof reads
+# /proc/sys/kernel/random/boot_id, which subset=pid masks (measured on
+# systemd 255; see server/wins_winn3_gateway_install.sh for the full
+# rationale). ProtectProc=invisible above still hides all other processes.
+RemoveIPC=yes
+SystemCallArchitectures=native
+
+# STRENGTHENED (2): no writable path anywhere on the filesystem -- EXCEPT the
+# F-02 replay journal, which is the one deliberate exception and only exists
+# when it is on.
+#
+# The carrier declares ReadWritePaths=/var/log/winn-carrier /run/winn-carrier
+# because it writes an audit log. This binary writes its status document to
+# stdout and its diagnostics to stderr, both of which the journal collects, and
+# it opens no file for writing at all -- except the persisted handshake replay
+# journal (F-02; see winn3/core/replay.go), which closes the one
+# restart-sensitive fingerprint the fleet still had: without it, a captured
+# initiation was re-answered by a restarted gateway. When it is ON
+# (WINN3_GATEWAY_REPLAY_JOURNAL resolves on at install; ON by default for NEW
+# installs), the unit gains exactly ONE writable path via the
+# StateDirectory=winn3-gateway row below, and nothing else is relaxed:
+# no capability, no device node, no family change. When it is OFF the unit
+# keeps a wholly read-only view of the filesystem, byte-identical to the
+# pre-F-02 shape.
+#
+# StateDirectory, not ReadWritePaths, on purpose: systemd creates
+# /var/lib/winn3-gateway if missing, makes it writable despite
+# ProtectSystem=strict, and manages its ownership -- a directory the
+# installer provisioned root-owned 0700 (with a root-owned 0640
+# replay.journal) is recursively chowned to this service user at start
+# (systemd.exec: pre-existing directories whose owner does not match User=
+# /Group= are recursively chowned; the directory mode is set to
+# StateDirectoryMode=0700, files are chowned but not chmodded). That chown is
+# what lets the non-root service append; before the first start, the
+# root-owned 0700 directory is what stops any other local user planting a
+# torn journal (a load-refused DoS) or reading initiation hashes out of it.
+# The gateway opens the file with O_CREAT, so it self-heals if the file is
+# ever deleted.
+#
+# The practical consequence is worth knowing before an incident: apart from
+# the journal, there is no on-disk artifact of a run. `journalctl -u
+# winn3-gateway` is the only record, so a node whose journal is volatile
+# keeps no history across a reboot.
+
+# STRENGTHENED (3), AT WINN3_GATEWAY_FORWARD=0 ONLY: no tun device and no
+# network administration.
+#
+# cmd/winn3-labrig needs /dev/net/tun and CAP_NET_ADMIN because it terminates
+# against a kernel interface. This binary's inner side, at the default
+# WINN3_GATEWAY_FORWARD=0, is an in-process reflector, so PrivateDevices=yes is
+# not merely tolerable, it is exact: the process has no business with any
+# device node. This is also why the unit is safe to place beside a running
+# AmneziaWG data plane -- it creates no interface, claims no address, and
+# installs no route, so it cannot collide with awg0 or with the node's
+# forwarding and NAT rules.
+#
+# AT WINN3_GATEWAY_FORWARD=1 this row is DELIBERATELY GIVEN UP, and nothing
+# else on this list is: the unit gains CAP_NET_ADMIN (CapabilityBoundingSet
+# and AmbientCapabilities, not a setuid bit and not full root -- the service
+# user stays winn3-gateway) and one named device node, which takes TWO
+# directives that do different jobs, with PrivateDevices=yes RETAINED rather
+# than dropped so every OTHER device node stays exactly as unavailable as it
+# is here:
+#
+#   BindPaths=/dev/net/tun       makes the node EXIST in the private /dev
+#   DeviceAllow=/dev/net/tun rw  makes it USABLE once it exists
+#
+# The non-collision argument changes shape to match: instead of "this process
+# touches no interface and no rule", it becomes "this process's own interface
+# and NAT rule are checked for overlap with awg0's, in code, before either is
+# applied" -- see WINN3_GATEWAY_FORWARD_CIDR and apply_forwarding_firewall()
+# in wins_winn3_gateway_install.sh.
+#
+# This combination is now VERIFIED BY EXECUTION (2026-08-12, aicore, Ubuntu
+# 24.04 / systemd 255), which corrects two things previously written here.
+# First, it is no longer unverified. Second, and more important, the earlier
+# claim that DeviceAllow alone "adds one named device node" was WRONG:
+# DeviceAllow is a cgroup device-controller ACL over nodes that already
+# exist and it never creates one. Measured, reading errno rather than an
+# error string: PrivateDevices=yes + DeviceAllow fails ENOENT (errno 2, the
+# node is absent) and behaves IDENTICALLY to PrivateDevices=yes with no
+# DeviceAllow at all; adding BindPaths makes the open succeed, and removing
+# DeviceAllow while keeping BindPaths fails EPERM (errno 1, node present,
+# access denied -- PrivateDevices=yes implies DevicePolicy=closed). Both
+# lines are therefore load-bearing and neither substitutes for the other.
+#
+# The fallback once documented here, PrivateDevices=no, is NOT needed and
+# should not be used: it exposes the host's entire /dev (~400 nodes, nvme*,
+# nvidia*, mem, kmsg, vfio) to obtain the single node BindPaths supplies on
+# its own. BindPaths adds exactly one entry to the private /dev listing.
+#
+# AT WINN3_GATEWAY_RESOLVER=1 WITHOUT FORWARD, NOTHING on this list is given
+# up: UDP needs only an ordinary outbound AF_INET UDP socket (AF_INET already
+# in RestrictAddressFamilies), no capability, no device node and no AF_NETLINK.
+# AT FORWARD=1 AND RESOLVER=1 the unit additionally gains CAP_NET_BIND_SERVICE
+# (bounding and ambient) for the TCP/53 listen on -inner-v4, and
+# SocketBindAllow=tcp:53. That grant must not appear on resolver-without-forward:
+# there is no tun address, and a successful bind would be on a host address
+# including the WAN. See write_unit and resolve_tcp.go.
+
+# A syscall allow-list is AVAILABLE and deliberately NOT enabled here.
+#
+# @system-service covers everything a Go network server needs, but this binary
+# has never been run under it, and a wrong filter kills the process at a moment
+# that looks exactly like "the gateway is not there" -- the one failure this
+# protocol's silence property makes hardest to diagnose. Enable it only after
+# observing a clean start plus a completed handshake with it in place, via
+# THIS unit's own three-step procedure, not by baking the line into
+# write_unit/emit_unit_text, and not by copying winn-knockd.service's extra
+# SystemCallFilter=~@privileged @resources (a different binary, a different
+# filter; that pairing is not this procedure):
+#
+#   systemctl edit winn3-gateway    # SystemCallFilter=@system-service
+#   systemctl restart winn3-gateway
+#   journalctl -u winn3-gateway -n 50 | grep -i 'system call\|signal'
+#
+# The drop-in body is exactly one directive. Empty grep output on step 3
+# plus an active unit and a completed handshake is the observation; a
+# SIGSYS / "blocked system call" line is a failed window -- revert the
+# drop-in, do not widen the filter to make it start.
+#
+# SystemCallFilter=@system-service
+
+LimitNOFILE=8192
+TasksMax=256
+# Session-derived at install from WINN3_GATEWAY_MAX_SESSIONS (default 64):
+# MemoryMax = 208 MiB + 64 MiB * max-sessions (tunnel-speed round 2,
+# 2026-10-10: the 8192-slot inbox and the 8192 send queue bill 36.98 MiB
+# adversarial per session, 37.35 MiB with -send-queue-fq's flow queues, and
+# the term must cover bill / 0.6 for the 60% GOMEMLIMIT ratio), MemoryHigh =
+# 75% of that. Not a percentage of host RAM. The installer regenerates these;
+# this file is the default-64 reference only, at WINN3_GATEWAY_DEDICATED=0
+# (the capped formula). The data-plane default, WINN3_GATEWAY_DEDICATED=1,
+# writes MemoryMax=infinity and MemoryHigh=infinity and a GOMEMLIMIT no lower
+# than half of host RAM; a host with monero-wallet-rpc.service renders 0.
+MemoryMax=4304M
+MemoryHigh=3228M
+
+[Install]
+WantedBy=multi-user.target

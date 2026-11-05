@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV variant launch background. The main variant is flat white, which
+     flashes on a TV during startup. Use the same dark navy as the banner and
+     app mark so the window never paints white on a set. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/tv_launch_background" />
+</layer-list>

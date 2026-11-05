@@ -1,0 +1,5 @@
+Winn v3 primary encrypted VPN for Windows PCs
+Winn v1 AWG then Xray ordered compatibility path
+Offline x64 Win32 installer with one UAC prompt
+Required ARM64 website and Partner Center installers pending-owner-evidence
+Destination split tunneling without a kernel split-tunnel driver

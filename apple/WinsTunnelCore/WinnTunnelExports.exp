@@ -1,0 +1,17 @@
+# Winn ABI that WinsWinn3Datapath.swift resolves with dlsym in the PacketTunnel executable.
+# Read by the PacketTunnel link (-Wl,-exported_symbols_list) and its release strip (STRIPFLAGS -s), so the
+# executable exports exactly these globals and STRIP_STYLE = all removes every other symbol.
+# Keep in step with the PacketTunnel -Wl,-u pins in ios/ and macos/Runner.xcodeproj/project.pbxproj.
+_WinnTunnelContractVersion
+_WinnTunnelProtocolVersion
+_WinnTunnelMaxDatagram
+_WinnTunnelCreate
+_WinnTunnelCreateWinn3
+_WinnTunnelCreateWithCarrier
+_WinnTunnelWriteInbound
+_WinnTunnelReadOutbound
+_WinnTunnelStatusJSON
+_WinnTunnelClose
+_WinnTunnelFreeString
+_WinsWinn3EnqueuePackets
+_WinsWinn3DequeuePackets

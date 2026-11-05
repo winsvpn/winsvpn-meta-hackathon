@@ -1,0 +1,21 @@
+# Top-level control-plane Python dependencies. This is the pip-compile source
+# for server/control-plane-requirements.lock -- do not hand-edit the lock
+# file; regenerate it from this file instead (see the recipe documented at
+# the top of control-plane-requirements.lock).
+#
+# Resolve/regenerate on linux/amd64 with the same CPython minor version as
+# the Ubuntu 24.04 production target (3.12) so the resulting wheel hashes are
+# the ones pip will actually select in production, e.g.:
+#
+#   docker run --rm --platform linux/amd64 -v "$PWD:/work" -w /work \
+#     python:3.12-slim bash -c '
+#       pip install --quiet pip-tools==7.6.1 &&
+#       pip-compile --generate-hashes --allow-unsafe --only-binary=:all: \
+#         --output-file=server/control-plane-requirements.lock \
+#         server/control-plane-requirements.in'
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+python-multipart==0.0.32
+python-dateutil==2.9.0.post0
+tzdata==2026.5

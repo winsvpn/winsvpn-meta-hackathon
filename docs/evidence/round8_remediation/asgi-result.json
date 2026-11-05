@@ -1,0 +1,6 @@
+{
+  "http_status": 200,
+  "database_worker_threads": 1,
+  "event_loop_responsive": true,
+  "external_io_allowed": false
+}

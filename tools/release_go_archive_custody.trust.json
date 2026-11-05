@@ -1,0 +1,18 @@
+{
+  "contract": "winsvpn-go-archive-custody-trust-v1",
+  "schema_version": 1,
+  "controller": "tools/release_go_archive_custody.py",
+  "wrapper": "tools/release_go_archive_custody.sh",
+  "provisioner": "tools/provision_macos_release_go_runtime.sh",
+  "manifest": "tools/toolchain-pins.json",
+  "trust_anchor": "tools/release_go_archive_custody.trust.json",
+  "issuance_env": "WINS_GO_CUSTODY_ISSUANCE",
+  "issuance_contract": "winsvpn-go-archive-custody-issuance-v2",
+  "authority": "/Library/WinsVPN/ReleaseGoAuthority/v1/authority.json",
+  "authority_contract": "winsvpn-go-archive-custody-authority-v1",
+  "signature_algorithm": "ecdsa-p256-sha256-x962",
+  "controller_sha256": "07065cc49b695da43e290030d30efd6e1e425a07311707222439c1bdbb4520b5",
+  "wrapper_sha256": "5b981a3713866995c5e6ff020fc15fc697fbd8bc2303e25d034f506dee416933",
+  "provisioner_sha256": "0308af0511f16d356793b001cfcd618ae1441804ab5968e2cc9ed26070e467c7",
+  "manifest_sha256": "36886cc389de7647ca1d35700dadc615c304da756e5809430e333c32ce36847c"
+}

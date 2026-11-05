@@ -1,0 +1,21 @@
+# Staging-only Python base image and apt snapshot pin. NOT release evidence.
+# This file does not prove release readiness.
+#
+# Reviewed 2026-08-24. Current stable CPython slim:
+# python.org /downloads/latest/python3/ redirects to
+# /downloads/release/python-3147/. 3.15 exists only as alpha/beta/rc.
+# Docker Hub official library/python tag 3.14.7-slim-trixie (Debian trixie).
+#
+# image.digest is the OCI image INDEX (manifest list) digest. Pull is
+# architecture-aware: the runtime selects linux/amd64 or linux/arm64 from
+# this frozen index. The index digest uniquely binds both platform
+# manifests.
+kind=winsvpn.staging_hub.base_image.v1
+scope=staging
+release_evidence=false
+image=python:3.14.7-slim-trixie@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4
+digest_kind=oci_image_index
+architectures=linux/amd64,linux/arm64
+debian_snapshot=20260823T000000Z
+debian_suite=trixie
+apt_package=openssl

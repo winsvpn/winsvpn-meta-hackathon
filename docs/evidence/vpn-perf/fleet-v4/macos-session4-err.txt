@@ -1,0 +1,7 @@
+2026-08-23 04:49:55.564 Win's VPN[52038:6226424] WINS_NECP_POSTURE probe: no request (inert launch)
+2026-08-23 04:49:55.589 Win's VPN[52038:6226424] Running with merged UI and platform thread. Experimental.
+2026-08-23 04:49:56.050 Win's VPN[52038:6226424] Win's VPN tunnel start stage: load_manager
+2026-08-23 04:49:56.053 Win's VPN[52038:6226424] Win's VPN tunnel start stage: save_preferences
+2026-08-23 04:49:56.078 Win's VPN[52038:6226424] Win's VPN tunnel start stage: reload_manager
+2026-08-23 04:49:56.082 Win's VPN[52038:6226424] Win's VPN tunnel start stage: start_provider
+2026-08-23 04:49:56.082 Win's VPN[52038:6226424] Win's VPN tunnel start stage accepted: start_provider

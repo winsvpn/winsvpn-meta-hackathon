@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Burmese (my) — SCAFFOLD ONLY. AWAITING HUMAN TRANSLATION.
+
+  This file deliberately contains NO machine-translated strings. The only
+  entries are the two server-load strings at the bottom, whose wording the
+  owner chose directly (see the comment there). Its presence is what
+  registers Burmese as a locale the watch app can serve: Android resolves
+  res/values-my/ automatically when the watch language is Burmese, and any
+  string missing from here falls back to res/values/strings.xml (English). So
+  today a Burmese watch shows English text, correctly and without crashing,
+  and the moment a real translation lands it takes effect with no code change.
+
+  No machine translation has been added and none should be. This app remote-
+  controls a VPN for people who may be relying on it for their safety; a
+  plausible-looking but wrong "Connected" is worse than an honest English one.
+
+  To translate: copy a <string> element from res/values/strings.xml into this
+  file and replace only the text. Keep the name attribute identical and keep
+  the %1$s placeholders, with one deliberate exception: do not add an
+  app_name entry here AT ALL. app_name is a permanent disguise pinned to the
+  same value in every locale this app ships (see the long comment on it in
+  res/values/strings.xml) — it is the one string in this file that must
+  never be translated, localised, or overridden, in Burmese or any other
+  language. An override here would fire only for a watch set to this
+  language, which is exactly the population most of this app's users are.
+
+  tools:ignore="MissingTranslation" is on the <resources> element because lint
+  is otherwise correct to shout that every string here is missing. That IS the
+  current state, it is tracked here in this comment, and the alternative (no
+  values-my at all) would leave Burmese unregistered entirely.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <!--
+      OWNER-APPROVED WORDING, not machine translation. The two server-load
+      strings below were chosen by the owner directly (Round LC, 2026-09-27):
+      .agent/debates/_decisions/owner_ruling_load_bar_burmese_20260927.md.
+      The bytes are copied from that ruling (the Flutter app_my.arb carries the
+      same text with {percent} instead of %1$d). Every other string in this
+      file stays untranslated under the rule in the header above.
+    -->
+    <string name="watch_server_load_percent">ဆာဗာ အသုံးပြုမှုနှုန်း %1$d%%</string>
+    <string name="watch_server_load_unknown">ဆာဗာ ဝန် မရရှိပါ</string>
+</resources>

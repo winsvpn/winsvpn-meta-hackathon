@@ -1,0 +1,71 @@
+{
+  "recorded_utc": "2026-09-13T15:17:17.114882+00:00",
+  "base_head": "89be66e75747c0b493583ca9c9efd7787c88a974",
+  "files": [
+    {
+      "path": "android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt",
+      "before_sha256": "539ecca47f2d36ef5676b4940dfd3d75b72c68de4d003e246de9d9d17d66041b",
+      "after_sha256": "34cbc2466a7351fbfae7759d5e56f46a1a0b8d0e6b805c059564dcd84b384226"
+    },
+    {
+      "path": "docs/evidence/round5_remediation/asgi_probe.py",
+      "before_sha256": null,
+      "after_sha256": "60a380f7c9c567504dbdc64950d0582ff2adb25e147f72d46da9c6c2741b5cac"
+    },
+    {
+      "path": "extension/src/adapters/firefox.js",
+      "before_sha256": "4c38545c58c76b1c65fd0540d8fdb2f855bdedf5d9247480abb0e9da3c9cbfcb",
+      "after_sha256": "48d92bdfafd2ef5df99d1cc308db95ecb195e593fe9f8213370a7ca1f73a5554"
+    },
+    {
+      "path": "extension/tools/test_browser_enforcement_regressions.py",
+      "before_sha256": "f10b30dd372e69b5c0e66e0f3f8e41708ce800c0199d38cc87037f470ce2664b",
+      "after_sha256": "b440caf3fb71961f3a3e10f25b43bd3a282ea9e0ce413077de57d8f8fa68e424"
+    },
+    {
+      "path": "server/test_control_plane_round5.py",
+      "before_sha256": null,
+      "after_sha256": "dc58728c8b8104ce7f2f4646607ad415c6b2755d258753ff67599efb555eeb0f"
+    },
+    {
+      "path": "server/test_winn3_descriptor_hub.py",
+      "before_sha256": "d2848910e2fe995d8284eada874fb3749dd98bdf6a046f19c74f3a376844424d",
+      "after_sha256": "929d4abcd4e6f37ce0de3829ebe833775c91481b72180ed8e46adcff886b4092"
+    },
+    {
+      "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+      "before_sha256": "f74ab1c7eda7254ef0040b1d678b5a7cb8057b41e8f2897756818cca97b0231d",
+      "after_sha256": "3c2bae9740e5aaf122caa96276100a63249a29e5127eb987599325619c974aa3"
+    },
+    {
+      "path": "tools/test_round5_crypto_checkout.py",
+      "before_sha256": null,
+      "after_sha256": "486dd6b264a8726410cbe414f418674160b3c407a0e58607b0f83274abbd744f"
+    },
+    {
+      "path": "web/_headers",
+      "before_sha256": "8a49011e1387ded6948c7028b594f53dfabf29f96b91b1f8931f0a762642b0b2",
+      "after_sha256": "3b2b4198685655c9ff8d011912deea825121b8136c582bee5b0fc4177b9c2d26"
+    },
+    {
+      "path": "web/_worker.js",
+      "before_sha256": "e5997110ca88aa9cdd286234f50321997f63f37c7a768b41e97ed47e5116345d",
+      "after_sha256": "15094001ff0c5b9028a3e6bd15606570f0248fd6012ce4ea31ee8573cb7dd21a"
+    },
+    {
+      "path": "web/index.html",
+      "before_sha256": "c4e2e2a45653ae13286f205789a26e1ff5aaae9f209a8711d681b8f644ecfb5c",
+      "after_sha256": "e26c1a54371cedb9783f9d0923d3cacc4a1ae222fd77d43c0a8d2c9428752bc3"
+    },
+    {
+      "path": "winn_protocol_experimental/internal/carrier/h3.go",
+      "before_sha256": "058558d8f39c08f612560d8293e95b81b69191d1a73deb506b0787d7075e28f4",
+      "after_sha256": "49fce5d5e29fd5294ae33ff869085ff7c622c09b3228340a8564c91d7d2870c1"
+    },
+    {
+      "path": "winn_protocol_experimental/internal/carrier/h3_receive_window_test.go",
+      "before_sha256": null,
+      "after_sha256": "5851cd55302c487c2c64a9dac5a289a464f185b3b61295dc6090e1f2c2323ef3"
+    }
+  ]
+}

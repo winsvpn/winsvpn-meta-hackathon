@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      TV variant theme. The phone styles both inherit from
+      Theme.Light.NoTitleBar, which paints a white window while the Flutter
+      engine initializes and flashes on a television. A TV sits in a dark room
+      and is watched from ten feet away, so this variant overrides both themes
+      with a dark, no-title-bar parent.
+    -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <!--
+          D-PAD FOCUS MUST BE VISIBLE. Leanback builds are driven by a remote,
+          never a touchscreen, so an item that exists only as a pointer target
+          is unreachable. Declaring a focused-item background on the launcher
+          theme is the minimum the launcher needs to paint D-pad focus; without
+          it the transition into the app is effectively pointer-only. The
+          TvDpadThemeTest asserts this item stays declared.
+        -->
+        <item name="focusedItemBackground">@drawable/launch_background</item>
+    </style>
+
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

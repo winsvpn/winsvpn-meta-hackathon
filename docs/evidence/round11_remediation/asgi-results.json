@@ -1,0 +1,45 @@
+{
+  "candidate": true,
+  "partial_remote_install": {
+    "http_status": 503,
+    "device_rows": 0,
+    "activation_consumed": false,
+    "repair_jobs": 1,
+    "remote_peer_remaining_after_drain": false,
+    "drain": {
+      "removed": 1,
+      "retry": 0
+    }
+  },
+  "double_core_timeout": {
+    "first_status": 503,
+    "first_detail": "Double VPN Core assignment is still being prepared. Please try again.",
+    "retry_status": 503,
+    "retry_detail": "Double VPN Core assignment is still being prepared. Please try again.",
+    "activation_consumed": false,
+    "device_rows": 1,
+    "assignment_rows": 1,
+    "bearer_delivered": false
+  },
+  "double_core_terminal_cases": {
+    "success": {
+      "status": 200,
+      "bearer_delivered": true,
+      "bearer_matches_current": true,
+      "activation_consumed": true,
+      "activation_replay_status": 401
+    },
+    "replaced_during_wait": {
+      "status": 409,
+      "bearer_delivered": false,
+      "bearer_matches_current": false,
+      "activation_consumed": false
+    },
+    "revoked_during_wait": {
+      "status": 409,
+      "bearer_delivered": false,
+      "bearer_matches_current": false,
+      "activation_consumed": false
+    }
+  }
+}

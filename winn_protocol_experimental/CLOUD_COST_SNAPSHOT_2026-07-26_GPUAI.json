@@ -1,0 +1,17 @@
+{
+  "schema": "winn-cloud-cost-snapshot/v1",
+  "observed_at_local": "2026-07-26T23:35:00-04:00",
+  "provider": "gpu.ai",
+  "source": "authenticated gpu.ai billing and instance inventory",
+  "balance": {
+    "currency": "USD",
+    "amount": 433.03
+  },
+  "burn_rate": "no active usage",
+  "inventory": {
+    "instances_total": 0,
+    "active_instances": 0
+  },
+  "action": "none",
+  "reason": "No GPU instance or active usage exists, so there is nothing billable to stop or destroy."
+}

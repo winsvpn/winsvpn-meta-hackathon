@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      TV-variant custom attribute backing the launcher theme's focused-item
+      background. Declared explicitly (rather than left as an undeclared style
+      item) so the LaunchTheme style stays resource-linkable if this source set
+      is ever merged into a variant build: an undeclared style item would fail
+      AAPT2 at resource linking. `format="color|reference"` lets the theme
+      point at either a color or a drawable.
+    -->
+    <attr name="focusedItemBackground" format="color|reference" />
+</resources>

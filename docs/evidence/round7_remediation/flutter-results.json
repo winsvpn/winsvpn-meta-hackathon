@@ -1,0 +1,18 @@
+{
+  "flutter-analyze": {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "exit_code": 0
+  },
+  "flutter-test": {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "exit_code": 0
+  }
+}

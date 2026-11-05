@@ -1,0 +1,14 @@
+[
+  {
+    "lane": "native",
+    "pid": 64398,
+    "model": "cursor-grok-4.6-xhigh",
+    "log": "docs/evidence/round12_remediation/lane-native.log"
+  },
+  {
+    "lane": "go",
+    "pid": 64399,
+    "model": "cursor-grok-4.6-xhigh",
+    "log": "docs/evidence/round12_remediation/lane-go.log"
+  }
+]

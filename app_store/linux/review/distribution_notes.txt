@@ -1,0 +1,51 @@
+Linux distribution notes for Win's VPN 1.0.17+34
+(AppStream 1.0.17, Debian 1.0.17-34).
+
+Package type:
+- Native tarball. Not DEB. Not AppImage.
+- Website x64: wins-vpn-linux-x64.tar.gz
+- Required website ARM64: wins-vpn-linux-arm64.tar.gz, pending-owner-evidence
+- Derived Debian amd64: wins-vpn_1.0.17-34_amd64.deb, not a separate upload target
+- Flathub decided target: org.winsvpn.WinsVPN dual-arch x64/arm64; submission held under the reported current AI policy; the in-tree application ID is still org.winsvpn.app and linux/packaging/flathub/manifest_artifact.py still emits an org.winsvpn.app manifest at build time; no store manifest file is committed
+- Flathub privilege boundary: unprivileged Flatpak GUI plus separately installed typed, polkit-controlled host VPN service; implementation pending
+- Snap decided target: wins-vpn dual-arch x64/arm64 under strict confinement; unprivileged GUI plus authenticated typed root daemon; not implemented, and linux/packaging/snap/manifest_artifact.py still emits a classic-confinement recipe at build time; no snapcraft.yaml file is committed
+- Native ARM64 uses distinct -arm64 / arm64 filenames and is not this x64 packet
+- AppImage identity wins-vpn-1.0.17-x86_64.AppImage is fail-closed and is not an upload target
+- Current signed x64 tarball: OWNER-BLOCKED: ABSENT
+- Local cosign/Sigstore trust anchor: committed as linux/packaging/release-signing/cosign.pub; the signing key stays owner-held
+- Private symbol/obfuscation receipts: unpublished under
+  .artifacts/private-release-symbols/linux/x64/1.0.17+34
+
+Flathub and Snap listing and review:
+Flathub listing: OWNER-BLOCKED: ABSENT
+Snap listing: OWNER-BLOCKED: ABSENT
+Flathub screenshots: OWNER-BLOCKED: ABSENT
+Snap screenshots: OWNER-BLOCKED: ABSENT
+Flathub privacy and review: OWNER-BLOCKED: ABSENT
+Snap privacy and review: OWNER-BLOCKED: ABSENT
+Flathub design/review decision: OWNER-APPROVED, COUNSEL-PENDING; submission held because no AI-policy exception will be requested
+Snap strict-confinement/interface request text: OWNER-APPROVED, COUNSEL-PENDING; implementation and submission remain held
+Flathub exact release declaration: OWNER-BLOCKED: ABSENT
+Snap exact release declaration: OWNER-BLOCKED: ABSENT
+- Reviewer account: OWNER-BLOCKED: ABSENT
+- Reviewer routes: OWNER-BLOCKED: ABSENT
+
+Protocol (local Linux engines):
+- Primary: Winn v3 (winn-datapath)
+- Ordered Winn v1 compatibility path: AWG then Xray
+- A served Winn v3 lead attempt cannot be skipped
+- Browser native host: tools/native_messaging/host/wins_bridge_host
+
+Privacy:
+- Privacy policy: https://www.winsvpn.org/privacy/
+- Tracking: no. Browsing history, DNS query history, traffic content, and
+  destination activity are not collected.
+
+Reviewer path:
+1. Install from the x64 tarball or amd64 deb once a signed archive exists; the current signed x64 tarball is OWNER-BLOCKED: ABSENT.
+2. Launch Win's VPN, set a six-digit PIN, and connect.
+3. Confirm Winn v3 is attempted first.
+4. Disconnect and confirm no residual winsvpn firewall or tunnel state.
+
+Exact reviewer accounts and routes remain owner-blocked.
+This package never uploads.

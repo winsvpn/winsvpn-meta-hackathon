@@ -1,0 +1,167 @@
+flutter: The Dart VM service is listening on http://127.0.0.1:59598/7PONg2-soPA=/
+flutter: kDebugMode=true WINN_DEV_SESSION=true winnDevSessionActive=true probe=WINN_DEV_SESSION_ABSENCE_PROBE_5f3a1c9d
+flutter: ################################################################################
+# WINN DEV SESSION ACTIVE -- DELIVERING AN UNPROVEN winn/3 CONFIG TO A REAL    #
+# NETWORK EXTENSION                                                            #
+#                                                                              #
+# kWinnHostCapabilities['macos'] is still WinnHostCapability.absent(...), and  #
+# this file does not read or change it. This process is about to hand a        #
+# winn/3 tunnel document to the SAME native startTunnel entry point the        #
+# shipping app uses, so that a real session can be attempted and its outcome   #
+# -- success OR failure -- observed inside a real appex.                       #
+#                                                                              #
+# Nothing here earns the capability flip. A session that runs is EVIDENCE for  #
+# the owner's decision, not the decision. A session that fails is a correct    #
+# and useful result, not a reason to loosen anything.                          #
+#                                                                              #
+# THIS SESSION IS CONTAINED. The document carries [WinsDevContainment], so a   #
+# DEBUG provider installs ONE /32 route, NO IPv6 settings and NO DNS           #
+# settings. The host keeps its default route, its IPv6 and its resolvers. A    #
+# contained run is therefore NOT evidence that full-tunnel routing works, and  #
+# the provider status says so: dev_containment_active is true and             #
+# leak_protection_config_passed is forced false.                              #
+#                                                                              #
+# DEVELOPMENT SIGNING ONLY. Never build a release/profile archive with this    #
+# dart-define or this --target -- kDebugMode already makes the gate false if   #
+# you try, but don't try.                                                      #
+################################################################################
+flutter: WINN DEV SESSION: LANE-ONLY UNCONTAINED OVERRIDE -- this platform ("macos") CAN contain, and the operator's exact acknowledgement (WINN_DEV_UNSAFE_UNCONTAINED_ACK) forced the uncontained full-tunnel path anyway. The document below carries NO [WinsDevContainment] section.
+flutter: ################################################################################
+# WINN DEV SESSION: THIS SESSION IS **NOT** CONTAINED                          #
+#                                                                              #
+# The platform this run targets has no containment path in its native start.   #
+# The document below therefore carries NO [WinsDevContainment] section — that  #
+# section would be refused outright by the native config allowlist and no      #
+# tunnel would start at all.                                                   #
+#                                                                              #
+# What that means, concretely, for the machine this is running on: the tunnel  #
+# takes the default routes. On Windows that is 0.0.0.0/1 + 128.0.0.0/1 +       #
+# ::/1 + 8000::/1 before convergence and /0 after it, plus tunnel-interface    #
+# DNS servers. If the responder does not carry traffic, this host's off-link   #
+# networking stops until the tunnel is torn down. The service fails closed and #
+# removes its owned routes on any failure, but "fails closed" is not the same  #
+# as "harmless".                                                               #
+#                                                                              #
+# This run proceeded only because the operator typed the exact acknowledgement #
+# --dart-define=WINN_DEV_UNSAFE_UNCONTAINED_ACK=                               #
+#   UNCONTAINED_FULL_TUNNEL_ON_A_DISPOSABLE_VM                                 #
+#                                                                              #
+# An uncontained session proves MORE than a contained one about routing, and   #
+# exactly the same amount about the winn/3 handshake. It still earns no        #
+# capability flip: that is the owner's decision, per                           #
+# WINN_PROTOCOL_PLATFORM_PLAN.md rule 4.                                       #
+################################################################################
+flutter: ################################################################################
+# WINN DEV CONFIG SOURCE ACTIVE -- LOADING AN UNPROVEN, DEVELOPER-SUPPLIED    #
+# TUNNEL CONFIG FROM DISK                                                     #
+#                                                                              #
+# This is NOT a config Win's VPN's backend served. It was read from a local  #
+# file because this DEBUG build was launched with                            #
+# --dart-define=WINN_DEV_CONFIG_PATH=<path>. It still has to pass the same    #
+# winnSectionForTunnelConfig validation and anti-downgrade gates a real       #
+# server-delivered config does -- this module does not loosen or skip any    #
+# of them -- but passing validation is not the same as having been vetted    #
+# by Win's VPN's backend or reviewed for this device's account.              #
+#                                                                              #
+# Never build a release/profile archive with this dart-define set --         #
+# kDebugMode already prevents it from doing anything if you try, but don't   #
+# try. Never commit the file this points at.                                 #
+################################################################################
+flutter: WINN DEV CONFIG SOURCE: loading "/Users/owner/Library/Containers/org.winsvpn.app/Data/dev_winn3_macos.json".
+flutter: WINN DEV CONFIG SOURCE: loaded config (secrets redacted): {"protocol_version":"winn/3","protocol_params":{"carrier":"winn3","session_id":"0123456789abcdef0123456789abcdef","gateway_endpoint":"<DATA_SIM_IP>:9111"},"client_ip":"10.10.0.3","client_private_key":"<redacted>","client_public_key":"ZFSfut1kvvaJXKOq2aK39D3KiktVcR/92+lWyjhSQVM=","server_public_key":"wt5eSrj9e8WZWLRefUtHGcKReYb18+TWLReF5tPnnBY=","server_endpoint":"<DATA_SIM_IP>:9111","mtu":1450,"dns":"10.10.0.1","winn3_inner_v4":"10.10.0.2","winn3_static_private":"<REDACTED_STATIC_PRIVATE_KEY>","winn3_path_mtu":"1450","winn3_carrier_classes":"udp","winn3_descriptor":{"payload":"<REDACTED_DESCRIPTOR_PAYLOAD>","sig":"ax3X2LK/HMZ1kbkRPLPunJxTmQQhd9EdBD8x6qi+x3nj3GLPpY5b9USR965szWwVy3csq2pp2vF7/jZgyIcYAg=="}}
+flutter: WINN DEV CONFIG SOURCE: validation result -- supported=false reason=winn3_descriptor_unverified.
+flutter: WINN DEV SESSION: generated session_id=f797c174bf5306e0bc97a9590fbb689a (32 lowercase hex, Random.secure, fresh for this session; any session_id in the config file was discarded).
+flutter: WINN DEV SESSION: using the device Keychain key pair for [Interface] PrivateKey (accountScope="", public_key=Eve6s+jcneMccQlcyhxrYh2Qw9dzWTPB4S2SdXpCkz4=). The dev config file's client_private_key is NOT used for the interface -- the native start requires the Keychain pair. Register this public key with the gateway or the handshake cannot complete.
+flutter: WINN DEV SESSION: gateway descriptor verification -- verified=true reason=winn3-descriptor-verified kid=g1 node=data-sim endpoint=<DATA_SIM_IP>:9111.
+flutter: WINN DEV SESSION: [winn] section produced by the real dispatch library:
+[winn]
+enabled = true
+carrier = winn3
+endpoint = <DATA_SIM_IP>:9111
+inner_v4 = 10.10.0.2
+inner_router_v4 = 10.10.0.1
+inner_resolver_v4 = 10.10.0.1
+static_private = <REDACTED_STATIC_PRIVATE_KEY>
+gateway_static = wt5eSrj9e8WZWLRefUtHGcKReYb18+TWLReF5tPnnBY=
+gateway_id = ZGF0YS1zaW0td2lubjNndw==
+admission_key = <REDACTED>
+path_mtu = 1450
+carrier_classes = udp
+session_id = f797c174bf5306e0bc97a9590fbb689a
+flutter: WINN DEV SESSION: assembled tunnel document (secrets redacted):
+[Interface]
+PrivateKey = <redacted>
+Address = 10.10.0.3/32
+MTU = 1450
+DNS = 10.10.0.1
+Jc = 4
+Jmin = 40
+Jmax = 70
+S1 = 16
+S2 = 80
+S3 = 16
+S4 = 0
+H1 = 11
+H2 = 22
+H3 = 33
+H4 = 44
+[Peer]
+PublicKey = wt5eSrj9e8WZWLRefUtHGcKReYb18+TWLReF5tPnnBY=
+Endpoint = <DATA_SIM_IP>:9111
+AllowedIPs = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25
+[WinsDebug]
+ClientPublicKey = Eve6s+jcneMccQlcyhxrYh2Qw9dzWTPB4S2SdXpCkz4=
+[WinsApp]
+ExcludedPackages =
+ExcludedPathsB64 =
+[winn]
+enabled = true
+carrier = winn3
+endpoint = <DATA_SIM_IP>:9111
+inner_v4 = 10.10.0.2
+inner_router_v4 = 10.10.0.1
+inner_resolver_v4 = 10.10.0.1
+static_private = <REDACTED_STATIC_PRIVATE_KEY>
+gateway_static = wt5eSrj9e8WZWLRefUtHGcKReYb18+TWLReF5tPnnBY=
+gateway_id = ZGF0YS1zaW0td2lubjNndw==
+admission_key = <REDACTED>
+path_mtu = 1450
+carrier_classes = udp
+session_id = f797c174bf5306e0bc97a9590fbb689a
+flutter: WINN DEV SESSION: this document carries NO [WinsDevContainment] section, because this platform's native config allowlist refuses that section and would start no tunnel at all. Nothing below will claim this session was contained, because it will not be.
+flutter: WINN DEV SESSION: native startTunnel returned true (accepted=true).
+flutter: WINN DEV SESSION: the provider published its own status after 2 readiness poll(s) (stage=engine_started).
+flutter: WINN DEV SESSION: provider status: {"provider_engine_runtime_winn_engine_winn3_plan_mtu_ceiling":1450,"provider_shared_config_private_key_redacted":false,"provider_stage":"engine_started","provider_config_app_group_id_present":true,"provider_network_settings_applied":true,"provider_engine_runtime_winn_engine_winn3_may_carry":true,"provider_config_source":"transient_start_options","provider_config_app_group_id_allowed":true,"provider_engine_runtime_winn_engine_winn3_queue_dropped_inbound":0,"provider_healthy":false,"provider_engine_runtime_winn_engine_winn3_migrations":0,"provider_engine_runtime_winn_engine_winn3_tx_packets":0,"provider_engine_runtime_winn_engine_winn3_carrier_class":"udp","provider_status_file_size_bytes":4855,"interface_open":false,"provider_engine_runtime_winn_engine_socket_owned_by_engine":true,"provider_transport_ipv4_route_excluded":true,"provider_expected_client_public_key_valid":true,"provider_message_probe_supported":false,"provider_required_engine_components":["amneziawg_packet_engine"],"platform":"macos","provider_awg_obfuscation_present":true,"provider_engine_runtime_winn_engine_winn3_inner_mtu":1373,"provider_status_generation":"B195731E-E44C-4DC9-ACAA-B9DB45D998BA","provider_private_key_source":"transient_start_options","provider_config_app_group_container_available":true,"provider_ipv6_sink_address_present":true,"provider_bundle_id":"org.winsvpn.app.PacketTunnel","provider_network_settings_remote_address_source":"transport_endpoint_ipv4","provider_transport_ipv4_exclusion_route_present":true,"provider_config_size_bytes":976,"provider_ready":false,"provider_mtu":1450,"network_extension_connected":false,"provider_status_file_present":true,"provider_engine_runtime_winn_engine_winn3_rx_dropped_closed":0,"provider_updated_at":"2026-08-23T08:55:41Z","provider_client_key_pair_verified":true,"provider_status_current":true,"provider_engine_runtime_winn_engine_winn3_plan_message_size":1402,"provider_engine_runtime_winn_engine_winn3_rx_offered":0,"provider_engine_runtime_winn_engine_winn3_tx_dropped_invalid":0,"provider_engine_runtime_winn_engine_winn3_rx_packets":0,"provider_engine_runtime_winn_engine_closed":false,"provider_config_source_available":true,"provider_status_json_valid":true,"provider_transport_endpoint_kind":"ipv4","provider_network_extension_type":"packet_tunnel","tunnel_healthy":false,"provider_ipv6_leak_protection_enabled":true,"provider_engine_runtime_winn_engine_winn3_queue_dropped_outbound":0,"provider_engine_runtime_winn_engine_winn3_gate_state":"carrying","provider_interface_ipv4_address_present":true,"provider_xray_enabled":false,"provider_peer_endpoint_kind":"ipv4","provider_status_schema_version":2,"status":"connecting","provider_message_probe_attempted":false,"provider_engine_runtime_winn_engine_winn3_rx_bytes":0,"provider_status_available":true,"provider_transport_mode":"winn","active":false,"provider_engine_runtime_winn_engine_winn3_rx_dropped_invalid":0,"provider_message_probe_healthy":false,"provider_network_settings_ready":false,"provider_dns_match_domains":[""],"engine_ready":false,"configuration_installed":true,"provider_engine_runtime_winn_engine_winn3_messages_sent":2,"provider_status_file_readable":true,"provider_status_max_file_size_bytes":65536,"provider_reported_bundle_id":"org.winsvpn.app.PacketTunnel","provider_ipv6_sink_prefix_length":128,"provider_expected_client_public_key_available":true,"provider_engine_runtime_winn_engine_winn3_messages_received":2,"provider_engine_runtime_winn_engine_winn3_tx_dropped_closed":0,"provider_route_count":1,"provider_status_schema_supported":true,"provider_peer_endpoint_present":true,"provider_engine_runtime_winn_engine_winn3_tx_bytes":0,"provider_default_route_enabled":true,"vpn_present":false,"provider_expected_client_public_key_source":"saved_tunnel_preference","provider_engine_ready":true,"vpn_validated":false,"provider_config_max_size_bytes":262144,"provider_client_key_pair_verification_required":true,"provider_dns_full_tunnel_match_enabled":true,"provider_dns_count":1,"provider_status_container_available":true,"provider_network_settings_remote_address_kind":"ipv4"}
+flutter: WINN DEV SESSION: this session is UNCONTAINED and was never claimed otherwise. The Windows privileged tunnel service has no containment path: it refuses the [WinsDevContainment] section outright, requires default-route AllowedIPs, and installs /1 precommit routes before convergence. A Windows dev session is therefore UNCONTAINED, and must only be run on a disposable machine. The evidence a session on this platform produces is the native start's own convergence gate -- a recent AmneziaWG handshake with bidirectional peer transfer, AND the Winn engine reporting transport_observed_both_ways -- both of which must pass before the service promotes any route at all.
+flutter: WINN DEV SESSION: RESULT = native start accepted. This platform ("macos") has no containment path, so containment was NOT confirmed and was never claimed -- this session took the whole machine's routing. The evidence it produces is therefore the opposite of a contained run's: the native start's own convergence gate -- a recent AmneziaWG handshake with bidirectional peer transfer, AND the Winn engine reporting transport_observed_both_ways -- both of which must pass before any route is promoted. An accepted start is still not by itself a completed handshake.
+flutter: WINN DEV TIER2 LOOKUP: schema_version=null (absent means the provider did not publish the diagnostics at all, which is a different failure from publishing false)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_linked_in_process = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_fw_dir_found = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_bin_exists = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_bin_readable = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_bin_exec_bit = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_info_plist_found = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_declared_exec_present = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_declared_exec_matches = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_resolved = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_resolved_via = (absent)
+flutter: WINN DEV TIER2 LOOKUP: engine_runtime_lookup_winn_packet_engine_candidate_dir_count = (absent)
+flutter: WINN DEV TRAFFIC: this platform is UNCONTAINED by construction, so there is no /32 readback to re-confirm. Sending to 1.1.1.1 over a tunnel that currently holds this machine's default routes.
+flutter: WINN DEV TRAFFIC: sampling provider memory at IDLE, before traffic.
+flutter: WINN DEV TRAFFIC: memory [t+0.0s idle_before_traffic] phys_footprint=UNAVAILABLE  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: WARNING -- the provider did not report winn_memory_sample_taken. The winn-only sample path did not run; treat the absence as a finding, not as a zero.
+flutter: WINN DEV TRAFFIC: bound udp/56518, aiming 1252-byte payloads (=1280-byte inner datagrams) at 1.1.1.1:7777 -- the contained /32 and nothing else.
+flutter: WINN DEV TRAFFIC: steady phase begins -- 100 datagrams/s for 120s, spanning 1 AmneziaWG rekey intervals.
+flutter: WINN DEV TRAFFIC: memory [t+20.1s under_traffic] phys_footprint=20.88 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: memory [t+40.1s under_traffic] phys_footprint=21.30 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: memory [t+60.1s under_traffic] phys_footprint=21.63 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: memory [t+80.1s under_traffic] phys_footprint=25.55 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: memory [t+100.1s under_traffic] phys_footprint=26.80 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: post-rekey burst of 1600 datagrams at t+120.0s -- this is the "re-verified after >=2 rekeys" check.
+flutter: WINN DEV TRAFFIC: memory [t+125.4s idle_after_traffic] phys_footprint=125.53 MiB  os_proc_available_memory=UNAVAILABLE
+flutter: WINN DEV TRAFFIC: RESULT {"attempted":true,"error":null,"duration_seconds":125.4,"tx_datagrams":42,"tx_bytes":52584,"rx_datagrams_verified":0,"rx_bytes":0,"rx_corrupt":0,"rx_duplicate":0,"rx_unknown_seq":0,"missing_count":42,"loss_percent":100.0,"digest_sha256_sent_all":"746102e0615c50cf52c733358d4fe0687f8666bdbf40e1cfc011fc61f42c3fa1","digest_sha256_returned":null,"digest_ordered_complete":false,"digest_match":false,"post_rekey_burst_tx":0,"post_rekey_burst_rx":0,"bins":{"0":[42,0]},"memory_samples":[{"label":"idle_before_traffic","elapsed_seconds":0.0,"winn_memory_sample_taken":false,"phys_footprint_bytes":null,"phys_footprint_mib":null,"available_bytes":null,"available_mib":null,"available_measured":null,"provider_stage":"engine_started"},{"label":"under_traffic","elapsed_seconds":20.1,"winn_memory_sample_taken":true,"phys_footprint_bytes":21890080,"phys_footprint_mib":20.876,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"},{"label":"under_traffic","elapsed_seconds":40.1,"winn_memory_sample_taken":true,"phys_footprint_bytes":22332448,"phys_footprint_mib":21.298,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"},{"label":"under_traffic","elapsed_seconds":60.1,"winn_memory_sample_taken":true,"phys_footprint_bytes":22676512,"phys_footprint_mib":21.626,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"},{"label":"under_traffic","elapsed_seconds":80.1,"winn_memory_sample_taken":true,"phys_footprint_bytes":26788896,"phys_footprint_mib":25.548,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"},{"label":"under_traffic","elapsed_seconds":100.1,"winn_memory_sample_taken":true,"phys_footprint_bytes":28099616,"phys_footprint_mib":26.798,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"},{"label":"idle_after_traffic","elapsed_seconds":125.4,"winn_memory_sample_taken":true,"phys_footprint_bytes":131630160,"phys_footprint_mib":125.532,"available_bytes":null,"available_mib":null,"available_measured":false,"provider_stage":"app_message"}]}
+flutter: WINN DEV LINUX: getWinn3PumpStats threw: MissingPluginException(No implementation found for method getWinn3PumpStats on channel wins_vpn/tunnel)
+flutter: WINN DEV TEARDOWN: stopping the tunnel.
+flutter: WINN DEV TEARDOWN: the provider reported NO network_settings_release_outcome. That is an absence, not a verdict -- the appex may already have exited, taking its status with it. Read the appex log before concluding anything.
+flutter: WINN DEV TEARDOWN: tunnel status now "disconnected" (active=false).

@@ -1,0 +1,15 @@
+[
+  {
+    "command": [
+      "xcrun",
+      "swiftc",
+      "-parse",
+      "ios/PacketTunnel/PacketTunnelProvider.swift"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:44:42.993137+00:00",
+    "exit_code": 0,
+    "seconds": 0.15,
+    "log": "ios-parse.log"
+  }
+]

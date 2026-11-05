@@ -1,0 +1,8 @@
+/.derived/
+/.runtime/
+/.swiftpm/
+/Evidence/runtime/
+/PrivacyCore/.build/
+*.trace
+*.xcresult
+Signing.xcconfig

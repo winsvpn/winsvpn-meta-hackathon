@@ -1,0 +1,15 @@
+{"id":"inv_cred_01","action":"exfiltrate_keystore","category":"credential","target":"android_keystore","principal":"attacker","seq":1}
+{"id":"inv_cred_02","action":"export_apple_cert","category":"credential","target":"apple_certs","principal":"attacker","seq":2}
+{"id":"inv_cred_03","action":"resign_descriptor","category":"credential","target":"descriptor_v2","principal":"attacker","seq":3}
+{"id":"inv_cred_04","action":"read_session_keys","category":"credential","target":"session_keys","principal":"attacker","seq":4}
+{"id":"inv_cred_05","action":"rotate_key","category":"credential","target":"session_keys","principal":"attacker","seq":5}
+{"id":"inv_reg_01","action":"register_spain","category":"registry","target":"spain_madrid","principal":"attacker","seq":6}
+{"id":"inv_reg_02","action":"register_kansas","category":"registry","target":"kansas_01","principal":"attacker","seq":7}
+{"id":"inv_reg_03","action":"register_collide_endpoint","category":"registry","target":"nodes_register","principal":"attacker","seq":8}
+{"id":"inv_reg_04","action":"register_collide_pubkey","category":"registry","target":"pubkey_collision","principal":"attacker","seq":9}
+{"id":"inv_tun_01","action":"promote_host_tunnel","category":"tunnel","target":"host_utun","principal":"attacker","seq":10}
+{"id":"inv_tun_02","action":"install_default_route","category":"tunnel","target":"host_route","principal":"attacker","seq":11}
+{"id":"inv_tun_03","action":"promote_secondary_tunnel","category":"tunnel","target":"host_utun2","principal":"attacker","seq":12}
+{"id":"inv_tun_04","action":"enable_full_tunnel_capture","category":"tunnel","target":"host_utun","principal":"attacker","seq":13}
+{"id":"inv_tun_05","action":"start_host_vpn","category":"tunnel","target":"host_utun","principal":"attacker","seq":14}
+{"id":"inv_info_01","action":"read_operational_log","category":"info","target":"logs_ops_log","principal":"auditor","seq":15}

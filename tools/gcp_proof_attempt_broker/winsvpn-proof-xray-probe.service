@@ -1,0 +1,35 @@
+[Unit]
+Description=Win's VPN proof Xray tun xray0 ICMP client probe
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+After=network-online.target winsvpn-proof-xray-client.service
+Requires=winsvpn-proof-xray-client.service
+# Bounded ping through xray0. Peer comes only from the root-owned
+# EnvironmentFile. The broker never accepts caller hosts or ports.
+ConditionFileNotEmpty=/etc/winn/proof-client/xray-probe.env
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/winn/proof-client/xray-probe.env
+ExecStart=/usr/bin/ping -n -c 2 -W 3 -I xray0 ${XRAY_PROOF_PEER}
+StandardOutput=truncate:/run/winsvpn-proof/xray-probe.out
+StandardError=inherit
+TimeoutStartSec=20
+RemainAfterExit=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/winsvpn-proof
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

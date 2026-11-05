@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+
+  "_purpose": [
+    "Single source of truth for the Debian/Ubuntu apt packages tools/build_linux_release.sh",
+    "installs for the Flutter Linux desktop release build, and the verdict each earns.",
+    "",
+    "The release producer used to run `apt-get install -y <pkg> ...` with no version",
+    "pins, so the Linux release binary was built against whatever the distro served that",
+    "day. Supply-chain finding S4 (spk_supply 2026-08-10). Each package is classified:",
+    "",
+    "  pin  - version drift changes the SHIPPED artifact (link-time ABI or the binary",
+    "         bytes themselves); the exact version is enforced and verified against.",
+    "  keep - needed on the build host but version drift cannot change the shipped",
+    "         artifact (orchestration, download, extraction, or runtime-only tools);",
+    "         installed unpinned.",
+    "  drop - not needed, and not installed.",
+    "",
+    "Versions below were measured (dpkg-query) inside the pinned release builder image",
+    "winsec-linux-builder:flutter-3.44.6 (Debian GNU/Linux 12 bookworm, linux/amd64),",
+    "which is the isolated VM the Linux release is produced in. They are the reference",
+    "for that distribution. A different OS must be added here deliberately before a",
+    "release is produced on it; tools/verify_linux_apt_pins.py refuses an unrecorded",
+    "one (fail-closed).",
+    "",
+    "KNOWN-GAP, DELIBERATE: Ubuntu 24.04 is NOT recorded. GitHub Actions is",
+    "not the Linux signing contract. Local/offline producers verify against this",
+    "pin set. A GitHub workflow, if used, is one optional OIDC signer and must",
+    "not rebuild on an unrecorded distro. The one Linux host that genuinely",
+    "produces the archive is the Debian 12 builder image above, so that",
+    "is the distribution pinned. If a WSL/Linux machine with unrecorded /etc/os-release",
+    "ever becomes a real producer, verify_linux_apt_pins.py will refuse it with a",
+    "specific message -- record that distro here (measured versions, same keep/pin/drop",
+    "verdicts) and re-run, rather than building unpinned."
+  ],
+
+  "release_distribution": "debian-12",
+
+  "distributions": {
+    "debian-12": {
+      "note": "Debian GNU/Linux 12 (bookworm), the base of winsec-linux-builder:flutter-3.44.6.",
+      "pin": {
+        "clang": "1:14.0-55.7~deb12u1",
+        "binutils": "2.40-2",
+        "libgtk-3-dev": "3.24.38-2~deb12u3",
+        "libsecret-1-dev": "0.20.5-3"
+      },
+      "keep": [
+        "cmake",
+        "ninja-build",
+        "pkg-config",
+        "curl",
+        "git",
+        "tar",
+        "unzip",
+        "xz-utils",
+        "make",
+        "libc6-dev",
+        "openssl"
+      ],
+      "drop": [
+        "liblzma-dev"
+      ],
+      "_pin_reasons": {
+        "clang": "The C++ compiler that emits wins_vpn and winsvpn-bypass-bpf machine code. A different clang emits different shipped bytes.",
+        "binutils": "objcopy/strip/readelf rewrite the shipped binaries in-build: strip --strip-unneeded, objcopy --add-gnu-debuglink, readelf-gated build-id checks. Version drift changes the delivered ELF bytes.",
+        "libgtk-3-dev": "wins_vpn and the bundled engine link libgtk-3.so.0 (measured DT_NEEDED); the dev headers/symlinks determine the ABI surface baked into the shipped binary.",
+        "libsecret-1-dev": "linux/runner links PkgConfig::LIBSECRET (ninja/l GLib secret-store uses secret_password_* sync, measured in linux_secure_store.cc); the dev package fixes the libsecret ABI the shipped binary references."
+      },
+      "_keep_reasons": {
+        "cmake": "Build orchestration only; version drift does not change shipped bytes for the fixed CMakeLists.",
+        "ninja-build": "Build execution only.",
+        "pkg-config": "Dependency resolution; resolves the pinned dev packages.",
+        "curl": "Downloads pinned, sha256-verified artifacts (Xray, AmneziaWG, Go SDK); artifact integrity is enforced by hash, not by curl version.",
+        "git": "Release-source integrity checks (git ls-files) and toolchain checkout.",
+        "tar": "Extracts the pinned Go SDK archive.",
+        "unzip": "Extracts pinned Xray/AmneziaWG archives.",
+        "xz-utils": "Extraction/compression utility; no shipped ELF links liblzma (measured: zero liblzma in any shipped DT_NEEDED).",
+        "make": "Orchestrates the linux-arm64 amneziawg-tools source build (tools/build_linux_arm64_awg.sh). Version drift does not change shipped bytes for a fixed Makefile plus the pinned awg output hash.",
+        "libc6-dev": "Headers/libs for the linux-arm64 awg compile. Output integrity is the pinned AWG_BINARY_SHA256_ARM64; a header drift that changes bytes fails that hash rather than shipping an unpinned binary.",
+        "openssl": "Test-only: the producer's flutter test step runs tests that shell out to the openssl CLI (for example test/control_plane_pinning_test.dart); it is never invoked to produce or sign release bytes, so it cannot change shipped bytes."
+      },
+      "_drop_reasons": {
+        "liblzma-dev": "No shipped artifact links liblzma (measured DT_NEEDED across wins_vpn, libapp.so, libflutter_linux_gtk.so), the Flutter tool has zero lzma references in the Linux build path (measured), and the runner CMake neither includes nor links lzma. Not needed to build the release."
+      }
+    }
+  }
+}

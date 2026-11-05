@@ -1,0 +1,77 @@
+T-I RERUN — provider status fields (getTunnelReadiness via the app's own MethodChannel
+'wins_vpn/tunnel', evaluated in the live isolate through the Dart VM service; the native
+side reads Tunnel/latest_status.json from the app's REAL app-group container —
+provider_status_file_present=true, size 6669 bytes, json_valid=true, schema_version=2,
+status_generation 27F91A4F-62DA-452B-A30E-E4847497FA1D, updated_at 2026-08-23T08:39:39Z).
+
+VERDICT FIELDS:
+  provider_stage = engine_start_failed   (held-proof record stage; NOT a real failure —
+    provider_error_code 1034 = "datapath was proven and promotion was held on purpose")
+  provider_engine_runtime_winn_engine_winn3_gate_state = carrying
+  provider_engine_runtime_winn_engine_winn3_rx_packets = 1   (rx_bytes=91, rx_offered=1)
+  provider_engine_runtime_winn_engine_winn3_tx_packets = 1   (tx_bytes=75)
+  provider_engine_runtime_winn_engine_winn3_messages_sent = 3
+  provider_engine_runtime_winn_engine_winn3_messages_received = 3
+  provider_engine_runtime_winn_engine_winn3_migrations = 0
+  provider_engine_runtime_winn_engine_winn3_queue_dropped_inbound = 0
+  provider_engine_runtime_winn_engine_winn3_queue_dropped_outbound = 0
+  provider_engine_runtime_winn_engine_winn3_may_carry = true
+  provider_engine_runtime_winn_engine_winn3_closed = false
+  provider_engine_runtime_winn_engine_winn3_carrier_class = udp
+  provider_engine_runtime_winn_engine_winn3_inner_mtu = 1373
+  provider_engine_runtime_winn_engine_winn3_plan_message_size = 1402
+  provider_engine_runtime_winn_engine_winn3_plan_mtu_ceiling = 1450
+  converged: the promotion proof gate converged (gate carrying AND RxPackets>0 AND in-tunnel
+    probe response observed) — evidenced by "PROVEN; promotion HELD" provider log + gateway
+    carriage_proven=true / promoted=1. There is no literal "converged" field in the iOS doc.
+
+CONTAINMENT (all pass; installed state, not just requested):
+  provider_dev_containment_active = true
+  provider_dev_containment_requested = true
+  provider_dev_containment_supported_by_build = true
+  provider_dev_containment_kind = dev_narrow_route_no_ipv6_no_dns
+  provider_dev_containment_observed = true
+  provider_dev_containment_observed_contained = true
+  provider_dev_containment_default_ipv4_route_installed = false        (no default route leak)
+  provider_dev_containment_observed_default_ipv4_route_installed = false
+  provider_dev_containment_ipv6_settings_installed = false             (no IPv6 settings)
+  provider_dev_containment_observed_ipv6_settings_installed = false
+  provider_dev_containment_dns_settings_installed = false              (no DNS settings)
+  provider_dev_containment_observed_dns_settings_installed = false
+  provider_dev_containment_included_route_count = 1
+  provider_dev_containment_observed_included_route_count = 1
+  provider_dev_containment_observed_included_route_prefix_lengths = 32 (/32 only)
+  provider_dev_containment_test_route_usable = true
+  provider_dev_containment_test_route_prefix_length = 32
+  provider_dev_containment_transport_exclusion_route_present = true   (endpoint /32 carve-out)
+  provider_transport_ipv4_exclusion_route_present = true
+  provider_transport_ipv4_route_excluded = true
+
+CONFIG-REQUESTED (for contrast — the INI requests full tunnel; containment refused it):
+  provider_default_route_enabled = true
+  provider_dev_containment_config_requested_default_route = true
+  provider_dev_containment_config_requested_ipv6_leak_protection = true
+  provider_dev_containment_config_requested_full_tunnel_dns = true
+  provider_config_size_bytes = 883, provider_config_source = transient_start_options
+  provider_client_key_pair_verified = true
+  provider_expected_client_public_key_valid = true (source saved_tunnel_preference)
+
+GATES:
+  provider_winn_memory_gate_checked=true available=40008904 required=12582912
+    phys_footprint=12419896 allowed=true carrier=winn3
+  vpn_configuration_permission_pending = false  (owner's Allow tap persisted)
+  vpn_manager_invalid_after_config_save = false
+  status = disconnected (by design after the held proof; the contained dev session never claims
+    the phone and self-cancels within 900s)
+
+FULL READINESS MAP (all 120+ fields, chunked capture):
+T-I-CHUNK[END]: =|=|=|=|=|=|=|=|=|=|=|=|=|
+T-I-CHUNK[14]: active=false|configuration_installed=true|engine_ready=false|interface_open=false|network_extension_connected=false|platform=ios|provider_awg_obfuscation_present=true|provider_bundle_id=org.winsvpn.app.debug.PacketTunnel|provider_client_key_pair_verification_required=true|provider_client_key_pair_verified=true|provider_config_app_group_container_available=true|provider_config_app_group_id_allowed=true|provider_config_app_group_id_present=true|provider_config_max_size_bytes=262144|
+T-I-CHUNK[28]: provider_config_size_bytes=883|provider_config_source=transient_start_options|provider_config_source_available=true|provider_default_route_enabled=true|provider_dev_containment_active=true|provider_dev_containment_config_requested_default_route=true|provider_dev_containment_config_requested_full_tunnel_dns=true|provider_dev_containment_config_requested_ipv6_leak_protection=true|provider_dev_containment_default_ipv4_route_installed=false|provider_dev_containment_dns_settings_installed=false|provider_dev_containment_included_route_count=1|provider_dev_containment_ipv6_settings_installed=false|provider_dev_containment_kind=dev_narrow_route_no_ipv6_no_dns|provider_dev_containment_observed=true|
+T-I-CHUNK[42]: provider_dev_containment_observed_contained=true|provider_dev_containment_observed_default_ipv4_route_installed=false|provider_dev_containment_observed_dns_settings_installed=false|provider_dev_containment_observed_included_route_count=1|provider_dev_containment_observed_included_route_prefix_lengths=32|provider_dev_containment_observed_ipv6_settings_installed=false|provider_dev_containment_requested=true|provider_dev_containment_supported_by_build=true|provider_dev_containment_test_route_explicit=false|provider_dev_containment_test_route_prefix_length=32|provider_dev_containment_test_route_usable=true|provider_dev_containment_transport_exclusion_route_present=true|provider_dns_count=1|provider_dns_full_tunnel_match_enabled=true|
+T-I-CHUNK[56]: provider_dns_match_domains=[]|provider_engine_ready=false|provider_engine_runtime_winn_engine_closed=false|provider_engine_runtime_winn_engine_socket_owned_by_engine=true|provider_engine_runtime_winn_engine_winn3_carrier_class=udp|provider_engine_runtime_winn_engine_winn3_gate_state=carrying|provider_engine_runtime_winn_engine_winn3_inner_mtu=1373|provider_engine_runtime_winn_engine_winn3_may_carry=true|provider_engine_runtime_winn_engine_winn3_messages_received=3|provider_engine_runtime_winn_engine_winn3_messages_sent=3|provider_engine_runtime_winn_engine_winn3_migrations=0|provider_engine_runtime_winn_engine_winn3_plan_message_size=1402|provider_engine_runtime_winn_engine_winn3_plan_mtu_ceiling=1450|provider_engine_runtime_winn_engine_winn3_queue_dropped_inbound=0|
+T-I-CHUNK[70]: provider_engine_runtime_winn_engine_winn3_queue_dropped_outbound=0|provider_engine_runtime_winn_engine_winn3_rx_bytes=91|provider_engine_runtime_winn_engine_winn3_rx_dropped_closed=0|provider_engine_runtime_winn_engine_winn3_rx_dropped_invalid=0|provider_engine_runtime_winn_engine_winn3_rx_offered=1|provider_engine_runtime_winn_engine_winn3_rx_packets=1|provider_engine_runtime_winn_engine_winn3_tx_bytes=75|provider_engine_runtime_winn_engine_winn3_tx_dropped_closed=0|provider_engine_runtime_winn_engine_winn3_tx_dropped_invalid=0|provider_engine_runtime_winn_engine_winn3_tx_packets=1|provider_error=The winn/3 standalone datapath was proven and promotion was held on purpose; full-tunnel settings were not installed.|provider_error_code=1034|provider_error_domain=org.winsvpn.PacketTunnel|provider_expected_client_public_key_available=true|
+T-I-CHUNK[84]: provider_expected_client_public_key_source=saved_tunnel_preference|provider_expected_client_public_key_valid=true|provider_healthy=false|provider_interface_ipv4_address_present=true|provider_ipv6_leak_protection_enabled=true|provider_ipv6_sink_address_present=true|provider_ipv6_sink_prefix_length=128|provider_message_probe_attempted=false|provider_message_probe_healthy=false|provider_message_probe_supported=false|provider_mtu=1280|provider_network_extension_type=packet_tunnel|provider_network_settings_applied=true|provider_network_settings_ready=false|
+T-I-CHUNK[98]: provider_network_settings_remote_address_kind=ipv4|provider_network_settings_remote_address_source=transport_endpoint_ipv4|provider_peer_endpoint_kind=ipv4|provider_peer_endpoint_present=true|provider_private_key_source=transient_start_options|provider_ready=false|provider_reported_bundle_id=org.winsvpn.app.debug.PacketTunnel|provider_required_engine_components=[amneziawg_packet_engine]|provider_route_count=1|provider_shared_config_private_key_redacted=false|provider_stage=engine_start_failed|provider_status_available=true|provider_status_container_available=true|provider_status_current=true|
+T-I-CHUNK[112]: provider_status_file_present=true|provider_status_file_readable=true|provider_status_file_size_bytes=6669|provider_status_generation=27F91A4F-62DA-452B-A30E-E4847497FA1D|provider_status_json_valid=true|provider_status_max_file_size_bytes=65536|provider_status_schema_supported=true|provider_status_schema_version=2|provider_transport_endpoint_kind=ipv4|provider_transport_ipv4_exclusion_route_present=true|provider_transport_ipv4_route_excluded=true|provider_transport_mode=winn|provider_updated_at=2026-08-23T08:39:39Z|provider_winn_memory_gate_allowed=true|
+T-I-CHUNK[END]: provider_winn_memory_gate_available_bytes=40008904|provider_winn_memory_gate_available_measured=true|provider_winn_memory_gate_carrier=winn3|provider_winn_memory_gate_checked=true|provider_winn_memory_gate_phys_footprint_bytes=12419896|provider_winn_memory_gate_required_bytes=12582912|provider_xray_enabled=false|status=disconnected|tunnel_healthy=false|vpn_configuration_permission_pending=false|vpn_manager_invalid_after_config_save=false|vpn_present=false|vpn_validated=false|

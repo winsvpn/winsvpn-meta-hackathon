@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/test_apple_standalone_v3_wiring.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:41:08.026014+00:00",
+    "exit_code": 0,
+    "seconds": 0.08,
+    "log": "apple-wiring.log"
+  }
+]

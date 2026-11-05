@@ -1,0 +1,4 @@
+[Interface]
+Address = 10.10.0.2/32
+[Peer]
+Endpoint = 192.0.2.20:51820

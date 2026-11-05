@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TV launch/splash background. Matches the banner and app mark dark navy
+         so the startup window never flashes white on a set. -->
+    <color name="tv_launch_background">#0B1524</color>
+</resources>

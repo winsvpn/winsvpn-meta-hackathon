@@ -1,0 +1,22 @@
+{
+  "mandatory_commands": 20,
+  "mandatory_passed": 20,
+  "round12_tests": 17,
+  "asgi_probes": "PASS",
+  "negative_control_selected_tests": 11,
+  "native_registration": {
+    "passed": 46,
+    "total": 48,
+    "preexisting_source_freeze_failures": 2
+  },
+  "linux_native_delivery": {
+    "passed": 9,
+    "total": 9
+  },
+  "source_hashes_unchanged_since_verification": true,
+  "text_evidence_files_checked_for_LF": 64,
+  "missing_report_links": [],
+  "final_rulings_exit_code": 0,
+  "report_sha256": "176ac30fa60d1fbe77ddb1a479d4826b8c9cfcc70238cbbbec46a4c0d7d587d9",
+  "head": "89be66e75747c0b493583ca9c9efd7787c88a974"
+}

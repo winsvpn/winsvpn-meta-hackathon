@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-apple-export-compliance-v1",
+  "last_reviewed": "2026-08-31",
+  "status_scope": "owner_decision_only",
+  "counsel_review_status": "pending",
+  "export_classification_status": "pending",
+  "filings_status": "none_filed",
+  "exact_artifact_verification_status": "pending",
+  "marking_note": "OWNER APPROVED 2026-08-31; COUNSEL REVIEW PENDING. This does not state or imply counsel review, classification, filing, or Apple approval.",
+  "canonical_release": "1.0.17+34",
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "status": "approved",
+  "uses_encryption": true,
+  "implements_standard_encryption_outside_apple_os": true,
+  "implements_proprietary_or_nonstandard_encryption": true,
+  "exemption_claimed": false,
+  "its_app_uses_non_exempt_encryption": true,
+  "apple_declaration_approved": false,
+  "export_compliance_code_present": false,
+  "unsigned_artifact_may_carry_declaration": false,
+  "owner_signoff_status": "approved",
+  "facts_file": "app_store/apple/review/export_compliance_facts.txt",
+  "required_surfaces": [
+    "ios",
+    "embedded_watchos_companion",
+    "macos"
+  ],
+  "non_shipping_surfaces": [
+    "tvos"
+  ]
+}

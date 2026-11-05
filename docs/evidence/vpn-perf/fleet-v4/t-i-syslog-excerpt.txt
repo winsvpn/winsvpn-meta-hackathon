@@ -1,0 +1,40 @@
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+    AlertItems: ownsHomeGesture; FGActive; suppressedBundles: org.winsvpn.app.debug->(none); suppressedScenes: 1->0; belowAllowsDimming: N->Y,
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+    AlertItems: ownsHomeGesture; FGActive; suppressedBundles: (none)->org.winsvpn.app.debug; suppressedScenes: 0->1; belowAllowsDimming: Y->N,
+Aug 22 23:58:22.937053 Runner(NetworkExtension)[2785] <Info>: Loading all configurations
+Aug 22 23:58:23.128783 Runner(NetworkExtension)[2785] <Notice>:  Saving configuration Win's VPN with existing signature (null)
+Aug 22 23:58:23.133208 SpringBoard[35] <Info>: Sending back 0 textField response(s) to alert item owner.
+Aug 22 23:58:23.133622 SpringBoard(SpringBoardFoundation)[35] <Notice>: Unregistered participant: <AlertItems>
+Aug 22 23:58:23.134414 SpringBoard(SpringBoardFoundation)[35] <Notice>: Resolved Stack (remove(AlertItems)) [
+Aug 22 23:58:23.555126 SpringBoard(SpringBoardFoundation)[35] <Notice>: Registered participant: <AlertItems>
+Aug 22 23:58:23.555158 SpringBoard(SpringBoardFoundation)[35] <Notice>: _updatePreferences <AlertItems>: {
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+Aug 22 23:58:23.556067 SpringBoard(SpringBoardFoundation)[35] <Notice>: Resolved Stack (add(AlertItems)) [
+    ++AlertItems: ownsHomeGesture; FGActive; suppressedBundles: org.winsvpn.app.debug; suppressedScenes: 1,
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+    AlertItems: ownsHomeGesture; FGActive; suppressedBundles: org.winsvpn.app.debug->(none); suppressedScenes: 1->0; belowAllowsDimming: N->Y,
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+    AlertItems: ownsHomeGesture; FGActive; suppressedBundles: (none)->org.winsvpn.app.debug; suppressedScenes: 0->1; belowAllowsDimming: Y->N,
+Aug 23 00:27:55.615995 Runner(NetworkExtension)[2804] <Info>: Loading all configurations
+Aug 23 00:27:55.623890 Runner(NetworkExtension)[2804] <Notice>:  Saving configuration Win's VPN with existing signature (null)
+Aug 23 00:27:55.628152 SpringBoard[35] <Info>: Sending back 0 textField response(s) to alert item owner.
+Aug 23 00:27:55.628576 SpringBoard(SpringBoardFoundation)[35] <Notice>: Unregistered participant: <AlertItems>
+Aug 23 00:27:55.629325 SpringBoard(SpringBoardFoundation)[35] <Notice>: Resolved Stack (remove(AlertItems)) [
+Aug 23 00:27:56.048458 SpringBoard(SpringBoardFoundation)[35] <Notice>: Registered participant: <AlertItems>
+Aug 23 00:27:56.048589 SpringBoard(SpringBoardFoundation)[35] <Notice>: _updatePreferences <AlertItems>: {
+    overrideKeyboardFocusTarget: AlertItems,
+    homeAffordanceDrawingSuppression: AlertItems,
+    activationState: AlertItems,
+Aug 23 00:27:56.049430 SpringBoard(SpringBoardFoundation)[35] <Notice>: Resolved Stack (add(AlertItems)) [
+    ++AlertItems: ownsHomeGesture; FGActive; suppressedBundles: org.winsvpn.app.debug; suppressedScenes: 1,

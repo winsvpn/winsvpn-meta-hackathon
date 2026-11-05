@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-08-03T11:26:57Z",
+  "flutter_analyze": {
+    "rc": 0,
+    "clean": true,
+    "tail": "Analyzing wins_vpn...                                           \nNo issues found! (ran in 2.1s)\n"
+  },
+  "flutter_test": {
+    "rc": 0,
+    "passed_count": 341,
+    "tail": "t/account_deletion_test.dart: AccountDeletionSheet UI states cancelling a pending request calls the hub and shows the result\n00:04 +331: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: AccountDeletionSheet UI states cancelled state offers a fresh delete, not a stuck screen\n00:04 +332: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: AccountDeletionSheet UI states completed state reports the account is gone\n00:04 +333: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: AccountDeletionSheet UI states an unreachable hub reports failure and changes nothing\n00:04 +334: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: AccountDeletionSheet UI states refresh re-reads status while a request is pending\n00:04 +335: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: AccountDeletionSheet UI states closing the sheet without acting reports no deletion\n00:04 +336: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: in-app discoverability and transport contract the account screen carries a Delete Account entry point\n00:04 +337: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: in-app discoverability and transport contract the entry point is hidden for the shared free-access identity\n00:04 +338: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: in-app discoverability and transport contract every deletion call is authenticated with this device's own token\n00:04 +339: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: in-app discoverability and transport contract all four hub routes are reachable through gateway failover\n00:04 +340: /Users/owner/Documents/wins/source/wins_vpn/test/account_deletion_test.dart: in-app discoverability and transport contract a completed deletion wipes local credentials for the dead account\n00:04 +341: All tests passed!\n"
+  },
+  "go_test_clientbinding": {
+    "rc": 0,
+    "tail": "ok  \twinsvpn.local/winnprotocol/clientbinding\t(cached)\n"
+  }
+}

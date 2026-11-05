@@ -1,0 +1,333 @@
+--- before/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
++++ after/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
+@@ -1073,7 +1073,13 @@
+         if (action == "ACTION_CONNECT") {
+             if (tearingDown || isTeardownInProgress()) {
+                 Log.i("WinsVpnService", "ACTION_CONNECT received while teardown is in flight; awaiting completion.")
+-                awaitTeardown(2500L)
++                if (!awaitTeardown(2500L)) {
++                    Log.e(
++                        "WinsVpnService",
++                        "Refusing ACTION_CONNECT because the prior teardown did not finish within 2500 ms.",
++                    )
++                    return START_NOT_STICKY
++                }
+             }
+         }
+ 
+@@ -1150,6 +1156,16 @@
+             WinnV3AwgXrayGrantStore.clear()
+         }
+ 
++        val xraySection = parseConfigSection(config, "xray")
++        val xrayEnabled = parseBool(xraySection["enabled"])
++        if (xrayEnabled) {
++            logError("Refusing Xray mode before carrier launch because its socket is not individually protected. No DNS lookup or carrier process was started.")
++            refuseWinn3Start(winn3Requested, winn3StartToken, winn3StartGeneration)
++            clearRestartConfig()
++            executeTunnelTeardown()
++            return START_NOT_STICKY
++        }
++
+         // RE-ARM THE OS-LEVEL KILL SWITCH ON EVERY CONNECT. Always-on is a
+         // single global slot per user and OEM firmware can drop it; rewriting
+         // it when the state file says armed is what makes the guarantee
+@@ -1177,8 +1193,6 @@
+         }
+         acquireTunnelPerformanceLocks()
+ 
+-        val xraySection = parseConfigSection(config, "xray")
+-        val xrayEnabled = parseBool(xraySection["enabled"])
+         if (winn3Requested && xrayEnabled) {
+             logError(
+                 "Tunnel config enables Winn Protocol v3 and the stealth Xray transport. " +
+@@ -1430,14 +1444,7 @@
+             }
+             debugLog("IPv6 sink route installed.")
+ 
+-            val xrayRequiresProtectedCarrier =
+-                mode == "stealth-xray" || mode == "winn-v3-stealth-chain"
+-            if (xrayRequiresProtectedCarrier) {
+-                logError("Refusing Xray mode because its carrier socket is not individually protected; excluding the app UID would route app traffic outside the VPN.")
+-                clearRestartConfig()
+-                executeTunnelTeardown()
+-                return START_NOT_STICKY
+-            } else if (winnEnabled) {
++            if (winnEnabled) {
+                 debugLog("App UID remains inside the VPN tunnel; the Winn outer UDP socket is individually protected.")
+             } else {
+                 debugLog("App UID remains inside the VPN tunnel; the AmneziaWG socket is individually protected.")
+--- before/linux/runner/linux_tunnel_backend.cc
++++ after/linux/runner/linux_tunnel_backend.cc
+@@ -86,6 +86,7 @@
+ // answers "was this tunnel supposed to have one", and it is the difference
+ // between a healthy AmneziaWG tunnel and a Winn tunnel whose engine has died.
+ bool g_winn_tunnel_active = false;
++bool g_tunnel_session_committed = false;
+ bool IsTunnelRunning();
+ 
+ // WINN DATAPATH PROGRESS, sampled by IsTunnelRunning on winn/3.
+@@ -4094,6 +4095,7 @@
+     }
+     g_last_winn3_proof =
+         winsvpn::winn3host::MakeConnectedWinn3StartProof(transition_generation);
++    g_tunnel_session_committed = true;
+     return true;
+   }
+ 
+@@ -4347,6 +4349,7 @@
+   std::remove(config_path.c_str());
+   g_linux_split_tunnel_ready = !g_linux_excluded_apps.empty();
+   StartTunnelPowerProtection();
++  g_tunnel_session_committed = true;
+   return true;
+ }
+ 
+@@ -4445,6 +4448,7 @@
+       if (error != nullptr) *error = winn3_error;
+       return false;
+     }
++    g_tunnel_session_committed = false;
+     return true;
+   }
+ 
+@@ -4480,6 +4484,7 @@
+   if (!data_directory.empty()) {
+     std::remove((data_directory + "/winsvpn.conf").c_str());
+   }
++  g_tunnel_session_committed = false;
+   return true;
+ }
+ 
+@@ -4992,6 +4997,11 @@
+ 
+ }  // namespace
+ 
++bool ShutdownLinuxTunnelBackend(std::string* error) {
++  if (!g_tunnel_session_committed) return true;
++  return StopTunnel(error);
++}
++
+ void RegisterLinuxTunnelBackend(FlBinaryMessenger* messenger) {
+   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+   g_channel = fl_method_channel_new(messenger, kChannelName,
+--- before/linux/runner/linux_tunnel_backend.h
++++ after/linux/runner/linux_tunnel_backend.h
+@@ -3,6 +3,9 @@
+ 
+ #include <flutter_linux/flutter_linux.h>
+ 
++#include <string>
++
+ void RegisterLinuxTunnelBackend(FlBinaryMessenger* messenger);
++bool ShutdownLinuxTunnelBackend(std::string* error);
+ 
+ #endif  // RUNNER_LINUX_TUNNEL_BACKEND_H_
+--- before/linux/runner/main.cc
++++ after/linux/runner/main.cc
+@@ -2,6 +2,7 @@
+ #include "linux_secure_store_async.h"
+ #include "my_application.h"
+ 
++#include <glib-unix.h>
+ #include <sys/stat.h>
+ 
+ #include <csignal>
+@@ -9,6 +10,11 @@
+ #include <string>
+ 
+ namespace {
++
++gboolean QuitApplicationFromUnixSignal(gpointer user_data) {
++  g_application_quit(G_APPLICATION(user_data));
++  return G_SOURCE_CONTINUE;
++}
+ 
+ void HardenLegacyStateFiles() {
+   const char* xdg = std::getenv("XDG_DATA_HOME");
+@@ -35,5 +41,12 @@
+   // issued synchronously (blocking) on the UI thread.
+   InitializeLinuxSecureStoreAsync();
+   g_autoptr(MyApplication) app = my_application_new();
+-  return g_application_run(G_APPLICATION(app), argc, argv);
++  const guint sigint_source =
++      g_unix_signal_add(SIGINT, QuitApplicationFromUnixSignal, app);
++  const guint sigterm_source =
++      g_unix_signal_add(SIGTERM, QuitApplicationFromUnixSignal, app);
++  const int status = g_application_run(G_APPLICATION(app), argc, argv);
++  g_source_remove(sigint_source);
++  g_source_remove(sigterm_source);
++  return status;
+ }
+--- before/linux/runner/my_application.cc
++++ after/linux/runner/my_application.cc
+@@ -113,9 +113,10 @@
+ 
+ // Implements GApplication::shutdown.
+ static void my_application_shutdown(GApplication* application) {
+-  // MyApplication* self = MY_APPLICATION(object);
+-
+-  // Perform any actions required at application shutdown.
++  std::string error;
++  if (!ShutdownLinuxTunnelBackend(&error)) {
++    g_warning("Linux tunnel shutdown cleanup failed: %s", error.c_str());
++  }
+ 
+   G_APPLICATION_CLASS(my_application_parent_class)->shutdown(application);
+ }
+--- before/server/wins_control_plane_setup_ONETOUCH.sh
++++ after/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -5898,7 +5898,7 @@
+ import urllib.request
+ import urllib.parse
+ import urllib.error
+-from contextlib import contextmanager
++from contextlib import closing, contextmanager
+ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+ from datetime import datetime, timedelta, timezone
+ from email.mime.application import MIMEApplication
+@@ -6534,26 +6534,27 @@
+         now_utc = security_now_utc()
+         utc_text, local_text = security_time_text(now_utc)
+         detail_text = security_details_json(details)
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
+-            ensure_security_events_db(conn)
+-            conn.execute("""
+-                INSERT OR IGNORE INTO security_events (
+-                    event_id, observed_at_utc, observed_at_eastern, priority, event_type,
+-                    source_ip, source_ip_bucket, request_path, details_hash, details_json, email_status
+-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+-            """, (
+-                event_id,
+-                now_utc.isoformat(),
+-                local_text,
+-                int(priority),
+-                event_type,
+-                None,
+-                security_event_hash(source_ip or "unknown"),
+-                security_event_hash(path) if path else "",
+-                security_event_hash(detail_text),
+-                detail_text,
+-                email_status,
+-            ))
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn:
++            with conn:
++                ensure_security_events_db(conn)
++                conn.execute("""
++                    INSERT OR IGNORE INTO security_events (
++                        event_id, observed_at_utc, observed_at_eastern, priority, event_type,
++                        source_ip, source_ip_bucket, request_path, details_hash, details_json, email_status
++                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
++                """, (
++                    event_id,
++                    now_utc.isoformat(),
++                    local_text,
++                    int(priority),
++                    event_type,
++                    None,
++                    security_event_hash(source_ip or "unknown"),
++                    security_event_hash(path) if path else "",
++                    security_event_hash(detail_text),
++                    detail_text,
++                    email_status,
++                ))
+     except Exception as exc:
+         logger.warning("Security event DB write failed: %s", exc)
+     return event_id
+@@ -6562,11 +6563,12 @@
+     if not event_id:
+         return
+     try:
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
+-            conn.execute(
+-                "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
+-                (status, error[:500], event_id),
+-            )
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn:
++            with conn:
++                conn.execute(
++                    "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
++                    (status, error[:500], event_id),
++                )
+     except Exception as exc:
+         logger.warning("Security event DB email-status update failed: %s", exc)
+ 
+@@ -16913,6 +16915,45 @@
+         return False
+     return parsed.scheme == "https" and bool(parsed.netloc)
+ 
++def validated_btcpay_checkout_url(raw_url: str) -> str:
++    """Bind checkout navigation to the configured HTTPS origin."""
++    def normalized_url(value: str):
++        if not isinstance(value, str) or not value or re.search(r"[\x00-\x20\x7f\\]", value):
++            raise ValueError("BTCPay URL is missing or contains forbidden characters")
++        parsed = urllib.parse.urlsplit(value)
++        if parsed.scheme != "https" or not parsed.netloc:
++            raise ValueError("BTCPay URL must use HTTPS")
++        if parsed.username is not None or parsed.password is not None:
++            raise ValueError("BTCPay URL must not contain user information")
++        if not re.fullmatch(r"(?:\[[0-9A-Fa-f:.]+\]|[^:\[\]]+)(?::[0-9]+)?", parsed.netloc):
++            raise ValueError("BTCPay URL has a malformed authority")
++        hostname = parsed.hostname
++        if not hostname or "%" in hostname:
++            raise ValueError("BTCPay URL has an invalid hostname")
++        if ":" in hostname:
++            hostname = ipaddress.IPv6Address(hostname).compressed
++            authority = f"[{hostname}]"
++        else:
++            hostname = hostname.encode("idna").decode("ascii").lower().removesuffix(".")
++            if len(hostname) > 253 or not all(
++                re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
++                for label in hostname.split(".")
++            ):
++                raise ValueError("BTCPay URL has an invalid hostname")
++            authority = hostname
++        port = parsed.port if parsed.port is not None else 443
++        if port < 1:
++            raise ValueError("BTCPay URL has an invalid port")
++        if port != 443:
++            authority += f":{port}"
++        return parsed._replace(netloc=authority), ("https", hostname, port)
++
++    checkout, checkout_origin = normalized_url(raw_url)
++    _, configured_origin = normalized_url(BTCPAY_URL)
++    if checkout_origin != configured_origin:
++        raise ValueError("BTCPay checkout URL origin does not match BTCPAY_URL")
++    return checkout.geturl()
++
+ def crypto_plan_label(plan_key: str) -> str:
+     return {
+         "one_month": "1 Month Subscription",
+@@ -19604,7 +19645,11 @@
+             )
+         raise HTTPException(status_code=502, detail="Unable to create crypto invoice")
+     invoice_id = str(invoice.get("id") or "")
+-    checkout_url = str(invoice.get("checkoutLink") or "")
++    checkout_url = ""
++    try:
++        checkout_url = validated_btcpay_checkout_url(invoice.get("checkoutLink"))
++    except ValueError:
++        logger.warning("BTCPay invoice returned an invalid checkout origin")
+     # H-1: require a well-formed invoice id, then atomically bind it to the order
+     # (creating -> pending). Until this bind lands the order is unprovisionable,
+     # and it can only ever be claimed once by the settlement webhook.
+@@ -21267,6 +21312,9 @@
+     dev = device_id or deviceid or body.get("device_id") or body.get("deviceid") or ""
+     if not dev:
+         raise HTTPException(status_code=400, detail="Missing device_id/deviceid")
++    return await asyncio.to_thread(free_logout_device_sync, background_tasks, request, dev)
++
++def free_logout_device_sync(background_tasks: BackgroundTasks, request: Request, dev: str):
+     account_number, synthetic_device_id, hardware_fingerprint = free_identity_for_device(dev)
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -21315,6 +21363,9 @@
+     dev = device_id or deviceid or form.get("device_id") or form.get("deviceid") or ""
+     if not acc or not dev:
+         raise HTTPException(status_code=400, detail="Missing account_number/accountnumber or device_id/deviceid")
++    return await asyncio.to_thread(logout_device_sync, background_tasks, request, acc, dev)
++
++def logout_device_sync(background_tasks: BackgroundTasks, request: Request, acc: str, dev: str):
+     with get_db() as conn:
+         ensure_schema(conn)
+         # M-5: /logout must not trust account_number+device_id alone once a

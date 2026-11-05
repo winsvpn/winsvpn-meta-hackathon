@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Calculator, replacing the shield mark on 2026-08-08.
+
+     WHY THE SHIELD HAD TO GO. app_name became "Calculator" permanently when the
+     watch naming leak was closed, but the icon beside that word was still a
+     security shield. A calculator labelled "Calculator" with a shield glyph is
+     a sharper tell than the honest name was: a plain name invites no second
+     look, a mismatch invites exactly one. The watch is the worse surface for
+     this because it sits visible on the wrist and is not something a user
+     thinks to sanitise.
+
+     GEOMETRY, AND WHY IT IS SMALLER THAN THE PHONE'S. The phone's
+     ic_calculator.xml fills 10..98 of the 108 viewport, which is right for a
+     squircle-masked launcher. The Wear launcher masks to a CIRCLE, so anything
+     outside the inscribed 72dp safe zone is cut. The body here is 44 wide by
+     56 tall centred on (54,54): its diagonal is sqrt(44^2 + 56^2) = 71.2,
+     which fits inside 72 with the corners to spare. Two rows of three keys
+     rather than the phone's denser grid, because at watch-launcher size a
+     third row collapses into a smear.
+
+     PALETTE is the phone's, deliberately: a user who sees both devices should
+     see one app, not two that happen to share a name.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Body. Rounded rect, x 32..76, y 26..82. -->
+    <path
+        android:fillColor="#202124"
+        android:pathData="M38,26h32a6,6 0 0 1 6,6v44a6,6 0 0 1 -6,6h-32a6,6 0 0 1 -6,-6v-44a6,6 0 0 1 6,-6z" />
+
+    <!-- Screen. -->
+    <path
+        android:fillColor="#3C4043"
+        android:pathData="M38,32h32v14h-32z" />
+
+    <!-- Readout bar inside the screen: the one accent, and the detail that
+         stops the screen reading as an empty window at small size. -->
+    <path
+        android:fillColor="#8AB4F8"
+        android:pathData="M42,36h24v6h-24z" />
+
+    <!-- Keys: two rows of three, 8x10, 4dp gutters. -->
+    <path
+        android:fillColor="#E8EAED"
+        android:pathData="M38,54h8v10h-8zM50,54h8v10h-8zM62,54h8v10h-8zM38,68h8v10h-8zM50,68h8v10h-8zM62,68h8v10h-8z" />
+</vector>

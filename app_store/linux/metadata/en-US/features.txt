@@ -1,0 +1,7 @@
+Winn v3 primary encrypted VPN for Linux desktops
+Winn v1 AWG then Xray ordered compatibility path
+Required website kind is a native tarball, not a DEB upload
+Native x64 tarball and derived amd64 Debian package
+Flathub target org.winsvpn.WinsVPN and Snap strict design, both held
+Flathub and Snap listing and screenshots owner-blocked
+Browser native messaging host for the official companion

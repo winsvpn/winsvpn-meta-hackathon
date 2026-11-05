@@ -1,0 +1,2490 @@
+--- a/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
++++ b/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
+@@ -147,7 +147,7 @@
+             "Winn Protocol v3 started but no datagram was observed crossing in both " +
+                 "directions within the convergence deadline, so the tunnel was stopped " +
+                 "instead of being reported as connected."
+-        private const val WAKE_LOCK_TIMEOUT_MS = 10 * 60 * 1000L
++        private const val STARTUP_WAKE_LOCK_TIMEOUT_MS = 60_000L
+         private const val XRAY_CONFIG_FILE = "wins_xray_client.json"
+ 
+         // ---- Kill switch ---------------------------------------------------
+@@ -2401,7 +2401,6 @@
+                         )
+                         refreshUnderlyingNetworkHint("VPN visibility gap")
+                     }
+-                    if (tunnelWakeLock?.isHeld != true) acquireTunnelWakeLock()
+                     // Re-assert the notification against the live composite each
+                     // sample: if the engine stalls this flips a "Connected" claim
+                     // back to "Connecting..." the moment the health check sees it,
+@@ -3658,7 +3657,7 @@
+                 "WinsVPN:TunnelFastPath"
+             ).apply {
+                 setReferenceCounted(false)
+-                acquire(WAKE_LOCK_TIMEOUT_MS.toLong())
++                acquire(STARTUP_WAKE_LOCK_TIMEOUT_MS)
+             }
+         } catch (e: Exception) {
+             logWarning("VPN wake lock is unavailable", e)
+@@ -3975,7 +3974,8 @@
+             } catch (e: PackageManager.NameNotFoundException) {
+                 logWarning("Skipped a split-tunnel package that is no longer installed.")
+             } catch (e: Exception) {
+-                logWarning("Failed to apply a split-tunnel exclusion.", e)
++                logError("Failed to apply a split-tunnel exclusion.", e)
++                throw IllegalStateException("Android refused a required split-tunnel package exclusion", e)
+             }
+         }
+     }
+--- a/android/app/src/test/kotlin/org/winsvpn/app/AndroidReleaseIdentityContractTest.kt
++++ b/android/app/src/test/kotlin/org/winsvpn/app/AndroidReleaseIdentityContractTest.kt
+@@ -6,7 +6,7 @@
+ import org.junit.Test
+ 
+ /**
+- * Source pins for the 1.0.15+30 phone/TV Play identity.
++ * Source pins for the 1.0.16+33 phone/TV Play identity.
+  *
+  * These tests read Gradle, not a signed AAB. A green run is not evidence that
+  * a release artifact was produced, obfuscated, or signed.
+@@ -14,15 +14,15 @@
+ class AndroidReleaseIdentityContractTest {
+ 
+     @Test
+-    fun `phone and TV share org winsvpn app at 1_0_15 plus 30`() {
++    fun `phone and TV share org winsvpn app at 1_0_16 plus 33`() {
+         val gradle = androidAppGradle()
+         assertTrue(gradle.contains("compileSdk = 36"))
+         assertTrue(gradle.contains("targetSdk = 36"))
+         assertTrue(gradle.contains("ndkVersion = \"29.0.14206865\""))
+         assertTrue(gradle.contains("applicationId = \"org.winsvpn.app\""))
+-        assertTrue(gradle.contains("versionName = \"1.0.15\""))
+-        assertTrue(gradle.contains("versionCode = 30"))
+-        assertTrue(flavorBody(gradle, "tv").contains("versionCode = 3002"))
++        assertTrue(gradle.contains("versionName = \"1.0.16\""))
++        assertTrue(gradle.contains("versionCode = 33"))
++        assertTrue(flavorBody(gradle, "tv").contains("versionCode = 3302"))
+         assertFalse(flavorBody(gradle, "phone").contains("applicationIdSuffix"))
+         assertFalse(flavorBody(gradle, "tv").contains("applicationIdSuffix"))
+         assertFalse(gradle.contains("applicationId = \"org.winsvpn.app.tv\""))
+--- a/docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md
++++ b/docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md
+@@ -376,3 +376,33 @@
+ Existing working changes were preserved. No uninstall/install, deployment,
+ push or release approval occurred. Cursor usage limits and workspace-agent
+ initialization failure prevented independent model review.
++
++### 2026-09-13: requested Round 8 source remediation
++
++Implemented all 12 requested repair groups: expiration-safe customer exports,
++durable device revocation, PayPal capture confirmation, durable v3 registry
++refresh triggers and retry, 70 synchronous route conversions, resolved Linux
++inhibitor executable paths, Android startup-only wake locking and split-tunnel
++failure propagation, Android Xray capability suppression, release identity test
++alignment, browser package rebuilds, and the requested verification/copy fixes.
++Adapted the async heartbeat alias and direct route test callers. The H3 test was
++already staged. Existing dirty work and ruled decisions were preserved.
++
++All 12 mandatory commands pass: analyzer clean; Flutter 1926 pass with 2 existing
++skips; required server suites 196 pass; website 56 checks with 1 existing skip;
++all 65 rulings and the Apple channel contract pass. New Round 8 server tests:
++13 pass, with saved pre-fix negative controls failing as expected. Real ASGI
++worker dispatch, additional affected route suites, Linux arm64/x64 compilation
++and inhibitor harnesses, Go carrier race tests, and both extension ZIP verifiers
++pass. Changed sources/tests use LF. Details, hashes, logs, and limitations:
++[Round 8 remediation](../evidence/round8_remediation.md).
++
++Android Kotlin/lint completed with zero lint errors. The full JVM suite is
++586 pass and 5 artifact failures: absent debug engines, an engine-less existing
++debug APK, and the existing Windows native consumer-authority refusal. The
++identity test passes. The release producer still refuses without a reviewed
++ReleaseInputIndex; no index or release APK exists in the checked artifact paths.
++Connected-phone uninstall/install/launch/logcat and wake-lock expiry remain
++blocked pending that release artifact. No phone installation, commit, push,
++publication, deployment, or release approval occurred. Cursor usage limits and
++workspace-agent startup failure prevented independent model review.
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -11593,7 +11593,7 @@
+           "double_vpn_enabled": _isDoubleVpnRequested,
+           "client_public_key": clientKeys['public_key'],
+           "supports_awg": true,
+-          "supports_xray": true,
++          "supports_xray": !Platform.isAndroid,
+           "supports_split_tunnel": true,
+           "supports_per_app_split_tunnel": _supportsPerAppSplitTunneling,
+           // Winn Protocol v3 single packet authorization. Serving `spa_*` params
+@@ -11717,7 +11717,7 @@
+       "double_vpn_enabled": doubleVpnRequested,
+       "client_public_key": clientKeys['public_key'],
+       "supports_awg": true,
+-      "supports_xray": true,
++      "supports_xray": !Platform.isAndroid,
+       "supports_split_tunnel": true,
+       "supports_per_app_split_tunnel": _supportsPerAppSplitTunneling,
+       // See the note at the paid-activation payload: capability-gated, and
+@@ -12183,7 +12183,7 @@
+       'double_vpn_enabled': doubleVpnRequested,
+       'client_public_key': clientKeys['public_key'],
+       'supports_awg': true,
+-      'supports_xray': true,
++      'supports_xray': !Platform.isAndroid,
+       'supports_split_tunnel': true,
+       'supports_per_app_split_tunnel': _supportsPerAppSplitTunneling,
+       // See the note at the paid-activation payload: capability-gated, and
+--- a/linux/runner/linux_tunnel_backend.cc
++++ b/linux/runner/linux_tunnel_backend.cc
+@@ -881,20 +881,30 @@
+ }
+ 
+ void StartTunnelPowerProtection() {
+-  if (RunArgv({"systemctl", "--user", "is-active", "--quiet",
++  const std::string systemctl = Which("systemctl");
++  const std::string systemd_run = Which("systemd-run");
++  const std::string systemd_inhibit = Which("systemd-inhibit");
++  const std::string sleep = Which("sleep");
++  if (systemctl.empty() || systemd_run.empty() || systemd_inhibit.empty() ||
++      sleep.empty()) {
++    return;
++  }
++  if (RunArgv({systemctl, "--user", "is-active", "--quiet",
+                "winsvpn-power-inhibit.service"},
+               ProcOutput::kSuppress).exit_status == 0) {
+     return;
+   }
+-  RunArgv({"systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
+-           "--collect", "--property=Type=exec", "systemd-inhibit",
++  RunArgv({systemd_run, "--user", "--unit=winsvpn-power-inhibit.service",
++           "--collect", "--property=Type=exec", systemd_inhibit,
+            "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
+-           "sleep", "infinity"},
++           sleep, "infinity"},
+           ProcOutput::kSuppress);
+ }
+ 
+ void StopTunnelPowerProtection() {
+-  RunArgv({"systemctl", "--user", "stop", "winsvpn-power-inhibit.service"},
++  const std::string systemctl = Which("systemctl");
++  if (systemctl.empty()) return;
++  RunArgv({systemctl, "--user", "stop", "winsvpn-power-inhibit.service"},
+           ProcOutput::kSuppress);
+ }
+ 
+--- a/server/test_control_plane_round7.py
++++ b/server/test_control_plane_round7.py
+@@ -282,16 +282,17 @@
+                 with self.subTest(route=route, duration=duration):
+                     request = harness.FakeRequest(path=f"/admin/{route}")
+                     kwargs = dict(request=request, duration=duration, x_admin_token="test-admin-token")
+-                    if route == "provision":
+-                        call = self.mod.provision_account(background_tasks=harness.BackgroundTasks(),
+-                                                          name="Test", email="new@example.test", **kwargs)
+-                    elif route == "renew":
+-                        call = self.mod.renew_account(account_number=harness.ACCOUNT, **kwargs)
+-                    else:
+-                        call = self.mod.admin_issue_redemption_batch(batch_id="test-batch", count=1, **kwargs)
+                     with patch.object(self.mod, "get_db", side_effect=AssertionError("invalid term reached database")):
+                         with self.assertRaises(harness.HTTPException) as error:
+-                            asyncio.run(call)
++                            if route == "provision":
++                                self.mod.provision_account(
++                                    background_tasks=harness.BackgroundTasks(),
++                                    name="Test", email="new@example.test", **kwargs)
++                            elif route == "renew":
++                                self.mod.renew_account(account_number=harness.ACCOUNT, **kwargs)
++                            else:
++                                self.mod.admin_issue_redemption_batch(
++                                    batch_id="test-batch", count=1, **kwargs)
+                     self.assertEqual(error.exception.status_code, 400)
+ 
+     def test_deletion_routes_parse_on_loop_and_keep_it_responsive_under_writer_lock(self):
+--- a/server/test_core_dark_start_latch.py
++++ b/server/test_core_dark_start_latch.py
+@@ -80,12 +80,10 @@
+             )
+ 
+     def register(self, *, runtime_ready: bool, core_token: str = CORE_TOKEN) -> dict:
+-        return asyncio.run(
+-            self.mod.register_core(
+-                core_registration(self.mod, runtime_ready=runtime_ready),
+-                harness.FakeRequest(path="/api/v1/core/register"),
+-                x_core_token=core_token,
+-            )
++        return self.mod.register_core(
++            core_registration(self.mod, runtime_ready=runtime_ready),
++            harness.FakeRequest(path="/api/v1/core/register"),
++            x_core_token=core_token,
+         )
+ 
+     def make_promotable(self) -> None:
+@@ -105,26 +103,22 @@
+         confirm_core_id: str | None = None,
+     ) -> dict:
+         core_id = self.mod.DOUBLE_VPN_CORE_ID
+-        return asyncio.run(
+-            self.mod.admin_promote_core(
+-                self.request,
+-                core_id=core_id,
+-                confirm_core_id=core_id if confirm_core_id is None else confirm_core_id,
+-                evidence_sha256=evidence_sha256,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        return self.mod.admin_promote_core(
++            self.request,
++            core_id=core_id,
++            confirm_core_id=core_id if confirm_core_id is None else confirm_core_id,
++            evidence_sha256=evidence_sha256,
++            x_admin_token=ADMIN_TOKEN,
+         )
+ 
+     def acknowledge_promotion(self, promotion_id: str) -> dict:
+-        return asyncio.run(
+-            self.mod.acknowledge_core_promotion(
+-                self.mod.CorePromotionAcknowledgement(
+-                    core_id=self.mod.DOUBLE_VPN_CORE_ID,
+-                    promotion_id=promotion_id,
+-                ),
+-                harness.FakeRequest(path="/api/v1/core/promotion/ack"),
+-                x_core_token=CORE_TOKEN,
+-            )
++        return self.mod.acknowledge_core_promotion(
++            self.mod.CorePromotionAcknowledgement(
++                core_id=self.mod.DOUBLE_VPN_CORE_ID,
++                promotion_id=promotion_id,
++            ),
++            harness.FakeRequest(path="/api/v1/core/promotion/ack"),
++            x_core_token=CORE_TOKEN,
+         )
+ 
+     def promote(
+@@ -140,12 +134,10 @@
+         return self.acknowledge_promotion(pending["promotion_id"])
+ 
+     def withdraw(self) -> dict:
+-        return asyncio.run(
+-            self.mod.admin_withdraw_core(
+-                self.request,
+-                core_id=self.mod.DOUBLE_VPN_CORE_ID,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        return self.mod.admin_withdraw_core(
++            self.request,
++            core_id=self.mod.DOUBLE_VPN_CORE_ID,
++            x_admin_token=ADMIN_TOKEN,
+         )
+ 
+     def core(self) -> sqlite3.Row:
+@@ -213,23 +205,19 @@
+ 
+     def test_bootstrap_placeholder_and_registration_are_dark_with_boolean_response(self) -> None:
+         grant_request = harness.FakeRequest(path="/admin/bootstrap-grant")
+-        grant = asyncio.run(
+-            self.mod.mint_bootstrap_grant(
+-                self.mod.BootstrapGrantRequest(
+-                    role="core", subject_id=self.mod.DOUBLE_VPN_CORE_ID
+-                ),
+-                grant_request,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        grant = self.mod.mint_bootstrap_grant(
++            self.mod.BootstrapGrantRequest(
++                role="core", subject_id=self.mod.DOUBLE_VPN_CORE_ID
++            ),
++            grant_request,
++            x_admin_token=ADMIN_TOKEN,
+         )["bootstrap_token"]
+-        bootstrap = asyncio.run(
+-            self.mod.bootstrap_core(
+-                self.mod.CoreBootstrapRequest(
+-                    core_id=self.mod.DOUBLE_VPN_CORE_ID,
+-                    bootstrap_token=grant,
+-                ),
+-                harness.FakeRequest(path="/api/v1/core/bootstrap"),
+-            )
++        bootstrap = self.mod.bootstrap_core(
++            self.mod.CoreBootstrapRequest(
++                core_id=self.mod.DOUBLE_VPN_CORE_ID,
++                bootstrap_token=grant,
++            ),
++            harness.FakeRequest(path="/api/v1/core/bootstrap"),
+         )
+         response = self.register(
+             runtime_ready=False,
+@@ -560,23 +548,19 @@
+             )
+ 
+         with self.assertRaises(harness.HTTPException) as forged:
+-            asyncio.run(
+-                self.mod.withdraw_core_for_deployment(
+-                    self.mod.DOUBLE_VPN_CORE_ID,
+-                    harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
+-                    x_core_token="wrong-core-token-with-enough-entropy",
+-                )
++            self.mod.withdraw_core_for_deployment(
++                self.mod.DOUBLE_VPN_CORE_ID,
++                harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
++                x_core_token="wrong-core-token-with-enough-entropy",
+             )
+         self.assertEqual(forged.exception.status_code, 401)
+         self.assertEqual(self.core()["promoted"], 1)
+ 
+         with self.assertRaises(sqlite3.IntegrityError):
+-            asyncio.run(
+-                self.mod.withdraw_core_for_deployment(
+-                    self.mod.DOUBLE_VPN_CORE_ID,
+-                    harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
+-                    x_core_token=CORE_TOKEN,
+-                )
++            self.mod.withdraw_core_for_deployment(
++                self.mod.DOUBLE_VPN_CORE_ID,
++                harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
++                x_core_token=CORE_TOKEN,
+             )
+         core = self.core()
+         self.assertEqual(core["promoted"], 1)
+@@ -591,12 +575,10 @@
+             )
+             conn.execute("DROP TRIGGER reject_core_installer_assignment_invalidation")
+ 
+-        withdrawn = asyncio.run(
+-            self.mod.withdraw_core_for_deployment(
+-                self.mod.DOUBLE_VPN_CORE_ID,
+-                harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
+-                x_core_token=CORE_TOKEN,
+-            )
++        withdrawn = self.mod.withdraw_core_for_deployment(
++            self.mod.DOUBLE_VPN_CORE_ID,
++            harness.FakeRequest(path="/api/v1/core/deployment/withdraw"),
++            x_core_token=CORE_TOKEN,
+         )
+         self.assertFalse(withdrawn["promoted"])
+         self.assertFalse(withdrawn["runtime_ready"])
+@@ -616,28 +598,24 @@
+         self.assertEqual(blocked.exception.status_code, 409)
+ 
+         with self.assertRaises(harness.HTTPException) as wrong_generation:
+-            asyncio.run(
+-                self.mod.complete_core_deployment(
+-                    self.mod.DOUBLE_VPN_CORE_ID,
+-                    self.mod.DeploymentWithdrawalCompletion(withdrawal_id="0" * 32),
+-                    harness.FakeRequest(path="/api/v1/core/deployment/complete"),
+-                    x_core_token=CORE_TOKEN,
+-                )
++            self.mod.complete_core_deployment(
++                self.mod.DOUBLE_VPN_CORE_ID,
++                self.mod.DeploymentWithdrawalCompletion(withdrawal_id="0" * 32),
++                harness.FakeRequest(path="/api/v1/core/deployment/complete"),
++                x_core_token=CORE_TOKEN,
+             )
+         self.assertEqual(wrong_generation.exception.status_code, 409)
+         self.assertEqual(
+             self.core()["deployment_withdrawal_id"], withdrawn["withdrawal_id"]
+         )
+ 
+-        completed = asyncio.run(
+-            self.mod.complete_core_deployment(
+-                self.mod.DOUBLE_VPN_CORE_ID,
+-                self.mod.DeploymentWithdrawalCompletion(
+-                    withdrawal_id=withdrawn["withdrawal_id"]
+-                ),
+-                harness.FakeRequest(path="/api/v1/core/deployment/complete"),
+-                x_core_token=CORE_TOKEN,
+-            )
++        completed = self.mod.complete_core_deployment(
++            self.mod.DOUBLE_VPN_CORE_ID,
++            self.mod.DeploymentWithdrawalCompletion(
++                withdrawal_id=withdrawn["withdrawal_id"]
++            ),
++            harness.FakeRequest(path="/api/v1/core/deployment/complete"),
++            x_core_token=CORE_TOKEN,
+         )
+         self.assertFalse(completed["promoted"])
+         self.assertEqual(self.core()["promoted"], 0)
+@@ -649,19 +627,17 @@
+         self.register(runtime_ready=True)
+         self.make_promotable()
+         with self.assertRaises(harness.HTTPException) as refused:
+-            asyncio.run(
+-                self.mod.admin_promote_core(
+-                    self.request,
+-                    core_id=self.mod.DOUBLE_VPN_CORE_ID,
+-                    confirm_core_id=self.mod.DOUBLE_VPN_CORE_ID,
+-                    evidence_sha256=EVIDENCE_SHA256,
+-                    x_admin_token="wrong-admin-token",
+-                )
++            self.mod.admin_promote_core(
++                self.request,
++                core_id=self.mod.DOUBLE_VPN_CORE_ID,
++                confirm_core_id=self.mod.DOUBLE_VPN_CORE_ID,
++                evidence_sha256=EVIDENCE_SHA256,
++                x_admin_token="wrong-admin-token",
+             )
+         self.assertEqual(refused.exception.status_code, 401)
+         self.assertNotIn("promoted", self.mod.CoreRegistration.__annotations__)
+         source = harness._extract_main_block()
+-        register_source = source.split('async def register_core(', 1)[1].split(
++        register_source = source.split('def register_core(', 1)[1].split(
+             '\n@app.post("/admin/core/promote")', 1
+         )[0]
+         self.assertIn('"promoted": promoted', register_source)
+--- a/server/test_data_plane_dark_start_latch.py
++++ b/server/test_data_plane_dark_start_latch.py
+@@ -117,11 +117,9 @@
+             )
+ 
+     def register(self, slug: str, *, status: str = "online") -> dict:
+-        return asyncio.run(
+-            self.mod.register_node(
+-                registration_payload(slug, status=status),
+-                harness.FakeRequest(path="/api/v1/nodes/register"),
+-            )
++        return self.mod.register_node(
++            registration_payload(slug, status=status),
++            harness.FakeRequest(path="/api/v1/nodes/register"),
+         )
+ 
+     def make_promotable(self, slug: str) -> None:
+@@ -141,15 +139,13 @@
+         *,
+         confirm_slug: str | None = None,
+     ) -> dict:
+-        return asyncio.run(
+-            self.mod.admin_set_node_tier(
+-                self.request,
+-                slug=slug,
+-                tier="premium",
+-                evidence_sha256=evidence_sha256,
+-                confirm_slug=slug if confirm_slug is None else confirm_slug,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        return self.mod.admin_set_node_tier(
++            self.request,
++            slug=slug,
++            tier="premium",
++            evidence_sha256=evidence_sha256,
++            confirm_slug=slug if confirm_slug is None else confirm_slug,
++            x_admin_token=ADMIN_TOKEN,
+         )
+ 
+     def test_fresh_schema_and_bootstrap_placeholder_default_dark(self) -> None:
+@@ -362,13 +358,11 @@
+             conn.execute(
+                 "UPDATE nodes SET last_heartbeat=? WHERE slug=?", (stale, slug)
+             )
+-        asyncio.run(
+-            self.mod.heartbeat(
+-                self.mod.NodeHeartbeat(
+-                    slug=slug, secret_token=NODE_TOKEN, status="online"
+-                ),
+-                harness.FakeRequest(path="/api/v1/nodes/heartbeat"),
+-            )
++        self.mod.heartbeat(
++            self.mod.NodeHeartbeat(
++                slug=slug, secret_token=NODE_TOKEN, status="online"
++            ),
++            harness.FakeRequest(path="/api/v1/nodes/heartbeat"),
+         )
+         recovered = self.node(slug)
+         self.assertEqual(recovered["status"], "online")
+@@ -597,9 +591,7 @@
+                     (result["promotion_id"],),
+                 )
+ 
+-        listing = asyncio.run(
+-            self.mod.admin_list_node_promotions(self.request, x_admin_token=ADMIN_TOKEN)
+-        )
++        listing = self.mod.admin_list_node_promotions(self.request, x_admin_token=ADMIN_TOKEN)
+         self.assertEqual(listing["promotions"][0]["promotion_id"], result["promotion_id"])
+ 
+     def test_evidence_insert_failure_rolls_back_the_latch(self) -> None:
+@@ -622,14 +614,12 @@
+         slug = "no-tier-bypass"
+         self.make_promotable(slug)
+         self.promote(slug)
+-        asyncio.run(
+-            self.mod.admin_set_node_tier(
+-                self.request,
+-                slug=slug,
+-                tier="off",
+-                evidence_sha256="",
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        self.mod.admin_set_node_tier(
++            self.request,
++            slug=slug,
++            tier="off",
++            evidence_sha256="",
++            x_admin_token=ADMIN_TOKEN,
+         )
+         with self.assertRaises(harness.HTTPException) as refused:
+             self.promote(slug, "")
+@@ -654,27 +644,23 @@
+             )
+ 
+         with self.assertRaises(harness.HTTPException) as forged:
+-            asyncio.run(
+-                self.mod.withdraw_node_for_deployment(
+-                    slug,
+-                    harness.FakeRequest(
+-                        path=f"/api/v1/nodes/{slug}/deployment/withdraw"
+-                    ),
+-                    x_node_token="wrong-node-token",
+-                )
++            self.mod.withdraw_node_for_deployment(
++                slug,
++                harness.FakeRequest(
++                    path=f"/api/v1/nodes/{slug}/deployment/withdraw"
++                ),
++                x_node_token="wrong-node-token",
+             )
+         self.assertEqual(forged.exception.status_code, 401)
+         self.assertEqual(self.node(slug)["operator_enabled"], 1)
+ 
+         with self.assertRaises(sqlite3.IntegrityError):
+-            asyncio.run(
+-                self.mod.withdraw_node_for_deployment(
+-                    slug,
+-                    harness.FakeRequest(
+-                        path=f"/api/v1/nodes/{slug}/deployment/withdraw"
+-                    ),
+-                    x_node_token=NODE_TOKEN,
+-                )
++            self.mod.withdraw_node_for_deployment(
++                slug,
++                harness.FakeRequest(
++                    path=f"/api/v1/nodes/{slug}/deployment/withdraw"
++                ),
++                x_node_token=NODE_TOKEN,
+             )
+         row = self.node(slug)
+         self.assertEqual(row["operator_enabled"], 1)
+@@ -689,12 +675,10 @@
+             )
+             conn.execute("DROP TRIGGER reject_installer_assignment_invalidation")
+ 
+-        withdrawn = asyncio.run(
+-            self.mod.withdraw_node_for_deployment(
+-                slug,
+-                harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/withdraw"),
+-                x_node_token=NODE_TOKEN,
+-            )
++        withdrawn = self.mod.withdraw_node_for_deployment(
++            slug,
++            harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/withdraw"),
++            x_node_token=NODE_TOKEN,
+         )
+         self.assertFalse(withdrawn["operator_enabled"])
+         self.assertEqual(withdrawn["invalidated_assignment_count"], 1)
+@@ -711,26 +695,22 @@
+         self.assertEqual(blocked.exception.status_code, 409)
+ 
+         with self.assertRaises(harness.HTTPException) as wrong_generation:
+-            asyncio.run(
+-                self.mod.complete_node_deployment(
+-                    slug,
+-                    self.mod.DeploymentWithdrawalCompletion(withdrawal_id="0" * 32),
+-                    harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/complete"),
+-                    x_node_token=NODE_TOKEN,
+-                )
++            self.mod.complete_node_deployment(
++                slug,
++                self.mod.DeploymentWithdrawalCompletion(withdrawal_id="0" * 32),
++                harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/complete"),
++                x_node_token=NODE_TOKEN,
+             )
+         self.assertEqual(wrong_generation.exception.status_code, 409)
+         self.assertEqual(self.node(slug)["deployment_withdrawal_id"], withdrawn["withdrawal_id"])
+ 
+-        completed = asyncio.run(
+-            self.mod.complete_node_deployment(
+-                slug,
+-                self.mod.DeploymentWithdrawalCompletion(
+-                    withdrawal_id=withdrawn["withdrawal_id"]
+-                ),
+-                harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/complete"),
+-                x_node_token=NODE_TOKEN,
+-            )
++        completed = self.mod.complete_node_deployment(
++            slug,
++            self.mod.DeploymentWithdrawalCompletion(
++                withdrawal_id=withdrawn["withdrawal_id"]
++            ),
++            harness.FakeRequest(path=f"/api/v1/nodes/{slug}/deployment/complete"),
++            x_node_token=NODE_TOKEN,
+         )
+         self.assertFalse(completed["operator_enabled"])
+         self.assertEqual(self.node(slug)["operator_enabled"], 0)
+@@ -745,22 +725,18 @@
+         slug = "restore-dark"
+         self.make_promotable(slug)
+         self.promote(slug)
+-        retired = asyncio.run(
+-            self.mod.admin_retire_node(
+-                self.request,
+-                slug=slug,
+-                reason="test retirement",
+-                confirm_last_servable_node=slug,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        retired = self.mod.admin_retire_node(
++            self.request,
++            slug=slug,
++            reason="test retirement",
++            confirm_last_servable_node=slug,
++            x_admin_token=ADMIN_TOKEN,
+         )
+         self.assertTrue(retired["ok"])
+-        restored = asyncio.run(
+-            self.mod.admin_restore_node(
+-                self.request,
+-                slug=slug,
+-                x_admin_token=ADMIN_TOKEN,
+-            )
++        restored = self.mod.admin_restore_node(
++            self.request,
++            slug=slug,
++            x_admin_token=ADMIN_TOKEN,
+         )
+         self.assertFalse(restored["operator_enabled"])
+         self.assertEqual(self.node(slug)["operator_enabled"], 0)
+--- a/server/test_hoppy_agent_tier1_hub.py
++++ b/server/test_hoppy_agent_tier1_hub.py
+@@ -112,9 +112,9 @@
+     except (TypeError, ValueError):
+         params = list(handler.__code__.co_varnames[:handler.__code__.co_argcount])
+     if "background_tasks" in params:
+-        result = asyncio.run(handler(request, harness.BackgroundTasks(), model))
++        result = handler(request, harness.BackgroundTasks(), model)
+         return result, request
+-    return asyncio.run(handler(request, model)), request
++    return handler(request, model), request
+ 
+ 
+ def _make_model(mod, path, body):
+--- a/server/test_winn3_descriptor_hub.py
++++ b/server/test_winn3_descriptor_hub.py
+@@ -351,24 +351,21 @@
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault(
+         "request", FakeRequest(path="/admin/nodes/winn3/descriptor"))
+-    return asyncio.run(
+-        mod.admin_set_node_winn3_descriptor(**kwargs))
++    return mod.admin_set_node_winn3_descriptor(**kwargs)
+ 
+ 
+ def admin_list_descriptors(mod, **kwargs):
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault(
+         "request", FakeRequest(path="/admin/nodes/winn3/descriptor"))
+-    return asyncio.run(
+-        mod.admin_list_node_winn3_descriptors(**kwargs))
++    return mod.admin_list_node_winn3_descriptors(**kwargs)
+ 
+ 
+ def admin_retire(mod, **kwargs):
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault(
+         "request", FakeRequest(path="/admin/nodes/winn3/admission/retire"))
+-    return asyncio.run(
+-        mod.admin_retire_node_winn3_previous_admission(**kwargs))
++    return mod.admin_retire_node_winn3_previous_admission(**kwargs)
+ 
+ 
+ def install(mod, payload, slot="g1", slug="lab-alpha"):
+--- a/server/test_winn3_install_time_carrier.py
++++ b/server/test_winn3_install_time_carrier.py
+@@ -162,9 +162,7 @@
+ def admin_winn3(mod, **kwargs):
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault("request", FakeRequest(path="/admin/nodes/winn3"))
+-    return asyncio.run(
+-        mod.admin_set_node_winn3(**kwargs)
+-    )
++    return mod.admin_set_node_winn3(**kwargs)
+ 
+ 
+ def run_validate(source: str, extra_env: dict[str, str] | None = None
+@@ -452,7 +450,7 @@
+             self.source, 'cat > "${APP_DIR}/main.py" <<\'PYEOF\'', "PYEOF"
+         )
+         self.assertIn("def maybe_apply_install_time_standalone_carrier(", hub)
+-        self.assertIn("async def register_node(", hub)
++        self.assertIn("def register_node(", hub)
+         # The call must sit after the INSERT, not instead of omitting the
+         # protocol columns (those stay absent from the node-token path).
+         insert_at = hub.find("INSERT INTO nodes (")
+--- a/server/test_winn3_pathmtu_hub.py
++++ b/server/test_winn3_pathmtu_hub.py
+@@ -288,17 +288,15 @@
+ def admin_winn3(mod, **kwargs):
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault("request", FakeRequest(path="/admin/nodes/winn3"))
+-    return asyncio.run(
+-        mod.admin_set_node_winn3(**kwargs))
++    return mod.admin_set_node_winn3(**kwargs)
+ 
+ 
+ def admin_list_winn3(mod):
+     """GET /admin/nodes/winn3 — the operator pre-flight, not a SELECT * bypass."""
+-    return asyncio.run(
+-        mod.admin_list_node_winn3(
+-            request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
+-            x_admin_token=ADMIN,
+-        ))
++    return mod.admin_list_node_winn3(
++        request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
++        x_admin_token=ADMIN,
++    )
+ 
+ 
+ def served_config(mod, **login_overrides):
+--- a/server/test_winn3_serving_hub.py
++++ b/server/test_winn3_serving_hub.py
+@@ -196,9 +196,7 @@
+ def admin_winn3(mod, **kwargs):
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault("request", FakeRequest(path="/admin/nodes/winn3"))
+-    return asyncio.run(
+-        mod.admin_set_node_winn3(**kwargs)
+-    )
++    return mod.admin_set_node_winn3(**kwargs)
+ 
+ 
+ STANDALONE_ADMIN = {
+@@ -705,11 +703,9 @@
+         raise AssertionError("expected a 409")
+     assert node_row(mod)["protocol_version"] == "winn/1"
+     # ...and the listing degrades to "not ready" instead of raising.
+-    out = asyncio.run(
+-        mod.admin_list_node_winn3(
+-            request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
+-            x_admin_token=ADMIN,
+-        )
++    out = mod.admin_list_node_winn3(
++        request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
++        x_admin_token=ADMIN,
+     )
+     entry = [n for n in out["nodes"] if n["slug"] == "lab-alpha"][0]
+     assert entry["ready"] is False
+@@ -975,11 +971,9 @@
+ def test_admin_readiness_listing(mod):
+     seed_node(mod)
+     seed_node(mod, slug="lab-bad", endpoint="gateway.example.test:9110")
+-    out = asyncio.run(
+-        mod.admin_list_node_winn3(
+-            request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
+-            x_admin_token=ADMIN,
+-        )
++    out = mod.admin_list_node_winn3(
++        request=FakeRequest(path="/admin/nodes/winn3", method="GET"),
++        x_admin_token=ADMIN,
+     )
+     assert out["ok"] is True
+     assert len(out["known_protocol_params"]) == 20
+--- a/server/test_winn3_sign_descriptor_tool.py
++++ b/server/test_winn3_sign_descriptor_tool.py
+@@ -169,7 +169,7 @@
+     kwargs.setdefault("x_admin_token", ADMIN)
+     kwargs.setdefault(
+         "request", FakeRequest(path="/admin/nodes/winn3/descriptor"))
+-    return asyncio.run(mod.admin_set_node_winn3_descriptor(**kwargs))
++    return mod.admin_set_node_winn3_descriptor(**kwargs)
+ 
+ 
+ def publish(mod, signed, slug="lab-alpha"):
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -8250,6 +8250,91 @@
+     return migrated
+ 
+ 
++def create_winn3_registry_refresh_table(conn: sqlite3.Connection):
++    existed = table_exists(conn, "winn3_registry_refreshes")
++    conn.execute("""
++        CREATE TABLE IF NOT EXISTS winn3_registry_refreshes (
++            node_slug TEXT PRIMARY KEY,
++            attempts INTEGER NOT NULL DEFAULT 0,
++            next_attempt_at REAL NOT NULL DEFAULT 0
++        )
++    """)
++    for event, records in (
++        ("INSERT", ("NEW",)),
++        ("DELETE", ("OLD",)),
++        ("UPDATE OF location_slug, winn3_static_public, winn3_inner_v4", ("OLD", "NEW")),
++    ):
++        trigger_name = "winn3_registry_devices_" + event.split()[0].lower()
++        statements = []
++        for record in records:
++            statements.append(f"""
++                INSERT INTO winn3_registry_refreshes (node_slug, attempts, next_attempt_at)
++                SELECT {record}.location_slug, 0, 0
++                WHERE COALESCE({record}.winn3_static_public, '') != ''
++                  AND COALESCE({record}.location_slug, '') != ''
++                ON CONFLICT(node_slug) DO UPDATE SET attempts=0, next_attempt_at=0;
++            """)
++        conn.execute(
++            f"CREATE TRIGGER IF NOT EXISTS {trigger_name} AFTER {event} ON devices "
++            "BEGIN " + " ".join(statements) + " END"
++        )
++    conn.execute("""
++        CREATE TRIGGER IF NOT EXISTS winn3_registry_account_authority
++        AFTER UPDATE OF status, expiration_date ON users
++        BEGIN
++            INSERT INTO winn3_registry_refreshes (node_slug, attempts, next_attempt_at)
++            SELECT DISTINCT location_slug, 0, 0 FROM devices
++            WHERE account_number=NEW.account_number
++              AND COALESCE(winn3_static_public, '') != ''
++              AND COALESCE(location_slug, '') != ''
++            ON CONFLICT(node_slug) DO UPDATE SET attempts=0, next_attempt_at=0;
++        END
++    """)
++    if not existed:
++        # Reconcile registered v3 nodes when this durable queue first exists.
++        conn.execute("""
++            INSERT OR IGNORE INTO winn3_registry_refreshes (node_slug)
++            SELECT slug FROM nodes WHERE protocol_version='winn/3' AND slug != ''
++        """)
++
++
++def drain_winn3_registry_refreshes(limit: int = 4) -> dict:
++    published = 0
++    retry = 0
++    with get_db() as conn:
++        ensure_schema(conn)
++        pending = conn.execute(
++            "SELECT node_slug FROM winn3_registry_refreshes WHERE next_attempt_at<=? "
++            "ORDER BY next_attempt_at, node_slug LIMIT ?",
++            (time.time(), max(1, min(int(limit), 32))),
++        ).fetchall()
++    for item in pending:
++        with get_db() as conn:
++            conn.execute("BEGIN IMMEDIATE")
++            queued = conn.execute(
++                "SELECT attempts FROM winn3_registry_refreshes "
++                "WHERE node_slug=? AND next_attempt_at<=?",
++                (item["node_slug"], time.time()),
++            ).fetchone()
++            if queued is None:
++                continue
++            node = conn.execute(
++                "SELECT ssh_host, endpoint FROM nodes WHERE slug=?", (item["node_slug"],)
++            ).fetchone()
++            node_ip = (node["ssh_host"] or extract_node_host(node["endpoint"] or "")) if node else ""
++            if node_ip and sync_winn3_registry_to_node(conn, node_ip, item["node_slug"]):
++                conn.execute("DELETE FROM winn3_registry_refreshes WHERE node_slug=?", (item["node_slug"],))
++                published += 1
++            else:
++                attempts = int(queued["attempts"]) + 1
++                conn.execute(
++                    "UPDATE winn3_registry_refreshes SET attempts=?, next_attempt_at=? WHERE node_slug=?",
++                    (attempts, time.time() + peer_revocation_backoff_seconds(attempts), item["node_slug"]),
++                )
++                retry += 1
++    return {"published": published, "retry": retry}
++
++
+ def ensure_schema(conn: sqlite3.Connection):
+     migrate_legacy_table(
+         conn, "users", "account_number", create_users_table,
+@@ -8667,6 +8752,7 @@
+     if not table_exists(conn, "users_pre_lifetime_migration_2025"):
+         migrate_legacy_lifetime(conn)
+     archive_terminal_payment_orders(conn)
++    create_winn3_registry_refresh_table(conn)
+ 
+ def get_setting(conn: sqlite3.Connection, key: str, default: str) -> str:
+     row = conn.execute("SELECT value FROM system_settings WHERE key = ?", (key,)).fetchone()
+@@ -13888,7 +13974,7 @@
+     assignments: list[dict[str, Any]] = []
+     for row in rows:
+         expiry = parse_iso_datetime(row["expiration_date"])
+-        if expiry and expiry < now:
++        if expiry is None or expiry <= now:
+             continue
+         assignment = {
+             "device_id": row["device_id"],
+@@ -16127,7 +16213,7 @@
+         raise ValueError("WINN3_INNER_POOL_CIDR is unavailable")
+     for row in rows:
+         expires_at = parse_iso_datetime(row["expiration_date"])
+-        if expires_at and expires_at < now:
++        if expires_at is None or expires_at <= now:
+             continue
+         public_text = str(row["winn3_static_public"] or "").strip()
+         inner_text = str(row["winn3_inner_v4"] or "").strip()
+@@ -16144,18 +16230,11 @@
+             raise ValueError("stored Winn3 peer registry contains a duplicate key or address")
+         seen_keys.add(public_text)
+         seen_addresses.add(inner_text)
+-        if expires_at:
+-            expiry_utc = (
+-                expires_at.replace(tzinfo=timezone.utc)
+-                if expires_at.tzinfo is None else expires_at.astimezone(timezone.utc)
+-            )
+-            not_after = int(expiry_utc.timestamp())
+-        else:
+-            not_after = 0
++        not_after = int(expires_at.timestamp())
+         peers.append({
+             "static_public": public_text,
+             "inner_v4": inner_text,
+-            # Zero is an explicit non-expiring account, never a missing field.
++            # Customer bindings always carry a valid future expiration.
+             # Expiring accounts self-revoke at the gateway even if a node misses
+             # the resync that would remove their row from the next snapshot.
+             "not_after": not_after,
+@@ -16191,6 +16270,16 @@
+ def sync_winn3_registry_to_node(conn: sqlite3.Connection, node_ip: str, node_slug: str) -> bool:
+     """Atomically publish one node's complete standalone v3 authorization map."""
+     try:
++        # Serialize every publication with device and account mutations. This
++        # writer lock is retained by the caller through publication and commit,
++        # so a snapshot read before revocation cannot be published after it.
++        if not conn.in_transaction:
++            conn.execute("BEGIN IMMEDIATE")
++        else:
++            conn.execute(
++                "UPDATE winn3_registry_refreshes SET attempts=attempts WHERE node_slug=?",
++                (node_slug,),
++            )
+         document = winn3_peer_registry_document(conn, node_slug)
+         payload = base64.b64encode(
+             json.dumps(document, sort_keys=True, separators=(",", ":")).encode("utf-8")
+@@ -16330,7 +16419,7 @@
+     now = utcnow()
+     for row in customer_rows:
+         expires_at = parse_iso_datetime(row["expiration_date"])
+-        if expires_at and expires_at < now:
++        if expires_at is None or expires_at <= now:
+             result["skipped"] += 1
+             continue
+         if (row["status"] or "") in {"offline", "maintenance"}:
+@@ -16356,7 +16445,7 @@
+     seen_core_peers = set()
+     for row in core_rows:
+         expires_at = parse_iso_datetime(row["expiration_date"])
+-        if expires_at and expires_at < now:
++        if expires_at is None or expires_at <= now:
+             result["skipped"] += 1
+             continue
+         core_peer = (
+@@ -18375,6 +18464,7 @@
+         try:
+             await asyncio.to_thread(sweep_expired_account_runtime)
+             await asyncio.to_thread(drain_peer_revocation_outbox)
++            await asyncio.to_thread(drain_winn3_registry_refreshes)
+         except asyncio.CancelledError:
+             raise
+         except Exception as exc:
+@@ -19068,7 +19158,7 @@
+ 
+ 
+ @app.get("/api/site/geo-scene")
+-async def site_geo_scene(request: Request):
++def site_geo_scene(request: Request):
+     country = (
+         request.headers.get("cf-ipcountry")
+         or request.headers.get("x-country-code")
+@@ -19113,7 +19203,7 @@
+     )
+ 
+ @app.post("/api/site/translate")
+-async def site_translate(payload: SiteTranslateRequest, request: Request):
++def site_translate(payload: SiteTranslateRequest, request: Request):
+     if site_rate_limited(request, limit=60):
+         raise HTTPException(status_code=429, detail="rate_limited")
+     # Major languages are pretranslated in web/i18n/major.json. This endpoint is intentionally
+@@ -19153,7 +19243,7 @@
+     return {"answer": redact_site_private_terms(site_fallback_answer(message)), "mode": "fallback_zero_cost"}
+ 
+ @app.get("/api/site/wallet-config")
+-async def site_wallet_config(request: Request):
++def site_wallet_config(request: Request):
+     # Public PayPal client id only -- never the secret. The wallet (Apple Pay /
+     # Google Pay) buttons on the pricing cards are hidden until this returns a
+     # non-empty client id, so a missing or misconfigured PayPal stays fail-closed
+@@ -19165,7 +19255,7 @@
+     return {"paypal_client_id": PAYPAL_PUBLIC_CLIENT_ID, "enabled": True}
+ 
+ @app.get("/api/site/crypto-config")
+-async def site_crypto_config(request: Request):
++def site_crypto_config(request: Request):
+     # Mirrors wallet-config: gated by the actual BTCPay / Monero capability so
+     # the frontend stays fail-closed until the hub is really ready to mint an
+     # invoice. Keeps the crypto rows hidden when neither provider is configured.
+@@ -19178,7 +19268,7 @@
+     }
+ 
+ @app.get("/healthz")
+-async def healthz():
++def healthz():
+     return {"ok": True, "service": "wins-hub", "device_limit": DEVICE_LIMIT}
+ 
+ @app.get("/nodes")
+@@ -19400,11 +19490,11 @@
+     return RedirectResponse(destination, status_code=302)
+ 
+ @app.get("/paypal/return")
+-async def paypal_return():
++def paypal_return():
+     return HTMLResponse("<!doctype html><title>Win's VPN</title><p>Your PayPal checkout is complete. You can return to Win's VPN.</p>")
+ 
+ @app.get("/paypal/cancel")
+-async def paypal_cancel():
++def paypal_cancel():
+     return HTMLResponse("<!doctype html><title>Win's VPN</title><p>PayPal checkout was canceled. You can close this page or choose another plan.</p>")
+ 
+ @app.post("/pay/wallet/create-order")
+@@ -19542,11 +19632,26 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         check_rate_limit(conn, rate_limit_bucket("wallet-capture-ip", request_origin_bucket_value(request)), 20, 60)
+-        # If a completed capture was already recorded for this order, do not
+-        # call PayPal again (on top of PayPal's own ORDER_ALREADY_CAPTURED and
+-        # the webhook's event dedupe).
++        # Reserve one capture attempt; duplicates must be processed and
++        # revalidated with PayPal before reporting capture success.
+         first_attempt = reserve_paypal_event(conn, audit_event_id, "WALLET.CAPTURE", "")
++        existing_event = conn.execute(
++            "SELECT status FROM paypal_events WHERE event_id=?", (audit_event_id,)
++        ).fetchone()
+     if not first_attempt:
++        if existing_event is None or existing_event["status"] != "processed":
++            raise HTTPException(status_code=409, detail="PayPal capture is still processing")
++        # Older releases recorded APPROVED or missing provider states as
++        # processed. Revalidate that durable legacy state before reporting it.
++        try:
++            existing = paypal_json_request("GET", f"/v2/checkout/orders/{urllib.parse.quote(order_id)}")
++        except Exception:
++            raise HTTPException(status_code=502, detail="Unable to confirm PayPal capture")
++        confirmed = isinstance(existing, dict) and str(existing.get("status") or "").upper() == "COMPLETED"
++        if not confirmed:
++            with get_db() as conn:
++                finish_paypal_event(conn, audit_event_id, "failed", error="capture_not_confirmed")
++            raise HTTPException(status_code=409, detail="PayPal capture has not completed")
+         return {"status": "already_captured", "order_id": order_id}
+     try:
+         result = paypal_json_request("POST", f"/v2/checkout/orders/{urllib.parse.quote(order_id)}/capture")
+@@ -19570,10 +19675,17 @@
+         if existing_status == "COMPLETED":
+             return {"status": "already_captured", "order_id": order_id}
+         raise HTTPException(status_code=502, detail="Unable to capture PayPal order")
+-    order_status = str(result.get("status") or "").upper() or "COMPLETED"
++    order_status = str(result.get("status") or "").upper() if isinstance(result, dict) else ""
++    if order_status != "COMPLETED":
++        with get_db() as conn:
++            finish_paypal_event(conn, audit_event_id, "failed", error="capture_not_completed")
++        raise HTTPException(
++            status_code=409 if order_status else 502,
++            detail="PayPal capture has not completed",
++        )
+     with get_db() as conn:
+         finish_paypal_event(conn, audit_event_id, "processed")
+-    return {"status": order_status, "order_id": order_id}
++    return {"status": "COMPLETED", "order_id": order_id}
+ 
+ class CryptoInvoiceRequest(BaseModel):
+     model_config = ConfigDict(populate_by_name=True, extra="ignore")
+@@ -19709,7 +19821,7 @@
+     }
+ 
+ @app.get("/pay/crypto/return")
+-async def crypto_return():
++def crypto_return():
+     return HTMLResponse("<!doctype html><title>Win's VPN</title><p>Thanks! Your crypto payment is confirming on-chain. Your account email is sent automatically once the network confirms the transaction. You can return to Win's VPN.</p>")
+ 
+ class MoneroOrderRequest(BaseModel):
+@@ -20009,7 +20121,7 @@
+     return current_legal_payload(locale, compact)
+ 
+ @app.post("/legal/accept")
+-async def legal_accept():
++def legal_accept():
+     # M-6: this endpoint used to write a legal_acceptances row from a bare,
+     # unauthenticated account_number+device_id supplied directly by the
+     # caller -- anyone could forge an acceptance record for any account, or
+@@ -20388,7 +20500,7 @@
+                     if duplicate_key:
+                         duplicate_node_ip = duplicate["ssh_host"] or extract_node_host(duplicate["endpoint"] or "")
+                         if duplicate_node_ip:
+-                            background_tasks.add_task(remove_peer_from_node, duplicate_node_ip, duplicate_key)
++                            queue_peer_revocation(conn, duplicate_node_ip, duplicate_key, background_tasks)
+                 conn.execute(
+                     "DELETE FROM devices WHERE account_number = ? AND hardware_hash = ? AND device_id != ?",
+                     (acc, device_bucket, login.device_id),
+@@ -20408,7 +20520,7 @@
+                             if _dn:
+                                 _dip = _dn["ssh_host"] or extract_node_host(_dn["endpoint"] or "")
+                                 if _dip:
+-                                    background_tasks.add_task(remove_peer_from_node, _dip, _dk)
++                                    queue_peer_revocation(conn, _dip, _dk, background_tasks)
+                         conn.execute("DELETE FROM devices WHERE device_id = ?", (_dup["device_id"],))
+             device_cfg["device_id"] = login.device_id
+             device_cfg["hardware_hash"] = device_bucket
+@@ -20560,7 +20672,7 @@
+         else:
+             mark_node_management_status(conn, node["slug"], "ok")
+         if old_peer_to_remove and old_peer_node_ip:
+-            background_tasks.add_task(remove_peer_from_node, old_peer_node_ip, old_peer_to_remove)
++            queue_peer_revocation(conn, old_peer_node_ip, old_peer_to_remove, background_tasks)
+ 
+         if double_vpn_requested and core and double_assignment:
+             assignment_payload = next(
+@@ -22258,7 +22370,7 @@
+     return {"ok": ok, "core_id": core_id, "management_status": "ok" if ok else "failed"}
+ 
+ @app.post("/admin/bootstrap-grant")
+-async def mint_bootstrap_grant(payload: BootstrapGrantRequest, request: Request, x_admin_token: str = Header(...)):
++def mint_bootstrap_grant(payload: BootstrapGrantRequest, request: Request, x_admin_token: str = Header(...)):
+     # H-2: this is the only place the fleet-wide admin token still routinely
+     # authorizes anything node/core-shaped -- minting a short-lived,
+     # single-use grant that the operator relays to exactly one target's
+@@ -22285,7 +22397,7 @@
+     }
+ 
+ @app.post("/api/v1/core/bootstrap")
+-async def bootstrap_core(payload: CoreBootstrapRequest, request: Request):
++def bootstrap_core(payload: CoreBootstrapRequest, request: Request):
+     # H-2: exchanges a single-use grant (from /admin/bootstrap-grant) for a
+     # permanent per-core token, returned exactly once. Every routine core
+     # endpoint thereafter authenticates with this token via require_core_token;
+@@ -22310,7 +22422,7 @@
+     return {"ok": True, "core_token": core_token}
+ 
+ @app.post("/api/v1/nodes/bootstrap")
+-async def bootstrap_node(payload: NodeBootstrapRequest, request: Request):
++def bootstrap_node(payload: NodeBootstrapRequest, request: Request):
+     # H-2: mirrors bootstrap_core. Deliberately decoupled from the full
+     # register_node payload -- a fresh data plane's AmneziaWG/public key
+     # material is not available yet at the point in its one-touch install
+@@ -22387,7 +22499,7 @@
+ 
+ 
+ @app.post("/api/v1/nodes/register")
+-async def register_node(payload: NodeRegistration, request: Request):
++def register_node(payload: NodeRegistration, request: Request):
+     # H-2: routine node-scoped endpoint -- per-node-token-only. A node
+     # obtains its token exactly once, via /api/v1/nodes/bootstrap
+     # (grant-gated), and every subsequent registration/re-registration
+@@ -22766,7 +22878,7 @@
+     return {"ok": True}
+ 
+ @app.post("/api/v1/nodes/{slug}/deployment/withdraw")
+-async def withdraw_node_for_deployment(
++def withdraw_node_for_deployment(
+     slug: str,
+     request: Request,
+     x_node_token: str = Header(...),
+@@ -22809,7 +22921,7 @@
+     }
+ 
+ @app.post("/api/v1/nodes/{slug}/deployment/complete")
+-async def complete_node_deployment(
++def complete_node_deployment(
+     slug: str,
+     payload: DeploymentWithdrawalCompletion,
+     request: Request,
+@@ -22902,7 +23014,7 @@
+     return acknowledged_count
+ 
+ @app.post("/api/v1/core/assignments/ack")
+-async def acknowledge_core_assignments(
++def acknowledge_core_assignments(
+     payload: CoreAssignmentAcknowledgementBatch,
+     request: Request,
+     x_core_token: str = Header(...),
+@@ -22952,7 +23064,7 @@
+     }
+ 
+ @app.post("/api/v1/core/register")
+-async def register_core(payload: CoreRegistration, request: Request, x_core_token: str = Header(...)):
++def register_core(payload: CoreRegistration, request: Request, x_core_token: str = Header(...)):
+     # H-2: routine core-scoped endpoint -- core-token-only. A core obtains
+     # its token exactly once, via /api/v1/core/bootstrap (grant-gated), and
+     # every subsequent registration/re-registration (this endpoint) uses
+@@ -23088,7 +23200,7 @@
+     }
+ 
+ @app.post("/api/v1/core/{core_id}/deployment/withdraw")
+-async def withdraw_core_for_deployment(
++def withdraw_core_for_deployment(
+     core_id: str,
+     request: Request,
+     x_core_token: str = Header(...),
+@@ -23127,7 +23239,7 @@
+     }
+ 
+ @app.post("/api/v1/core/{core_id}/deployment/complete")
+-async def complete_core_deployment(
++def complete_core_deployment(
+     core_id: str,
+     payload: DeploymentWithdrawalCompletion,
+     request: Request,
+@@ -23166,7 +23278,7 @@
+     }
+ 
+ @app.post("/admin/core/promote")
+-async def admin_promote_core(
++def admin_promote_core(
+     request: Request,
+     core_id: str = Form(default=DOUBLE_VPN_CORE_ID),
+     confirm_core_id: str = Form(default=""),
+@@ -23259,7 +23371,7 @@
+     }
+ 
+ @app.post("/api/v1/core/promotion/ack")
+-async def acknowledge_core_promotion(
++def acknowledge_core_promotion(
+     payload: CorePromotionAcknowledgement,
+     request: Request,
+     x_core_token: str = Header(...),
+@@ -23359,7 +23471,7 @@
+     }
+ 
+ @app.post("/admin/core/withdraw")
+-async def admin_withdraw_core(
++def admin_withdraw_core(
+     request: Request,
+     core_id: str = Form(default=DOUBLE_VPN_CORE_ID),
+     x_admin_token: str = Header(...),
+@@ -23404,7 +23516,7 @@
+     }
+ 
+ @app.get("/admin/core/promotions")
+-async def admin_list_core_promotions(request: Request, x_admin_token: str = Header(...)):
++def admin_list_core_promotions(request: Request, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "list Double VPN Core promotions")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -23417,7 +23529,7 @@
+     return {"ok": True, "promotions": [dict(row) for row in rows]}
+ 
+ @app.post("/api/v1/site-ai/tunnel-key")
+-async def register_site_ai_tunnel_key(payload: SiteAiTunnelKeyRequest, request: Request, x_core_token: str = Header(...)):
++def register_site_ai_tunnel_key(payload: SiteAiTunnelKeyRequest, request: Request, x_core_token: str = Header(...)):
+     # H-2: routine core-scoped endpoint -- core-token-only, never the
+     # fleet-wide admin token (see require_core_token).
+     core_id = (payload.core_id or DOUBLE_VPN_CORE_ID).strip() or DOUBLE_VPN_CORE_ID
+@@ -23468,7 +23580,7 @@
+     }
+ 
+ @app.get("/api/v1/core/assignments")
+-async def core_assignments(request: Request, core_id: str = DOUBLE_VPN_CORE_ID, x_core_token: str = Header(...)):
++def core_assignments(request: Request, core_id: str = DOUBLE_VPN_CORE_ID, x_core_token: str = Header(...)):
+     # H-2: routine core-scoped endpoint -- core-token-only, never the
+     # fleet-wide admin token (see require_core_token).
+     requested_core = (core_id or DOUBLE_VPN_CORE_ID).strip() or DOUBLE_VPN_CORE_ID
+@@ -23479,7 +23591,7 @@
+     return {"ok": True, "core_id": requested_core, "assignments": assignments}
+ 
+ @app.post("/api/v1/nodes/heartbeat")
+-async def heartbeat(payload: NodeHeartbeat, request: Request):
++def heartbeat(payload: NodeHeartbeat, request: Request):
+     with get_db() as conn:
+         ensure_schema(conn)
+         # H-9: heartbeat is node-token-only -- the global admin token is never
+@@ -23500,10 +23612,10 @@
+ @app.post("/api/v1/nodes/{slug}/heartbeat")
+ async def heartbeat_path(slug: str, payload: NodeHeartbeat, request: Request):
+     payload.slug = slug
+-    return await heartbeat(payload, request)
++    return await asyncio.to_thread(heartbeat, payload, request)
+ 
+ @app.post("/admin/nodes/free-access")
+-async def admin_set_node_free_access(
++def admin_set_node_free_access(
+     request: Request,
+     slug: str = Form(...),
+     enabled: bool = Form(...),
+@@ -23525,7 +23637,7 @@
+     return {"ok": True, "slug": node_slug, "free_access_enabled": bool(enabled), "free_node_slugs": free_slugs}
+ 
+ @app.post("/admin/nodes/direct-awg")
+-async def admin_set_node_direct_awg(
++def admin_set_node_direct_awg(
+     request: Request,
+     slug: str = Form(...),
+     enabled: bool = Form(...),
+@@ -23575,7 +23687,7 @@
+ # no tier, no management_status. Turning winn/3 on and off cannot change which
+ # clients a node serves, only which protocol it is advertised as speaking.
+ @app.post("/admin/nodes/winn3")
+-async def admin_set_node_winn3(
++def admin_set_node_winn3(
+     request: Request,
+     slug: str = Form(...),
+     enabled: bool = Form(...),
+@@ -23793,7 +23905,7 @@
+     }
+ 
+ @app.get("/admin/nodes/winn3")
+-async def admin_list_node_winn3(request: Request, x_admin_token: str = Header(...)):
++def admin_list_node_winn3(request: Request, x_admin_token: str = Header(...)):
+     """Per-node winn/3 readiness. The pre-flight for a deploy night.
+ 
+     Node-scoped only. It cannot tell you whether any given CLIENT will be
+@@ -23860,7 +23972,7 @@
+ #   * clear     -- enabled=false. Reversible, never refused, and it costs the
+ #                  fleet nothing because the descriptor is additive.
+ @app.post("/admin/nodes/winn3/descriptor")
+-async def admin_set_node_winn3_descriptor(
++def admin_set_node_winn3_descriptor(
+     request: Request,
+     slug: str = Form(...),
+     enabled: bool = Form(...),
+@@ -24111,7 +24223,7 @@
+     }
+ 
+ @app.get("/admin/nodes/winn3/descriptor")
+-async def admin_list_node_winn3_descriptors(
++def admin_list_node_winn3_descriptors(
+     request: Request, x_admin_token: str = Header(...)
+ ):
+     """Per-node descriptor and rotation state. The pre-flight for a rotation.
+@@ -24165,7 +24277,7 @@
+     }
+ 
+ @app.post("/admin/nodes/winn3/admission/retire")
+-async def admin_retire_node_winn3_previous_admission(
++def admin_retire_node_winn3_previous_admission(
+     request: Request,
+     slug: str = Form(...),
+     force: bool = Form(default=False),
+@@ -24250,7 +24362,7 @@
+     }
+ 
+ @app.post("/admin/nodes/tier")
+-async def admin_set_node_tier(
++def admin_set_node_tier(
+     request: Request,
+     slug: str = Form(...),
+     tier: str = Form(...),
+@@ -24396,7 +24508,7 @@
+     }
+ 
+ @app.get("/admin/nodes/tier")
+-async def admin_list_node_tiers(request: Request, x_admin_token: str = Header(...)):
++def admin_list_node_tiers(request: Request, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "list node tiers")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -24420,7 +24532,7 @@
+     }
+ 
+ @app.get("/admin/nodes/promotions")
+-async def admin_list_node_promotions(request: Request, x_admin_token: str = Header(...)):
++def admin_list_node_promotions(request: Request, x_admin_token: str = Header(...)):
+     """Return the secret-free, append-only node promotion evidence ledger."""
+     require_admin_token(x_admin_token, request, "list node promotions")
+     with get_db() as conn:
+@@ -24435,7 +24547,7 @@
+     return {"ok": True, "promotions": [dict(row) for row in rows]}
+ 
+ @app.post("/admin/nodes/retire")
+-async def admin_retire_node(
++def admin_retire_node(
+     request: Request,
+     slug: str = Form(...),
+     reason: str = Form(default=""),
+@@ -24591,7 +24703,7 @@
+     }
+ 
+ @app.post("/admin/nodes/restore")
+-async def admin_restore_node(
++def admin_restore_node(
+     request: Request,
+     slug: str = Form(...),
+     x_admin_token: str = Header(...),
+@@ -24727,7 +24839,7 @@
+     }
+ 
+ @app.get("/admin/nodes/retirements")
+-async def admin_list_node_retirements(request: Request, x_admin_token: str = Header(...)):
++def admin_list_node_retirements(request: Request, x_admin_token: str = Header(...)):
+     """The retirement ledger. Names, timestamps and counts -- never state_json,
+     which carries endpoints and public keys."""
+     require_admin_token(x_admin_token, request, "list node retirements")
+@@ -24758,7 +24870,7 @@
+     return resync_active_peers_to_node(node_slug)
+ 
+ @app.post("/api/v1/nodes/{slug}/resync-peers")
+-async def node_resync_own_peers(slug: str, request: Request, x_node_token: str = Header(...)):
++def node_resync_own_peers(slug: str, request: Request, x_node_token: str = Header(...)):
+     # H-9: node-token-only self-service resync. The slug comes from the URL
+     # path and the supplied token must hash-match *that exact* node's stored
+     # token, so node A can never trigger (or piggyback observations on) a
+@@ -24771,7 +24883,7 @@
+     return resync_active_peers_to_node(node_slug)
+ 
+ @app.get("/api/v1/pubkey")
+-async def get_pubkey(
++def get_pubkey(
+     request: Request,
+     slug: str = "",
+     core_id: str = "",
+@@ -24811,7 +24923,7 @@
+         return {"pubkey": ""}
+ 
+ @app.post("/admin/announce")
+-async def set_announcement(request: Request, msg: str = Form(...), x_admin_token: str = Header(...)):
++def set_announcement(request: Request, msg: str = Form(...), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "set announcement")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -24833,7 +24945,7 @@
+     return {"ok": True, "signed": seq is not None, "seq": seq}
+ 
+ @app.post("/admin/maintenance")
+-async def set_maintenance(request: Request, enabled: bool = Form(...), x_admin_token: str = Header(...)):
++def set_maintenance(request: Request, enabled: bool = Form(...), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "set maintenance")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -24841,7 +24953,7 @@
+     return {"ok": True, "maintenance": enabled}
+ 
+ @app.post("/admin/double-vpn/free-access")
+-async def set_double_vpn_free_access(request: Request, enabled: bool = Form(...), x_admin_token: str = Header(...)):
++def set_double_vpn_free_access(request: Request, enabled: bool = Form(...), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "set Double VPN free access")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -24849,7 +24961,7 @@
+     return {"ok": True, "double_vpn_free_access_enabled": enabled}
+ 
+ @app.post("/admin/app-version-gate")
+-async def set_app_version_gate(
++def set_app_version_gate(
+     request: Request,
+     min_supported: str = Form(""),
+     latest: str = Form(""),
+@@ -24887,7 +24999,7 @@
+     }
+ 
+ @app.post("/admin/provision")
+-async def provision_account(request: Request, background_tasks: BackgroundTasks, name: str = Form(...), email: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
++def provision_account(request: Request, background_tasks: BackgroundTasks, name: str = Form(...), email: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "provision account")
+     try:
+         delta = parse_duration(duration)
+@@ -24919,7 +25031,7 @@
+     return {"status": "ok", "account_number": account_number, "accountnumber": account_number, "email_sent": email_sent}
+ 
+ @app.post("/admin/renew")
+-async def renew_account(request: Request, account_number: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
++def renew_account(request: Request, account_number: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "renew account")
+     acc = normalize_account_number(account_number)
+     try:
+@@ -24942,7 +25054,7 @@
+     return {"status": "ok", "account_number": acc, "accountnumber": acc, "expiration_date": expiry, "expirationdate": expiry}
+ 
+ @app.post("/admin/device/remove")
+-async def admin_remove_device(
++def admin_remove_device(
+     request: Request,
+     background_tasks: BackgroundTasks,
+     account_number: str = Form(...),
+@@ -25033,7 +25145,7 @@
+     }
+ 
+ @app.get("/admin/device/list")
+-async def admin_list_devices(
++def admin_list_devices(
+     request: Request,
+     account_number: str,
+     x_admin_token: str = Header(...),
+@@ -25053,7 +25165,7 @@
+         }
+ 
+ @app.post("/admin/resend")
+-async def resend_email(request: Request, background_tasks: BackgroundTasks, email: str = Form(...), x_admin_token: str = Header(...)):
++def resend_email(request: Request, background_tasks: BackgroundTasks, email: str = Form(...), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "resend activation email")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -25071,7 +25183,7 @@
+     return {"status": "ok", "email_sent": email_sent, "account_number": user["account_number"], "accountnumber": user["account_number"]}
+ 
+ @app.post("/admin/donor-acknowledgment/issue")
+-async def admin_issue_donor_acknowledgment(
++def admin_issue_donor_acknowledgment(
+     request: Request,
+     background_tasks: BackgroundTasks,
+     donor_name: str = Form(...),
+@@ -25117,7 +25229,7 @@
+ 
+ 
+ @app.post("/admin/donor-acknowledgment/resend")
+-async def admin_resend_donor_acknowledgment(
++def admin_resend_donor_acknowledgment(
+     request: Request,
+     background_tasks: BackgroundTasks,
+     ack_number: str = Form(...),
+@@ -25145,7 +25257,7 @@
+ 
+ 
+ @app.post("/admin/donor-acknowledgment/annual-summary")
+-async def admin_donor_annual_summary(
++def admin_donor_annual_summary(
+     request: Request,
+     background_tasks: BackgroundTasks,
+     email: str = Form(...),
+@@ -25163,7 +25275,7 @@
+ 
+ 
+ @app.get("/admin/donor-acknowledgments")
+-async def admin_list_donor_acknowledgments(request: Request, x_admin_token: str = Header(...)):
++def admin_list_donor_acknowledgments(request: Request, x_admin_token: str = Header(...)):
+     """Ledger view. `undelivered=1` is the one that matters operationally: it
+     lists every acknowledgment that has not reached its donor, including the
+     $250-or-more gifts where a donor cannot deduct without it."""
+@@ -25689,7 +25801,7 @@
+     return await run_monero_poll_sweep()
+ 
+ @app.get("/admin/paypal/dead-letter")
+-async def admin_paypal_dead_letter(request: Request, status: str = "failed", limit: int = 50, x_admin_token: str = Header(...)):
++def admin_paypal_dead_letter(request: Request, status: str = "failed", limit: int = 50, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "paypal dead-letter list")
+     status = (status or "failed").strip().lower()
+     if status not in {"failed", "processing", "ignored", "processed"}:
+@@ -25715,7 +25827,7 @@
+         return {"status": status, "count": len(events), "events": events}
+ 
+ @app.post("/admin/paypal/retry")
+-async def admin_paypal_retry(request: Request, background_tasks: BackgroundTasks, event_id: str = Form(...), x_admin_token: str = Header(...)):
++def admin_paypal_retry(request: Request, background_tasks: BackgroundTasks, event_id: str = Form(...), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "paypal dead-letter retry")
+     event_id = (event_id or "").strip()
+     if not event_id:
+@@ -25744,7 +25856,7 @@
+             raise HTTPException(status_code=502, detail=f"PayPal retry failed: {exc}")
+ 
+ @app.get("/admin/payment-clicks")
+-async def admin_payment_clicks(request: Request, days: int = 30, x_admin_token: str = Header(...)):
++def admin_payment_clicks(request: Request, days: int = 30, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "payment click summary")
+     days = max(1, min(int(days or 30), 365))
+     cutoff = (utcnow() - timedelta(days=days)).isoformat()
+@@ -25761,7 +25873,7 @@
+         return {"days": days, "total_clicks": total, "groups": [dict(row) for row in rows]}
+ 
+ @app.get("/admin/free-access-events")
+-async def admin_free_access_events(request: Request, days: int = 7, limit: int = 200, x_admin_token: str = Header(...)):
++def admin_free_access_events(request: Request, days: int = 7, limit: int = 200, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "free access event list")
+     days = max(1, min(int(days or 7), FREE_ACCESS_EVENTS_RETENTION_DAYS))
+     limit = max(1, min(int(limit or 200), 500))
+@@ -26669,7 +26781,7 @@
+ 
+ 
+ @app.post("/api/redeem")
+-async def redeem_prepaid_code(request: Request, payload: RedemptionRequest):
++def redeem_prepaid_code(request: Request, payload: RedemptionRequest):
+     if not redemption_enabled():
+         raise HTTPException(status_code=503, detail="Redemption is not configured on this hub.")
+     normalized = normalize_redemption_code(payload.code)
+@@ -26735,7 +26847,7 @@
+ 
+ 
+ @app.post("/api/redeem/ack")
+-async def acknowledge_redemption(request: Request, payload: RedemptionRequest):
++def acknowledge_redemption(request: Request, payload: RedemptionRequest):
+     # Explicit deletion semantics for the fulfillment record. A client that has
+     # safely stored its setup key can destroy the only at-rest copy immediately
+     # instead of waiting out the TTL. Presenting the code is the authorisation:
+@@ -27023,7 +27135,7 @@
+ 
+ 
+ @app.post("/admin/redemption/batch")
+-async def admin_issue_redemption_batch(
++def admin_issue_redemption_batch(
+     request: Request,
+     batch_id: str = Form(...),
+     count: int = Form(...),
+@@ -27114,7 +27226,7 @@
+ 
+ 
+ @app.post("/admin/redemption/revoke")
+-async def admin_revoke_redemption_batch(
++def admin_revoke_redemption_batch(
+     request: Request,
+     batch_id: str = Form(...),
+     reason: str = Form(""),
+@@ -27157,7 +27269,7 @@
+ 
+ 
+ @app.get("/admin/redemption/batches")
+-async def admin_list_redemption_batches(request: Request, x_admin_token: str = Header(...)):
++def admin_list_redemption_batches(request: Request, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "list redemption batches")
+     with get_db() as conn:
+         ensure_schema(conn)
+@@ -27908,7 +28020,7 @@
+ 
+ 
+ @app.get("/admin/emergency/outbox")
+-async def admin_emergency_outbox(request: Request, x_admin_token: str = Header(...)):
++def admin_emergency_outbox(request: Request, x_admin_token: str = Header(...)):
+     # Counts by state ONLY. There is deliberately no way to read a queued
+     # alert's destination or location back out of this hub over HTTP.
+     require_admin_token(x_admin_token, request, "relay outbox status")
+@@ -28226,7 +28338,7 @@
+ 
+ 
+ @app.post("/api/agent/v1/device-limit-reset")
+-async def hoppy_agent_device_limit_reset(request: Request, background_tasks: BackgroundTasks, payload: HoppyAccountRequest):
++def hoppy_agent_device_limit_reset(request: Request, background_tasks: BackgroundTasks, payload: HoppyAccountRequest):
+     # Tier 1: clear the authenticated account's device list and reset its
+     # device-limit override back to the platform default. Scoped to the token.
+     acc = _hoppy_resolve_account(payload)
+@@ -28234,7 +28346,6 @@
+         raise HTTPException(status_code=400, detail="Missing account_number/accountnumber")
+     request_id = _hoppy_request_id(payload)
+     require_hoppy_agent_auth(request, "device-limit-reset", acc)
+-    peer_teardowns = []
+     with get_db() as conn:
+         ensure_schema(conn)
+         check_rate_limit(conn, rate_limit_bucket("hoppy-agent-reset-ip", request_origin_bucket_value(request)), HOPPY_AGENT_IP_RATE_LIMIT_PER_MINUTE, 60)
+@@ -28251,7 +28362,7 @@
+         replayed = _hoppy_try_replay(conn, idem)
+         if replayed is not None:
+             return JSONResponse(status_code=200, content=json.loads(replayed))
+-        # Remove peers from their gateways (best-effort background) and clear
++        # Persist peer removals in the same transaction that clears
+         # the device rows. device_limit_override NULL restores the global default.
+         devices = conn.execute(
+             "SELECT client_public_key, location_slug FROM devices WHERE account_number = ?",
+@@ -28270,7 +28381,7 @@
+                 continue
+             node_ip = node["ssh_host"] or extract_node_host(node["endpoint"] or "")
+             if node_ip:
+-                peer_teardowns.append((node_ip, client_key))
++                queue_peer_revocation(conn, node_ip, client_key, background_tasks)
+         _hoppy_record_audit(conn, request, "device-limit-reset", acc, idem, "completed", f"cleared={cleared}")
+         result = {
+             "ok": True,
+@@ -28281,16 +28392,11 @@
+         }
+         _hoppy_store_idempotency(conn, idem, acc, "device-limit-reset", request_id, json.dumps(result))
+         conn.commit()
+-    # Tear peers off gateways after commit via FastAPI BackgroundTasks (the
+-    # same idiom execute_account_deletion uses); the task is fire-and-forget
+-    # and a peer removal failure is non-fatal.
+-    for node_ip, client_key in peer_teardowns:
+-        background_tasks.add_task(remove_peer_from_node, node_ip, client_key)
+     return JSONResponse(status_code=200, content=result)
+ 
+ 
+ @app.post("/api/agent/v1/device-revoke")
+-async def hoppy_agent_device_revoke(request: Request, background_tasks: BackgroundTasks, payload: HoppyDeviceRevokeRequest):
++def hoppy_agent_device_revoke(request: Request, background_tasks: BackgroundTasks, payload: HoppyDeviceRevokeRequest):
+     # Tier 1: revoke ONE named device session on the authenticated account.
+     acc = _hoppy_resolve_account(payload)
+     device_id = (payload.device_id or "").strip()
+@@ -28300,7 +28406,6 @@
+         raise HTTPException(status_code=400, detail="Missing device_id")
+     request_id = _hoppy_request_id(payload)
+     require_hoppy_agent_auth(request, "device-revoke", acc)
+-    peer_teardown = None
+     with get_db() as conn:
+         ensure_schema(conn)
+         check_rate_limit(conn, rate_limit_bucket("hoppy-agent-revoke-ip", request_origin_bucket_value(request)), HOPPY_AGENT_IP_RATE_LIMIT_PER_MINUTE, 60)
+@@ -28334,7 +28439,7 @@
+             if node is not None:
+                 node_ip = node["ssh_host"] or extract_node_host(node["endpoint"] or "")
+                 if node_ip:
+-                    peer_teardown = (node_ip, client_key)
++                    queue_peer_revocation(conn, node_ip, client_key, background_tasks)
+         _hoppy_record_audit(conn, request, "device-revoke", acc, idem, "completed")
+         result = {
+             "ok": True,
+@@ -28344,15 +28449,11 @@
+         }
+         _hoppy_store_idempotency(conn, idem, acc, "device-revoke", request_id, json.dumps(result))
+         conn.commit()
+-    # Best-effort gateway peer removal via BackgroundTasks.
+-    if peer_teardown is not None:
+-        node_ip, client_key = peer_teardown
+-        background_tasks.add_task(remove_peer_from_node, node_ip, client_key)
+     return JSONResponse(status_code=200, content=result)
+ 
+ 
+ @app.post("/api/agent/v1/credentials-resend")
+-async def hoppy_agent_credentials_resend(request: Request, payload: HoppyAccountRequest):
++def hoppy_agent_credentials_resend(request: Request, payload: HoppyAccountRequest):
+     # Tier 1: resend the account's enrollment credentials to the EMAIL ALREADY
+     # ON FILE. The target address is read ONLY from the users record; any
+     # address a caller puts in the body is ignored. Accepting a body-supplied
+@@ -28480,7 +28581,7 @@
+ 
+ 
+ @app.post("/api/agent/v1/receipt-reissue")
+-async def hoppy_agent_receipt_reissue(request: Request, payload: HoppyAccountRequest):
++def hoppy_agent_receipt_reissue(request: Request, payload: HoppyAccountRequest):
+     # Tier 1: reissue a receipt to the EMAIL ALREADY ON FILE. As with
+     # credentials-resend, only the address on the account record is ever used.
+     acc = _hoppy_resolve_account(payload)
+@@ -28522,7 +28623,7 @@
+ 
+ 
+ @app.post("/api/agent/v1/preferred-server")
+-async def hoppy_agent_preferred_server(request: Request, payload: HoppyPreferredServerRequest):
++def hoppy_agent_preferred_server(request: Request, payload: HoppyPreferredServerRequest):
+     # Tier 1: change the preferred server or region for the authenticated
+     # account. region/server may be 'auto' or an existing node slug; a request
+     # for a server that does not exist is refused rather than stored.
+@@ -28717,7 +28818,7 @@
+ 
+ 
+ @app.get("/admin/hoppy-agent/outbox")
+-async def admin_hoppy_agent_outbox_status(request: Request, x_admin_token: str = Header(...)):
++def admin_hoppy_agent_outbox_status(request: Request, x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "hoppy agent outbox status")
+     with get_db() as conn:
+         ensure_schema(conn)
+--- a/tools/test_linux_round7.py
++++ b/tools/test_linux_round7.py
+@@ -29,30 +29,43 @@
+ std::vector<std::vector<std::string>> calls;
+ bool active = false;
+ int start_status = 0;
++std::string missing;
++std::string Which(const std::string& name) {
++  return name == missing ? "" : "/usr/bin/" + name;
++}
+ ProcResult RunArgv(const std::vector<std::string>& argv, ProcOutput) {
+   calls.push_back(argv);
+   if (argv.size() > 2 && argv[2] == "is-active") return {active ? 0 : 3};
+-  if (argv[0] == "systemd-run") {
++  if (argv[0] == "/usr/bin/systemd-run") {
+     active = start_status == 0;
+     return {start_status};
+   }
+   assert(argv == (std::vector<std::string>{
+-      "systemctl", "--user", "stop", "winsvpn-power-inhibit.service"}));
++      "/usr/bin/systemctl", "--user", "stop", "winsvpn-power-inhibit.service"}));
+   active = false;
+   return {0};
+ }
+ '''
+         suffix = r'''
+ int main() {
++  for (const auto& name : {"systemctl", "systemd-run", "systemd-inhibit", "sleep"}) {
++    missing = name;
++    StartTunnelPowerProtection();
++    assert(calls.empty());
++  }
++  missing = "systemctl";
++  StopTunnelPowerProtection();
++  assert(calls.empty());
++  missing.clear();
+   StartTunnelPowerProtection();
+   assert(active && calls.size() == 2);
+   assert(calls[0] == (std::vector<std::string>{
+-      "systemctl", "--user", "is-active", "--quiet", "winsvpn-power-inhibit.service"}));
++      "/usr/bin/systemctl", "--user", "is-active", "--quiet", "winsvpn-power-inhibit.service"}));
+   assert(calls[1] == (std::vector<std::string>{
+-      "systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
+-      "--collect", "--property=Type=exec", "systemd-inhibit",
++      "/usr/bin/systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
++      "--collect", "--property=Type=exec", "/usr/bin/systemd-inhibit",
+       "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
+-      "sleep", "infinity"}));
++      "/usr/bin/sleep", "infinity"}));
+   StartTunnelPowerProtection();
+   assert(active && calls.size() == 3);
+   StopTunnelPowerProtection();
+--- a/tools/verify_apple_method_channel_contract.py
++++ b/tools/verify_apple_method_channel_contract.py
+@@ -63,16 +63,6 @@
+     "deleteSecureText": (set(), "uncalled", "Apple uses the Keychain path."),
+     "readSecureText": (set(), "uncalled", "Apple uses the Keychain path."),
+     "writeSecureText": (set(), "uncalled", "Apple uses the Keychain path."),
+-    "deleteVpnConfig": (
+-        {"ios"},
+-        "guarded:Platform.isIOS",
+-        "iOS-only native private config deletion; macOS never reaches it.",
+-    ),
+-    "readVpnConfig": (
+-        {"ios"},
+-        "guarded:Platform.isIOS",
+-        "iOS-only native private config read; macOS never reaches it.",
+-    ),
+     "setLauncherCamouflage": (
+         {"ios"},
+         "guarded:Platform.isIOS",
+--- a/tools/verify_rulings.sh
++++ b/tools/verify_rulings.sh
+@@ -13,6 +13,7 @@
+ # scratch state. See memory: lane verification lies; this runs outside it.
+ 
+ set -u
++set -o pipefail
+ 
+ ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+ LOCK="$ROOT/docs/rulings/RULINGS.lock"
+@@ -25,38 +26,74 @@
+ # E-05/E1 (audit 2026-08-28): the old whole-file `grep -qF` was satisfied by
+ # the pinned literal's own corpse inside a comment -- commenting out the
+ # ruled assignment kept the gate green. Matching now runs against a
+-# comment-stripped view of the file: full-line //, #, and * comment lines,
+-# trailing // comments, and /* ... */ spans are removed first. Over-stripping
+-# (a URL in a string literal) can only make a REQUIRE fail loudly, never
+-# pass silently, which is the correct direction for a gate.
++# comment-stripped view of source files: line comments and multiline block
++# comments are removed, while quoted strings and Markdown content survive.
++# Read errors and unterminated block comments fail the gate.
+ stripped() {
+-  # $1 = file. Strip line comments before matching so a pinned literal's
+-  # corpse inside a comment no longer satisfies a REQUIRE. '#' comments are
+-  # stripped only for non-markdown files: ruling DOCUMENTS are pinned by
+-  # their '#' headings, which are content, not comments.
+-  local f="$1"
+-  case "$f" in
+-    *.md)
+-      sed -e 's@^[[:space:]]*//.*$@@' \
+-          -e 's@^[[:space:]]*\*.*$@@' \
+-          -e 's@/\*.*\*/@@g' \
+-          -e 's@//.*$@@' \
+-          "$f"
+-      ;;
+-    *)
+-      sed -e 's@^[[:space:]]*//.*$@@' \
+-          -e 's@^[[:space:]]*#.*$@@' \
+-          -e 's@^[[:space:]]*\*.*$@@' \
+-          -e 's@/\*.*\*/@@g' \
+-          -e 's@//.*$@@' \
+-          "$f"
+-      ;;
+-  esac
++  python3 - "$1" <<'PYSCAN'
++import pathlib
++import sys
++
++path = pathlib.Path(sys.argv[1])
++source = path.read_text(encoding="utf-8")
++if path.suffix == ".md":
++    sys.stdout.write(source)
++    raise SystemExit(0)
++output = []
++i = 0
++block_depth = 0
++quote = None
++while i < len(source):
++    char = source[i]
++    pair = source[i:i + 2]
++    if block_depth:
++        if pair == "/*":
++            block_depth += 1
++            i += 2
++        elif pair == "*/":
++            block_depth -= 1
++            i += 2
++            output.append(" ")
++        else:
++            if char == "\n":
++                output.append("\n")
++            i += 1
++        continue
++    if quote is not None:
++        output.append(char)
++        i += 1
++        if char == "\\" and i < len(source):
++            output.append(source[i])
++            i += 1
++        elif char == quote:
++            quote = None
++        continue
++    if pair == "/*":
++        block_depth = 1
++        output.append(" ")
++        i += 2
++    elif pair == "//" or char == "#":
++        end = source.find("\n", i)
++        i = len(source) if end < 0 else end
++    else:
++        if char in ("'", '"'):
++            quote = char
++        output.append(char)
++        i += 1
++if block_depth:
++    raise SystemExit("Unterminated block comment in " + str(path))
++sys.stdout.write("".join(output))
++PYSCAN
+ }
+ 
+ contains_live() {
+   # $1 = file, $2 = literal
+-  stripped "$1" | grep -qF -- "$2"
++  local content
++  if ! content="$(stripped "$1")"; then
++    echo "RULINGS: FAIL cannot parse $1" >&2
++    exit 2
++  fi
++  grep -qF -- "$2" <<< "$content"
+ }
+ 
+ checked=0
+--- a/tools/verify_shipped_native_artifact_freshness.py
++++ b/tools/verify_shipped_native_artifact_freshness.py
+@@ -177,11 +177,11 @@
+     "upload_target": False,
+     "separate_cross_store_target": False,
+     "derived_from": "linux-x64-package",
+-    "canonical_release": "1.0.15+30",
+-    "debian_version": "1.0.15-30",
++    "canonical_release": "1.0.16+33",
++    "debian_version": "1.0.16-33",
+     "architecture": "amd64",
+-    "filename": "wins-vpn_1.0.15-30_amd64.deb",
+-    "path": "build/linux-deb/wins-vpn_1.0.15-30_amd64.deb",
++    "filename": "wins-vpn_1.0.16-33_amd64.deb",
++    "path": "build/linux-deb/wins-vpn_1.0.16-33_amd64.deb",
+     "produced": False,
+     "upload_performed": False,
+     "publication_authorized": False,
+--- a/web/index.html
++++ b/web/index.html
+@@ -3802,7 +3802,7 @@
+                   <div class="hash-modal-file-meta">Connect Win's VPN on your Mac or PC, enable Local Network Sharing, and set your Apple TV gateway IP to your computer. All Apple TV streaming traffic routes encrypted through Win's VPN.</div>
+                 </div>
+                 <div class="hash-modal-notice">
+-                  <span>Standalone Native tvOS Client: Win's VPN native tvOS application with Winn Protocol v3 obfuscation is currently in Apple App Store review and will be available as an automatic update for all active accounts.</span>
++                  <span>Standalone Native tvOS Client: A native Win's VPN tvOS application is not available and is not part of the current release scope. Apple TV users can use the setup methods above.</span>
+                 </div>
+               </div>
+             </div>
+--- /dev/null
++++ b/server/test_control_plane_round8.py
+@@ -0,0 +1,343 @@
++#!/usr/bin/env python3
++"""Round 8 regressions against generated hub code and real SQLite.
++
++The shared harness supplies framework stubs. All gateway and provider I/O is
++mocked. Transactions, persisted queues, races and retry behavior are real.
++"""
++import _toolchain  # noqa: F401
++import ast
++import asyncio
++import base64
++from concurrent.futures import ThreadPoolExecutor
++from datetime import timedelta
++import inspect
++import logging
++import shutil
++import threading
++import time
++import types
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_hoppy_agent_tier1_hub as hoppy
++import test_winn3_serving_hub as serving
++
++
++class Round8Tests(unittest.TestCase):
++    def setUp(self):
++        def close_handlers(**kwargs):
++            for handler in kwargs.get("handlers", []):
++                handler.close()
++
++        with patch("logging.basicConfig", side_effect=close_handlers):
++            self.mod = harness.load_hub(
++                HOPPY_AGENT_HMAC=hoppy.HMAC, DURABILITY_BARRIER_ENABLED=0,
++                DURABILITY_BARRIER_REQUIRED=0, WINN3_INNER_POOL_CIDR="10.10.0.0/24",
++                WINN3_CANARY_NODE_SLUG="",
++            )
++        self.mod.logger.propagate = False
++        self.mod.logger.addHandler(logging.NullHandler())
++        self.mod.security_alert = lambda *args, **kwargs: None
++        self.tokens = harness.seed_account(self.mod, devices=1)
++        self.device, self.token = next(iter(self.tokens.items()))
++        serving.seed_node(self.mod, slug="test-node")
++        self.remote = patch.object(self.mod.subprocess, "run", side_effect=AssertionError("unexpected node I/O"))
++        self.remote.start()
++        self.provider = patch.object(self.mod, "paypal_json_request", side_effect=AssertionError("unexpected provider I/O"))
++        self.provider.start()
++        self.addCleanup(self.remote.stop)
++        self.addCleanup(self.provider.stop)
++
++    def tearDown(self):
++        for handler in list(self.mod.logger.handlers):
++            handler.close()
++            self.mod.logger.removeHandler(handler)
++        shutil.rmtree(self.mod._TMPDIR)
++
++    def bind_v3(self):
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE nodes SET protocol_version='winn/3' WHERE slug='test-node'")
++            conn.execute("UPDATE devices SET winn3_static_public=?, winn3_inner_v4=?",
++                         (base64.b64encode(bytes(range(32))).decode(), "10.10.0.2"))
++
++    def pending(self):
++        with self.mod.get_db() as conn:
++            return [dict(row) for row in conn.execute(
++                "SELECT * FROM winn3_registry_refreshes ORDER BY node_slug")]
++
++    def clear_refreshes(self):
++        with self.mod.get_db() as conn:
++            conn.execute("DELETE FROM winn3_registry_refreshes")
++
++    def capture(self):
++        return self.mod._wallet_capture_sync(
++            self.mod.WalletCaptureRequest(order_id="ROUND8-ORDER"),
++            harness.FakeRequest(path="/pay/wallet/capture"))
++
++    def event_status(self):
++        with self.mod.get_db() as conn:
++            return conn.execute("SELECT status FROM paypal_events WHERE event_id=?",
++                                ("wallet-capture:ROUND8-ORDER",)).fetchone()[0]
++
++    def test_customer_exports_reject_invalid_past_and_exact_expiry(self):
++        self.bind_v3()
++        now = self.mod.utcnow()
++        for expiry in (None, "", "invalid", "LIFETIME ACCESS", (now - timedelta(seconds=1)).isoformat(), now.isoformat()):
++            with self.subTest(expiry=expiry), patch.object(self.mod, "utcnow", return_value=now):
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE users SET expiration_date=?", (expiry,))
++                    self.assertEqual(self.mod.winn3_peer_registry_document(conn, "test-node")["peers"], [])
++                with patch.object(self.mod, "sync_peer_to_node", return_value=True) as sync, patch.object(
++                    self.mod, "sync_winn3_registry_to_node", return_value=True
++                ):
++                    self.mod.resync_active_peers_to_node("test-node")
++                    sync.assert_not_called()
++        future = now + timedelta(days=1)
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE users SET expiration_date=?", (future.isoformat(),))
++            peers = self.mod.winn3_peer_registry_document(conn, "test-node")["peers"]
++            self.assertEqual(len(peers), 1)
++            self.assertEqual(peers[0]["not_after"], int(future.timestamp()))
++
++    def test_registry_queue_is_seeded_once_and_survives_reinitialization(self):
++        self.bind_v3()
++        with self.mod.get_db() as conn:
++            conn.execute("DROP TABLE winn3_registry_refreshes")
++            self.mod.create_winn3_registry_refresh_table(conn)
++            self.assertEqual(conn.execute("SELECT node_slug FROM winn3_registry_refreshes").fetchone()[0], "test-node")
++            conn.execute("UPDATE winn3_registry_refreshes SET attempts=3, next_attempt_at=12345")
++            self.mod.create_winn3_registry_refresh_table(conn)
++        self.assertEqual(self.pending()[0]["attempts"], 3)
++
++    def test_core_exports_require_future_expiration(self):
++        with self.mod.get_db() as conn:
++            conn.execute("INSERT INTO core_servers(core_id, exit_public_key) VALUES('test-core', 'core-key')")
++            conn.execute("INSERT INTO core_exit_peers(core_id, exit_slug, core_exit_ip, table_id, iface) VALUES('test-core', 'test-node', '10.8.1.3', 100, 'exit0')")
++            conn.execute("INSERT INTO double_vpn_assignments(device_id, account_number, core_id, exit_slug, client_public_key, client_ip) VALUES(?, ?, 'test-core', 'test-node', 'client-key', '10.9.0.2')",
++                         (self.device, harness.ACCOUNT))
++        now = self.mod.utcnow()
++        for expiry in (None, "", "invalid", "LIFETIME ACCESS", now.isoformat(), (now + timedelta(days=1)).isoformat()):
++            valid = expiry == (now + timedelta(days=1)).isoformat()
++            with self.subTest(expiry=expiry), patch.object(self.mod, "utcnow", return_value=now):
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE users SET expiration_date=?", (expiry,))
++                    self.assertEqual(len(self.mod.active_core_assignment_payloads(conn, "test-core")), int(valid))
++                with patch.object(self.mod, "sync_peer_to_node", return_value=True) as sync:
++                    self.mod.resync_active_peers_to_node("test-node")
++                    if not valid:
++                        sync.assert_not_called()
++
++    def test_reconnect_and_duplicate_deletions_queue_each_removed_peer(self):
++        for kind in ("hardware", "model", "key_rotation"):
++            with self.subTest(kind=kind):
++                tokens = harness.seed_account(self.mod, devices=2)
++                device = next(iter(tokens))
++                fingerprint = "round8-same-hardware"
++                with self.mod.get_db() as conn:
++                    conn.execute("DELETE FROM peer_revocations")
++                    if kind == "hardware":
++                        conn.execute("UPDATE devices SET hardware_hash=?",
++                                     (self.mod.device_identity_bucket(fingerprint),))
++                    if kind == "model":
++                        conn.execute("UPDATE devices SET device_model='Round8 Phone'")
++                    old_keys = {row[0] for row in conn.execute("SELECT client_public_key FROM devices")}
++                    activation = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++                login = serving.build_login(
++                    self.mod, device_id=device, device_fingerprint=fingerprint,
++                    device_model="Round8 Phone" if kind == "model" else "audit-harness",
++                    location="test-node", selection_generation="a" * 32,
++                    ordinary_v3_failure_generation="a" * 32,
++                    client_public_key=base64.b64encode(b"k" * 32).decode(),
++                )
++                request = harness.FakeRequest(path="/verify", headers={"x-wins-activation": activation})
++                with patch.object(self.mod, "sync_peer_to_node", return_value=True):
++                    asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++                with self.mod.get_db() as conn:
++                    queued = {row[0] for row in conn.execute("SELECT client_public_key FROM peer_revocations")}
++                    expected = old_keys if kind != "key_rotation" else {"PUBLIC-KEY-" + device}
++                    self.assertEqual(queued, expected)
++
++    def test_triggered_device_move_key_rotation_and_account_updates(self):
++        self.bind_v3()
++        for statement, params, expected in (
++            ("UPDATE devices SET location_slug=?", ("other-node",), ["other-node", "test-node"]),
++            ("UPDATE devices SET winn3_static_public=''", (), ["other-node"]),
++            ("UPDATE devices SET winn3_static_public=?", (base64.b64encode(b"x" * 32).decode(),), ["other-node"]),
++            ("UPDATE devices SET winn3_inner_v4=?", ("10.10.0.3",), ["other-node"]),
++            ("UPDATE users SET status='inactive'", (), ["other-node"]),
++            ("UPDATE users SET expiration_date=?", ("2020-01-01T00:00:00Z",), ["other-node"]),
++            ("DELETE FROM devices", (), ["other-node"]),
++        ):
++            self.clear_refreshes()
++            with self.subTest(statement=statement), self.mod.get_db() as conn:
++                conn.execute(statement, params)
++            self.assertEqual([row["node_slug"] for row in self.pending()], expected)
++        self.clear_refreshes()
++        with self.mod.get_db() as conn:
++            conn.execute("INSERT INTO devices(device_id, account_number, location_slug, winn3_static_public, winn3_inner_v4) VALUES(?, ?, ?, ?, ?)",
++                         ("inserted-device", harness.ACCOUNT, "test-node", base64.b64encode(b"y" * 32).decode(), "10.10.0.4"))
++        self.assertEqual([row["node_slug"] for row in self.pending()], ["test-node"])
++
++    def test_rollback_reverts_device_and_refresh_queue_together(self):
++        self.bind_v3()
++        self.clear_refreshes()
++        with self.assertRaisesRegex(RuntimeError, "rollback"), self.mod.get_db() as conn:
++            conn.execute("DELETE FROM devices")
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM winn3_registry_refreshes").fetchone()[0], 1)
++            raise RuntimeError("rollback")
++        self.assertEqual(self.pending(), [])
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 1)
++
++    def test_logout_refresh_survives_failure_and_drains_empty_snapshot(self):
++        self.bind_v3()
++        self.clear_refreshes()
++        request = harness.FakeRequest(path="/logout", headers={"authorization": "Bearer " + self.token})
++        asyncio.run(self.mod.logout_device(
++            harness.BackgroundTasks(), request,
++            account_number=harness.ACCOUNT, device_id=self.device))
++        self.assertEqual(len(self.pending()), 1)
++        with patch.object(self.mod, "sync_winn3_registry_to_node", return_value=False) as publish:
++            self.assertEqual(self.mod.drain_winn3_registry_refreshes(), {"published": 0, "retry": 1})
++            self.assertGreater(self.pending()[0]["next_attempt_at"], time.time())
++            self.assertEqual(self.mod.drain_winn3_registry_refreshes(), {"published": 0, "retry": 0})
++            self.assertEqual(publish.call_count, 1)
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE winn3_registry_refreshes SET next_attempt_at=0")
++
++        def publish(conn, node_ip, slug):
++            self.assertTrue(conn.in_transaction)
++            self.assertEqual(self.mod.winn3_peer_registry_document(conn, slug)["peers"], [])
++            return True
++
++        with patch.object(self.mod, "sync_winn3_registry_to_node", side_effect=publish):
++            self.assertEqual(self.mod.drain_winn3_registry_refreshes(), {"published": 1, "retry": 0})
++        self.assertEqual(self.pending(), [])
++
++    def test_missing_node_is_retained_with_backoff(self):
++        with self.mod.get_db() as conn:
++            conn.execute("INSERT INTO winn3_registry_refreshes(node_slug) VALUES('absent-node')")
++        self.assertEqual(self.mod.drain_winn3_registry_refreshes(), {"published": 0, "retry": 1})
++        self.assertEqual(self.pending()[0]["attempts"], 1)
++
++    def test_publication_serializes_with_device_mutation(self):
++        self.bind_v3()
++        for deferred in (False, True):
++            with self.subTest(deferred=deferred):
++                publishing = threading.Event()
++                release = threading.Event()
++                mutating = threading.Event()
++                mutated = threading.Event()
++
++                def run_remote(*args, **kwargs):
++                    publishing.set()
++                    self.assertTrue(release.wait(5))
++                    return types.SimpleNamespace(returncode=0, stdout="", stderr="")
++
++                def publish():
++                    with self.mod.get_db() as conn:
++                        if deferred:
++                            conn.execute("BEGIN")
++                        return self.mod.sync_winn3_registry_to_node(conn, "127.0.0.1", "test-node")
++
++                def mutate():
++                    with self.mod.get_db() as conn:
++                        mutating.set()
++                        conn.execute("UPDATE devices SET winn3_inner_v4='10.10.0.5'")
++                    mutated.set()
++
++                with patch.object(self.mod.subprocess, "run", side_effect=run_remote), ThreadPoolExecutor(max_workers=2) as pool:
++                    first = pool.submit(publish)
++                    try:
++                        self.assertTrue(publishing.wait(5))
++                        second = pool.submit(mutate)
++                        self.assertTrue(mutating.wait(5))
++                        self.assertFalse(mutated.wait(0.1))
++                    finally:
++                        release.set()
++                    self.assertTrue(first.result(5))
++                    second.result(5)
++                self.assertTrue(mutated.is_set())
++                self.assertEqual(len(self.pending()), 1)
++
++    def test_hoppy_deletions_commit_revocations_without_background_execution(self):
++        for action in ("device-revoke", "device-limit-reset"):
++            with self.subTest(action=action):
++                tokens = harness.seed_account(self.mod, devices=2)
++                with self.mod.get_db() as conn:
++                    conn.execute("DELETE FROM peer_revocations")
++                bearer, _ = self.mod.mint_hoppy_agent_token(harness.ACCOUNT, action)
++                body = {"account_number": harness.ACCOUNT, "request_id": "round8-" + action}
++                if action == "device-revoke":
++                    body["device_id"] = next(iter(tokens))
++                hoppy.call(self.mod, "/api/agent/v1/" + action, body, x_token=bearer)
++                expected = 1 if action == "device-revoke" else 2
++                with self.mod.get_db() as conn:
++                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 2 - expected)
++                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], expected)
++                with patch.object(self.mod, "remove_peer_from_node", return_value=False):
++                    self.assertEqual(self.mod.drain_peer_revocation_outbox()["retry"], expected)
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE peer_revocations SET next_attempt_at=0, lease_until=NULL")
++                with patch.object(self.mod, "remove_peer_from_node", return_value=True):
++                    self.assertEqual(self.mod.drain_peer_revocation_outbox()["removed"], expected)
++
++    def test_capture_requires_explicit_completed_result(self):
++        with patch.object(self.mod, "paypal_enabled", return_value=True):
++            for result, status in (({}, 502), (None, 502), ({"status": "APPROVED"}, 409), ({"status": "PENDING"}, 409)):
++                with self.subTest(result=result):
++                    with self.mod.get_db() as conn:
++                        conn.execute("DELETE FROM paypal_events")
++                    with patch.object(self.mod, "paypal_json_request", return_value=result), self.assertRaises(harness.HTTPException) as error:
++                        self.capture()
++                    self.assertEqual(error.exception.status_code, status)
++                    self.assertEqual(self.event_status(), "failed")
++            with patch.object(self.mod, "paypal_json_request", return_value={"status": "COMPLETED"}):
++                self.assertEqual(self.capture()["status"], "COMPLETED")
++            self.assertEqual(self.event_status(), "processed")
++
++    def test_duplicate_capture_requires_processed_and_provider_confirmation(self):
++        with self.mod.get_db() as conn:
++            self.mod.reserve_paypal_event(conn, "wallet-capture:ROUND8-ORDER", "WALLET.CAPTURE", "")
++        with patch.object(self.mod, "paypal_enabled", return_value=True):
++            with self.assertRaises(harness.HTTPException) as error:
++                self.capture()
++            self.assertEqual(error.exception.status_code, 409)
++            with self.mod.get_db() as conn:
++                self.mod.finish_paypal_event(conn, "wallet-capture:ROUND8-ORDER", "processed")
++            with patch.object(self.mod, "paypal_json_request", return_value={"status": "APPROVED"}) as provider, self.assertRaises(harness.HTTPException) as error:
++                self.capture()
++            provider.assert_called_once_with("GET", "/v2/checkout/orders/ROUND8-ORDER")
++            self.assertEqual(error.exception.status_code, 409)
++            self.assertEqual(self.event_status(), "failed")
++            with self.mod.get_db() as conn:
++                self.mod.finish_paypal_event(conn, "wallet-capture:ROUND8-ORDER", "processed")
++            with patch.object(self.mod, "paypal_json_request", return_value={"status": "COMPLETED"}) as provider:
++                self.assertEqual(self.capture()["status"], "already_captured")
++            provider.assert_called_once_with("GET", "/v2/checkout/orders/ROUND8-ORDER")
++
++    def test_all_async_routes_have_real_async_work(self):
++        for function in ast.parse(harness._extract_main_block()).body:
++            if not isinstance(function, ast.AsyncFunctionDef):
++                continue
++            if not any(isinstance(d, ast.Call) and isinstance(d.func, ast.Attribute) and d.func.attr in
++                       {"get", "post", "put", "patch", "delete", "head", "options"} for d in function.decorator_list):
++                continue
++            with self.subTest(route=function.name):
++                self.assertTrue(any(isinstance(n, (ast.Await, ast.AsyncFor, ast.AsyncWith)) for n in ast.walk(function)))
++        self.assertFalse(inspect.iscoroutinefunction(self.mod.heartbeat))
++        thread_ids = []
++
++        def heartbeat(payload, request):
++            thread_ids.append(threading.get_ident())
++            return {"ok": True}
++
++        with patch.object(self.mod, "heartbeat", side_effect=heartbeat):
++            self.assertEqual(asyncio.run(self.mod.heartbeat_path(
++                "test-node", types.SimpleNamespace(slug=""), harness.FakeRequest())), {"ok": True})
++        self.assertNotEqual(thread_ids, [threading.get_ident()])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- /dev/null
++++ b/tools/test_rulings_round8.py
+@@ -0,0 +1,48 @@
++#!/usr/bin/env python3
++"""Exercise the production rulings parser, including fail-closed errors."""
++from pathlib import Path
++import subprocess
++import tempfile
++import unittest
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SOURCE = (ROOT / "tools/verify_rulings.sh").read_text()
++FUNCTIONS = SOURCE[SOURCE.index("stripped() {"):SOURCE.index("\nchecked=0")]
++
++
++class RulingParserTests(unittest.TestCase):
++    def invoke(self, source, suffix=".swift", literal=None):
++        with tempfile.TemporaryDirectory(prefix="winsvpn-ruling-test-") as directory:
++            path = Path(directory) / ("source" + suffix)
++            path.write_text(source)
++            command = 'stripped "$1"' if literal is None else 'contains_live "$1" "$2"'
++            return subprocess.run(["bash", "-c", FUNCTIONS + "\n" + command,
++                                   "test-rulings", str(path), literal or ""],
++                                  capture_output=True, text=True, timeout=10)
++
++    def test_multiline_nested_and_line_comments_cannot_satisfy_live_rule(self):
++        source = "/*\nstatic let enforceRoutes = true\n/* nested */\n*/\nstatic let enforceRoutes = !true\n"
++        result = self.invoke(source, literal="static let enforceRoutes = true")
++        self.assertEqual(result.returncode, 1)
++        for comment in ("//", "#"):
++            self.assertEqual(self.invoke(comment + " static let enforceRoutes = true\n",
++                                         literal="static let enforceRoutes = true").returncode, 1)
++        self.assertEqual(self.invoke("static let enforceRoutes = true // live\n",
++                                    literal="static let enforceRoutes = true").returncode, 0)
++
++    def test_markdown_headings_and_quoted_urls_are_preserved(self):
++        heading = "# Approved route posture\n"
++        self.assertEqual(self.invoke(heading, ".md").stdout, heading)
++        source = 'let url = "https://example.test/a#fragment"\nlet text = "/* literal */"\n'
++        self.assertEqual(self.invoke(source).stdout, source)
++
++    def test_unterminated_comment_fails_both_require_and_forbid_search(self):
++        for literal in ("enforceRoutes = true", "enforceRoutes = false"):
++            result = self.invoke("/*\nenforceRoutes = true\n", literal=literal)
++            self.assertEqual(result.returncode, 2)
++            self.assertIn("cannot parse", result.stderr)
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- /dev/null
++++ b/docs/evidence/round8_remediation.md
+@@ -0,0 +1,133 @@
++# Round 8 requested remediation
++
++Date: 2026-09-13. Workspace: `/Users/owner/xprize/winsvpnv3`.
++
++All 12 requested repair groups are implemented. All 12 mandatory verification
++commands pass. This is local source and package verification. Android physical
++acceptance remains blocked, and the broader Android JVM suite retains five
++artifact failures described below.
++
++The existing dirty working tree was preserved. No commit, push, publication,
++deployment, or release authorization occurred. Task-specific changes and hashes
++are recorded in [repairs.diff](round8_remediation/repairs.diff) and
++[changed-files.json](round8_remediation/changed-files.json).
++
++## Repairs
++
++| Finding | Implemented behavior |
++| --- | --- |
++| SOL-H2 | Rebuilt and verified Edge and Firefox ZIPs from the current extension source. A second deterministic build produced identical verified bytes. |
++| A01 | Core assignments, customer AWG/Core resynchronization, and customer v3 registry exports require a parsed expiration strictly after the current UTC time. Customer `not_after` comes directly from that timestamp. The separately configured canary remains distinct from customer authorization. |
++| A02 | Both duplicate-device deletion branches, old-peer replacement, Hoppy device revoke, and Hoppy device-limit reset call `queue_peer_revocation` inside the mutation transaction. Background tasks drain committed records. |
++| A03 | A duplicate capture must have a processed event and a fresh PayPal GET confirming COMPLETED. Unconfirmed legacy records become failed. Fresh non-COMPLETED or missing provider results become failed and return 409 or 502. |
++| A06 | Added the durable per-node registry refresh table, device insert/delete/update triggers, account status/expiration triggers, initial v3-node reconciliation, and bounded retry/backoff drain. Publication acquires a SQLite writer lock before reading its snapshot and retains it through the caller's transaction. The existing `account_expiry_revocation_sweep_loop` runs the drain through `asyncio.to_thread`; that is the actual background-loop name in this checkout. |
++| SOL-H3 | Converted exactly 70 routes with no asynchronous operations to synchronous `def`. The async heartbeat alias now awaits `asyncio.to_thread(heartbeat, ...)`. Direct route callers and declaration assertions in affected tests were adapted without changing their policy assertions. |
++| A04 / SOL-M2 | Linux power protection resolves systemctl, systemd-run, systemd-inhibit, and sleep through `Which`, passes those paths to the runner, and returns when required tools are unavailable. Stop independently resolves systemctl. |
++| DB-04 | Android acquires a 60-second startup wake lock. Watchdog renewal is removed; explicit teardown release is retained. |
++| SOL-M4 | Unexpected Android split-tunnel exclusion errors log at error level and throw the required IllegalStateException. Missing, uninstalled packages retain their existing dedicated handling. |
++| SOL-M1 | All three Dart request payloads advertise `supports_xray: !Platform.isAndroid`. |
++| SOL-L3 | Android identity assertions now match phone 1.0.16+33 and TV 3302. The historical superseded TV evidence assertion remains historical. |
++| A07 / A10 / DB-02 / DB-03 / index | The rulings parser removes multiline block comments, preserves quoted strings and Markdown headings, and fails closed on parser errors. Removed the obsolete readVpnConfig/deleteVpnConfig exemptions from the actual `PLATFORM_SPECIFIC_METHODS` mapping. Updated the Debian non-upload identity to 1.0.16+33. Replaced the tvOS claim with the exact requested out-of-scope wording. The H3 receive-window test was already staged and was verified present in the index. |
++
++All changed source and test files use LF with zero CR bytes. Existing ruled
++decisions and `RULINGS.lock` were not changed by this task.
++
++## Mandatory verification
++
++| Command | Final result |
++| --- | --- |
++| `flutter analyze --no-pub` | PASS, no issues |
++| `flutter test --no-pub` | PASS, 1926 passed, 2 existing opt-in skips |
++| `python3 server/test_control_plane_deepseek_round2.py` | PASS, 11 tests |
++| `python3 server/test_control_plane_round4.py` | PASS, 8 tests |
++| `python3 server/test_control_plane_round5.py` | PASS, 16 tests |
++| `python3 server/test_control_plane_round6.py` | PASS, 7 tests |
++| `python3 server/test_control_plane_round7.py` | PASS, 17 tests |
++| `python3 server/test_winn3_descriptor_hub.py` | PASS, 117 tests |
++| `python3 server/test_account_deletion_hub.py` | PASS, 20 tests |
++| `python3 tools/website_security_audit.py` | PASS, 56 checks, 1 existing skip |
++| `sh tools/verify_rulings.sh` | PASS, 59 general and 6 Apple checks |
++| `python3 tools/verify_apple_method_channel_contract.py` | PASS, 9 remaining exemptions re-proved |
++
++Exact commands, exit codes, and log filenames are in
++[final-suites.json](round8_remediation/final-suites.json) and
++[flutter-results.json](round8_remediation/flutter-results.json).
++Flutter and Android Gradle commands ran sequentially under task-owned repository
++build locks. No other process's lock was removed.
++
++## Additional verification
++
++- New [Round 8 server tests](../../server/test_control_plane_round8.py): 13 pass.
++  Coverage includes missing/invalid/exact-boundary expiration, Core exports,
++  duplicate hardware/model cleanup and key rotation, Hoppy durable revocation,
++  registry migration and triggers, rollback, missing-node backoff, logout to an
++  empty registry, failed publication retry, and concurrent writer serialization
++  with both fresh and deferred transactions. PayPal provider outcomes and
++  duplicate confirmation states are exercised without provider access.
++- Five selected new tests fail against the saved pre-fix source: 18 assertion
++  failures and one error. This is an expected negative control, recorded in
++  [negative-control.log](round8_remediation/negative-control.log).
++- A real FastAPI/HTTPX ASGI request to the converted device-list route returns
++  HTTP 200 while its database operation is blocked on a worker thread. The
++  event loop remains responsive. Network and subprocess operations were denied.
++  See [asgi-result.json](round8_remediation/asgi-result.json).
++- All affected route suites pass: v3 serving 49, install-time carrier 36, Core
++  dark-start 15, path MTU 28, descriptor signing 30, data-plane dark-start 17,
++  and Hoppy Tier 1 23 tests.
++- Three [rulings parser regressions](../../tools/test_rulings_round8.py) pass,
++  including nested multiline comments, live literals, quoted URLs, Markdown
++  headings, and an unterminated-comment failure for both search directions.
++- Linux runner C++17 syntax checks with warnings treated as errors pass for
++  arm64 and x64. The extracted production inhibitor functions compile and run
++  on both architectures, including missing-tool, repeated-start, failed-start,
++  retry, and stop cases. Containers had no network and mounted source read-only.
++  See [linux-results.json](round8_remediation/linux-results.json).
++- Go `go test -race ./internal/carrier`, 12 extension enforcement regressions,
++  and the control-plane shell syntax check pass.
++- Edge and Firefox verification passes. SHA-256 values:
++  Edge `22734014d0f1caa7dff0c851f6de99d371d2309e737667ba6c25d290e3d90875`;
++  Firefox `e5a9a17bbb21ecb51231c2cd67964401eba72d6ede604e9224db120ce6b9ec58`.
++
++The server harness still emits existing SQLite ResourceWarnings. The website
++skip concerns the absent optional `drop_in/lib/spa_service.dart`. These results
++do not establish production provider behavior, real browser lifecycle behavior,
++or physical gateway/desktop routing acceptance.
++
++## Android status and remaining work
++
++Kotlin compilation and lint completed with zero lint errors and 77 warnings.
++The full phone JVM suite ran 591 tests: 586 passed, five failed. The updated
++release identity test passes. All five failures are in
++`ShippedEngineFreshnessTest`, as detailed in
++[android-jvm-summary.json](round8_remediation/android-jvm-summary.json):
++
++- Three debug ABI `libwinnengine.so` files are absent, causing two staged-engine
++  inventory checks to fail.
++- The existing phone debug APK has no Winn engine, causing two APK checks to
++  fail. It was not installed on the phone.
++- Native source freshness reaches the existing refusal for stale Windows
++  native consumer authority paths. The Debian identity correction is applied;
++  the subsequent Windows gate remains intact.
++
++A Motorola USB-debugging phone is connected. The actual Android release
++producer exits 1 with `ReleaseInputIndex is required for every Android release
++build.` No `RELEASE_INPUT_INDEX.json` exists under the repository `.artifacts`
++tree, and `build/app/outputs/flutter-apk/app-release.apk` is absent. See
++[android-release-result.json](round8_remediation/android-release-result.json).
++
++Resume physical verification with a valid reviewed input index and release
++artifact. Then perform the required uninstall, install, launch, and logcat
++sequence. Startup wake-lock expiry after 60 seconds and continued screen-off
++tunnel operation remain unverified on the device. No phone uninstall or
++installation occurred during this task.
++
++Six preferred Cursor/Grok 4.6 Extra High lanes were launched and all exited
++before work with account usage-limit errors. Workspace-agent startup also
++failed. The lead completed implementation and review locally; no independent
++model review is claimed.
++
++Technical references checked live on 2026-09-13:
++[FastAPI synchronous route offload](https://fastapi.tiangolo.com/async/),
++[SQLite writer transactions](https://www.sqlite.org/lang_transaction.html),
++[PayPal Orders integration](https://developer.paypal.com/api/rest/integration/orders-api),
++and [Android VPN package exclusions](https://developer.android.com/reference/android/net/VpnService.Builder).

@@ -1,0 +1,4 @@
+ingress:
+  - hostname: EDGE_AICORE_HOST
+    service: http://localhost:8090
+  - service: http_status:404

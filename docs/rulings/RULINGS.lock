@@ -1,0 +1,159 @@
+# RULINGS.lock — ruled invariants of this tree.
+#
+# Every entry here encodes a DECISION made by the delegated authority
+# (docs/handoff/MACOS_ENFORCEROUTES_TRUE_RULING_20260810.md is the pattern:
+# a dated ruling document, then the code). A lane, agent, or refactor that
+# needs to change a line guarded here is not blocked from proposing it, but
+# the change is a RULING EVENT: it requires a new dated ruling document that
+# names the evidence, and the lockfile entry must be updated in the same
+# change. Editing this file without such a document is itself a violation.
+#
+# Verified by tools/verify_rulings.sh. The dispatcher runs it after every
+# lane merge and before any release build. It is not a test lanes run for
+# themselves; its value is that the DISPATCHER runs it, outside lane
+# verification, so a silent revert cannot ride a green lane report.
+#
+# Format, one entry per line, fields separated by " :: ":
+#   REQUIRE :: <path relative to repo root> :: <exact literal that must be present>
+#   FORBID  :: <path relative to repo root> :: <exact literal that must be absent>
+# Lines starting with # and blank lines are ignored. Literals are matched
+# fixed-string (grep -F), not as regexes.
+
+# ---------------------------------------------------------------------------
+# RULING: macOS ships enforceRoutes = true.
+# Ruled 2026-08-10 (MACOS_ENFORCEROUTES_TRUE_RULING_20260810.md), silently
+# reverted by a lane 2026-08-10, reinstated by ruling 2026-08-11.
+# The single source of the posture is WinsMacRoutePosture; the connect path
+# must keep reading from it so there is exactly one flip point.
+# Release remains gated on the SELFSTRANGULATION section-5 remote-endpoint
+# carriage measurement (owner-scheduled, never on the dev Mac).
+# ---------------------------------------------------------------------------
+REQUIRE :: macos/Runner/RouteAudit.swift :: static let enforceRoutes = true
+FORBID  :: macos/Runner/RouteAudit.swift :: enforceRoutes = false
+REQUIRE :: macos/Runner/MainFlutterWindow.swift :: tunnelProtocol.enforceRoutes = WinsMacRoutePosture.enforceRoutes
+FORBID  :: macos/Runner/MainFlutterWindow.swift :: enforceRoutes = false
+REQUIRE :: ios/Runner/AppDelegate.swift :: tunnelProtocol.enforceRoutes = true
+FORBID  :: ios/Runner/AppDelegate.swift :: enforceRoutes = false
+
+# ---------------------------------------------------------------------------
+# RULING: release security checks fail closed.
+# Ruled 2026-08-23 (RELEASE_SECURITY_FAIL_CLOSED_RULING_AUG23.md).
+# Descriptor identity and hub geometry are checked before standalone traffic;
+# a failed v3 check is a refusal and never an implicit v1 downgrade.
+# Pinning and replay durability entries are added with their final reviewed
+# implementation literals before a release candidate is built.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/RELEASE_SECURITY_FAIL_CLOSED_RULING_AUG23.md :: # Release security fail-closed ruling, 2026-08-23
+REQUIRE :: lib/winn_protocol_dispatch.dart :: winn3DescriptorNodeMismatch('winn3_descriptor_node_mismatch')
+REQUIRE :: lib/winn_protocol_dispatch.dart :: const int kWinn3MaxDescriptorTtlSeconds = 30 * 24 * 3600;
+REQUIRE :: lib/winn_protocol_dispatch.dart :: selectedNode != descriptor.node
+REQUIRE :: lib/winn_protocol_dispatch.dart :: const Set<String> kWinn3DescriptorRequiredFields = <String>{
+REQUIRE :: lib/winn_protocol_dispatch.dart :: 'descriptor-unknown-fields'
+REQUIRE :: lib/winn_protocol_dispatch.dart :: 'descriptor-resolver-does-not-match-gateway-bind'
+REQUIRE :: lib/main.dart :: securityRefused: _lastTunnelCandidateWasSecurityRefusal
+REQUIRE :: lib/winn3_cover_fallback.dart :: return !securityRefused && servedConfigNeedsCoverNodeFallback(config);
+REQUIRE :: lib/control_plane_pinning.dart :: ..connectionFactory = _openPinnedConnection;
+REQUIRE :: lib/control_plane_pinning.dart :: ..followRedirects = false
+REQUIRE :: winn_protocol_experimental/winn3/core/replay.go :: var ErrReplayJournal = errors.New("winn3: replay journal persistence failed")
+# The gateway block lives in the data-plane installer (design v17 2.8, slice S3,
+# under the slice S0 ruling). Slice S6 removed the standalone installer's line
+# in the same commit that made that installer a tombstone, so the replay-journal
+# literal is required in the data-plane installer only. The tombstone
+# server/wins_winn3_gateway_install.sh carries no gateway code.
+REQUIRE :: server/wins_data_plane_setup_ONETOUCH.sh :: WINN3_GATEWAY_REPLAY_JOURNAL=1
+
+# ---------------------------------------------------------------------------
+# RULING: Android API 36 compatibility exception for release 1.0.15+30.
+# Ruled 2026-08-24 (ANDROID_API36_COMPATIBILITY_EXCEPTION_20260824.json).
+# This exception is release-specific and expires at the bounded review trigger.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260824.json :: "status": "approved_for_named_release_only"
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260824.json :: "api_36_remains_compliant": true
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260824.json :: "before_next_android_release_candidate": true
+
+# ---------------------------------------------------------------------------
+# RULING: Android API 36 compatibility exception for release 1.0.16+33.
+# Ruled 2026-09-13 (ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json).
+# This exception is release-specific and expires at the bounded review trigger.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "status": "approved_for_named_release_only"
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "api_36_remains_compliant": true
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "before_next_android_release_candidate": true
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "version_name": "1.0.16"
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "version_code": 33
+REQUIRE :: docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json :: "hard_deadline": "2026-09-30"
+
+# ---------------------------------------------------------------------------
+# RULING: Android API 37 adoption (compileSdk 37, targetSdk 37, NDK r30).
+# Ruled 2026-10-06 (ANDROID_API37_ADOPTION_20261006.json), on the owner's
+# direct decision to bump every pinned component to latest stable. Supersedes
+# the two API 36 compatibility exceptions above, which stay as history. The
+# literals below replaced the compileSdk/targetSdk 36 and NDK r29 entries that
+# the 20260824 ruling carried.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/ANDROID_API37_ADOPTION_20261006.json :: "status": "owner_directed_pending_debate_round"
+REQUIRE :: docs/rulings/ANDROID_API37_ADOPTION_20261006.json :: "api_37_exceeds_play_requirement": true
+REQUIRE :: docs/rulings/ANDROID_API37_ADOPTION_20261006.json :: "required_before_next_android_release_candidate_upload": true
+REQUIRE :: android/app/build.gradle.kts :: compileSdk = 37
+REQUIRE :: android/app/build.gradle.kts :: targetSdk = 37
+REQUIRE :: android/app/build.gradle.kts :: ndkVersion = "30.0.16248370"
+REQUIRE :: wear_os/app/build.gradle.kts :: compileSdk = 37
+REQUIRE :: wear_os/app/build.gradle.kts :: targetSdk = 37
+REQUIRE :: wear_os/app/build.gradle.kts :: ndkVersion = "30.0.16248370"
+
+# ---------------------------------------------------------------------------
+# RULING: tvOS is post-release native product work, not release 1.0.15+30.
+# Ruled 2026-08-24 (TVOS_POST_RELEASE_PRODUCT_SCOPE_20260824.json).
+# The current Apple denominator is one iOS IPA with embedded watchOS plus one
+# macOS App Store PKG. Developer ID macOS is an optional separate distribution.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/TVOS_POST_RELEASE_PRODUCT_SCOPE_20260824.json :: "status": "post_release_native_product_only"
+REQUIRE :: docs/rulings/TVOS_POST_RELEASE_PRODUCT_SCOPE_20260824.json :: "tvos_is_release_blocker": false
+REQUIRE :: docs/rulings/TVOS_POST_RELEASE_PRODUCT_SCOPE_20260824.json :: "tvos_is_readiness_denominator": false
+FORBID  :: tools/release_dependency_freeze.py :: "tvos":
+FORBID  :: tools/apple_upload_exact_release_candidates.py :: tvos
+FORBID  :: tools/validate_apple_submission_package.py :: tvos
+FORBID  :: tools/validate_apple_owner_signoff.py :: tvos
+
+# ---------------------------------------------------------------------------
+# RULING: ReleasePython v1 is an inert sealed fossil; v2 is create-only.
+# Ruled 2026-09-03 in the preceding ruling-only commit
+# 0cf7a43af7ae0c092bb77c290049391b199b297e.
+# The v1 updater is dead capability and remains at its v1 source path only.
+# V2 has no updater. Its four-leaf generation and ceremony are governed by
+# OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: # Owner ratification, ReleasePython v2, and deployment governance ruling, 2026-09-03
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: Commit `49cf6b96a75f5bf17854c04f73693211813b7fcc`
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: Branch A is adopted.
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: There is no v2 updater or transition agent.
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: The credential remains recorded as exposed and live.
+REQUIRE :: docs/rulings/RELEASEPYTHON_SEALED_PAIR_UPDATER_RULING_20260901.md :: # ReleasePython sealed-pair updater ruling, 2026-09-01
+REQUIRE :: tools/macos_release_python_owner_updater.c :: /Library/WinsVPN/ReleasePythonAuthority/v1/owner-updater
+REQUIRE :: tools/macos_release_python_owner_updater.c :: RENAME_SWAP
+REQUIRE :: tools/macos_release_python_owner_updater.c :: WINS_OLD_CONTROLLER_SHA256
+REQUIRE :: tools/macos_release_python_owner_updater.c :: WINS_NEW_LAUNCHER_SHA256
+FORBID  :: tools/macos_release_python_owner_updater.c :: /Library/WinsVPN/ReleasePythonAuthority/v2/owner-updater
+FORBID  :: tools/macos_release_python_owner_updater.c :: RENAME_UNLINK
+FORBID  :: tools/macos_release_python_owner_updater.c :: system(
+REQUIRE :: docs/rulings/OWNER_RATIFICATION_RELEASEPYTHON_V2_AND_DEPLOYMENT_GOVERNANCE_20260903.md :: the installed v1 updater with SHA-256
+# ---------------------------------------------------------------------------
+# RULING: ReleasePython v2 authority renewal mechanism permitted (narrow).
+# Ruled 2026-09-05 (OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md):
+# development now; installation/execution ONLY after the gated conditions
+# (independent reviews, fresh bounded signed authorization by reference,
+# full recovery). Production HOLD until evidenced. The September 3 document
+# is preserved unmodified as history.
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md :: # Owner ruling: ReleasePython v2 authority renewal mechanism permitted (narrow amendment), 2026-09-05
+REQUIRE :: docs/rulings/OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md :: is amended SOLELY as follows: the create-only restriction on the
+REQUIRE :: docs/rulings/OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md :: 1. No new key generation for authority purposes. No satisfaction, in whole
+REQUIRE :: docs/rulings/OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md :: role may withhold technical GO but may not rewrite this decision.
+REQUIRE :: docs/rulings/OWNER_RELEASEPYTHON_V2_AUTHORITY_RENEWAL_20260905.md :: This ruling creates no OWNER-DECISIONS-NEEDED label and alters none.
+# ---------------------------------------------------------------------------
+# RULING: the Windows installer payload is not byte-reproducible; accepted for
+# release 1.0.16+33 only (WINDOWS_PAYLOAD_NONREPRODUCIBLE_ACCEPTANCE_20261022.md).
+# ---------------------------------------------------------------------------
+REQUIRE :: docs/rulings/WINDOWS_PAYLOAD_NONREPRODUCIBLE_ACCEPTANCE_20261022.md :: # Windows installer payload is not byte-reproducible: accepted for 1.0.16+33 (2026-10-22)
+REQUIRE :: docs/rulings/WINDOWS_PAYLOAD_NONREPRODUCIBLE_ACCEPTANCE_20261022.md :: Status: in force for release 1.0.16+33 only.
+REQUIRE :: docs/rulings/WINDOWS_PAYLOAD_NONREPRODUCIBLE_ACCEPTANCE_20261022.md :: Nothing may claim that a Windows installer can be rebuilt to the same digest.

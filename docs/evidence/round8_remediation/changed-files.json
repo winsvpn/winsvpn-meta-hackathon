@@ -1,0 +1,163 @@
+[
+  {
+    "path": "android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt",
+    "before_sha256": "256d79f56c80beb0a6a007ca9b16173f1f15efb2e715c24416e20051a50e8a98",
+    "after_sha256": "cab4bcdf88b52ce33dcd3276b1a7a8b83cefb67673cd466a744c2845eedbabd3",
+    "bytes": 201565,
+    "cr_bytes": 0
+  },
+  {
+    "path": "android/app/src/test/kotlin/org/winsvpn/app/AndroidReleaseIdentityContractTest.kt",
+    "before_sha256": "735e21132cac1a7da60d11ff2f3a1b888d190711b04c54a7fef20cce3157948b",
+    "after_sha256": "6177b8e9c8ce15216e585f68394cdf28f95d6e8610db6ea046c90627d16eedb9",
+    "bytes": 4330,
+    "cr_bytes": 0
+  },
+  {
+    "path": "docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md",
+    "before_sha256": "124422ff785107fbcedcf97161bef7bcc8c64ac0923d8ad8218cf3d78410706b",
+    "after_sha256": "ecde429f0f9ebbf2083bf9b63bbbe10767e9b625fe26b73d2de40f8715b2c7bc",
+    "bytes": 36622,
+    "cr_bytes": 0
+  },
+  {
+    "path": "lib/main.dart",
+    "before_sha256": "cabfc25302f1e3dffb6e98419f40d9477d0db9e811a6e0ba43f423f394594d35",
+    "after_sha256": "d3c2d9fbb460a952bfa21fe4eaad75af668bc53c4c2201494c767bd908025aa8",
+    "bytes": 907524,
+    "cr_bytes": 0
+  },
+  {
+    "path": "linux/runner/linux_tunnel_backend.cc",
+    "before_sha256": "c103e52865a3b882c317644a9dabc732140795625b9b831f66e96686e340508f",
+    "after_sha256": "dba0d35f5f07e1c465b707adaf5acc33875c25b3f551de10e69acdf62d506034",
+    "bytes": 214849,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_control_plane_round7.py",
+    "before_sha256": "72be0a4c3f3272fa2cf16ba4bd4ca4ab3bb9f5016c86b37b5db56b98b0759e27",
+    "after_sha256": "17d3fc19080e8fe5d458613fe8cbde60a728dd6f151ca10bcab0beabcfae8ab0",
+    "bytes": 19003,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_core_dark_start_latch.py",
+    "before_sha256": "2b24e2b00e823926cc3c8f9c797b6378f17790e604919b8cfeaa15eb6736bcc4",
+    "after_sha256": "f4ef8ca15d8ceb6b17348cc8493f2363373be09ac9b355473deb2ce18efd2330",
+    "bytes": 29659,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_data_plane_dark_start_latch.py",
+    "before_sha256": "d1da04d99a8e115af2925fc55ce6608b53aa8ba23045efb54c008bbf3613f822",
+    "after_sha256": "cd635f207788ac9e1924bc59d63cb782877da55ca369d2f15b22d23ad144adc3",
+    "bytes": 33593,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_hoppy_agent_tier1_hub.py",
+    "before_sha256": "e5691a8a4dbc0cc5a3dc6df01349d18d1c0e10251136d86bc849d49f42d52e55",
+    "after_sha256": "8bc08bcc7f3b5755e346edc835ff201a7a89d5336fb06a727b91426cc6668f69",
+    "bytes": 24331,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_winn3_descriptor_hub.py",
+    "before_sha256": "929d4abcd4e6f37ce0de3829ebe833775c91481b72180ed8e46adcff886b4092",
+    "after_sha256": "79eddbab7c84a231d966fc3bd02878ee67c1216b7dd9984eeed2ff449f8c78d1",
+    "bytes": 147051,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_winn3_install_time_carrier.py",
+    "before_sha256": "341163455d129f244dea195f99567ce98851a7f4314be0249f4897ec42dd6171",
+    "after_sha256": "69da3a4ea2ec79e21a9b7eb54999a0e7fdd874e482d533216b70bda0269b08dd",
+    "bytes": 38236,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_winn3_pathmtu_hub.py",
+    "before_sha256": "9d30a06aeefe4d1314dd2292e19bc422d68e2c8e3806045f46f94de211f3aa85",
+    "after_sha256": "52c05c2d26654325383c6dbc1db4a0fe81f611f94c85d3d7a2fbdafc05a85672",
+    "bytes": 38497,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_winn3_serving_hub.py",
+    "before_sha256": "f0fb4fbeebfdc98da8630162f7dc1d2cf8abf96382b8150872daf6ba05df8062",
+    "after_sha256": "c63226ffb1a9165e8cb2b2fdd57ba1928ba4bab3f5e8247c1b6633397c14d9a8",
+    "bytes": 49350,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_winn3_sign_descriptor_tool.py",
+    "before_sha256": "e787835b724c8ec195a0418f0c0a0325963df4a8e5fc80a6a205c7ca308daa7e",
+    "after_sha256": "45ae6470f6aa6614aab568fb606ee22dac609718c7066771651a51dfe3a3fd94",
+    "bytes": 37639,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+    "before_sha256": "8b5f322f0f5fa672432a5632ada2a3df7462297688042057d0b03953fb2ea95a",
+    "after_sha256": "650a61d397bce24223936fd1d64a5424f973665b5b8dc8e90340f5bb0aab3542",
+    "bytes": 1857731,
+    "cr_bytes": 0
+  },
+  {
+    "path": "tools/test_linux_round7.py",
+    "before_sha256": "a64f631c496467141c2d026379b962491d52cce550b7546db8dcfd3b569c45ec",
+    "after_sha256": "fbbec3cb5e8d4cb4908ca191071db6b99ddb2697f8a4e56f3db1a30be0aae558",
+    "bytes": 3365,
+    "cr_bytes": 0
+  },
+  {
+    "path": "tools/verify_apple_method_channel_contract.py",
+    "before_sha256": "3646c7e5d865364361e9e5feab61610909e87686a7852291c76a278ae78d7391",
+    "after_sha256": "eca0df59b747d629fd0a345ad3a154d701048092aa1756bc38dc5b6c5f28eb6a",
+    "bytes": 17528,
+    "cr_bytes": 0
+  },
+  {
+    "path": "tools/verify_rulings.sh",
+    "before_sha256": "dac47b215e37a90e1a4e1ad029080e0c6289e6ceafc3a247f9d5d8463a101b75",
+    "after_sha256": "5153425fc419d4ae010442beb58ba02963e087358b9ab028338d320dbf723a7f",
+    "bytes": 10410,
+    "cr_bytes": 0
+  },
+  {
+    "path": "tools/verify_shipped_native_artifact_freshness.py",
+    "before_sha256": "651234e3261e42040e78e1bd38860be5d09900e4719dd8a77d6e5bb2c49b0a6d",
+    "after_sha256": "b8ba78548c0b3b4f7e0b27dfddd78f70c3ea440ed850348bfbf907596aff5ace",
+    "bytes": 374536,
+    "cr_bytes": 0
+  },
+  {
+    "path": "web/index.html",
+    "before_sha256": "e26c1a54371cedb9783f9d0923d3cacc4a1ae222fd77d43c0a8d2c9428752bc3",
+    "after_sha256": "a79671f5ad0240675a13745407d96b35aa9f3d163565dbfc09ba08f90aa47672",
+    "bytes": 399723,
+    "cr_bytes": 0
+  },
+  {
+    "path": "server/test_control_plane_round8.py",
+    "new_file": true,
+    "after_sha256": "19bf084f8c49cd058d6f875bd2c129bab444e8c59730bf737ae82f0dd1f0ca84",
+    "bytes": 19442,
+    "cr_bytes": 0
+  },
+  {
+    "path": "tools/test_rulings_round8.py",
+    "new_file": true,
+    "after_sha256": "5e26e10b4b2998088d8a8d7baa2a701f9a1d3b09e6046a49c61c6493b5168411",
+    "bytes": 2406,
+    "cr_bytes": 0
+  },
+  {
+    "path": "docs/evidence/round8_remediation.md",
+    "new_file": true,
+    "after_sha256": "8dc129f885fdfd71e69e7217296c8400ea735a83f50638c44bba7e99f9aaaf49",
+    "bytes": 9747,
+    "cr_bytes": 0
+  }
+]

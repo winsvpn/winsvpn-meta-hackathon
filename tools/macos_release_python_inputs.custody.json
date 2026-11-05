@@ -1,0 +1,247 @@
+{
+  "artifact_count": 34,
+  "artifacts": [
+    {
+      "kind": "package",
+      "leaf": "python-3.14.7-macos11.pkg",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/70c5239ad2d62925d2947e46921d0ddd3d35be3d2f0a2d50db33da507dbcb419/python-3.14.7-macos11.pkg",
+      "sha256": "70c5239ad2d62925d2947e46921d0ddd3d35be3d2f0a2d50db33da507dbcb419"
+    },
+    {
+      "kind": "sigstore-bundle",
+      "leaf": "python-3.14.7-macos11.pkg.sigstore",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/c8e8af7129581634031508dbbf4831b0436e11716796d85eccb08f305664dd6b/python-3.14.7-macos11.pkg.sigstore",
+      "sha256": "c8e8af7129581634031508dbbf4831b0436e11716796d85eccb08f305664dd6b"
+    },
+    {
+      "kind": "source-archive",
+      "leaf": "Python-3.14.7.tar.xz",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81/Python-3.14.7.tar.xz",
+      "sha256": "3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81"
+    },
+    {
+      "kind": "source-sigstore-bundle",
+      "leaf": "Python-3.14.7.tar.xz.sigstore",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/6f41efc358b146b5548dbfc0414e9247441f8524fb6ef59f1c4ca946ffc70701/Python-3.14.7.tar.xz.sigstore",
+      "sha256": "6f41efc358b146b5548dbfc0414e9247441f8524fb6ef59f1c4ca946ffc70701"
+    },
+    {
+      "kind": "sigstore-trusted-root",
+      "leaf": "trusted_root.json",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66/trusted_root.json",
+      "sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66"
+    },
+    {
+      "kind": "sigstore-verifier",
+      "leaf": "cosign",
+      "mode": "0555",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/5cf948c2f4dfe59687bdd0b8523709067383e03982cc543475c8a7dc70e92a76/cosign",
+      "sha256": "5cf948c2f4dfe59687bdd0b8523709067383e03982cc543475c8a7dc70e92a76"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pytest-9.1.1-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c/pytest-9.1.1-py3-none-any.whl",
+      "sha256": "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "iniconfig-2.3.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12/iniconfig-2.3.0-py3-none-any.whl",
+      "sha256": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "packaging-26.3-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c/packaging-26.3-py3-none-any.whl",
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pluggy-1.6.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746/pluggy-1.6.0-py3-none-any.whl",
+      "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pygments-2.21.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9/pygments-2.21.0-py3-none-any.whl",
+      "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "annotated_doc-0.0.5-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101/annotated_doc-0.0.5-py3-none-any.whl",
+      "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "annotated_types-0.8.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0/annotated_types-0.8.0-py3-none-any.whl",
+      "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "anyio-4.14.2-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494/anyio-4.14.2-py3-none-any.whl",
+      "sha256": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "click-8.4.2-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76/click-8.4.2-py3-none-any.whl",
+      "sha256": "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "fastapi-0.141.1-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3/fastapi-0.141.1-py3-none-any.whl",
+      "sha256": "bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "h11-0.16.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86/h11-0.16.0-py3-none-any.whl",
+      "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "httpcore2-2.10.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01/httpcore2-2.10.0-py3-none-any.whl",
+      "sha256": "7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "httpx2-2.10.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18/httpx2-2.10.0-py3-none-any.whl",
+      "sha256": "5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "idna-3.19-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4/idna-3.19-py3-none-any.whl",
+      "sha256": "815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pip-26.2.1-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e/pip-26.2.1-py3-none-any.whl",
+      "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pydantic-2.13.4-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba/pydantic-2.13.4-py3-none-any.whl",
+      "sha256": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pydantic_core-2.46.4-cp314-cp314-macosx_11_0_arm64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/23ace664830ee0bfe014a0c7bc248b1f7f25ed7ad103852c317624a1083af462/pydantic_core-2.46.4-cp314-cp314-macosx_11_0_arm64.whl",
+      "sha256": "23ace664830ee0bfe014a0c7bc248b1f7f25ed7ad103852c317624a1083af462"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "starlette-1.6.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c/starlette-1.6.0-py3-none-any.whl",
+      "sha256": "a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "truststore-0.10.4-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981/truststore-0.10.4-py3-none-any.whl",
+      "sha256": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "typing_extensions-4.16.0-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8/typing_extensions-4.16.0-py3-none-any.whl",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "typing_inspection-0.4.4-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147/typing_inspection-0.4.4-py3-none-any.whl",
+      "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "uvicorn-0.52.4-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f86e41a149d7d05a9969337e3946a9c171c06a5d42680896daaba624aeac8da1/uvicorn-0.52.4-py3-none-any.whl",
+      "sha256": "f86e41a149d7d05a9969337e3946a9c171c06a5d42680896daaba624aeac8da1"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/34d5fcd24b8445fadc33f9cf348c1047101756fd760b4dacb5c3e99755703310/pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl",
+      "sha256": "34d5fcd24b8445fadc33f9cf348c1047101756fd760b4dacb5c3e99755703310"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pillow-12.3.0-cp314-cp314-macosx_11_0_arm64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e158cb00350dc278f3b91551101aa7d12415a66ebf2c91d8d5ac14e56ddd3ad0/pillow-12.3.0-cp314-cp314-macosx_11_0_arm64.whl",
+      "sha256": "e158cb00350dc278f3b91551101aa7d12415a66ebf2c91d8d5ac14e56ddd3ad0"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "certifi-2026.7.22-py3-none-any.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775/certifi-2026.7.22-py3-none-any.whl",
+      "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pillow-12.3.0-cp314-cp314-macosx_10_15_x86_64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/ba54cfebe86920a559a7c4d6b9050791c20513650a1952ebe3368c7dc70306f8/pillow-12.3.0-cp314-cp314-macosx_10_15_x86_64.whl",
+      "sha256": "ba54cfebe86920a559a7c4d6b9050791c20513650a1952ebe3368c7dc70306f8"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pydantic_core-2.46.4-cp314-cp314-macosx_10_12_x86_64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/428e04521a40150c85216fc8b85e8d39fece235a9cf5e383761238c7fa9b96fb/pydantic_core-2.46.4-cp314-cp314-macosx_10_12_x86_64.whl",
+      "sha256": "428e04521a40150c85216fc8b85e8d39fece235a9cf5e383761238c7fa9b96fb"
+    },
+    {
+      "kind": "wheel",
+      "leaf": "pyyaml-6.0.3-cp314-cp314-macosx_10_13_x86_64.whl",
+      "mode": "0444",
+      "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/8d1fab6bb153a416f9aeb4b8763bc0f22a5586065f86f7664fc23339fc1c1fac/pyyaml-6.0.3-cp314-cp314-macosx_10_13_x86_64.whl",
+      "sha256": "8d1fab6bb153a416f9aeb4b8763bc0f22a5586065f86f7664fc23339fc1c1fac"
+    }
+  ],
+  "contract": "winsvpn-release-python-input-custody-v1",
+  "destination_root": "/Library/WinsVPN/ReleasePythonInputs/sha256",
+  "pin_manifest_sha256": "191518c76689e52ee0de00b896cc67c4408bd917ac280fb53247a9ca59853a3d",
+  "schema_version": 1
+}

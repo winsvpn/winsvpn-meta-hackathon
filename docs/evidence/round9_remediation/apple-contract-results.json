@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:38:44.400976+00:00",
+    "exit_code": 0,
+    "seconds": 0.05,
+    "log": "apple-contract.log"
+  }
+]

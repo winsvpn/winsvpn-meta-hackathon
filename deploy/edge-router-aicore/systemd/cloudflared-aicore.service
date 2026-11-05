@@ -1,0 +1,17 @@
+[Unit]
+Description=Cloudflare Tunnel (Wins edge AI router)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=aicore
+Slice=wins-ai.slice
+EnvironmentFile=/home/aicore/.cloudflared/token.env
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/aicore/.cloudflared/config.yml --no-autoupdate run
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

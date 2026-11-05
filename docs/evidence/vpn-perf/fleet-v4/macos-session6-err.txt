@@ -1,0 +1,18 @@
+2026-08-23 04:55:40.062 Win's VPN[54154:6239621] WINS_NECP_POSTURE probe: no request (inert launch)
+2026-08-23 04:55:40.095 Win's VPN[54154:6239621] Running with merged UI and platform thread. Experimental.
+2026-08-23 04:55:40.641 Win's VPN[54154:6239621] Win's VPN tunnel start stage: load_manager
+2026-08-23 04:55:40.644 Win's VPN[54154:6239621] Win's VPN tunnel start stage: save_preferences
+2026-08-23 04:55:40.668 Win's VPN[54154:6239621] Win's VPN tunnel start stage: reload_manager
+2026-08-23 04:55:40.674 Win's VPN[54154:6239621] Win's VPN tunnel start stage: start_provider
+2026-08-23 04:55:40.674 Win's VPN[54154:6239621] Win's VPN tunnel start stage accepted: start_provider
+[ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: SocketException: Send failed (OS Error: Network is unreachable, errno = 51), address = 0.0.0.0, port = 56518
+#0      _NativeSocket.send (dart:io-patch/socket_patch.dart:1513:34)
+#1      _RawDatagramSocket.send (dart:io-patch/socket_patch.dart:3037:15)
+#2      runWinnDevTrafficAndMemoryProbe.send (package:wins_vpn/winn_protocol_dev_session_traffic.dart:481:25)
+#3      runWinnDevTrafficAndMemoryProbe (package:wins_vpn/winn_protocol_dev_session_traffic.dart:509:15)
+<asynchronous suspension>
+#4      _WinnDevSessionPageState._runTraffic (package:wins_vpn/winn_protocol_dev_session_main.dart:328:7)
+<asynchronous suspension>
+#5      _WinnDevSessionPageState._run (package:wins_vpn/winn_protocol_dev_session_main.dart:238:7)
+<asynchronous suspension>
+

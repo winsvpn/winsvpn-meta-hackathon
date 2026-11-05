@@ -1,0 +1,1335 @@
+{
+  "about": "Round A3 cross-language contract. Android: WinnV3HostReadinessTest drives VpnTunnelService's lifecycle board through each op and requires getTunnelReadiness's claim and lifecycle keys to equal `readiness` exactly. Apple: tools/verify_apple_winn3_lifecycle_harness.swift feeds each `engine` document through the real sampler, promotion gate, host verdict on a monotonic clock and the app forwarder's own key list, and requires the forwarded lifecycle keys to equal `forwarded` exactly. test/winn3_host_lifecycle_contract_test.dart feeds the same maps to the Dart status consumer and requires `app`.",
+  "schema": 1,
+  "android": [
+    {
+      "step": "connected",
+      "op": {
+        "begin": 7,
+        "publish": "CONNECTED"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": true,
+        "tunnel_healthy": true,
+        "engine_ready": true,
+        "winn3_capture_held": false,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "connected"
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false,
+        "proof": true
+      }
+    },
+    {
+      "step": "recovering",
+      "op": {
+        "publish": "RECOVERING"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false,
+        "proof": false
+      }
+    },
+    {
+      "step": "later_recovery",
+      "op": {
+        "publish": "CONNECTED"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": true,
+        "tunnel_healthy": true,
+        "engine_ready": true,
+        "winn3_capture_held": false,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "connected"
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false,
+        "proof": true
+      }
+    },
+    {
+      "step": "engine_blocked",
+      "op": {
+        "publish": "BLOCKED",
+        "observer": "ENGINE",
+        "cause": "budget_spent"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "engine",
+        "winn3_lifecycle_cause": "budget_spent"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "engine",
+        "cause": "budget_spent"
+      }
+    },
+    {
+      "step": "held_after_teardown",
+      "op": {
+        "hold": true
+      },
+      "composite": [
+        false,
+        false,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "engine",
+        "winn3_lifecycle_cause": "budget_spent"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "engine",
+        "cause": "budget_spent"
+      }
+    },
+    {
+      "step": "new_session_recovering",
+      "op": {
+        "begin": 8,
+        "publish": "RECOVERING"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false,
+        "proof": false
+      }
+    },
+    {
+      "step": "host_ceiling",
+      "op": {
+        "publish": "BLOCKED",
+        "observer": "RECOVERY_CEILING"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "recovery_ceiling"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "recovery_ceiling"
+      }
+    },
+    {
+      "step": "session_ended_without_blocked",
+      "op": {
+        "begin": 9,
+        "publish": "CONNECTED",
+        "hold": true
+      },
+      "composite": [
+        false,
+        false,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "hold_kept_without_notification",
+      "op": {
+        "begin": 10,
+        "publish": "RECOVERING",
+        "hold_limitation": "foreground_refresh_failed"
+      },
+      "composite": [
+        false,
+        false,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended",
+        "winn3_hold_limitation": "foreground_refresh_failed"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended",
+        "limitation": "foreground_refresh_failed"
+      }
+    },
+    {
+      "step": "released_by_disguise",
+      "op": {
+        "begin": 11,
+        "publish": "CONNECTED",
+        "release": "disguise_refused_notification"
+      },
+      "composite": [
+        false,
+        false,
+        false
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": false,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended",
+        "winn3_hold_limitation": "disguise_refused_notification"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": false,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended",
+        "limitation": "disguise_refused_notification",
+        "released": true
+      }
+    },
+    {
+      "step": "destroyed_after_release",
+      "op": {
+        "end": true
+      },
+      "composite": [
+        false,
+        false,
+        false
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": false,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended",
+        "winn3_hold_limitation": "disguise_refused_notification"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": false,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended",
+        "limitation": "disguise_refused_notification",
+        "released": true
+      }
+    },
+    {
+      "step": "acknowledged_by_disconnect",
+      "op": {
+        "acknowledge": true
+      },
+      "composite": [
+        false,
+        false,
+        false
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": false,
+        "winn3_action_required": false
+      },
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false,
+        "proof": false
+      }
+    },
+    {
+      "step": "hold_before_revoked_after_hold",
+      "op": {
+        "begin": 15,
+        "publish": "CONNECTED",
+        "hold": true
+      },
+      "composite": [
+        false,
+        false,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "revoked_after_hold",
+      "op": {
+        "os_release": "OS_REVOKE"
+      },
+      "composite": [
+        false,
+        false,
+        false
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": false,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended",
+        "winn3_hold_limitation": "vpn_permission_revoked"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": false,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended",
+        "limitation": "vpn_permission_revoked",
+        "released": true
+      }
+    },
+    {
+      "step": "hold_before_destroyed_after_hold",
+      "op": {
+        "begin": 16,
+        "publish": "CONNECTED",
+        "hold": true
+      },
+      "composite": [
+        false,
+        false,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "destroyed_after_hold",
+      "op": {
+        "os_release": "PROCESS_DESTROY"
+      },
+      "composite": [
+        false,
+        false,
+        false
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": false,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended",
+        "winn3_hold_limitation": "service_destroyed"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": false,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended",
+        "limitation": "service_destroyed",
+        "released": true
+      }
+    },
+    {
+      "step": "legacy_engine",
+      "op": {
+        "begin": 12,
+        "publish": "UNREPORTED"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": true,
+        "tunnel_healthy": true,
+        "engine_ready": true,
+        "winn3_capture_held": false,
+        "winn3_action_required": false
+      },
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false,
+        "proof": true
+      }
+    },
+    {
+      "step": "engine_connected",
+      "op": {
+        "begin": 13,
+        "engine": "connected"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": true,
+        "tunnel_healthy": true,
+        "engine_ready": true,
+        "winn3_capture_held": false,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "connected"
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false,
+        "proof": true
+      }
+    },
+    {
+      "step": "engine_stopped_after_connected",
+      "op": {
+        "engine": "stopped"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "session_ended"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "engine_connected_again",
+      "op": {
+        "begin": 14,
+        "engine": "connected"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": true,
+        "tunnel_healthy": true,
+        "engine_ready": true,
+        "winn3_capture_held": false,
+        "winn3_action_required": false,
+        "winn3_lifecycle": "connected"
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false,
+        "proof": true
+      }
+    },
+    {
+      "step": "engine_connecting_after_proof",
+      "op": {
+        "engine": "connecting"
+      },
+      "composite": [
+        true,
+        true,
+        true
+      ],
+      "readiness": {
+        "active": false,
+        "tunnel_healthy": false,
+        "engine_ready": false,
+        "winn3_capture_held": true,
+        "winn3_action_required": true,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_observer": "invalid_transition"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "proof": false,
+        "observer": "invalid_transition"
+      }
+    }
+  ],
+  "apple": [
+    {
+      "step": "connected",
+      "at_seconds": 100,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "recovering",
+      "at_seconds": 110,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "recovering",
+        "provider_winn3_recovery_state": "recovering",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_winn3_recovery_observed_ms": 0
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false
+      }
+    },
+    {
+      "step": "still_recovering",
+      "at_seconds": 150,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "recovering",
+        "provider_winn3_recovery_state": "recovering",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_winn3_recovery_observed_ms": 40000
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false
+      }
+    },
+    {
+      "step": "later_recovery",
+      "at_seconds": 160,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 2,
+        "winn3_rx_offered": 2,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "second_episode",
+      "at_seconds": 200,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "recovering",
+        "provider_winn3_recovery_state": "recovering",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_winn3_recovery_observed_ms": 0
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false
+      }
+    },
+    {
+      "step": "sampling_unavailable_mid_episode",
+      "at_seconds": 366,
+      "engine": {},
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "recovering",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_winn3_recovery_observed_ms": 166000
+      },
+      "app": {
+        "state": "recovering",
+        "holds_session": true,
+        "action_required": false
+      }
+    },
+    {
+      "step": "host_ceiling",
+      "at_seconds": 368,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "recovering"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "recovering",
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "recovery_ceiling",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_winn3_recovery_observed_ms": 168000
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "recovery_ceiling"
+      }
+    },
+    {
+      "step": "recovery_after_the_ceiling",
+      "at_seconds": 380,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 1,
+        "winn3_rx_offered": 1,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "engine_blocked",
+      "at_seconds": 390,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "blocked",
+        "winn3_lifecycle_cause": "budget_spent"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "blocked",
+        "provider_engine_runtime_winn_engine_winn3_lifecycle_cause": "budget_spent",
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "engine",
+        "provider_winn3_recovery_cause": "budget_spent",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "engine",
+        "cause": "budget_spent"
+      }
+    },
+    {
+      "step": "present_but_invalid_lifecycle",
+      "at_seconds": 400,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": 1
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle_invalid": true,
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_status",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_status"
+      }
+    },
+    {
+      "step": "connected_before_stopped",
+      "at_seconds": 405,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "stopped_after_proof",
+      "at_seconds": 406,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "stopped"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "session_ended",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "stopped"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "connected_after_stopped",
+      "at_seconds": 407,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "connecting_after_proof",
+      "at_seconds": 408,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connecting"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_transition",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connecting"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_transition"
+      }
+    },
+    {
+      "step": "connected_after_connecting",
+      "at_seconds": 409,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "lifecycle_disappears",
+      "at_seconds": 410,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_transition",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_transition"
+      }
+    },
+    {
+      "step": "connected_after_disappearance",
+      "at_seconds": 411,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "promoted_by_gate_then_stopped",
+      "new_datapath": true,
+      "promote": true,
+      "at_seconds": 430,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {},
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "first_sample_after_promotion_stopped",
+      "at_seconds": 431,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "stopped"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "session_ended",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "stopped"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "session_ended"
+      }
+    },
+    {
+      "step": "recovered_after_promotion_stopped",
+      "at_seconds": 432,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "promoted_by_gate_then_connecting",
+      "new_datapath": true,
+      "promote": true,
+      "at_seconds": 433,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {},
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "first_sample_after_promotion_connecting",
+      "at_seconds": 434,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connecting"
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_transition",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true,
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connecting"
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_transition"
+      }
+    },
+    {
+      "step": "recovered_after_promotion_connecting",
+      "at_seconds": 435,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "promoted_by_gate_then_missing_lifecycle",
+      "new_datapath": true,
+      "promote": true,
+      "at_seconds": 436,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {},
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "first_sample_after_promotion_missing_lifecycle",
+      "at_seconds": 437,
+      "engine": {
+        "winn3_gate_state": "closed",
+        "winn3_may_carry": false,
+        "winn3_rx_packets": 0,
+        "winn3_rx_offered": 0,
+        "winn3_runtime_completed": false
+      },
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_transition",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_transition"
+      }
+    },
+    {
+      "step": "recovered_after_promotion_missing_lifecycle",
+      "at_seconds": 438,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "promoted_by_gate_then_unavailable_sample",
+      "new_datapath": true,
+      "promote": true,
+      "at_seconds": 439,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {},
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "first_sample_after_promotion_unavailable_sample",
+      "at_seconds": 440,
+      "engine": {},
+      "converged": false,
+      "forwarded": {
+        "provider_winn3_recovery_state": "blocked",
+        "provider_winn3_recovery_observer": "invalid_transition",
+        "provider_winn3_recovery_claims_connected": false,
+        "provider_winn3_recovery_action_required": true,
+        "provider_winn3_recovery_capture_held": true
+      },
+      "app": {
+        "state": "blocked",
+        "holds_session": true,
+        "action_required": true,
+        "observer": "invalid_transition"
+      }
+    },
+    {
+      "step": "recovered_after_promotion_unavailable_sample",
+      "at_seconds": 441,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false,
+        "winn3_lifecycle": "connected"
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_engine_runtime_winn_engine_winn3_lifecycle": "connected",
+        "provider_winn3_recovery_state": "connected",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "connected",
+        "holds_session": false,
+        "action_required": false
+      }
+    },
+    {
+      "step": "legacy_engine",
+      "at_seconds": 447,
+      "engine": {
+        "winn3_gate_state": "carrying",
+        "winn3_may_carry": true,
+        "winn3_rx_packets": 7,
+        "winn3_rx_offered": 7,
+        "winn3_runtime_completed": false
+      },
+      "converged": true,
+      "forwarded": {
+        "provider_winn3_recovery_state": "unreported",
+        "provider_winn3_recovery_claims_connected": true,
+        "provider_winn3_recovery_action_required": false,
+        "provider_winn3_recovery_capture_held": false
+      },
+      "app": {
+        "state": "none",
+        "holds_session": false,
+        "action_required": false
+      },
+      "new_datapath": true
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+-A WINVPN-INPUT -j WINVPN-SSH-RECOVERY
+-A WINVPN-INPUT -j WINVPN-LOCAL-SERVING
+-A WINVPN-INPUT -i lo -p tcp -m tcp --dport 9199 -j WINVPN-NFQ-PROBE
+-A WINVPN-INPUT -i lo -j ACCEPT
+-A WINVPN-INPUT -p udp -m udp --dport 9111 -j ACCEPT
+-A WINVPN-INPUT -p udp -m udp --dport 9110 -j ACCEPT
+-A WINVPN-INPUT -p tcp -m tcp --dport 80 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 0 --queue-bypass
+-A WINVPN-INPUT -p tcp -m tcp --dport 443 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 0 --queue-bypass
+-A WINVPN-INPUT -p tcp -m tcp --dport 8000 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 0 --queue-bypass
+-A WINVPN-INPUT -p tcp -m tcp --dport 9111 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 0 --queue-bypass
+-A WINVPN-INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A WINVPN-INPUT -i awg0 -p tcp -m tcp --dport 8080 -j DROP
+-A WINVPN-INPUT -i awg0 -p udp -m udp --dport 53 -j ACCEPT
+-A WINVPN-INPUT -i awg0 -p tcp -m tcp --dport 53 -j ACCEPT
+-A WINVPN-INPUT -i awg0 -p tcp -m multiport --dports 853,8853 -j REJECT --reject-with tcp-reset
+-A WINVPN-INPUT -i awg0 -p udp -m multiport --dports 853,784,8853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-INPUT -i amn0 -p tcp -m tcp --dport 8080 -j DROP
+-A WINVPN-INPUT -i amn0 -p udp -m udp --dport 53 -j ACCEPT
+-A WINVPN-INPUT -i amn0 -p tcp -m tcp --dport 53 -j ACCEPT
+-A WINVPN-INPUT -i amn0 -p tcp -m multiport --dports 853,8853 -j REJECT --reject-with tcp-reset
+-A WINVPN-INPUT -i amn0 -p udp -m multiport --dports 853,784,8853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A WINVPN-INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A WINVPN-INPUT -p tcp -m tcp --dport 8000 -j ACCEPT
+-A WINVPN-INPUT -p tcp -m tcp --dport 9111 -j ACCEPT
+-A WINVPN-INPUT -p tcp -m tcp --dport 8080 -j DROP
+-A WINVPN-INPUT -p icmp -m icmp --icmp-type 8 -j DROP
+-A WINVPN-INPUT -p udp -m udp --dport 6881:6889 -j DROP
+-A WINVPN-INPUT -p tcp -m tcp --dport 6881:6889 -j DROP
+-A WINVPN-INPUT -p tcp -m tcp --dport 6969 -j DROP
+-A WINVPN-INPUT -j DROP

@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-inno-toolchain-custody-v1",
+  "product": "Inno Setup",
+  "vendor": "JRSoftware",
+  "version": "7.1.0",
+  "channel": "latest-stable",
+  "status": "pinned",
+  "retrieved_utc": "2026-08-24T22:11:15Z",
+  "official_sources": {
+    "downloads": {
+      "url": "https://jrsoftware.org/isdl.php",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "current-stable-listing"
+    },
+    "verify": {
+      "url": "https://jrsoftware.org/isdl-verify.php",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "official-verification-methods"
+    },
+    "product": {
+      "url": "https://jrsoftware.org/isinfo.php",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "product-identity"
+    },
+    "whatsnew": {
+      "url": "https://jrsoftware.org/files/is7-whatsnew.htm",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "7.1.0-revision-history"
+    },
+    "files_readme": {
+      "url": "https://files.jrsoftware.org/is/7/readme.txt",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "immutable-release-host-note"
+    },
+    "x64_issig": {
+      "url": "https://files.jrsoftware.org/is/7/innosetup-7.1.0-x64.exe.issig",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "x64-installer-issig"
+    },
+    "x86_issig": {
+      "url": "https://files.jrsoftware.org/is/7/innosetup-7.1.0-x86.exe.issig",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "x86-installer-issig"
+    },
+    "def02_key": {
+      "url": "https://files.jrsoftware.org/is/misc/def02.ispublickey",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "installer-issig-public-key"
+    },
+    "def01_key": {
+      "url": "https://files.jrsoftware.org/is/misc/def01.ispublickey",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "issigtool-issig-public-key"
+    },
+    "issigtool": {
+      "url": "https://files.jrsoftware.org/is/misc/ISSigTool.exe",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "official-issig-tool-bytes"
+    },
+    "issigtool_issig": {
+      "url": "https://files.jrsoftware.org/is/misc/ISSigTool.exe.issig",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "official-issig-tool-signature"
+    },
+    "immutable_x64": {
+      "url": "https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "x64-installer-bytes"
+    },
+    "immutable_x86": {
+      "url": "https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x86.exe",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "x86-installer-bytes"
+    },
+    "immutable_tag": {
+      "url": "https://github.com/jrsoftware/issrc/releases/tag/is-7_1_0",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "immutable-release-tag"
+    },
+    "issig_help": {
+      "url": "https://jrsoftware.org/ishelp/topic_issig.htm",
+      "retrieved_utc": "2026-08-24T22:10:43Z",
+      "role": "issig-method-documentation"
+    },
+    "issigfunc": {
+      "url": "https://raw.githubusercontent.com/jrsoftware/issrc/is-7_1_0/Components/ISSigFunc.pas",
+      "retrieved_utc": "2026-08-24T22:11:12Z",
+      "role": "issig-v2-signed-message-format"
+    }
+  },
+  "verification_methods": {
+    "authenticode": {
+      "required": true,
+      "publisher_name": "Pyrsys B.V.",
+      "signer_binding": "pkcs7_signerinfo_issuer_serial",
+      "source_url": "https://jrsoftware.org/isdl-verify.php",
+      "windows_api": "WinVerifyTrust"
+    },
+    "issig_ecdsa_p256": {
+      "required": true,
+      "installer_key": "def02",
+      "tool_key": "def01",
+      "trust_anchor": "immutable_code_constants",
+      "source_url": "https://jrsoftware.org/isdl-verify.php",
+      "execute_issigtool": false
+    },
+    "github_release_attestation": {
+      "required": false,
+      "source_url": "https://jrsoftware.org/isdl-verify.php",
+      "reason": "official optional method; GitHub CLI attestation was not proven in this environment and is not a custody gate"
+    }
+  },
+  "publisher": {
+    "authenticode_publisher_name": "Pyrsys B.V.",
+    "authenticode_subject_rfc4514": "CN=Pyrsys B.V.,O=Pyrsys B.V.,ST=Noord-Holland,C=NL",
+    "authenticode_issuer_rfc4514": "CN=Sectigo Public Code Signing CA R36,O=Sectigo Limited,C=GB",
+    "authenticode_leaf_serial_hex": "b208315c09c02ef1550e0c8d127cf499",
+    "authenticode_leaf_sha256": "4efd84e6f1091b19321231743b9aa86482effd6d0bea9f7a44db6211154616f3"
+  },
+  "issig_keys": {
+    "def02": {
+      "filename": "def02.ispublickey",
+      "key_id": "def020edee3c4835fd54d85eff8b66d4d899b22a777353ca4a114b652e5e7a28",
+      "public_x": "515dc7d6c16d4a46272ceb3d158c5630a96466ab4d948e72c2029d737c823097",
+      "public_y": "f3c21f6b5156c52a35f6f28016ee3e31a3ded60c325b81fb7b1f88c221081a61",
+      "sha256": "32bea6bceb4ac7c4e6b3becdf3fb38de77378c5e76d494ab907d87cfab9e597b",
+      "size": 248
+    },
+    "def01": {
+      "filename": "def01.ispublickey",
+      "key_id": "def0147c3bbc17ab99bf7b7a9c2de1390283f38972152418d7c2a4a7d7131a38",
+      "public_x": "e3e943066aff8f28d2219fd71c9ffff4c8d1aa26bc4225434be67180ab5e242d",
+      "public_y": "e419041c3f54551e86a1c47f387005cd535dfc9d64339b30d37f9a4f7866b650",
+      "sha256": "3b0b7e1e478c9ab327746a990512e2b245c9231e88a7fdd60d7874dd439db562",
+      "size": 248
+    }
+  },
+  "installers": {
+    "windows_x64": {
+      "status": "pinned",
+      "filename": "innosetup-7.1.0-x64.exe",
+      "edition": "64-bit",
+      "pe_machine": "x64",
+      "recommended_compiler_host": true,
+      "size": 14304168,
+      "sha256": "0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f",
+      "product_name": "Inno Setup",
+      "product_version_string": "7.1.0",
+      "company_name": "jrsoftware.org",
+      "file_description": "Inno Setup Setup",
+      "download_url": "https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe",
+      "issig_url": "https://files.jrsoftware.org/is/7/innosetup-7.1.0-x64.exe.issig",
+      "issig_sha256": "3f95d2c22f657b6064b6f1447cbca41ba61a765f6157f0b4995a795d3828b929",
+      "issig_size": 380,
+      "issig_key": "def02",
+      "issig_file_tag": "",
+      "issig_sig_r": "d5bca53c6a5939ef65fbd3b7bf1376e7dc296ef3d8909b5654e39e302c98607f",
+      "issig_sig_s": "5b4f36a53087d1922a835452877699c42564eca14b47a532d88b6ba2ad64cfd0"
+    },
+    "windows_x86": {
+      "status": "pinned",
+      "filename": "innosetup-7.1.0-x86.exe",
+      "edition": "32-bit",
+      "pe_machine": "x86",
+      "recommended_compiler_host": false,
+      "size": 13119232,
+      "sha256": "f9671174e0d15ba9b4f6b56564c6aed32ea8db9c3cb9bf6f2af0850fe7894f60",
+      "product_name": "Inno Setup",
+      "product_version_string": "7.1.0 (32-bit)",
+      "company_name": "jrsoftware.org",
+      "file_description": "Inno Setup Setup",
+      "download_url": "https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x86.exe",
+      "issig_url": "https://files.jrsoftware.org/is/7/innosetup-7.1.0-x86.exe.issig",
+      "issig_sha256": "4e4b17167aa341e9f4f37ac5a9c4ecca0c47bbdd15b01904bc1fd9c3352043c5",
+      "issig_size": 380,
+      "issig_key": "def02",
+      "issig_file_tag": "",
+      "issig_sig_r": "7c106d803c7486f8f0f909cf4f59fc83184882d83894544030f89f6a00f698b8",
+      "issig_sig_s": "02ea62aea4e1393080ae223a3cff66b1f6d009e78057f7c8a26e783204f77678"
+    }
+  },
+  "compilers": {
+    "windows_x64": {
+      "status": "pinned",
+      "filename": "ISCC.exe",
+      "pe_machine": "x64",
+      "output_architectures": [
+        "x64"
+      ],
+      "trusted_root_leaf": "Inno Setup 7",
+      "trusted_root_kind": "program_files",
+      "publisher_name": "Pyrsys B.V.",
+      "expected_version": "7.1.0",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "size": 1048576,
+      "install_tree_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+      "product_version_string": "7.1.0",
+      "owner_action": "Example-only compiler receipt shape for tools/inno-toolchain-pins.schema.json. These SHA-256, size, and install-tree values are not a reviewed ISCC.exe identity. Do not copy them into tools/inno-toolchain-pins.json."
+    },
+    "windows_arm64": {
+      "status": "pinned",
+      "filename": "ISCC.exe",
+      "pe_machine": "x64",
+      "native_arm64_compiler": "not_published",
+      "output_architectures": [
+        "arm64"
+      ],
+      "trusted_root_leaf": "Inno Setup 7",
+      "trusted_root_kind": "program_files",
+      "publisher_name": "Pyrsys B.V.",
+      "expected_version": "7.1.0",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "size": 1048576,
+      "install_tree_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+      "product_version_string": "7.1.0",
+      "owner_action": "Example-only compiler receipt shape for tools/inno-toolchain-pins.schema.json. These SHA-256, size, and install-tree values are not a reviewed ISCC.exe identity. Do not copy them into tools/inno-toolchain-pins.json."
+    }
+  },
+  "verification_tool": {
+    "status": "pinned",
+    "filename": "ISSigTool.exe",
+    "execute": false,
+    "pe_machine": "x86",
+    "size": 919184,
+    "sha256": "bff7cf67917577b633053c463ba10957387f5c6199adc0bfc39b69f4565f3d50",
+    "download_url": "https://files.jrsoftware.org/is/misc/ISSigTool.exe",
+    "issig_url": "https://files.jrsoftware.org/is/misc/ISSigTool.exe.issig",
+    "issig_sha256": "662b52dd2bd5a90d8bee1330a622c415c9ffba13a96c090635dd665d1e61151d",
+    "issig_size": 368,
+    "issig_key": "def01",
+    "issig_file_tag": "",
+    "issig_sig_r": "82ad0a3dbdc6dc3c01ce918b9b0b3f4fc99616a60baee90d52b4f0a70fbee03d",
+    "issig_sig_s": "1afc182c929be84beaf9e44ff9a183e1d4ba1e6150bdf4ea22d5331e37de7a6c",
+    "note": "Pinned only as the official ISSig utility identity. Custody verifies ECDSA itself and must never execute ISSigTool.exe or any Inno setup candidate."
+  },
+  "compiler_archive": {
+    "status": "not_published",
+    "filename": null,
+    "sha256": null,
+    "size": null,
+    "owner_action": "files.jrsoftware.org/is/7/ listed only .issig sidecars for 7.1.0 on 2026-08-24; no compiler zip was published. Do not invent an archive hash. The official distribution is the signed installer EXE."
+  }
+}

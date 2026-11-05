@@ -1,0 +1,118 @@
+Winn3 agent per-kind validator contract -- connect missing endpoint/host param rejected with Reason
+Lane: gen_agent_schema_validator_contract
+Date: 2026-08-12
+Package: winn_protocol_experimental/winn3/agent
+Module: winsvpn.local/winnprotocol
+Files: winn3/agent/validator.go (backed up as validator.go.bak_20260811_gen_agent_schema_validator_contract sha256 91df52847042617d2369c480d0bf6b837ba94ca31f91b96a8c4d90a142914ae8), winn3/agent/validator_test.go, winn3/agent/testdata/*.json
+
+1. WHAT WAS PROVED
+   The per-kind validator in winn3/agent/validator.go rejects a legal-kind action with a missing required param.
+   Specifically, a connect action with no endpoint param is rejected with ErrMalformed and a Reason naming the missing param.
+
+   Terminology: the production contract names the connect endpoint as host (and gateway_id). The test contract uses host as the single required param. Both refer to the dial endpoint (spain-madrid:443 in fixtures). A custom contract requiring endpoint demonstrates the same path with the literal name endpoint. In all cases the validator returns ErrMalformed with message kind "connect" missing required param "<name>".
+
+2. CONTRACT UNDER TEST
+   productionContracts in validator.go:
+     ActionConnect: Required: [gateway_id, host]  Allowed: [gateway_id, host]
+     ActionRotateKey: Required: [key_id, algorithm] Allowed: [key_id, algorithm]
+     ActionReport: {}  (no required params)
+   testSchema in validator_test.go (the three controls):
+     ActionConnect: Required: [host] Allowed: [host]
+     ActionRotateKey: {}
+     ActionReport: {}
+   Both enforce: connect without its endpoint param must be ErrMalformed, not nil and not ErrUnknownKind.
+
+3. FIXTURE AND CODE PATH
+   testdata/schema_invalid.json:
+     {"kind":"connect","params":[],"policy":{"name":"default","version":3}}
+   testdata/valid.json:
+     {"kind":"connect","params":[{"name":"host","value":"spain-madrid:443"}],"policy":{"name":"default","version":3}}
+   validator.go ActionSchema.Validate checks:
+     - nil action => ErrMalformed
+     - empty param Name => ErrMalformed: param name empty
+     - unknown kind via IsValidKind => ErrUnknownKind
+     - for each Required name, if not in have map => ErrMalformed: kind "connect" missing required param "<name>"
+     - if Allowed non-empty, any unexpected param name => ErrMalformed
+
+4. FAILING-WITH-REASON CASE FOR CONNECT WITH NO ENDPOINT PARAM
+   Direct proof via Validate and DecodeAndValidate (run from proof_endpoint.go at module root):
+
+   CASE: connect with no endpoint/host param via Validate
+   err=agent: action schema violation: kind "connect" missing required param "host"
+   errors.Is ErrMalformed=true
+   errors.Is ErrUnknownKind=false
+   Reason: agent: action schema violation: kind "connect" missing required param "host"
+   ---
+   JSON: {"kind":"connect","policy":{"name":"default","version":3}}
+   DecodeAndValidate err=agent: action schema violation: kind "connect" missing required param "host"
+   errors.Is ErrMalformed=true
+   Reason: agent: action schema violation: kind "connect" missing required param "host"
+   ---
+   CASE: connect with no endpoint param (endpoint-named contract) via Validate
+   err=agent: action schema violation: kind "connect" missing required param "endpoint"
+   errors.Is ErrMalformed=true
+   Reason: agent: action schema violation: kind "connect" missing required param "endpoint"
+   ---
+   POSITIVE: connect with host param via Validate err=<nil> (want nil)
+   REGISTRY: connect empty via ContractRegistry.Validate err=agent: action schema violation: kind "connect" missing required param "gateway_id" IsMalformed=true Reason:agent: action schema violation: kind "connect" missing required param "gateway_id"
+
+   Interpretation: every path that offers a connect action lacking its endpoint/host param is rejected as ErrMalformed with a Reason that names the missing param. The sentinel ErrMalformed is distinct from ErrUnknownKind (TestSentinelErrorsAreDistinct asserts inequality), so the failure class is unambiguous. Valid connect with host passes (nil).
+
+5. VERIFICATION -- NO MUTATION (must pass)
+   $ go test -count=1 -v ./winn3/agent/... -run TestControl_ValidActionMustPass|TestControl_SchemaInvalidMustBeRejected|TestControl_UnknownKindMustBeDenied|TestSentinelErrorsAreDistinct
+   === RUN   TestControl_ValidActionMustPass
+   --- PASS: TestControl_ValidActionMustPass (0.00s)
+   === RUN   TestControl_UnknownKindMustBeDenied
+   --- PASS: TestControl_UnknownKindMustBeDenied (0.00s)
+   === RUN   TestControl_SchemaInvalidMustBeRejected
+   --- PASS: TestControl_SchemaInvalidMustBeRejected (0.00s)
+   === RUN   TestSentinelErrorsAreDistinct
+   --- PASS: TestSentinelErrorsAreDistinct (0.00s)
+   PASS
+   ok  winsvpn.local/winnprotocol/winn3/agent 0.169s
+
+   Full suite:
+   $ go test -count=1 ./winn3/agent/...
+   ok  winsvpn.local/winnprotocol/winn3/agent 0.208s
+   (all 50+ tests pass including TestRegistry_*, TestNegative_*, TestActionSchemaGolden*, TestConformance_*, TestRouteSafety_*, TestAgentCorpusNoEmOrEnDash)
+
+   $ go vet ./winn3/agent/...
+   exit 0 (no vet findings)
+
+   Backup verified:
+   validator.go.bak_20260811_gen_agent_schema_validator_contract sha256 91df52847042617d2369c480d0bf6b837ba94ca31f91b96a8c4d90a142914ae8 identical to validator.go at backup time.
+
+6. VERIFICATION -- COMMENT-ONLY CONTROL (must pass)
+   No source change beyond existing comments. Suite remains green as shown in section 5. The validator behavior is unchanged.
+
+7. VERIFICATION -- DELIBERATE BREAK (must go red, scored inverted)
+   Mutant: validator_invert_contract2.go replaces ActionSchema.Validate with return nil (fail-open). Applied via go test -overlay.
+
+   $ go test -count=1 -overlay overlay_contract2.json -run TestControl_SchemaInvalidMustBeRejected -v ./winn3/agent/...
+   === RUN   TestControl_SchemaInvalidMustBeRejected
+       validator_test.go:70: schema-invalid action was accepted; expected ErrMalformed
+   --- FAIL: TestControl_SchemaInvalidMustBeRejected (0.00s)
+   FAIL
+
+   $ go test -count=1 -overlay overlay_contract2.json -run TestControl_ValidActionMustPass -v ./winn3/agent/...
+   --- PASS: TestControl_ValidActionMustPass (0.00s)
+   PASS
+
+   Result: the negative control fails when the guard is removed, while the positive control still passes. This proves the green in section 5 has teeth: it is not a vacuous pass and specifically catches the fail-open case where a legal-kind action missing its required endpoint param would be let through. Classified as FAIL (not BUILD_FAIL).
+
+8. REPRO
+   cd source/wins_vpn/winn_protocol_experimental
+   go test -count=1 ./winn3/agent/... -v
+   go vet ./winn3/agent/...
+   # Direct failing-with-Reason for connect no endpoint:
+   # See proof output in section 4; validator_test.go TestControl_SchemaInvalidMustBeRejected exercises the same path via testdata/schema_invalid.json and asserts errors.Is(err, ErrMalformed).
+
+9. FILES
+   - winn3/agent/validator.go (backed up as validator.go.bak_20260811_gen_agent_schema_validator_contract)
+   - winn3/agent/validator_test.go (testSchema and three controls)
+   - winn3/agent/testdata/schema_invalid.json, valid.json, unknown_kind.json
+   - winn3/agent/agent_validator_contract.txt (this file)
+   - .spark_lanes/scratch/gen_agent_schema_validator_contract/validator_invert_contract2.go and overlay_contract2.json (mutant proof, gitignored under .spark_lanes)
+
+10. NOTES
+   Endpoint naming: production uses host for the dial endpoint; test uses host; proof also shows endpoint literal via custom schema. All map to the same validation branch: missing Required => ErrMalformed with Reason naming the param. No em dash or en dash characters in this file or in validator.go/validator_test.go. No simulator or emulator used. No memory heavy operation.

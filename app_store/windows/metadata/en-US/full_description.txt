@@ -1,0 +1,26 @@
+Win's VPN is a user-initiated encrypted VPN for Windows PCs.
+
+The tunnel uses Winn v3 as the product's primary protocol. Winn v1
+AWG then Xray fallback is the ordered compatibility path after a served
+Winn v3 attempt. A served Winn v3 lead attempt cannot be skipped. Direct
+AWG or Xray is not a separate request site.
+
+The production Store route is an Authenticode-signed x64 offline Win32
+installer. This listing is not an MSIX package. This listing does not
+attach a current 1.0.17+34 signed installer. When a current signed
+candidate exists, install it, approve one User Account Control prompt,
+then connect from the app. Disconnect from the app at any time.
+Destination split tunneling does not ship a kernel split-tunnel driver.
+
+Website and Partner Center remain separate x64 artifacts. Website ARM64 and
+Partner Center ARM64 are distinct required upload targets. Native ARM64 remains
+pending-owner-evidence. Do not treat an x64 installer as native ARM64.
+
+Premium access is purchased through the public website checkout on
+https://winsvpn.org. The default Store build does not embed direct PayPal
+plan buttons. The app does not collect card data.
+
+Win's VPN does not collect browsing history, DNS query history, traffic
+contents, or destination activity.
+
+Privacy policy: https://www.winsvpn.org/privacy/

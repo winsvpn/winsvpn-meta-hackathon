@@ -1,0 +1,41 @@
+{
+  "prevalidation": [
+    {
+      "field": "obfuscation_json",
+      "status": 503,
+      "remote_calls": 0,
+      "device_rows": 0,
+      "revocation_rows": 0,
+      "activation_consumed": false
+    },
+    {
+      "field": "tunnel_gateway_ipv4",
+      "status": 503,
+      "remote_calls": 0,
+      "device_rows": 0,
+      "revocation_rows": 0,
+      "activation_consumed": false
+    }
+  ],
+  "concurrency": {
+    "first_status": 200,
+    "second_status": 409,
+    "retry_after": "5",
+    "devices": 1,
+    "active_assignments": 1,
+    "remaining_leases": 0,
+    "preparers": 1
+  },
+  "payments": {
+    "paypal_inflight": 409,
+    "paypal_duplicate": 200,
+    "early_btcpay": 409,
+    "settled_btcpay": 200,
+    "duplicate_btcpay": 200,
+    "provider_reads": 2,
+    "bound_price": "10.00 USD",
+    "catalog_price": "20.00 USD",
+    "outbox_rows": 1,
+    "order_state": "settled"
+  }
+}

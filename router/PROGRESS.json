@@ -1,0 +1,43 @@
+{
+  "component": "aicore Smart Router",
+  "implementation_status": "implemented_and_offline_tested",
+  "production_integration_status": "implemented_and_offline_tested",
+  "live_deployment_status": "not_verified_from_this_lane",
+  "offline_tests": "329 passed (router suite, 2026-08-25)",
+  "recent_hardening": "2026-08-25: shared parse_provider_model now safely unwraps a single level of JSON-string-wrapped (double-encoded) terse Gemma/Gemini decisions and still enforces the strict schema (extra=forbid, typed fields, closed-set + protocol validation). Non-JSON / malformed inner strings fail closed. Added 3 tests (test_provider_transport.py). Verified 329/329 green.",
+  "provider_order": [
+    "deterministic_connection_initiation",
+    "local_gemma_vllm_on_distress",
+    "google_gemini_api_on_distress",
+    "deterministic_distress_fallback"
+  ],
+  "integrations": {
+    "hoppy": "POST /hoppy/escalate in this directory",
+    "google_smart_router": "this directory; Google is Gemini API fallback only, not a Cloud NCC/Cloud Router product"
+  },
+  "live_compatibility": {
+    "edge_router_port": 8090,
+    "vllm_url": "http://127.0.0.1:8002/v1/chat/completions",
+    "served_model_id": "gemma12b",
+    "note": "The model ID is aicore deployment evidence, not a general code default."
+  },
+  "security": {
+    "authentication": "mandatory replay-resistant HMAC",
+    "legacy_optional_edge_router_secret": "rejected",
+    "request_body_limit": true,
+    "rate_limit": true,
+    "provider_concurrency_limit": true,
+    "secret_logging": false,
+    "route_node_binding": "hub node slug"
+  },
+  "remaining": [
+    "Deploy this exact implementation to aicore.",
+    "Confirm /live and /ready on aicore loopback port 8090.",
+    "Read the exact served Gemma model ID from loopback vLLM /v1/models and set SMART_ROUTER_GEMMA_MODEL to that value. Do not invent a model name.",
+    "Place SMART_ROUTER_HMAC_SECRET in /etc/winsvpn/router.env as root:root mode 0600. Do not put it in an app, command line, or installer log.",
+    "Supply both GEMINI_API_KEY and GEMINI_MODEL or leave both empty. Partial Google config fails closed at install time.",
+    "Wire the same HMAC secret into the hub SMART_ROUTER_URL/SMART_ROUTER_HMAC_SECRET pair. This lane does not touch the hub.",
+    "Run authenticated live local-Gemma, Google-fallback, and deterministic-fallback proofs."
+  ],
+  "updated": "2026-08-25"
+}

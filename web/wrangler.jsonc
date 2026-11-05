@@ -1,0 +1,146 @@
+{
+  // ---------------------------------------------------------------------
+  // NOT USED BY THE CURRENT LIVE DEPLOYMENT. Read this whole comment block
+  // before touching this file or wiring it into anything.
+  //
+  // winsvpn.org / winsvpn.com are served today by the Cloudflare **Pages**
+  // Direct Upload project named `winsvpn`. The project has no Git provider.
+  // An operator publishes a clean staged copy of `web/` with
+  // `wrangler pages deploy <directory> --project-name winsvpn --branch main`.
+  // Pages supplies the ASSETS binding used by `_worker.js` advanced mode.
+  // This migration-target file is deliberately excluded from the uploaded
+  // directory and is therefore inert for the current Pages deployment.
+  // Current Pages bindings are configured in the Cloudflare dashboard.
+  //
+  // What this file IS: the documented **migration target** described in
+  // the GPT 5.6 audit finding M-9 ("Pages translation/AI quotas are
+  // isolate-local and translation remains an open cost proxy") and finding
+  // L-8 ("Worker migration rate-limit bindings are incomplete", which added
+  // the four payment bindings below so they would not be forgotten if this
+  // ever migrates). Cloudflare Rate Limiting bindings (the `ratelimits`
+  // block below) are a Workers-only feature -- Cloudflare's Pages config
+  // validation rejects that binding type outright, which is exactly why
+  // `web/_worker.js`'s `requireQuota()` helper only *optionally* uses a
+  // bound limiter (see the comment there) and otherwise falls back to its
+  // existing isolate-local rate limiter. That fallback is the live behavior
+  // today and this file does not change it.
+  //
+  // This file becomes relevant only if/when a human operator deliberately
+  // migrates this site off Pages onto a plain Cloudflare Worker (Workers
+  // now support serving static assets directly, which is what would let
+  // `_worker.js`'s `env.ASSETS.fetch(...)` calls keep working outside
+  // Pages). Before that migration is ever run for real, a human must still:
+  //
+  //   1. Provision real Rate Limiting namespaces (Cloudflare dashboard, or
+  //      `wrangler ratelimit namespace create`) and replace the
+  //      `namespace_id` placeholder strings below with the real IDs. "1001"
+  //      and "1002" (translate/AI chat) and "1003" (shared by the four
+  //      payment bindings) are non-functional placeholders, not secrets and
+  //      not real Cloudflare resource IDs -- real namespace IDs are long
+  //      numeric/hex identifiers, so these will not silently pass as real
+  //      config. The four payment bindings may keep sharing one namespace
+  //      (see the comment above them) or be split into more if ever
+  //      desired -- either is safe.
+  //   2. Add a static-assets binding (Workers Static Assets, e.g. an
+  //      `"assets": { "directory": "./", "binding": "ASSETS" }` block) so
+  //      `env.ASSETS.fetch(request)` in `_worker.js` keeps working when this
+  //      is deployed as a plain Worker instead of a Pages project -- Pages
+  //      provides that binding automatically today; a plain Worker does
+  //      not, without this.
+  //   3. Re-create the equivalent of `web/_headers` / `web/_redirects`
+  //      behavior (Pages-specific conventions this Worker does not
+  //      currently replicate on its own for pure static-asset requests).
+  //   4. Cut the custom domain over from the Pages project to the new
+  //      Worker in the Cloudflare dashboard, and confirm the apex/CNAME
+  //      routing notes in README_FINAL_DEPLOYMENT.md still hold.
+  //
+  // Until that migration happens, per-path abuse protection additionally
+  // needs a zone-level WAF Rate Limiting rule for /api/site/translate and
+  // /api/site/ai-chat (configured directly in the Cloudflare dashboard --
+  // out of scope for any file in this repository), plus a Google Cloud
+  // Translation API budget/quota alarm. Both are tracked as human ops
+  // follow-ups, not something this file or `_worker.js` can enforce.
+  // ---------------------------------------------------------------------
+  "name": "winsvpn-site-api",
+  "main": "_worker.js",
+  "compatibility_date": "2026-07-24",
+  // Website desktop downloads (later R2 hosting mode).
+  // Direct artifacts above the Pages 25 MiB asset cap live in this R2 bucket
+  // and are served only by _worker.js serveR2Download(): the Worker derives
+  // the key `downloads/sha256/<sha256>` from the deployed
+  // releases/downloads.json, checks size (and the R2 SHA-256 checksum when the
+  // object carries one), and streams the bytes through a SHA-256 verifier.
+  // The bucket is private: no public r2.dev URL and no custom domain.
+  // The LIVE Pages project does not read this file: the deploy lane adds the
+  // same binding in the dashboard (Workers & Pages > winsvpn > Settings >
+  // Bindings > Add > R2 bucket, variable name DOWNLOADS_BUCKET, bucket
+  // winsvpn-website-downloads) and redeploys. See
+  // docs/runbooks/WEBSITE_DOWNLOAD_R2_PUBLICATION.md. No credentials here.
+  "r2_buckets": [
+    {
+      "binding": "DOWNLOADS_BUCKET",
+      "bucket_name": "winsvpn-website-downloads"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER_TRANSLATE",
+      "namespace_id": "1001", // PLACEHOLDER -- replace before ever deploying this config for real.
+      "simple": { "limit": 30, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_AI_CHAT",
+      "namespace_id": "1002", // PLACEHOLDER -- replace before ever deploying this config for real.
+      "simple": { "limit": 20, "period": 60 }
+    },
+    // L-8 ("Worker migration rate-limit bindings are incomplete"): the four
+    // payment routes (handleWalletCreateOrder, handleWalletCapture,
+    // handleMoneroCreateOrder, handleCryptoCreateInvoice in _worker.js) each
+    // call requireQuota() with one of the binding names below too, but had
+    // no migration-target entry here -- so a future Worker migration would
+    // leave them silently falling back to the isolate-local map limiter
+    // (limit 20 / 60s, matching the "simple" values below) instead of a
+    // real bound limiter. All four share one placeholder namespace_id: a
+    // Cloudflare Rate Limiting binding's counter is keyed by the string
+    // passed to limiter.limit({key}), and every call site below already
+    // prefixes that key with its own route (e.g. "wallet-create-order:<ip>"
+    // vs "monero-create-order:<ip>"), so sharing a namespace cannot
+    // cross-count between routes -- same reasoning the audit gives for why
+    // one payment namespace is acceptable here.
+    {
+      "name": "RATE_LIMITER_WALLET_ORDER",
+      "namespace_id": "1003", // PLACEHOLDER -- replace before ever deploying this config for real.
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_WALLET_CAPTURE",
+      "namespace_id": "1003", // PLACEHOLDER -- shares the payment namespace above; replace before ever deploying this config for real.
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_MONERO_ORDER",
+      "namespace_id": "1003", // PLACEHOLDER -- shares the payment namespace above; replace before ever deploying this config for real.
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_CRYPTO_INVOICE",
+      "namespace_id": "1003", // PLACEHOLDER -- shares the payment namespace above; replace before ever deploying this config for real.
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_WALLET_CONFIG",
+      "namespace_id": "1003",
+      "simple": { "limit": 60, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_CRYPTO_CONFIG",
+      "namespace_id": "1003",
+      "simple": { "limit": 60, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMITER_REDEEM",
+      "namespace_id": "1003",
+      "simple": { "limit": 10, "period": 60 }
+    }
+  ]
+}

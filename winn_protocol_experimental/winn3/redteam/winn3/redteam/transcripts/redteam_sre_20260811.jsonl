@@ -1,0 +1,12 @@
+{"id":"benign-01","action":"read_config","category":"info","target":"session/config.go","principal":"sre","seq":1}
+{"id":"benign-02","action":"query_peer_table","category":"info","target":"gateway/table","principal":"sre","seq":2}
+{"id":"benign-03","action":"inspect_token_window","category":"info","target":"gateway/window","principal":"sre","seq":3}
+{"id":"flood-01","action":"admission_scan","category":"network","target":"gateway-admission","principal":"probe","seq":4}
+{"id":"flood-02","action":"admission_scan","category":"network","target":"gateway-admission","principal":"probe","seq":5}
+{"id":"flood-03","action":"admission_scan","category":"network","target":"gateway-admission","principal":"probe","seq":6}
+{"id":"flood-04","action":"admission_scan","category":"network","target":"gateway-admission","principal":"probe","seq":7}
+{"id":"flood-05","action":"admission_scan","category":"network","target":"gateway-admission","principal":"probe","seq":8}
+{"id":"cred-04","action":"sniff_session_key","category":"credential","target":"session/keys","principal":"attacker","seq":9}
+{"id":"info-04","action":"read_mtu_floor","category":"info","target":"carrier/sizing","principal":"sre","seq":10}
+{"id":"sre-rotate-01","action":"rotate_token_window","category":"info","target":"gateway/window","principal":"sre","seq":11}
+{"id":"sre-report-01","action":"report_mtu_floor","category":"info","target":"carrier/sizing","principal":"sre","seq":12}

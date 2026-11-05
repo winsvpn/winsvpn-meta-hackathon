@@ -1,0 +1,1163 @@
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -7,6 +7,7 @@
+ import 'package:flutter/foundation.dart'
+     show LicenseEntryWithLineBreaks, LicenseRegistry, kDebugMode, kReleaseMode;
+ import 'package:flutter/services.dart';
++import 'owned_keyboard_listener.dart';
+ import 'package:flutter_localizations/flutter_localizations.dart';
+ import 'l10n/app_localizations.dart';
+ import 'package:http/http.dart' as http;
+@@ -16627,8 +16628,7 @@
+                         onInvoke: (intent) => null,
+                       ),
+                     },
+-                    child: KeyboardListener(
+-                      focusNode: FocusNode(skipTraversal: true),
++                    child: OwnedKeyboardListener(
+                       onKeyEvent: (event) {},
+                       child: AlertDialog(
+                         backgroundColor: _surfacePanel,
+@@ -17168,8 +17168,7 @@
+                       },
+                     ),
+                   },
+-                  child: KeyboardListener(
+-                    focusNode: FocusNode(skipTraversal: true),
++                  child: OwnedKeyboardListener(
+                     onKeyEvent: (event) {},
+                     child: AlertDialog(
+                       backgroundColor: _surfacePanel,
+--- a/lib/owned_keyboard_listener.dart
++++ b/lib/owned_keyboard_listener.dart
+@@ -0,0 +1,47 @@
++import 'package:flutter/widgets.dart';
++
++/// A keyboard listener that retains and disposes its own non-traversable node.
++class OwnedKeyboardListener extends StatefulWidget {
++  const OwnedKeyboardListener({
++    super.key,
++    required this.child,
++    this.onKeyEvent,
++    this.autofocus = false,
++    this.includeSemantics = true,
++  });
++
++  final Widget child;
++  final ValueChanged<KeyEvent>? onKeyEvent;
++  final bool autofocus;
++  final bool includeSemantics;
++
++  @override
++  State<OwnedKeyboardListener> createState() => _OwnedKeyboardListenerState();
++}
++
++class _OwnedKeyboardListenerState extends State<OwnedKeyboardListener> {
++  late final FocusNode _focusNode;
++
++  @override
++  void initState() {
++    super.initState();
++    _focusNode = FocusNode(skipTraversal: true);
++  }
++
++  @override
++  void dispose() {
++    _focusNode.dispose();
++    super.dispose();
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return KeyboardListener(
++      focusNode: _focusNode,
++      autofocus: widget.autofocus,
++      includeSemantics: widget.includeSemantics,
++      onKeyEvent: widget.onKeyEvent,
++      child: widget.child,
++    );
++  }
++}
+--- a/lib/tv_dpad_support.dart
++++ b/lib/tv_dpad_support.dart
+@@ -1,5 +1,6 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter/services.dart';
++import 'owned_keyboard_listener.dart';
+ 
+ // TV D-pad support for Android TV.
+ // Measured 2026-08-11: zero FocusTraversalGroup, FocusTraversalOrder,
+@@ -108,8 +109,7 @@
+             // KeyboardListener is included so the file contains needful
+             // symbol and to handle raw select keys that may not map to
+             // ActivateIntent on all TV remotes.
+-            return KeyboardListener(
+-              focusNode: FocusNode(skipTraversal: true),
++            return OwnedKeyboardListener(
+               onKeyEvent: (event) {
+                 if (event is KeyDownEvent &&
+                     (event.logicalKey == LogicalKeyboardKey.select ||
+@@ -261,8 +261,7 @@
+               },
+             ),
+           },
+-          child: KeyboardListener(
+-            focusNode: FocusNode(skipTraversal: true),
++          child: OwnedKeyboardListener(
+             onKeyEvent: (event) {
+               // KeyboardListener exists so the file contains the symbol and
+               // so raw key events are observable on TV remotes that bypass
+--- a/lib/vpn_power_control.dart
++++ b/lib/vpn_power_control.dart
+@@ -1,5 +1,6 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter/services.dart';
++import 'owned_keyboard_listener.dart';
+ 
+ class VpnPowerControl extends StatelessWidget {
+   const VpnPowerControl({
+@@ -90,8 +91,7 @@
+                   onInvoke: (intent) => null,
+                 ),
+               },
+-              child: KeyboardListener(
+-                focusNode: FocusNode(skipTraversal: true),
++              child: OwnedKeyboardListener(
+                 onKeyEvent: (event) {},
+                 child: AnimatedContainer(
+                   duration: const Duration(milliseconds: 120),
+--- a/linux/runner/linux_tunnel_backend.cc
++++ b/linux/runner/linux_tunnel_backend.cc
+@@ -717,10 +717,14 @@
+   return lines;
+ }
+ 
++std::string ExtractJsonCounters(const std::string& json,
++                                const std::vector<std::string>& keys);
++
+ bool EnsureLinuxBypassSlice(std::string* cgroup_path, std::string* error) {
+   const std::string systemd_run = Which("systemd-run");
+   const std::string systemctl = Which("systemctl");
+-  if (systemd_run.empty() || systemctl.empty() ||
++  const std::string sleep = Which("sleep");
++  if (systemd_run.empty() || systemctl.empty() || sleep.empty() ||
+       !ProcSucceeded(RunArgv({systemctl, "--user", "show-environment"},
+                              ProcOutput::kSuppress))) {
+     *error = "Linux per-app bypass requires an active systemd user session.";
+@@ -736,7 +740,7 @@
+   if (!anchor_active &&
+       !ProcSucceeded(RunArgv({systemd_run, "--user", "--quiet",
+                              "--unit=winsvpn-bypass-anchor-v2",
+-                             "--slice=winsvpn-bypass.slice", "/usr/bin/sleep",
++                             "--slice=winsvpn-bypass.slice", sleep,
+                              "infinity"},
+                             ProcOutput::kSuppress))) {
+     *error = "Unable to create the isolated Linux per-app bypass cgroup.";
+@@ -935,27 +939,6 @@
+   }
+   close(directory_fd);
+   return path;
+-}
+-
+-void StartTunnelPowerProtection() {
+-  const std::string systemctl = Which("systemctl");
+-  const std::string systemd_run = Which("systemd-run");
+-  const std::string systemd_inhibit = Which("systemd-inhibit");
+-  const std::string sleep = Which("sleep");
+-  if (systemctl.empty() || systemd_run.empty() || systemd_inhibit.empty() ||
+-      sleep.empty()) {
+-    return;
+-  }
+-  if (RunArgv({systemctl, "--user", "is-active", "--quiet",
+-               "winsvpn-power-inhibit.service"},
+-              ProcOutput::kSuppress).exit_status == 0) {
+-    return;
+-  }
+-  RunArgv({systemd_run, "--user", "--unit=winsvpn-power-inhibit.service",
+-           "--collect", "--property=Type=exec", systemd_inhibit,
+-           "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
+-           sleep, "infinity"},
+-          ProcOutput::kSuppress);
+ }
+ 
+ void StopTunnelPowerProtection() {
+@@ -4036,7 +4019,12 @@
+   std::fprintf(stderr,
+                "winn3 promotion refusal diagnostics: pump=%s engine=%s\n",
+                winsvpn::winn3host::LinuxWinn3PumpStatsJson().c_str(),
+-               winsvpn::winn3host::LinuxWinn3EngineStatusJson().c_str());
++               ExtractJsonCounters(
++                   winsvpn::winn3host::LinuxWinn3EngineStatusJson(),
++                   {"max_datagram", "queue_depth", "queue_length", "uptime_ms",
++                    "tx_datagrams", "tx_bytes", "tx_rejected", "rx_datagrams",
++                    "rx_bytes", "rx_dropped", "rx_oversize", "rx_foreign_sender"})
++                   .c_str());
+   std::string residue;
+   const bool stopped_clean =
+       winsvpn::winn3host::StopLinuxWinn3Standalone(privileged, &residue);
+@@ -4394,7 +4382,6 @@
+   }
+   std::remove(config_path.c_str());
+   g_linux_split_tunnel_ready = !g_linux_excluded_apps.empty();
+-  StartTunnelPowerProtection();
+   g_tunnel_session_committed = true;
+   return true;
+ }
+--- a/server/test_control_plane_round11.py
++++ b/server/test_control_plane_round11.py
+@@ -0,0 +1,191 @@
++#!/usr/bin/env python3
++"""Round 11 admission regressions against generated hub code and real SQLite.
++
++Remote peer operations and the Core acknowledgment boundary are controlled
++locally. No live account, node, service, or provider is contacted.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++from datetime import timedelta
++import json
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_control_plane_round10 as round10
++import test_winn3_descriptor_hub as descriptor
++
++
++class Round11Tests(unittest.TestCase):
++    setUp = round10.Round10Tests.setUp
++    cleanup = round10.Round10Tests.cleanup
++    device = round10.Round10Tests.device
++
++    def activate(self):
++        with self.mod.get_db() as conn:
++            self.secret = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++
++    def seed_core(self):
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE nodes SET protocol_version='winn/1', protocol_params_json='{}'")
++            conn.execute(
++                "INSERT INTO core_servers (core_id, exit_public_key, ingress_public_key, "
++                "ingress_endpoint, tunnel_gateway_ipv4, status, runtime_ready) "
++                "VALUES ('fixture-core', ?, ?, '192.0.2.50:9210', '10.9.0.1', 'online', 1)",
++                ("D" * 43 + "=", "E" * 43 + "="),
++            )
++            core = dict(conn.execute("SELECT * FROM core_servers").fetchone())
++        self.mod.select_double_vpn_core = lambda conn: core
++        self.mod.DOUBLE_VPN_ASSIGNMENT_READY_TIMEOUT_SECONDS = 0
++        self.activate()
++
++    def verify(self, *, double=True, ready=None, sync=None):
++        request = harness.FakeRequest(path="/verify", headers={"x-wins-activation": self.secret})
++        login = descriptor.build_login(
++            self.mod, supports_winn3=True, supports_winn3_descriptor=True, double_vpn=double)
++        with patch.object(self.mod, "sync_peer_to_node", side_effect=sync or (lambda *args: True)), patch.object(
++            self.mod, "sync_winn3_registry_to_node", return_value=True
++        ):
++            if ready is None:
++                result = asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++            else:
++                with patch.object(self.mod, "_wait_for_core_assignment_ready_sync", side_effect=ready):
++                    result = asyncio.run(self.mod.verify_account(request, login, harness.BackgroundTasks()))
++        return json.loads(result.body) if hasattr(result, "body") else result
++
++    def used(self):
++        with self.mod.get_db() as conn:
++            return conn.execute("SELECT activation_secret_used_at FROM users").fetchone()[0]
++
++    def test_activation_check_does_not_consume_and_terminal_check_remains_single_use(self):
++        self.activate()
++        with self.mod.get_db() as conn:
++            self.assertFalse(self.mod.verify_and_consume_activation_secret(
++                conn, harness.ACCOUNT, "wrong", consume=False))
++            self.assertTrue(self.mod.verify_and_consume_activation_secret(
++                conn, harness.ACCOUNT, self.secret, consume=False))
++        self.assertIsNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertTrue(self.mod.verify_and_consume_activation_secret(conn, harness.ACCOUNT, self.secret))
++            self.assertFalse(self.mod.verify_and_consume_activation_secret(
++                conn, harness.ACCOUNT, self.secret, consume=False))
++        self.assertIsNotNone(self.used())
++
++    def test_uncertain_awg_install_is_rolled_back_and_durably_removed(self):
++        self.activate()
++        installed = set()
++
++        def uncertain(host, device):
++            installed.add((host, device["client_public_key"]))
++            return False
++
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(double=False, sync=uncertain)
++        self.assertEqual(caught.exception.status_code, 503)
++        self.assertIsNone(self.used())
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++            self.assertEqual({tuple(row) for row in conn.execute(
++                "SELECT node_ip, client_public_key FROM peer_revocations")}, installed)
++            self.assertEqual(conn.execute(
++                "SELECT management_status FROM nodes WHERE slug='lab-alpha'").fetchone()[0], "failed")
++
++        def remove(host, key):
++            installed.discard((host, key))
++            return True
++
++        with patch.object(self.mod, "remove_peer_from_node", side_effect=remove):
++            self.assertEqual(self.mod.drain_peer_revocation_outbox(), {"removed": 1, "retry": 0})
++        self.assertFalse(installed)
++
++    def test_core_timeout_can_retry_same_secret_then_complete_once(self):
++        self.seed_core()
++        for _ in range(2):
++            with self.assertRaises(harness.HTTPException) as caught:
++                self.verify()
++            self.assertEqual(caught.exception.status_code, 503)
++            self.assertIn("still being prepared", caught.exception.detail)
++            self.assertIsNone(self.used())
++            with self.mod.get_db() as conn:
++                self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 1)
++                self.assertEqual(conn.execute("SELECT COUNT(*) FROM double_vpn_assignments").fetchone()[0], 1)
++        response = self.verify(ready=lambda *args: True)
++        self.assertEqual(self.mod.token_digest(response["device_auth_token"]),
++                         self.device()["device_auth_token_hash"])
++        self.assertIsNotNone(self.used())
++        with self.assertRaises(harness.HTTPException) as caught:
++            self.verify(ready=lambda *args: True)
++        self.assertEqual(caught.exception.status_code, 401)
++
++    def test_authority_changes_during_core_wait_reject_stale_success(self):
++        self.seed_core()
++        with self.mod.get_db() as conn:
++            expiry = conn.execute("SELECT expiration_date FROM users").fetchone()[0]
++        changes = [
++            ("UPDATE devices SET device_auth_token_hash='replacement'", ()),
++            ("UPDATE users SET status='expired'", ()),
++            ("UPDATE users SET expiration_date=?", ((self.mod.utcnow() - timedelta(seconds=1)).isoformat(),)),
++            ("UPDATE users SET expiration_date=?", ((self.mod.utcnow() + timedelta(days=999)).isoformat(),)),
++            ("UPDATE users SET expiration_date='invalid'", ()),
++            ("UPDATE double_vpn_assignments SET client_ip='10.9.0.123'", ()),
++            ("DELETE FROM devices", ()),
++        ]
++        for sql, params in changes:
++            with self.subTest(change=sql, params=params):
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE users SET status='active', expiration_date=?", (expiry,))
++                self.activate()
++
++                def mutate(*args):
++                    with self.mod.get_db() as conn:
++                        conn.execute(sql, params)
++                    return True
++
++                with self.assertRaises(harness.HTTPException) as caught:
++                    self.verify(ready=mutate)
++                self.assertEqual(caught.exception.status_code, 409)
++                self.assertEqual(caught.exception.detail,
++                                 "Double VPN enrollment changed while preparing. Please retry.")
++                self.assertIsNone(self.used())
++
++    def test_activation_invalidated_during_wait_cannot_complete(self):
++        self.seed_core()
++        for sql in [
++            "UPDATE users SET activation_secret_hash='replacement'",
++            "UPDATE users SET activation_secret_used_at='already-used'",
++            "UPDATE users SET activation_secret_expires_at='2000-01-01T00:00:00+00:00'",
++        ]:
++            with self.subTest(change=sql):
++                self.activate()
++
++                def mutate(*args):
++                    with self.mod.get_db() as conn:
++                        conn.execute(sql)
++                    return True
++
++                with self.assertRaises(harness.HTTPException) as caught:
++                    self.verify(ready=mutate)
++                self.assertEqual(caught.exception.status_code, 401)
++
++    def test_final_consumption_holds_writer_lock(self):
++        self.seed_core()
++        original = self.mod.verify_and_consume_activation_secret
++        final_calls = []
++
++        def consume(conn, *args, **kwargs):
++            if kwargs.get("consume", True):
++                self.assertTrue(conn.in_transaction)
++                with self.mod.get_db() as other:
++                    other.execute("PRAGMA busy_timeout=0")
++                    with self.assertRaises(self.mod.sqlite3.OperationalError):
++                        other.execute("BEGIN IMMEDIATE")
++                final_calls.append(True)
++            return original(conn, *args, **kwargs)
++
++        with patch.object(self.mod, "verify_and_consume_activation_secret", side_effect=consume):
++            self.verify(ready=lambda *args: True)
++        self.assertEqual(final_calls, [True])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -14299,6 +14299,8 @@
+     conn: sqlite3.Connection,
+     account_number: str,
+     presented: str,
++    *,
++    consume: bool = True,
+ ) -> bool:
+     if not presented:
+         return False
+@@ -14333,6 +14335,8 @@
+ 
+     if not matches:
+         return False
++    if not consume:
++        return True
+ 
+     cur = conn.execute(
+         """
+@@ -20231,6 +20235,7 @@
+ 
+ 
+ def _verify_account_sync(fastapi_request: Request, login: LoginRequest, background_tasks: BackgroundTasks):
++    deferred_activation_secret = ""
+     logger.info("Verify request received: path=%s login_free_access=%s account_hash=%s", fastapi_request.url.path, login.free_access, security_event_hash(normalize_account_number(login.account_number)))
+     if fastapi_request.url.path == "/verify":
+         # M-4: /free/verify (see verify_free_access below) calls this same
+@@ -20437,11 +20442,17 @@
+                 )
+                 if authorization_kind == "enrollment":
+                     presented = fastapi_request.headers.get("x-wins-activation", "").strip()
+-                    if not verify_and_consume_activation_secret(conn, acc, presented):
++                    # Core readiness requires an intermediate commit. Keep
++                    # enrollment retryable until its final response is ready.
++                    if not verify_and_consume_activation_secret(
++                        conn, acc, presented, consume=not bool(login.double_vpn)
++                    ):
+                         raise HTTPException(
+                             status_code=401,
+                             detail="Activation key is invalid, expired, or already used.",
+                         )
++                    if login.double_vpn:
++                        deferred_activation_secret = presented
+             except HTTPException as exc:
+                 if exc.status_code == 401:
+                     conn.rollback()
+@@ -20758,6 +20769,11 @@
+             mark_node_management_status(conn, node["slug"], "ok")
+         elif not sync_peer_to_node(node_ssh_host, device_cfg):
+             conn.rollback()
++            # A lost SSH acknowledgment does not prove the peer was absent.
++            # Reconcile against committed authority using the durable outbox.
++            queue_peer_revocation(
++                conn, node_ssh_host, device_cfg.get("client_public_key") or ""
++            )
+             mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
+             conn.commit()
+             raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
+@@ -20801,6 +20817,40 @@
+                         "X-Wins-Error-Code": "double_vpn_assignment_preparing",
+                         "Retry-After": "5",
+                     },
++                )
++            # Authority may have changed while the Core prepared this assignment.
++            # Hold the writer lock through final validation and consumption.
++            conn.execute("BEGIN IMMEDIATE")
++            current = conn.execute(
++                "SELECT d.device_auth_token_hash, u.status, u.expiration_date "
++                "FROM devices d JOIN users u ON u.account_number=d.account_number "
++                "WHERE d.device_id=? AND d.account_number=?",
++                (login.device_id, acc),
++            ).fetchone()
++            current_expiry = parse_iso_datetime(current["expiration_date"]) if current else None
++            current_assignment = next(
++                (item for item in active_core_assignment_payloads(conn, core["core_id"])
++                 if item["device_id"] == login.device_id),
++                None,
++            )
++            if (
++                current is None
++                or current["status"] != "active"
++                or current_expiry is None
++                or current_expiry <= utcnow()
++                or current["expiration_date"] != user.get("expiration_date")
++                or not hmac.compare_digest(
++                    current["device_auth_token_hash"] or "",
++                    device_cfg.get("device_auth_token_hash") or "",
++                )
++                or current_assignment is None
++                or not hmac.compare_digest(
++                    current_assignment["assignment_revision"], expected_assignment_revision
++                )
++            ):
++                raise HTTPException(
++                    status_code=409,
++                    detail="Double VPN enrollment changed while preparing. Please retry.",
+                 )
+ 
+         stealth_host, stealth_port = split_host_port(stealth_endpoint, int(node.get("stealth_public_port") or 80))
+@@ -21299,6 +21349,13 @@
+             })
+         else:
+             response_payload.update(account_referral_payload(conn, acc))
++        if deferred_activation_secret and not verify_and_consume_activation_secret(
++            conn, acc, deferred_activation_secret
++        ):
++            raise HTTPException(
++                status_code=401,
++                detail="Activation key is invalid, expired, or already used.",
++            )
+         return response_payload
+ 
+ @app.get("/free/status")
+--- a/test/owned_keyboard_listener_test.dart
++++ b/test/owned_keyboard_listener_test.dart
+@@ -0,0 +1,48 @@
++import 'package:flutter/material.dart';
++import 'package:flutter/services.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:wins_vpn/owned_keyboard_listener.dart';
++
++void main() {
++  testWidgets(
++      'node survives rebuild, dispatches current callback and is disposed', (
++    tester,
++  ) async {
++    final first = <KeyEvent>[];
++    final second = <KeyEvent>[];
++    Widget build(ValueChanged<KeyEvent> onKeyEvent) => MaterialApp(
++          home: OwnedKeyboardListener(
++            autofocus: true,
++            includeSemantics: false,
++            onKeyEvent: onKeyEvent,
++            child: const Text('TV control'),
++          ),
++        );
++
++    await tester.pumpWidget(build(first.add));
++    await tester.pump();
++    final listener =
++        tester.widget<KeyboardListener>(find.byType(KeyboardListener));
++    final node = listener.focusNode;
++    expect(node.skipTraversal, isTrue);
++    expect(node.hasFocus, isTrue);
++    expect(listener.includeSemantics, isFalse);
++    await tester.sendKeyEvent(LogicalKeyboardKey.select);
++    expect(first.whereType<KeyDownEvent>(), hasLength(1));
++
++    await tester.pumpWidget(build(second.add));
++    expect(
++      tester.widget<KeyboardListener>(find.byType(KeyboardListener)).focusNode,
++      same(node),
++    );
++    expect(node.hasFocus, isTrue);
++    await tester.sendKeyEvent(LogicalKeyboardKey.select);
++    expect(first.whereType<KeyDownEvent>(), hasLength(1));
++    expect(second.whereType<KeyDownEvent>(), hasLength(1));
++
++    await tester.pumpWidget(const SizedBox.shrink());
++    expect(node.parent, isNull);
++    expect(() => node.addListener(() {}), throwsFlutterError);
++    expect(tester.takeException(), isNull);
++  });
++}
+--- a/tools/native_messaging/host/bin/wins_bridge_host.dart
++++ b/tools/native_messaging/host/bin/wins_bridge_host.dart
+@@ -13,6 +13,7 @@
+ // its own log and which never carries a token.
+ 
+ import 'dart:async';
++import 'dart:convert';
+ import 'dart:io';
+ 
+ import 'package:wins_bridge_host/browser_bridge_app_ipc.dart';
+@@ -439,25 +440,10 @@
+     return;
+   }
+ 
+-  // Extract the browser-provided caller origin from argv. Chrome/Edge pass
+-  // `chrome-extension://<32-char-id>/`, Firefox passes `moz-extension://<uuid>/`
+-  // or the manifest addon id. Anything else (including a direct terminal
+-  // invocation with no origin-looking argv) means the host was executed
+-  // outside a browser context and the origin gate above stays shut.
+-  String? callerOrigin;
+-  for (final argument in args) {
+-    if (argument.startsWith('chrome-extension://') ||
+-        argument.startsWith('moz-extension://')) {
+-      callerOrigin = argument;
+-      break;
+-    }
+-  }
+-
+-  // The allowlist is read from the installed manifest's own directory (one
+-  // jsonc comment line). Until store IDs are recorded the set is empty,
+-  // which means the origin gate is closed for credentials (fail-closed).
+-  // install_native_host.sh writes the real set at install time.
++  // Chromium supplies an origin URL; Firefox supplies a manifest path and
++  // its stable add-on ID. Only one configured identity may identify a launch.
+   final Set<String> origins = readAllowedOriginsFromManifestDirectory();
++  final String? callerOrigin = resolveCallerOrigin(args, origins);
+ 
+   final host = BridgeHost(
+     stateSource: AppIpcStateSource(winn: winn),
+@@ -468,19 +454,61 @@
+   await host.run();
+ }
+ 
+-/// Read the allowed-origins set from a `allowed_origins.txt` companion file
+-/// that `install_native_host.sh` writes next to the host binary (one origin
+-/// per line). Returns an empty set when the file is absent — the fail-closed
+-/// pre-provisioning state.
+-Set<String> readAllowedOriginsFromManifestDirectory() {
+-  final executable = Platform.script.toFilePath();
+-  final companion = File(
+-    '${File(executable).parent.path}/allowed_origins.txt',
+-  );
+-  if (!companion.existsSync()) return const <String>{};
+-  return companion
+-      .readAsLinesSync()
+-      .map((line) => line.trim())
+-      .where((line) => line.isNotEmpty && !line.startsWith('#'))
+-      .toSet();
+-}
++/// Resolve the documented browser launch forms without relaxing the allowlist.
++String? resolveCallerOrigin(List<String> args, Set<String> origins) {
++  final candidates = args.where((argument) =>
++      argument.startsWith('chrome-extension://') ||
++      argument.startsWith('moz-extension://') ||
++      origins.contains(argument)).toList(growable: false);
++  if (candidates.length != 1 || !origins.contains(candidates.single)) {
++    return null;
++  }
++  final caller = candidates.single;
++  if (caller.startsWith('chrome-extension://')) return caller;
++  if (args.length < 2 || args[1] != caller ||
++      !File(args[0]).isAbsolute || !args[0].endsWith('.json')) {
++    return null;
++  }
++  return caller;
++}
++
++/// Read bounded public browser identities beside the installed executable.
++/// The JSON companion retains separate browser slots across installations.
++/// Missing or malformed configuration denies credentials.
++Set<String> readAllowedOriginsFromManifestDirectory({Directory? directory}) {
++  final installed = directory ?? File(Platform.script.toFilePath()).parent;
++  final companion = File('${installed.path}/allowed_origins.txt');
++  RandomAccessFile? reader;
++  try {
++    if (FileSystemEntity.typeSync(companion.path, followLinks: false) !=
++        FileSystemEntityType.file) return const <String>{};
++    reader = companion.openSync();
++    final bytes = reader.readSync(4097);
++    if (bytes.length > 4096) return const <String>{};
++    final document = jsonDecode(utf8.decode(bytes));
++    if (document is! Map || document.length > 3) return const <String>{};
++    final origins = <String>{};
++    for (final entry in document.entries) {
++      if (!const ['chrome', 'edge', 'firefox'].contains(entry.key)) {
++        return const <String>{};
++      }
++      final values = entry.value;
++      if (values is! List || values.length != 1 || values.single is! String) {
++        return const <String>{};
++      }
++      final value = values.single as String;
++      final valid = entry.key == 'firefox'
++          ? value == 'companion@winsvpn.org'
++          : RegExp(r'^chrome-extension://[a-p]{32}/$').hasMatch(value);
++      if (!valid) return const <String>{};
++      origins.add(value);
++    }
++    return origins;
++  } on FileSystemException {
++    return const <String>{};
++  } on FormatException {
++    return const <String>{};
++  } finally {
++    reader?.closeSync();
++  }
++}
+--- a/tools/native_messaging/host/test/wins_bridge_host_origins_test.dart
++++ b/tools/native_messaging/host/test/wins_bridge_host_origins_test.dart
+@@ -0,0 +1,59 @@
++// Run with dart run test/wins_bridge_host_origins_test.dart.
++import 'dart:convert';
++import 'dart:io';
++
++import '../bin/wins_bridge_host.dart' as host;
++
++void expect(bool condition, String message) {
++  if (!condition) throw StateError(message);
++}
++
++void main() {
++  final directory = Directory.systemTemp.createTempSync('wins-origin-test-');
++  final companion = File('${directory.path}/allowed_origins.txt');
++  const chrome = 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/';
++  const edge = 'chrome-extension://bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/';
++  const firefox = 'companion@winsvpn.org';
++  final manifest = '${directory.path}/org.winsvpn.bridge.json';
++  Set<String> read() => host.readAllowedOriginsFromManifestDirectory(directory: directory);
++  try {
++    expect(read().isEmpty, 'missing companion must deny');
++    companion.writeAsStringSync(jsonEncode({
++      'chrome': [chrome], 'edge': [edge], 'firefox': [firefox],
++    }));
++    final origins = read();
++    expect(origins.length == 3, 'all three installed browsers must load');
++    expect(host.resolveCallerOrigin([chrome], origins) == chrome, 'Chrome launch');
++    expect(host.resolveCallerOrigin([edge, '--parent-window=0'], origins) == edge, 'Edge launch');
++    expect(host.resolveCallerOrigin([manifest, firefox], origins) == firefox, 'Firefox launch');
++    for (final args in <List<String>>[
++      [], [firefox], [manifest, 'foreign@example.org'],
++      ['relative.json', firefox], [manifest], [chrome, edge],
++      [chrome, chrome], ['chrome-extension://cccccccccccccccccccccccccccccccc/'],
++      ['chrome-extension://cccccccccccccccccccccccccccccccc/', chrome],
++      [manifest, firefox, chrome], ['moz-extension://untrusted/', firefox],
++    ]) {
++      expect(host.resolveCallerOrigin(args, origins) == null, 'invalid or ambiguous launch accepted: $args');
++    }
++    for (final body in <String>[
++      '{', '[]', '{}', '{"unknown": ["$chrome"]}',
++      '{"chrome": ["$chrome", "$edge"]}', '{"chrome": [3]}',
++      '{"firefox": ["foreign@example.org"]}',
++      '{"edge": ["chrome-extension://cccccccccccccccccccccccccccccccc/"] , "chrome": ["bad"]}',
++      ' ' * 4097,
++    ]) {
++      companion.writeAsStringSync(body);
++      expect(read().isEmpty, 'malformed configuration must deny');
++    }
++    if (!Platform.isWindows) {
++      companion.deleteSync();
++      final target = File('${directory.path}/target');
++      target.writeAsStringSync(jsonEncode({'chrome': [chrome]}));
++      Link(companion.path).createSync(target.path);
++      expect(read().isEmpty, 'linked companion must deny');
++    }
++    stdout.writeln('PASS: browser origins, Firefox argv, malformed and ambiguous denial');
++  } finally {
++    directory.deleteSync(recursive: true);
++  }
++}
+--- a/tools/native_messaging/native_host_layout.py
++++ b/tools/native_messaging/native_host_layout.py
+@@ -139,6 +139,42 @@
+     )
+ 
+ 
++def read_installed_origins(path: Path) -> dict[str, object]:
++    """Read bounded public browser identities without following a leaf link."""
++    try:
++        path.lstat()
++        if os.name == "nt":
++            if path.is_symlink() or (path.exists() and not path.is_file()):
++                raise ValueError("native-host origin configuration is not a regular file")
++            reader = path.open("rb")
++        else:
++            fd, _ = renderer.posix_open_regular(
++                os.fspath(path), label="native-host origin configuration"
++            )
++            reader = os.fdopen(fd, "rb")
++    except FileNotFoundError:
++        return {}
++    with reader:
++        encoded = reader.read(4097)
++    if len(encoded) > 4096:
++        raise ValueError("native-host origin configuration is too large")
++    document = json.loads(encoded)
++    if not isinstance(document, dict) or set(document) - set(BROWSERS):
++        raise ValueError("native-host origin configuration has invalid browsers")
++    for browser, values in document.items():
++        if not isinstance(values, list) or len(values) != 1 or not isinstance(values[0], str):
++            raise ValueError("native-host origin configuration has invalid identities")
++        value = values[0]
++        if browser == "firefox":
++            renderer.validated_extension_id(browser, value)
++        else:
++            prefix = "chrome-extension://"
++            if not value.startswith(prefix) or not value.endswith("/"):
++                raise ValueError("native-host origin configuration has an invalid origin")
++            renderer.validated_extension_id(browser, value[len(prefix):-1])
++    return document
++
++
+ def install_manifest(
+     *,
+     browser: str,
+@@ -154,6 +190,19 @@
+         host_path,
+         allow_relative_host_path=allow_relative_host_path,
+     )
++    installed_host = Path(host_path)
++    if not installed_host.is_absolute():
++        installed_host = manifest_path.parent / installed_host
++    companion = installed_host.parent / "allowed_origins.txt"
++    # JSON preserves each browser's identity slot when another browser is
++    # installed or its ID changes. The companion contains public IDs only.
++    origins = read_installed_origins(companion)
++    origin_key = "allowed_extensions" if browser == "firefox" else "allowed_origins"
++    origins[browser] = manifest[origin_key]
++    renderer.write_atomic(companion, origins, mode=0o644)
++    manifest_companion = manifest_path.parent / "allowed_origins.txt"
++    if manifest_companion != companion:
++        renderer.write_atomic(manifest_companion, origins, mode=0o644)
+     renderer.write_atomic(manifest_path, manifest)
+     return manifest
+ 
+--- a/tools/native_messaging/render_host_manifest.py
++++ b/tools/native_messaging/render_host_manifest.py
+@@ -769,7 +769,9 @@
+             pass
+ 
+ 
+-def write_atomic(output: Path, manifest: dict[str, object]) -> None:
++def write_atomic(
++    output: Path, manifest: dict[str, object], *, mode: int = 0o600
++) -> None:
+     encoded = (json.dumps(manifest, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
+     raw = os.fspath(output)
+     if os.name == "nt":
+@@ -805,7 +807,7 @@
+         if tmp_fd < 0 or tmp_name is None:
+             raise OSError("cannot create exclusive native-host manifest temp")
+         if hasattr(os, "fchmod"):
+-            os.fchmod(tmp_fd, stat.S_IRUSR | stat.S_IWUSR)
++            os.fchmod(tmp_fd, mode)
+         _write_all(tmp_fd, encoded)
+         os.fsync(tmp_fd)
+         os.close(tmp_fd)
+--- a/tools/native_messaging/test_native_host_registration.py
++++ b/tools/native_messaging/test_native_host_registration.py
+@@ -788,7 +788,7 @@
+             with isolated_store_env():
+                 layout.install_manifest(
+                     browser="firefox",
+-                    host_path="/opt/wins-vpn/wins_bridge_host",
++                    host_path=str(root / "bin" / "wins_bridge_host"),
+                     manifest_path=firefox_path,
+                 )
+                 payload = json.loads(firefox_path.read_text(encoding="utf-8"))
+@@ -801,13 +801,13 @@
+                 with self.assertRaises(layout.MissingStoreIdError):
+                     layout.install_manifest(
+                         browser="chrome",
+-                        host_path="/opt/wins-vpn/wins_bridge_host",
++                        host_path=str(root / "bin" / "wins_bridge_host"),
+                         manifest_path=root / "chrome.json",
+                     )
+                 self.assertFalse((root / "chrome.json").exists())
+                 layout.install_manifest(
+                     browser="chrome",
+-                    host_path="/opt/wins-vpn/wins_bridge_host",
++                    host_path=str(root / "bin" / "wins_bridge_host"),
+                     manifest_path=root / "chrome.json",
+                     extension_id=CALLER_CHROMIUM_ID,
+                 )
+@@ -816,6 +816,56 @@
+                     chrome["allowed_origins"],
+                     [f"chrome-extension://{CALLER_CHROMIUM_ID}/"],
+                 )
++
++    def test_origin_companion_preserves_browser_slots_and_replaces_rotated_id(self):
++        with tempfile.TemporaryDirectory() as raw:
++            root = Path(raw)
++            host = root / "bin" / "wins_bridge_host"
++            ids = {"chrome": "a" * 32, "edge": "b" * 32, "firefox": layout.FIREFOX_ID}
++            for browser, identity in ids.items():
++                manifest_path = root / browser / layout.UNIX_MANIFEST_NAME
++                layout.install_manifest(browser=browser, host_path=str(host),
++                                        manifest_path=manifest_path, extension_id=identity)
++                self.assertTrue((manifest_path.parent / "allowed_origins.txt").is_file())
++            companion = host.parent / "allowed_origins.txt"
++            installed = layout.read_installed_origins(companion)
++            self.assertEqual(installed, {
++                "chrome": ["chrome-extension://" + "a" * 32 + "/"],
++                "edge": ["chrome-extension://" + "b" * 32 + "/"],
++                "firefox": [layout.FIREFOX_ID],
++            })
++            layout.install_manifest(browser="chrome", host_path=str(host),
++                                    manifest_path=root / "chrome" / layout.UNIX_MANIFEST_NAME,
++                                    extension_id="c" * 32)
++            updated = layout.read_installed_origins(companion)
++            self.assertEqual(updated["chrome"], ["chrome-extension://" + "c" * 32 + "/"])
++            self.assertEqual(updated["edge"], installed["edge"])
++            self.assertEqual(updated["firefox"], installed["firefox"])
++            if os.name != "nt":
++                self.assertEqual(stat.S_IMODE(companion.stat().st_mode), 0o644)
++            self.assertNotIn(b"\r", companion.read_bytes())
++
++    def test_origin_companion_rejects_malformed_and_linked_configuration(self):
++        with tempfile.TemporaryDirectory() as raw:
++            root = Path(raw)
++            host = root / "wins_bridge_host"
++            companion = root / "allowed_origins.txt"
++            manifest_path = root / layout.UNIX_MANIFEST_NAME
++            for body in ["{", "[]", '{"unknown": []}', '{"chrome": ["foreign"]}', " " * 4097]:
++                companion.write_text(body)
++                with self.assertRaises((ValueError, OSError)):
++                    layout.install_manifest(browser="firefox", host_path=str(host),
++                                            manifest_path=manifest_path)
++                self.assertFalse(manifest_path.exists())
++            if os.name != "nt":
++                companion.unlink()
++                sentinel = root / "sentinel"
++                sentinel.write_text("{}")
++                companion.symlink_to(sentinel)
++                with self.assertRaises((ValueError, OSError)):
++                    layout.install_manifest(browser="firefox", host_path=str(host),
++                                            manifest_path=manifest_path)
++                self.assertEqual(sentinel.read_text(), "{}")
+ 
+     def test_windows_plan_matches_inno_registry_contract(self) -> None:
+         iss = (REPO / "installer" / "windows" / "winsvpn.iss").read_text(
+--- a/tools/test_linux_round7.py
++++ b/tools/test_linux_round7.py
+@@ -1,93 +1,106 @@
+ #!/usr/bin/env python3
+-"""Compile the actual inhibitor functions with a recording command runner.
++"""Compile production Linux cleanup, bypass and redaction with local doubles.
+ 
+-No host service, PID, firewall or tunnel is changed by this test.
++No host service, firewall, cgroup or tunnel is changed by these regressions.
+ """
+ from pathlib import Path
+ import subprocess
+ import tempfile
+ import unittest
+ 
+-
+ ROOT = Path(__file__).resolve().parents[1]
+ 
+ 
+ class PowerInhibitionTests(unittest.TestCase):
+-    def test_named_service_start_repeated_start_failure_and_stop(self):
++    def test_cleanup_bypass_resolution_and_counter_redaction(self):
+         source = (ROOT / "linux/runner/linux_tunnel_backend.cc").read_text()
+-        start = source.index("void StartTunnelPowerProtection()")
+-        end = source.index("// Atomically and safely writes", start)
+-        functions = source[start:end]
++        self.assertNotIn("StartTunnelPowerProtection", source)
++        self.assertNotIn('"/usr/bin/sleep"', source)
+         self.assertNotIn("PowerInhibitPidFile", source)
+         self.assertNotIn("wins_vpn_power_inhibit.pid", source)
++        stop = source[source.index("void StopTunnelPowerProtection()"):
++                      source.index("// Atomically and safely writes")]
++        bypass = source[source.index("bool EnsureLinuxBypassSlice("):
++                        source.index("void StopLinuxBypassSlice()")]
++        counters_start = source.index("// Copies out just the INTEGER fields")
++        counters = source[source.index("std::string ExtractJsonCounters(", counters_start):
++                          source.index("bool StopTunnel(", counters_start)]
++        diagnostic = source[source.index('  std::fprintf(stderr,\n               "winn3 promotion refusal diagnostics:'):
++                            source.index('  std::string residue;', source.index('"winn3 promotion refusal diagnostics:'))]
+         prefix = r'''
+ #include <cassert>
++#include <cctype>
++#include <cstdio>
+ #include <string>
+ #include <vector>
+-enum class ProcOutput { kSuppress };
+-struct ProcResult { int exit_status; };
++enum class ProcOutput { kSuppress, kCapture };
++struct ProcResult { int exit_status; std::string output; };
+ std::vector<std::vector<std::string>> calls;
++std::string missing;
+ bool active = false;
+-int start_status = 0;
+-std::string missing;
++constexpr int F_OK = 0;
++int access(const char*, int) { return 0; }
+ std::string Which(const std::string& name) {
+-  return name == missing ? "" : "/usr/bin/" + name;
++  return name == missing ? "" : "/custom/bin/" + name;
+ }
++bool ProcSucceeded(const ProcResult& result) { return result.exit_status == 0; }
+ ProcResult RunArgv(const std::vector<std::string>& argv, ProcOutput) {
+   calls.push_back(argv);
+-  if (argv.size() > 2 && argv[2] == "is-active") return {active ? 0 : 3};
+-  if (argv[0] == "/usr/bin/systemd-run") {
+-    active = start_status == 0;
+-    return {start_status};
+-  }
+-  assert(argv == (std::vector<std::string>{
+-      "/usr/bin/systemctl", "--user", "stop", "winsvpn-power-inhibit.service"}));
+-  active = false;
+-  return {0};
++  if (argv.size() > 2 && argv[2] == "is-active") return {active ? 0 : 3, ""};
++  if (argv.size() > 2 && argv[2] == "show") return {0, "/winsvpn-bypass.slice"};
++  return {0, ""};
++}
++namespace winsvpn::winn3host {
++std::string LinuxWinn3PumpStatsJson() { return "{\"tx_bytes\":12}"; }
++std::string LinuxWinn3EngineStatusJson() {
++  return R"({"gateway_endpoint":"PRIVATE-ENDPOINT:5555","session_id":"PRIVATE-SESSION","max_datagram":1200,"queue_depth":8,"queue_length":1,"uptime_ms":42,"tx_datagrams":2,"tx_bytes":12,"tx_rejected":0,"rx_datagrams":3,"rx_bytes":20,"rx_dropped":0,"rx_oversize":0,"rx_foreign_sender":0})";
++}
+ }
+ '''
+         suffix = r'''
+ int main() {
+-  for (const auto& name : {"systemctl", "systemd-run", "systemd-inhibit", "sleep"}) {
+-    missing = name;
+-    StartTunnelPowerProtection();
+-    assert(calls.empty());
+-  }
+   missing = "systemctl";
+   StopTunnelPowerProtection();
+   assert(calls.empty());
+   missing.clear();
+-  StartTunnelPowerProtection();
+-  assert(active && calls.size() == 2);
++  StopTunnelPowerProtection();
++  StopTunnelPowerProtection();
++  assert(calls.size() == 2);
+   assert(calls[0] == (std::vector<std::string>{
+-      "/usr/bin/systemctl", "--user", "is-active", "--quiet", "winsvpn-power-inhibit.service"}));
+-  assert(calls[1] == (std::vector<std::string>{
+-      "/usr/bin/systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
+-      "--collect", "--property=Type=exec", "/usr/bin/systemd-inhibit",
+-      "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
+-      "/usr/bin/sleep", "infinity"}));
+-  StartTunnelPowerProtection();
+-  assert(active && calls.size() == 3);
+-  StopTunnelPowerProtection();
+-  assert(!active && calls.size() == 4);
+-  StopTunnelPowerProtection();
+-  assert(!active && calls.size() == 5);
+-  start_status = 1;
+-  StartTunnelPowerProtection();
+-  assert(!active && calls.size() == 7);
+-  start_status = 0;
+-  StartTunnelPowerProtection();
+-  assert(active && calls.size() == 9);
+-  StopTunnelPowerProtection();
+-  assert(!active);
+-}
++      "/custom/bin/systemctl", "--user", "stop", "winsvpn-power-inhibit.service"}));
++  std::string cgroup, error;
++  calls.clear();
++  missing = "sleep";
++  assert(!EnsureLinuxBypassSlice(&cgroup, &error));
++  assert(calls.empty());
++  missing.clear();
++  assert(EnsureLinuxBypassSlice(&cgroup, &error));
++  bool found_sleep = false;
++  for (const auto& call : calls) {
++    if (call[0] == "/custom/bin/systemd-run") {
++      assert(call[5] == "/custom/bin/sleep");
++      assert(call[6] == "infinity");
++      found_sleep = true;
++    }
++  }
++  assert(found_sleep);
++  active = true;
++  calls.clear();
++  assert(EnsureLinuxBypassSlice(&cgroup, &error));
++  for (const auto& call : calls) assert(call[0] != "/custom/bin/systemd-run");
+ '''
+-        with tempfile.TemporaryDirectory(prefix="winsvpn-power-test-") as directory:
++        with tempfile.TemporaryDirectory(prefix="winsvpn-linux-round11-") as directory:
+             path = Path(directory)
+-            (path / "test.cc").write_text(prefix + functions + suffix)
+-            subprocess.run(["c++", "-std=c++17", "-Wall", "-Wextra", "-Werror",
+-                            "-UNDEBUG", str(path / "test.cc"), "-o", str(path / "test")], check=True)
+-            subprocess.run([str(path / "test")], check=True, timeout=10)
++            (path / "test.cc").write_text(prefix + stop + bypass + counters + suffix + diagnostic + "\n}\n")
++            subprocess.run(["c++", "-std=c++17", "-Wall", "-Wextra", "-Werror", "-UNDEBUG",
++                            str(path / "test.cc"), "-o", str(path / "test")], check=True)
++            result = subprocess.run([str(path / "test")], capture_output=True, text=True,
++                                    check=True, timeout=10)
++            self.assertIn("tx_bytes=12", result.stderr)
++            self.assertIn("rx_foreign_sender=0", result.stderr)
++            self.assertNotIn("PRIVATE", result.stderr)
++            self.assertNotIn("gateway_endpoint", result.stderr)
++            self.assertNotIn("session_id", result.stderr)
+ 
+ 
+ if __name__ == "__main__":
+--- a/winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go
+@@ -2,7 +2,6 @@
+ 
+ import (
+ 	"bytes"
+-	"crypto/subtle"
+ 	"encoding/base64"
+ 	"encoding/json"
+ 	"errors"
+@@ -213,17 +212,13 @@
+ 	copy(candidate[:], peer)
+ 	r.mu.RLock()
+ 	defer r.mu.RUnlock()
+-	// Iterate instead of a direct map lookup so authorization does not add a
+-	// key-dependent equality timing signal at this boundary. The registry is a
+-	// /24 and therefore bounded to at most 254 entries.
+-	for key, addr := range r.byKey {
+-		if subtle.ConstantTimeCompare(key[:], candidate[:]) == 1 {
+-			expires, present := r.notAfter[key]
+-			if !present || (expires != 0 && time.Now().Unix() >= expires) {
+-				return netip.Addr{}, false
+-			}
+-			return addr, true
+-		}
+-	}
+-	return netip.Addr{}, false
+-}
++	addr, allowed := r.byKey[candidate]
++	if !allowed {
++		return netip.Addr{}, false
++	}
++	expires, present := r.notAfter[candidate]
++	if !present || (expires != 0 && time.Now().Unix() >= expires) {
++		return netip.Addr{}, false
++	}
++	return addr, true
++}
+--- a/winn_protocol_experimental/cmd/winn3-gateway/peer_registry_round11_test.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/peer_registry_round11_test.go
+@@ -0,0 +1,45 @@
++package main
++
++import (
++	"bytes"
++	"testing"
++	"time"
++)
++
++func TestPeerRegistryLookupRequiresBothAuthorityIndexes(t *testing.T) {
++	f := newAuthorityFixture(t, 0)
++	var key [32]byte
++	copy(key[:], f.key)
++	if addr, ok := f.registry.innerForPeer(f.key); !ok || addr != f.addr {
++		t.Fatalf("nonexpiring peer = %v, %v", addr, ok)
++	}
++	for _, bad := range [][]byte{nil, f.key[:31], append(bytes.Clone(f.key), 0), bytes.Repeat([]byte{0xff}, 32)} {
++		if addr, ok := f.registry.innerForPeer(bad); ok || addr.IsValid() {
++			t.Fatalf("invalid or foreign key authorized: %v, %v", addr, ok)
++		}
++	}
++	f.registry.mu.Lock()
++	delete(f.registry.notAfter, key)
++	f.registry.mu.Unlock()
++	if _, ok := f.registry.innerForPeer(f.key); ok {
++		t.Fatal("missing expiry authorization accepted")
++	}
++	f.registry.mu.Lock()
++	f.registry.notAfter[key] = time.Now().Unix()
++	f.registry.mu.Unlock()
++	if _, ok := f.registry.innerForPeer(f.key); ok {
++		t.Fatal("expired authorization accepted at its boundary")
++	}
++	f.registry.mu.Lock()
++	f.registry.notAfter[key] = time.Now().Unix() + 3600
++	f.registry.mu.Unlock()
++	if _, ok := f.registry.innerForPeer(f.key); !ok {
++		t.Fatal("future expiry rejected")
++	}
++	f.registry.mu.Lock()
++	delete(f.registry.byKey, key)
++	f.registry.mu.Unlock()
++	if _, ok := f.registry.innerForPeer(f.key); ok {
++		t.Fatal("orphaned expiry authorizes an absent peer")
++	}
++}

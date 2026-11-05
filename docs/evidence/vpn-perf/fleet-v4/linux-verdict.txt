@@ -1,0 +1,78 @@
+T-L LANE / LINUX APP-LEVEL LIVE VPN TEST vs FLEET (fleet-v4)
+=============================================================
+Captured: 2026-08-23T04:10Z
+Host: linux-host 192.168.50.10 (Ubuntu 24.04 x86_64, 16c/92GB)
+      YOGA FALLBACK: yoga (192.168.50.226, Lenovo slim7x aarch64) was down the
+      entire session; ping/mDNS/WOL (3x from Mac + aicore) all failed, so the
+      established method ran on aicore instead (same LAN, Flutter 3.44.9,
+      xvfb-run, root). aicore is NOT disposable like yoga; run window was kept
+      to the harness's own traffic phase and everything was reverted after.
+
+TUNNEL UNDER TEST
+- Repo: /Users/owner/xprize/winsvpnv3 @ main b029ed7 (clean tree, no commit)
+- Target: lib/winn_protocol_dev_session_main.dart
+  --dart-define=WINN_DEV_SESSION=true
+  --dart-define=WINN_DEV_UNSAFE_UNCONTAINED_ACK=UNCONTAINED_FULL_TUNNEL_ON_A_DISPOSABLE_VM
+  --dart-define=WINN_DEV_CONFIG_PATH=/tmp/t-l-fleet/dev_winn3_fleet4.json
+  --dart-define=WINS_WINN3_ENABLED_PLATFORMS=linux
+  --dart-define=WINN_DEV_TRAFFIC_TARGET=1.1.1.1
+  + descriptor ring defines (g1/g2/g3 + ring sha256 52e91c72..., g1 verified
+  byte-identical against fleet g1-ceremony.pem pubkey)
+- Dev config: carrier=winn3, endpoint <DATA_SIM_IP>:9111, inner_v4 10.10.0.2,
+  router/resolver 10.10.0.1, path_mtu 1450, carrier_classes udp,
+  fleet-v4 signed descriptor (kid=g1 node=data-sim seq=2, valid until
+  2026-08-24T03:22Z), canary client static key + admission key from
+  /Users/owner/.xprize/winn3-fleet4/
+- Engine: winn-datapath (datapath-linux-amd64) built on aicore with go1.26.5,
+  sha256 dc1dcede... copied into the app bundle (bundle-only lookup).
+- Descriptor gate: verified=true reason=winn3-descriptor-verified kid=g1
+  node=data-sim endpoint=<DATA_SIM_IP>:9111
+
+RESULT SUMMARY
+- Handshake: gate_state=carrying (engine posture: 5 msgs sent / 5 received)
+- Promotion: after 2 refusals (gate carrying but rx_packets=0: the fleet
+  gateway does not answer inner ICMP to 10.10.0.1), promotion succeeded on
+  run 3 by injecting advisory inner traffic during the 15 s window
+  (dig @10.10.0.1 -> NXDOMAIN reply from gateway resolver; ping to /32s
+  pinned into winsvpn3 -> replies at ~58 ms through the tunnel).
+- Posture: 0.0.0.0/1 + 128.0.0.0/1 dev winsvpn3, ::/1 + 8000::/1, resolver
+  systemd-resolved -> 10.10.0.1. getWinn3PumpStats at teardown:
+  tun_read_packets=37995 tun_read_bytes=11513855 inbound_frames=37995
+  outbound_frames=76627 promoted_posture=applied promoted_capturing=true
+- Egress proof: curl https://api.ipify.org through the tunnel = <DATA_SIM_IP>
+  (the data-sim gateway's public IP; aicore's own WAN IP differs).
+- Harness TRAFFIC RESULT: tx 7297 datagrams / 9.14 MB over 485.6 s, 0 rx
+  verified (expected: 1.1.1.1:7777 has no responder; the harness target is a
+  black hole). 4 AmneziaWG rekey intervals survived with continuous sends
+  (bins 0-31 ~177-180 tx each) and the post-rekey burst of 1600 fired at
+  t+480.2 s. Bidirectional proof lives in the pump counters + AFTER curl.
+
+SPEED (speed.cloudflare.com/__down?bytes=25000000, same host)
+- BEFORE (no VPN): 41.2 / 78.7 / 80.6 / 74.9 / 80.4 / 78.0 MB/s
+  -> median 78.35 MB/s = 626.8 Mbps
+- AFTER (tunnel up, promoted): 18.6 / 15.1 / 16.9 / 17.5 MB/s
+  -> median 17.20 MB/s = 137.6 Mbps
+
+VERDICT: carrying=YES; before=626.8 Mbps; after=137.6 Mbps; loss=78.0%
+(harness-window cross-check: 7297 tx datagrams over 485.6 s with 4 rekeys
+survived, 0 echo returns by design of the black-hole target; pump counters
+show 11.5 MB in / 76627 frames out over the session.)
+
+FINDINGS / BLOCKERS
+1. yoga was unreachable all session (down/asleep; WOL x4 failed). Method ran
+   on aicore instead. All Linux-side evidence here is aicore evidence.
+2. Fleet gateway (data-sim winn3gw) does not answer inner ICMP to 10.10.0.1:
+   the runner's self-start promotion probe (4 echoes / 2.5 s) starves and the
+   native start fails closed with "gate is carrying but no inner packet has
+   reached the host device yet". Unblocked client-side with DNS/ICMP advisory
+   traffic inside the window (linux-inject.log). Gateway-side fix (answer
+   inner ICMP or serve a reflector) is the durable one.
+3. Linux stopTunnel does not tear down the standalone winn3 promoted posture:
+   after the harness's TEARDOWN (stopTunnel + "tunnel status null/active=false")
+   the winsvpn3 interface, /1 routes and winn-datapath engine were STILL UP
+   (linux_tunnel_backend.cc StopTunnel only stops the relay engine + awg-quick
+   stop). The lane killed the app processes manually and verified full route /
+   resolver restore. This is a real shipping-path gap for the Linux host.
+4. Memory probe fields are UNAVAILABLE on Linux (winn_memory_sample_taken
+   never reported by the provider) - expected absence, recorded as a finding.
+EOF

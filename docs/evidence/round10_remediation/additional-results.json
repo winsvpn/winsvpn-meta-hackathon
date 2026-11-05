@@ -1,0 +1,203 @@
+[
+  {
+    "name": "server-round10-delivery",
+    "command": [
+      "python3",
+      "server/test_control_plane_round10.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:00:45.106834+00:00",
+    "log": "server-round10-delivery.log",
+    "exit_code": 0,
+    "seconds": 2.79
+  },
+  {
+    "name": "gateway-race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "./cmd/winn3-gateway"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started": "2026-09-13T20:48:50.738941+00:00",
+    "log": "gateway-race.log",
+    "exit_code": 0,
+    "seconds": 48.35
+  },
+  {
+    "name": "windows-arm64",
+    "command": [
+      "python3",
+      "tools/test_windows_arm64_release_readiness.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:46:35.684344+00:00",
+    "log": "windows-arm64.log",
+    "exit_code": 0,
+    "seconds": 0.08
+  },
+  {
+    "name": "linux-teardown",
+    "command": [
+      "python3",
+      "tools/test_linux_tunnel_shutdown.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:48:58.677169+00:00",
+    "log": "linux-teardown.log",
+    "exit_code": 0,
+    "seconds": 0.72
+  },
+  {
+    "name": "linux-power",
+    "command": [
+      "python3",
+      "tools/test_linux_round7.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:48:59.398504+00:00",
+    "log": "linux-power.log",
+    "exit_code": 0,
+    "seconds": 0.47
+  },
+  {
+    "name": "extension-lifecycle-final",
+    "command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "extension/tools/test_background_lifecycle.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:49:16.319943+00:00",
+    "log": "extension-lifecycle-final.log",
+    "exit_code": 0,
+    "seconds": 0.66
+  },
+  {
+    "name": "native-identity-final",
+    "command": [
+      "/Users/owner/.local/flutter/bin/cache/dart-sdk/bin/dart",
+      "test/wins_bridge_host_identity_test.dart"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3/tools/native_messaging/host",
+    "started": "2026-09-13T20:59:18.470689+00:00",
+    "log": "native-identity-final.log",
+    "exit_code": 0,
+    "seconds": 4.48
+  },
+  {
+    "name": "extension-build-final",
+    "command": [
+      "python3",
+      "extension/build.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:59:22.954319+00:00",
+    "log": "extension-build-final.log",
+    "exit_code": 0,
+    "seconds": 25.32
+  },
+  {
+    "name": "extension-archive-final-chrome",
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "chrome",
+      "extension/dist/wins-vpn-companion-chrome.zip"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:55.396766+00:00",
+    "log": "extension-archive-final-chrome.log",
+    "exit_code": 0,
+    "seconds": 2.6
+  },
+  {
+    "name": "extension-archive-final-edge",
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "edge",
+      "extension/dist/wins-vpn-companion-edge.zip"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:01:58.000847+00:00",
+    "log": "extension-archive-final-edge.log",
+    "exit_code": 0,
+    "seconds": 2.63
+  },
+  {
+    "name": "extension-archive-final-firefox",
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "firefox",
+      "extension/dist/wins-vpn-companion-firefox.zip"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:02:00.629886+00:00",
+    "log": "extension-archive-final-firefox.log",
+    "exit_code": 0,
+    "seconds": 2.62
+  },
+  {
+    "name": "extension-archive-safari",
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "safari",
+      "extension/dist/wins-vpn-proxy-safari.zip"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:51:36.100111+00:00",
+    "log": "extension-archive-safari.log",
+    "exit_code": 1,
+    "seconds": 0.08
+  },
+  {
+    "name": "server-round10-negative",
+    "command": [
+      "python3",
+      "-c",
+      "import sys,unittest;sys.path.insert(0,'server');import test_control_plane_round10 as r;r.harness.HUB='/var/folders/s4/2dqkqxyn13v0qz1zq4kt67yc0000gn/T/winsvpn-round10-syedbbum/before/server/wins_control_plane_setup_ONETOUCH.sh';result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(r.Round10Tests));sys.exit(not result.wasSuccessful())"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:47:14.948591+00:00",
+    "log": "server-round10-negative.log",
+    "exit_code": 1,
+    "seconds": 2.52
+  },
+  {
+    "name": "awg-rollback-negative",
+    "command": [
+      "python3",
+      "-c",
+      "import sys,unittest;sys.path.insert(0,'server');import test_control_plane_round10 as r;r.harness.HUB='/var/folders/s4/2dqkqxyn13v0qz1zq4kt67yc0000gn/T/winsvpn-round10-syedbbum/control-plane-without-awg-repair.sh';result=unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([r.Round10Tests('test_failed_old_registry_sync_rolls_back_and_repairs_both_nodes')]));sys.exit(not result.wasSuccessful())"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T20:59:55.045271+00:00",
+    "log": "awg-rollback-negative.log",
+    "exit_code": 1,
+    "seconds": 0.42
+  },
+  {
+    "name": "control-shell-delivery",
+    "command": [
+      "bash",
+      "-n",
+      "server/wins_control_plane_setup_ONETOUCH.sh"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started": "2026-09-13T21:02:03.252046+00:00",
+    "log": "control-shell-delivery.log",
+    "exit_code": 0,
+    "seconds": 0.02
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "name": "org.winsvpn.bridge",
+  "description": "Win's VPN browser bridge",
+  "path": "PLACEHOLDER_ABSOLUTE_PATH_TO_HOST",
+  "type": "stdio",
+  // TEMPLATE, not an installed manifest. install_native_host.sh writes the
+  // installed file itself and refuses to install if the id it is given is a
+  // placeholder; this file is the pattern a packager follows and the value a
+  // build gate checks.
+  //
+  // REQUIRED VALUE: the Edge STORE-LISTING extension id, the 32 lowercase
+  // [a-p] letters shown on edge://extensions for the packaged listing. It is
+  // stable per store listing, so it is recorded once the listing exists and is
+  // then substituted here. Until that id is known the placeholder stays, and
+  // extension/build.py warns on every build (tools/native_messaging/
+  // check_host_manifests.py). Once it is known, set WINSVPN_EDGE_STORE_ID
+  // (or tools/native_messaging/manifests/store_ids.json) to it and any
+  // remaining placeholder FAILS the build.
+  "allowed_origins": [
+    "chrome-extension://glgihadopbjoandhoihghddecoibcldf/"
+  ]
+}

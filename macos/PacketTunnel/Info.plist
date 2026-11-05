@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Win's VPN Packet Tunnel</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Win's VPN Packet Tunnel</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>WinsAppleSharedKeychainAccessGroup</key>
+	<string>$(AppIdentifierPrefix)org.winsvpn.shared</string>
+	<key>WinsReleaseTunnelRuntimeContract</key>
+	<dict>
+		<key>fallback</key>
+		<array>
+			<string>awg</string>
+			<string>xray</string>
+		</array>
+		<key>fallback_protocol</key>
+		<string>winn1</string>
+		<key>primary</key>
+		<string>winn3</string>
+		<key>required_engine_components</key>
+		<array>
+			<string>winn_packet_engine</string>
+			<string>amneziawg_packet_engine</string>
+			<string>xray_vless_ws_transport</string>
+		</array>
+		<key>schema_version</key>
+		<integer>1</integer>
+	</dict>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.networkextension.packet-tunnel</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).PacketTunnelProvider</string>
+	</dict>
+</dict>
+</plist>

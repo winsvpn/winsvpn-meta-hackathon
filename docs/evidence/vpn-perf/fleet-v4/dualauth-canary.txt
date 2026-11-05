@@ -1,0 +1,118 @@
+v3probe: udp socket buffers requested=8388608 granted_read=8388608 granted_write=8388608
+v3probe: dialed <DATA_SIM_IP>:9111, inner 10.10.0.2, reflect-to 10.10.0.1, canary rekey-after=32, inner MTU 1373
+v3probe: gate is CARRYING -- a real winn/3 session is up
+v3probe: HANDSHAKE ok state=carrying epoch=1 session=established
+v3probe: captured initiation 300 bytes for replay
+v3probe: REPLAY other-source silent=true initiation_bytes=300 wait=3s
+v3probe: canary sending 48 inner packets to reflector 10.10.0.1 (rekey-after=32 epoch=1)
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=1 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=2 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=3 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=4 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=5 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=6 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=7 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=8 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=9 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=10 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=11 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=12 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=13 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=14 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=15 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=16 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=17 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=18 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=19 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=20 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=21 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=22 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=23 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=24 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=25 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=26 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=27 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=28 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=29 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=30 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=31 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=32 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=33 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=34 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=35 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=36 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=37 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=38 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=39 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=40 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=41 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=42 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=43 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=44 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=45 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=46 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=47 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=55472 seq=48 payload="winn3-canary-reflect-20260818"
+v3probe: REKEY ok rekeys=1 epoch=2 session=established gate=carrying
+v3probe: VERDICT canary handshake=ok replay-safe=ok reflect=FAIL rekey=unproven
+v3probe: no reply: for -reflect-to the gateway must be a local winn3-gateway reflector (not -forward); -reflect-to must be that process's -inner-v4, and -inner a different host address, not equal to -reflect-to
+
+===== PLAIN CANARY (no dual flags), 2026-08-23T03:38:25Z =====
+v3probe: udp socket buffers requested=8388608 granted_read=8388608 granted_write=8388608
+v3probe: dialed <DATA_SIM_IP>:9111, inner 10.10.0.2, reflect-to 10.10.0.1, canary rekey-after=32, inner MTU 1373
+v3probe: gate is CARRYING -- a real winn/3 session is up
+v3probe: HANDSHAKE ok state=carrying epoch=1 session=established
+v3probe: captured initiation 287 bytes for replay
+v3probe: REPLAY other-source silent=true initiation_bytes=287 wait=3s
+v3probe: canary sending 48 inner packets to reflector 10.10.0.1 (rekey-after=32 epoch=1)
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=1 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=2 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=3 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=4 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=5 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=6 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=7 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=8 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=9 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=10 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=11 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=12 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=13 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=14 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=15 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=16 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=17 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=18 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=19 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=20 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=21 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=22 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=23 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=24 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=25 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=26 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=27 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=28 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=29 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=30 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=31 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=32 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=33 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=34 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=35 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=36 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=37 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=38 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=39 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=40 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=41 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=42 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=43 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=44 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=45 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=46 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=47 payload="winn3-canary-reflect-20260818"
+v3probe: SENT  ipv4 10.10.0.2 -> 10.10.0.1 proto=1 len=57 icmp type=8 code=0 id=57480 seq=48 payload="winn3-canary-reflect-20260818"
+v3probe: REKEY ok rekeys=1 epoch=2 session=established gate=carrying
+v3probe: VERDICT canary handshake=ok replay-safe=ok reflect=FAIL rekey=unproven
+v3probe: no reply: for -reflect-to the gateway must be a local winn3-gateway reflector (not -forward); -reflect-to must be that process's -inner-v4, and -inner a different host address, not equal to -reflect-to

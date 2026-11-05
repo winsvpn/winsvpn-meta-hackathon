@@ -1,0 +1,101 @@
+[
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.71,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_deepseek_round2.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.78,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round4.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.73,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round5.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.52,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round6.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "exit_code": 0,
+    "seconds": 5.46,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round7.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.76,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round8.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round9.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.61,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round9.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round10.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.85,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_control_plane_round10.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 20.35,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_winn3_descriptor_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.2,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_account_deletion_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_donor_acknowledgment_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 7.73,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_donor_acknowledgment_hub.log"
+  }
+]

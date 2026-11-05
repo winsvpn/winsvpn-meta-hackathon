@@ -1,0 +1,69 @@
+{
+  "contract": "winsvpn-gcloud-custody-trust-v1",
+  "schema_version": 3,
+  "controller": "tools/gcloud_custody.py",
+  "manifest": "tools/toolchain-pins.json",
+  "trust_anchor": "tools/gcloud_custody.trust.json",
+  "python_custody": "tools/macos_release_python_runtime_receipt.py",
+  "controller_sha256": "5f35dd67d406fe10141403c73de3ca9dbae34ab5f9972ccc647dc614f34ae317",
+  "manifest_sha256": "67399ed6bf2768ba72c095bc946d6867411d60efb28979744899dece840cdd05",
+  "python_custody_sha256": "a1af6cb00410e9f9a73e231f30033dd316a5ffc383f89bf89d658038a5eb2f11",
+  "component_contract": "winsvpn-gcloud-release-components-v1",
+  "components": [
+    {
+      "kind": "test",
+      "path": "tools/gcloud_custody_test.py",
+      "sha256": "5fabf6d4ec3d6cdfc649228fa58c4d6488608c4e0da928c57f06c98d34b22c45"
+    },
+    {
+      "kind": "source",
+      "path": "tools/create_gcloud_custody_receipt.py",
+      "sha256": "39e9fd096bfa16cb5ac246e52863d561f1c223b133eb6b0cab5885455f26bfef"
+    },
+    {
+      "kind": "test",
+      "path": "tools/test_create_gcloud_custody_receipt.py",
+      "sha256": "5366780a0546b7fea6a3aeb7851746d59256528300b28712c124dc0893942be3"
+    },
+    {
+      "kind": "source",
+      "path": "tools/gcloud_immutable_helper.go",
+      "sha256": "f353861155e7e072bf65752f8abe73ee341989c638d947d897c124930b98c122"
+    },
+    {
+      "kind": "test",
+      "path": "tools/gcloud_immutable_helper_test.go",
+      "sha256": "31c4d3098fb142cfa339fafa3e356acc4eeb62ff794b8e53edef6021cdd9d4a1"
+    },
+    {
+      "kind": "build_script",
+      "path": "tools/build_gcloud_immutable_helper.sh",
+      "sha256": "a540199220d286c405ed34c45f322b1f24760c19176b5d7ab6d6cbe9c60872f5"
+    },
+    {
+      "kind": "artifact",
+      "path": "build/gcloud_runtime_provisioner/gcloud_immutable_helper_linux_amd64",
+      "sha256": "edc55ae3dec94e331e363b9c4edab14777cf0d2942a49a11b75d17e9a6ac4dc0"
+    },
+    {
+      "kind": "source",
+      "path": "tools/gcloud_runtime_provisioner.go",
+      "sha256": "6f0939d3063f7583eb39719111bf8b1104182669fd83cb3bc587c62166b2789a"
+    },
+    {
+      "kind": "test",
+      "path": "tools/gcloud_runtime_provisioner_test.go",
+      "sha256": "5098ac5c5ac7937fc1029acd91b9b7ab46ae0302f1d9391d8ca1ad4db24287aa"
+    },
+    {
+      "kind": "build_script",
+      "path": "tools/build_gcloud_runtime_provisioner.sh",
+      "sha256": "08ce1c3a154e6df46b08137db5d1983b3297c0a45506eca30e0f809139806dd8"
+    },
+    {
+      "kind": "artifact",
+      "path": "build/gcloud_runtime_provisioner/gcloud_runtime_provisioner_linux_amd64",
+      "sha256": "4542fa0e5520c376adb73bb9c592eb1ea8fbe0e737d975a243d781240d6c55fe"
+    }
+  ]
+}

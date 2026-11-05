@@ -1,0 +1,2 @@
+ok  	winsvpn.local/winnprotocol/winn3/agent	0.218s
+?   	winsvpn.local/winnprotocol/winn3/agent/trace	[no test files]

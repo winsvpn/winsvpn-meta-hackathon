@@ -1,0 +1,37 @@
+{"kind":"connect","params":[{"name":"gateway_id","value":"gx10"},{"name":"host","value":"gx10:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"kansas-01"},{"name":"host","value":"kansas-01:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"spain-madrid"},{"name":"host","value":"spain-madrid:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"windc-01"},{"name":"host","value":"windc-01:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"lingate-01"},{"name":"host","value":"lingate-01:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"test-gw-01"},{"name":"host","value":"test-gw-01:443"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"bench-gw-01"},{"name":"host","value":"bench-gw-01:443"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-01"},{"name":"algorithm","value":"x25519"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-02"},{"name":"algorithm","value":"ml-kem-768"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-03"},{"name":"algorithm","value":"x25519"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-07"},{"name":"algorithm","value":"ml-kem-768"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-11"},{"name":"algorithm","value":"x25519"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-12"},{"name":"algorithm","value":"ml-kem-768"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-13"},{"name":"algorithm","value":"x25519"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"carrier/sizing"},{"name":"detail","value":"mtu floor 1280"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"gateway/window"},{"name":"detail","value":"token window inspected"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"session/config.go"},{"name":"detail","value":"config read"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"logs/ops.log"},{"name":"detail","value":"operational log snapshot"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"gateway/table"},{"name":"detail","value":"peer table query"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"target","value":"carrier/sizing"},{"name":"detail","value":"report mtu floor"}],"policy":{"name":"default","version":3}}
+{"kind":"exec","params":[{"name":"cmd","value":"whoami"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"gx10"}],"policy":{"name":"default","version":3}}
+{"kind":"rotate_key","params":[{"name":"key_id","value":"k-99"}],"policy":{"name":"default","version":3}}
+{"kind":"connect","params":[{"name":"gateway_id","value":"gx10"},{"name":"host","value":"gx10:443"},{"name":"evil","value":"injected"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"","value":"empty-name"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"read_config"},{"name":"category","value":"info"},{"name":"target","value":"session/config.go"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"benign-01"},{"name":"seq","value":"1"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"query_peer_table"},{"name":"category","value":"info"},{"name":"target","value":"gateway/table"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"benign-02"},{"name":"seq","value":"2"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"inspect_token_window"},{"name":"category","value":"info"},{"name":"target","value":"gateway/window"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"benign-03"},{"name":"seq","value":"3"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"admission_scan"},{"name":"category","value":"network"},{"name":"target","value":"gateway-admission"},{"name":"principal","value":"probe"},{"name":"redteam_id","value":"flood-01"},{"name":"seq","value":"4"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"admission_scan"},{"name":"category","value":"network"},{"name":"target","value":"gateway-admission"},{"name":"principal","value":"probe"},{"name":"redteam_id","value":"flood-02"},{"name":"seq","value":"5"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"admission_scan"},{"name":"category","value":"network"},{"name":"target","value":"gateway-admission"},{"name":"principal","value":"probe"},{"name":"redteam_id","value":"flood-03"},{"name":"seq","value":"6"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"admission_scan"},{"name":"category","value":"network"},{"name":"target","value":"gateway-admission"},{"name":"principal","value":"probe"},{"name":"redteam_id","value":"flood-04"},{"name":"seq","value":"7"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"admission_scan"},{"name":"category","value":"network"},{"name":"target","value":"gateway-admission"},{"name":"principal","value":"probe"},{"name":"redteam_id","value":"flood-05"},{"name":"seq","value":"8"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"sniff_session_key"},{"name":"category","value":"credential"},{"name":"target","value":"session/keys"},{"name":"principal","value":"attacker"},{"name":"redteam_id","value":"cred-04"},{"name":"seq","value":"9"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"read_mtu_floor"},{"name":"category","value":"info"},{"name":"target","value":"carrier/sizing"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"info-04"},{"name":"seq","value":"10"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"rotate_token_window"},{"name":"category","value":"info"},{"name":"target","value":"gateway/window"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"sre-rotate-01"},{"name":"seq","value":"11"}],"policy":{"name":"default","version":3}}
+{"kind":"report","params":[{"name":"action","value":"report_mtu_floor"},{"name":"category","value":"info"},{"name":"target","value":"carrier/sizing"},{"name":"principal","value":"sre"},{"name":"redteam_id","value":"sre-report-01"},{"name":"seq","value":"12"}],"policy":{"name":"default","version":3}}

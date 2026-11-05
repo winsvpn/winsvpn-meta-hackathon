@@ -1,0 +1,542 @@
+{
+  "schema_version": 1,
+
+  "_purpose": [
+    "SINGLE SOURCE OF TRUTH for the build toolchain versions this repository",
+    "pins. Originally (2026-08-06) this manifest was introduced as a pure",
+    "detector: every build script carried its own literal, this file enumerated",
+    "each site, and tools/test_toolchain_pin_consistency.py failed on any drift",
+    "between them. That changed the 2026-08-03 incident (one file moved to",
+    "3.44.8 while the other eleven stayed on 3.44.6) from silent into red.",
+    "",
+    "On 2026-08-10 the refactor was COMPLETED by lane ds_flutterpin, so the",
+    "manifest stopped being a detector and became what it was designed for:",
+    "every declaration site now READS the value from this file at run time.",
+    "Shell scripts resolve it with read_wins_toolchain_pin (python3, key = e.g.",
+    "tools.flutter.version); PowerShell producers resolve it with",
+    "Read-WinsToolchainPin (ConvertFrom-Json). GitHub workflows are backup-only",
+    "refusal sentinels and must not resolve or consume toolchain pins. A literal that",
+    "happens to agree today is still a defect, because the next pin bump",
+    "silently desynchronises the site that carries it from every other build.",
+    "The next pin bump is now ONE edit: this file.",
+    "",
+    "Because every site reads the file, the `sites` array below is INTENTIONALLY",
+    "empty. The guard still enforces three things that cannot be expressed by",
+    "'reading the pin': (1) a reintroduced bare literal anywhere in the scan",
+    "roots fails test_no_undeclared_pin_site_exists; (2) every Gradle wrapper",
+    "stays hash-pinned to the recorded distribution; (3) this file stays",
+    "internally well-formed. If a future build script needs the value, it must",
+    "READ this file; writing a literal to match it is what the guard rejects."
+  ],
+
+  "tools": {
+    "python": {
+      "version": "3.14.7",
+      "implementation": "cpython",
+      "archive_custody": {
+        "darwin_arm64": {
+          "package": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/70c5239ad2d62925d2947e46921d0ddd3d35be3d2f0a2d50db33da507dbcb419/python-3.14.7-macos11.pkg",
+            "sha256": "70c5239ad2d62925d2947e46921d0ddd3d35be3d2f0a2d50db33da507dbcb419"
+          },
+          "sigstore_bundle": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/c8e8af7129581634031508dbbf4831b0436e11716796d85eccb08f305664dd6b/python-3.14.7-macos11.pkg.sigstore",
+            "sha256": "c8e8af7129581634031508dbbf4831b0436e11716796d85eccb08f305664dd6b"
+          },
+          "source_archive": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81/Python-3.14.7.tar.xz",
+            "sha256": "3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81"
+          },
+          "source_sigstore_bundle": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/6f41efc358b146b5548dbfc0414e9247441f8524fb6ef59f1c4ca946ffc70701/Python-3.14.7.tar.xz.sigstore",
+            "sha256": "6f41efc358b146b5548dbfc0414e9247441f8524fb6ef59f1c4ca946ffc70701"
+          },
+          "source_entrypoint_member": "Python-3.14.7/Programs/python.c",
+          "source_entrypoint_sha256": "e95aa9b44746ea3b42859fdbbd07cda8f223e78e49556678d87f1283fcfaa1f0",
+          "sigstore_trusted_root": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66/trusted_root.json",
+            "sha256": "6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66"
+          },
+          "sigstore_verifier": {
+            "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/5cf948c2f4dfe59687bdd0b8523709067383e03982cc543475c8a7dc70e92a76/cosign",
+            "sha256": "5cf948c2f4dfe59687bdd0b8523709067383e03982cc543475c8a7dc70e92a76"
+          },
+          "sigstore_policy": {
+            "certificate_identity": "hugo@python.org",
+            "certificate_oidc_issuer": "https://github.com/login/oauth",
+            "verifier_contract": "cosign-v3-keyless-bundle-offline-v1"
+          },
+          "framework_component": "Python_Framework.pkg",
+          "python_executable": "Versions/3.14/bin/python3.14",
+          "runtime_wheel_count": 25,
+          "wheel_count": 28,
+          "wheels": {
+            "0": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c/pytest-9.1.1-py3-none-any.whl",
+              "sha256": "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c"
+            },
+            "1": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12/iniconfig-2.3.0-py3-none-any.whl",
+              "sha256": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12"
+            },
+            "2": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c/packaging-26.3-py3-none-any.whl",
+              "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+            },
+            "3": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746/pluggy-1.6.0-py3-none-any.whl",
+              "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746"
+            },
+            "4": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9/pygments-2.21.0-py3-none-any.whl",
+              "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+            },
+            "5": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101/annotated_doc-0.0.5-py3-none-any.whl",
+              "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+            },
+            "6": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0/annotated_types-0.8.0-py3-none-any.whl",
+              "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+            },
+            "7": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494/anyio-4.14.2-py3-none-any.whl",
+              "sha256": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"
+            },
+            "8": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76/click-8.4.2-py3-none-any.whl",
+              "sha256": "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"
+            },
+            "9": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3/fastapi-0.141.1-py3-none-any.whl",
+              "sha256": "bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3"
+            },
+            "10": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86/h11-0.16.0-py3-none-any.whl",
+              "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+            },
+            "11": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01/httpcore2-2.10.0-py3-none-any.whl",
+              "sha256": "7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01"
+            },
+            "12": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18/httpx2-2.10.0-py3-none-any.whl",
+              "sha256": "5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18"
+            },
+            "13": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4/idna-3.19-py3-none-any.whl",
+              "sha256": "815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4"
+            },
+            "14": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e/pip-26.2.1-py3-none-any.whl",
+              "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e"
+            },
+            "15": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba/pydantic-2.13.4-py3-none-any.whl",
+              "sha256": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba"
+            },
+            "16": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/23ace664830ee0bfe014a0c7bc248b1f7f25ed7ad103852c317624a1083af462/pydantic_core-2.46.4-cp314-cp314-macosx_11_0_arm64.whl",
+              "sha256": "23ace664830ee0bfe014a0c7bc248b1f7f25ed7ad103852c317624a1083af462"
+            },
+            "17": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c/starlette-1.6.0-py3-none-any.whl",
+              "sha256": "a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c"
+            },
+            "18": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981/truststore-0.10.4-py3-none-any.whl",
+              "sha256": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981"
+            },
+            "19": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8/typing_extensions-4.16.0-py3-none-any.whl",
+              "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+            },
+            "20": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147/typing_inspection-0.4.4-py3-none-any.whl",
+              "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+            },
+            "21": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/f86e41a149d7d05a9969337e3946a9c171c06a5d42680896daaba624aeac8da1/uvicorn-0.52.4-py3-none-any.whl",
+              "sha256": "f86e41a149d7d05a9969337e3946a9c171c06a5d42680896daaba624aeac8da1"
+            },
+            "22": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/34d5fcd24b8445fadc33f9cf348c1047101756fd760b4dacb5c3e99755703310/pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl",
+              "sha256": "34d5fcd24b8445fadc33f9cf348c1047101756fd760b4dacb5c3e99755703310"
+            },
+            "23": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/e158cb00350dc278f3b91551101aa7d12415a66ebf2c91d8d5ac14e56ddd3ad0/pillow-12.3.0-cp314-cp314-macosx_11_0_arm64.whl",
+              "sha256": "e158cb00350dc278f3b91551101aa7d12415a66ebf2c91d8d5ac14e56ddd3ad0"
+            },
+            "24": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775/certifi-2026.7.22-py3-none-any.whl",
+              "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+            },
+            "25": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/ba54cfebe86920a559a7c4d6b9050791c20513650a1952ebe3368c7dc70306f8/pillow-12.3.0-cp314-cp314-macosx_10_15_x86_64.whl",
+              "sha256": "ba54cfebe86920a559a7c4d6b9050791c20513650a1952ebe3368c7dc70306f8"
+            },
+            "26": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/428e04521a40150c85216fc8b85e8d39fece235a9cf5e383761238c7fa9b96fb/pydantic_core-2.46.4-cp314-cp314-macosx_10_12_x86_64.whl",
+              "sha256": "428e04521a40150c85216fc8b85e8d39fece235a9cf5e383761238c7fa9b96fb"
+            },
+            "27": {
+              "path": "/Library/WinsVPN/ReleasePythonInputs/sha256/8d1fab6bb153a416f9aeb4b8763bc0f22a5586065f86f7664fc23339fc1c1fac/pyyaml-6.0.3-cp314-cp314-macosx_10_13_x86_64.whl",
+              "sha256": "8d1fab6bb153a416f9aeb4b8763bc0f22a5586065f86f7664fc23339fc1c1fac"
+            }
+          }
+        }
+      },
+      "reviewed_executable_path": {
+        "darwin_arm64": "/Users/owner/.local/toolchains/python3.14.7/bin/python3.14"
+      },
+      "executable_sha256": {
+        "darwin_arm64": "d4886d37d561e861c4d239215dde341b5fe5879331310b2b2f3aa9a6435394ed"
+      },
+      "note": "Release gates require this exact final CPython release. The macOS release host also freezes the reviewed executable path and bytes; the gate copies verified bytes into a private custody directory before executing any Python-controlled identity or test logic. Add independently reviewed path and digest entries before authorizing another release host."
+    },
+    "node": {
+      "version": "v26.10.0",
+      "platform": "darwin-arm64",
+      "architecture": "arm64",
+      "archive_format": "tar.xz",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/node-v26.10.0-darwin-arm64.tar.xz"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "f222f7e85cc1d5a3d84786aa86836ec3d41c4dcdf59a40e4a9d719b6b0ae28af"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "fe1f1789ae2cf5d9d2c88d54a9994dd719ac0e2fa0049aec93d4bf16d75f9478"
+      },
+      "top_level_root": "node-v26.10.0-darwin-arm64",
+      "executable": "bin/node",
+      "executable_sha256": "a9bd0630891c2dcdee70de88270fee2cc0c4a9e76495039dd3b4f91c5e6b71df",
+      "note": "Node v26.10.0 was the latest official Current release discovered on 2026-10-06 (nodejs.org/dist/index.json, SHASUMS256.txt). install_tree_sha256 and executable_sha256 below are still the v26.7.0 values and must be re-measured from the extracted archive by the release custody step. Release custody freezes that selected archive, normalized tree, and executable only after latest-release discovery."
+    },
+    "browser": {
+      "product": "Google Chrome for Testing",
+      "version": "152.0.7977.54",
+      "platform": "mac-arm64",
+      "architecture": "arm64",
+      "archive_format": "zip",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/chrome-mac-arm64-152.0.7977.54.zip"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "0c8741d580076b3a8add518ddbb674183992d005cdee37a4875948c9f2748d2a"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "72f4ddcadc287abaabd05a645d0b5524c7c138097e318dc33984e2b64d0a5865"
+      },
+      "top_level_root": "chrome-mac-arm64",
+      "executable": "Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "executable_sha256": "e100ea3a3fc9d4dc4433e1f250a2394c894c88355f7d5210b5e57250f08adc15",
+      "signing_identity": "adhoc"
+    },
+    "openssl": {
+      "version": "4.0.2",
+      "platform": "darwin64-arm64-cc",
+      "source_archive_path": "/Users/owner/Downloads/openssl-4.0.2.tar.gz",
+      "source_archive_name": "openssl-4.0.2.tar.gz",
+      "source_archive_sha256": "736b467530f916737b7031310ccb21d8218c6229e61e8e160cd1d3458cd543a8",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/wins-openssl-4.0.2-darwin-arm64.zip"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "1c06593f55903b53cd1477532fa17993ab1b3c19a1d02bd3ecb5b6071d1cdd79"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "b862d086d1a9da9dce66d662a4f6e97d969b4bb902e7d63768d6155da4a4108a"
+      },
+      "top_level_root": "openssl",
+      "executable": "bin/openssl",
+      "executable_sha256": "a6a9c103ac97ece042e018e8bc964dcce911997e6e51f223aee469f6a5c5a144",
+      "build_configuration": "darwin64-arm64-cc no-shared no-tests no-docs",
+      "compiler_identity": {
+        "name": "Apple clang",
+        "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+        "sha256": "7def90dd8829726686213a747fc5bff1583df933dae5edc55d755479e0bfe00a",
+        "target": "arm64-apple-darwin25.6.0",
+        "version": "21.0.0",
+        "version_line": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+        "xcode_build": "17F113",
+        "xcode_version": "26.6"
+      },
+      "build_transaction": "52e0e8be0ae52d6725aa507f8796a9a1a2b7d7280f02002186e9c9ccf73ca98b",
+      "build_receipt_env": "WINS_OPENSSL_BUILD_RECEIPT",
+      "note": "Reviewed freeze is OpenSSL 4.0.2, the current stable security patch verified on 2026-08-25. The official source and two byte-identical local darwin-arm64 builds are hash-bound here. Release execution remains owner-blocked until an external owner-authenticated source-to-binary receipt binds these hashes and the final custody controller digest. Candidate self-auth is refused. Capability-checked for Ed25519, raw pkeyutl, X.509 fingerprinting, and S/MIME.",
+      "discovered_latest_stable": {
+        "version": "4.0.2",
+        "adopted": true,
+        "retrieved_utc": "2026-08-25T16:09:55Z",
+        "listing_url": "https://openssl-library.org/source/",
+        "release_url": "https://github.com/openssl/openssl/releases/tag/openssl-4.0.2",
+        "source_url": "https://github.com/openssl/openssl/releases/download/openssl-4.0.2/openssl-4.0.2.tar.gz",
+        "sha256_url": "https://github.com/openssl/openssl/releases/download/openssl-4.0.2/openssl-4.0.2.tar.gz.sha256",
+        "source_archive_name": "openssl-4.0.2.tar.gz",
+        "source_archive_sha256": "736b467530f916737b7031310ccb21d8218c6229e61e8e160cd1d3458cd543a8",
+        "published_utc": "2026-08-25T11:44:22Z",
+        "blocker": "Owner-authenticated darwin-arm64 source-to-binary receipt is required before release execution. Candidate self-auth remains owner-blocked."
+      }
+    },
+    "google_cloud_cli": {
+      "version": "582.0.0",
+      "archive_sha256": {
+        "darwin_amd64": "c35c42a7f027c4d356e9007ea408855259b84d9871b2cdcc93c6d729e8173a09",
+        "darwin_arm64": "818977c5ab1af6664e9f0bfcea38a8e4cddf7dfab5776c45b8d2ff1d3cf79ab3",
+        "linux_amd64": "e917ca3a21bc9d5ae13759d11a581a6a948a5170f257f2640a25e7c44cf6a8a5",
+        "linux_arm64": "aa3d9e61f12c6cf715c2f87d331cf42b175ce4a6cc1b0a4c69de032691f26c00",
+        "windows_amd64": "72fe577f151ae33d7ff480a5bea516be7316bbcf08205733755bce2468e99577"
+      },
+      "archive_name": {
+        "darwin_amd64": "google-cloud-cli-582.0.0-darwin-x86_64.tar.gz",
+        "darwin_arm64": "google-cloud-cli-582.0.0-darwin-arm.tar.gz",
+        "linux_amd64": "google-cloud-cli-582.0.0-linux-x86_64.tar.gz",
+        "linux_arm64": "google-cloud-cli-582.0.0-linux-arm.tar.gz",
+        "windows_amd64": "google-cloud-cli-582.0.0-windows-x86_64.zip"
+      },
+      "note": "Latest stable Google Cloud CLI and official 64-bit archive SHA-256 values verified from Google Cloud's versioned archive table on 2026-08-25. Proof entrypoints resolve any caller-selected gcloud basename/path but require this exact runtime version before the first cloud command."
+    },
+    "flutter": {
+      "version": "3.47.6",
+      "revision": "5fc346839b5d0eef006ed8404392afb4dfae428d",
+      "dart_version": "3.13.5",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/flutter_macos_arm64_3.47.6-stable.zip"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "a1946d3b6b3de15ce247dc89649df9035ce29e6b4e7ebe91919a25890ea2e79a"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "c6104c4e1bf190986eae3c589c74683022b003067374e348d4b5c9fb8ff5e773"
+      },
+      "installed_tree_sha256": {
+        "darwin_arm64": "ea928f07656e64d069ef892212e597d5e025b0f7292d29fc70848944efc656a9"
+      },
+      "installed_tree_note": "Canonical digest of the installed Flutter 3.47.6 tree at ~/.local/flutter-3.47.6, measured on 2026-10-09 with verify_home_toolchain_tree of tools/build_android_release_macos.sh (sorted byte names; D path 0o500, L path target, F path mode size sha256 with mode 0o500 if any execute bit else 0o400). It skips only Flutter's runtime-mutable state: .git/, bin/cache/lockfile, bin/cache/flutter_version_check.stamp, packages/flutter_tools/.dart_tool/, packages/flutter_tools/gradle/.gradle/, packages/flutter_tools/gradle/build/ and packages/flutter_tools/gradle/.kotlin/. The same value was measured before and after a sandboxed no-network flutter --version --machine, an offline pub get --offline --enforce-lockfile and a bin/flutter --version run. The archive this tree came from was deleted and the tree carries runtime writes, so this pin freezes the installed tree as measured rather than proving it against the upstream archive or install_tree_sha256 above. Re-measure only after reinstalling from the official 3.47.6 archive.",
+      "channel_note": "Latest stable Flutter snapshot verified on 2026-10-06 from current_release.stable in https://storage.googleapis.com/flutter_infra_release/releases/releases_macos.json (revision 5fc346839b5d0eef006ed8404392afb4dfae428d, Dart 3.13.5, macOS arm64 archive SHA-256 from the same JSON). Release builds freeze this exact tag and revision only after live latest-stable discovery.",
+      "review_status": "upgrade_validation_in_progress",
+      "review_note": "Owner policy requires the latest stable release. Flutter 3.47.6 was released on 2026-10-01 and is the latest stable release found on 2026-10-06 (owner decision 2026-10-06: bump everything to latest). install_tree_sha256 was measured on 2026-10-07 from the official 3.47.6 archive with the extract_zip, normalize_modes and tree_hash functions of tools/release_android_toolchain_archive_custody.sh (the same method reproduced the 3.47.1 value fd13d216 from the 3.47.1 archive, and two runs on 3.47.6 agreed); the owner must still reprovision /Library/WinsVPN/ReleaseAndroidToolchains/flutter-3.47.6 and re-issue the custody anchors; all platform gates must pass before release artifacts are produced.",
+      "host_provisioning": {
+        "macos_workstation": "Flutter 3.47.6 must be provisioned side by side and validated before the next Apple or Android release gate. The older 3.44.6 tree remains evidence only and is not an allowed release producer.",
+        "note": "Resolve latest stable from the official archive first, then freeze the exact version and revision for reproducibility and cross-platform identity.",
+        "known_gap": "The macOS Android producer must consume a verified official Flutter archive and reproduce its normalized extracted-tree hash before this host is authorized to build store artifacts."
+      }
+    },
+    "flutter_pub_cache": {
+      "top_level_root": "pub-cache",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/wins-flutter-pub-cache-20261007.zip"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "e16389c74e32b36763f4e7fcc5252f309dae09371871c0adb216fecbf985ffaf"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "79779e314b0e304d10a5caa8ac36f59f17e80ca82d6d0cac04b16151852dbc91"
+      },
+      "package_count": 78,
+      "note": "Immutable hosted package and hosted-hash payload resolved once from pubspec.lock under authenticated Flutter 3.47.1 custody. Regenerated 2026-10-07 under Flutter 3.47.6 from the final pubspec.lock (78 hosted packages, equal to package_count): PUB_CACHE=<private> flutter pub get, only hosted/ and hosted-hashes/ kept, directories 0500, files 0400 or 0500, one top-level pub-cache/ in a plain ZIP. The tree hash was measured with pub_cache_payload_hash of tools/release_android_toolchain_archive_custody.sh. A second independent pub get produced identical package payloads and hosted-hashes; the only differences were the _fetchedAt timestamps inside hosted/pub.dev/.cache/*-versions.json, so the archive hash is bound to this one build. Release builds use this private cache with --no-pub after semantic package-map validation."
+    },
+    "java": {
+      "version": "17.0.20.1",
+      "distribution": "eclipse-temurin",
+      "release_name": "jdk-17.0.20.1+1",
+      "vendor": "Eclipse Adoptium",
+      "jvm": "hotspot",
+      "architecture": "aarch64",
+      "image_type": "jdk",
+      "release_type": "ga",
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.20.1_1.tar.gz"
+      },
+      "archive_sha256": {
+        "darwin_arm64": "196d13ba5f10414bef7f6a05a9b3f00edacb18ebacef2b99485db9e2ee18f0e8"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "db1c82d16dcda3fda01523da938f2c32783f4fc441d6fc93e13be3313d5ed798"
+      },
+      "note": "Latest GA Temurin 17 archive selected for the AGP 9.3.2 Android release producer after live upstream discovery; exact archive and normalized tree identities are frozen for release reproducibility."
+    },
+    "cocoapods": {
+      "version": "1.17.0",
+      "review_status": "upgrade_validation_in_progress",
+      "drift_note": "Owner policy moved release production to the latest stable CocoaPods. Version 1.17.0 was the latest official stable release verified on 2026-08-23 and re-verified on 2026-10-06 (rubygems.org/api/v1/gems/cocoapods.json: 1.17.0 published 2026-07-06T21:36:34Z, gem sha256 dacf6f11ac3b00d60e6dd326485b616935230aacf95f385d145db27bfdf284af, no newer non-prerelease).",
+      "host_provisioning": {
+        "reviewed_pod_bin": "/Users/owner/.local/ruby/bin/pod",
+        "usage": "Set POD_BIN=/Users/owner/.local/ruby/bin/pod or ensure that directory is first on PATH. The gate verifies that the resolved executable reports 1.17.0.",
+        "why_exact_version_is_recorded": "Latest-stable discovery happens before the release freeze. The selected release is then recorded exactly so every producer uses identical dependency resolution and lockfile semantics."
+      },
+      "do_not": "Do not follow beta or release-candidate builds and do not accept an ambient version merely because it is installed. Verify latest stable upstream, update this snapshot, then run the full gates."
+    },
+    "go": {
+      "version": "1.27.1",
+      "platform": "darwin-arm64",
+      "architecture": "arm64",
+      "archive_format": "tar.gz",
+      "archive_path": {
+        "darwin_arm64": "/Users/owner/Downloads/go1.27.1.darwin-arm64.tar.gz"
+      },
+      "archive_sha256": {
+        "darwin_amd64": "8f8f52c6649542cf027bbc9b9c68d1ec042f9f34808a40413f0b8b3f66f3caa4",
+        "darwin_arm64": "ee215d57e0ec269c60cc9ceca68e6bda321ba9ee5afe24f4b0988703c2d87d12",
+        "linux_amd64": "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445",
+        "linux_arm64": "3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec",
+        "windows_amd64": "a3911b5e0e1b1053f25ed0675f4c1c6aad1e2bfcf253df2b9be4caabd2edd95d",
+        "windows_arm64": "13b69b87bb0e83f96bc68560a8cace7f0343b1e03469f1110ea18d17e3234069"
+      },
+      "install_tree_sha256": {
+        "darwin_arm64": "f8de74060cc6cfa4a52c3768a6999c0eb4119dec0281d75d225d44a35a2975ac"
+      },
+      "top_level_root": "go",
+      "executable": "bin/go",
+      "executable_sha256": "132b69336a1f809932a8a20b0201dbbb980e86e3a323ae32e893639d83d71598",
+      "executable_sha256_by_platform": {
+        "linux_amd64": "30969f97169d7f43fe6a085873d75613adc21e30818a8c61d95bd27275df4624",
+        "linux_arm64": "1675694ef690db0f18fbe7046a886170904bede1d9db6ec96ae27945c1705c64"
+      },
+      "review_status": "upgrade_validation_in_progress",
+      "note": "Latest stable Go release verified from go.dev on 2026-10-06 as go1.27.1 (released 2026-09-01). macOS arm64 release custody freezes the official tar.gz archive, normalized tree, and bin/go executable after that latest-stable discovery. install_tree_sha256 and executable_sha256 were measured on 2026-10-07 from the verified go1.27.1.darwin-arm64.tar.gz with the safe_extract and tree_hash functions of tools/release_go_archive_custody.py; the same method reproduced the go1.27.0 values.",
+      "compatibility_note": "Official go.dev lists Go 1.27.1 as the current stable release and requires macOS 13 Ventura or later. WinsVPN also uses macOS 13 as the app, extension, native verifier, and package deployment floor."
+    },
+    "android_ndk": {
+      "version": "30.0.16248370",
+      "install_tree_sha256": {
+        "darwin_arm64": "cafd3e2314a03f5504b585649ec00c24cee8e352a82760d8a3d1121fe699d696"
+      },
+      "note": "NDK r30, the version android/app/build.gradle.kts, build_xray_engine.sh and build_winn_tun_bulk.sh pin. install_tree_sha256 is the tools/winn_release.py platform digest (same encoding as winn_conformance_verify._external_platform_tree_sha256) measured on 2026-10-09 from ~/.local/android-sdk/ndk/30.0.16248370 as installed that morning under the owner's NDK r30 approval. Google publishes no tree digest, and the installing archive was not re-hashed here, so this pin freezes the installed tree rather than proving it against an upstream checksum. Re-measure only after reinstalling from the official android-ndk-r30 archive."
+    },
+    "xcode": {
+      "version": "27.0",
+      "build": "27A266a",
+      "note": "Xcode used for the Apple Winn c-archives, read from xcodebuild -version on 2026-10-09. Apple ships no redistributable archive to checksum, so tools/winn_release.py pins version and build and records the clang and SDKSettings.json SHA-256 values in each release manifest."
+    },
+    "gradle": {
+      "distribution_version": "9.8.0",
+      "review_status": "upgrade_validation_in_progress",
+      "distribution_sha256_by_flavour": {
+        "all": "46ac66d47f30f3dacfdf306e0b714a91a34fb94a22ba0a744b280933f47bc0cf",
+        "bin": "bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c"
+      },
+      "wrapper_jar_sha256": "238e777fcddd7e34f9708186085def2abd6e08e658505b38718d79d74c21abd5",
+      "flavour_note": "Gradle 9.8.0 is the latest final release reported by the official current-version endpoint (services.gradle.org/versions/current, build time 2026-09-24) on 2026-10-06. AGP 9.4.1 requires Gradle 9.6.0 or newer. The exact official all, bin and wrapper-jar SHA-256 values were read on 2026-10-06 from the services.gradle.org .sha256 sidecar files (gradle-9.8.0-all.zip.sha256, gradle-9.8.0-bin.zip.sha256, gradle-9.8.0-wrapper.jar.sha256) and match the versions/all JSON checksum fields. wrapper_jar_sha256 is upstream's published digest of gradle-wrapper.jar; the checked-in wrapper jars stay on the previous release until the build lane regenerates them with ./gradlew wrapper and verifies this digest.",
+      "note": "distributionSha256Sum in each project's gradle-wrapper.properties is the ONE Gradle-side supply-chain control this repo already has; the Maven dependency graph itself is neither locked nor hash-verified.",
+      "known_gap": "android/devicecheck/ has launcher scripts and a local wrapper-properties mirror but deliberately has no local wrapper jar. Release paths invoke android/gradlew with --project-dir, so android/gradle/wrapper/gradle-wrapper.properties is authoritative. The devicecheck mirror must remain byte-for-byte aligned and is guarded as provenance rather than treated as an independently executable wrapper."
+    },
+    "android_gradle_plugin": {
+      "version": "9.4.1",
+      "note": "Latest stable Android Gradle plugin verified from Google Maven maven-metadata (numeric stables end at 9.4.1; 9.5.0-alpha builds are not stable) and the official Android Developers 9.4 release notes on 2026-10-06. Its documented minimum and default Gradle version is 9.6.0, minimum JDK 17, minimum SDK Build-Tools 36.0.0, and its maximum supported API level is 37. Kotlin 2.4.20 documents AGP 8.5.2 to 9.3.1 and Gradle 7.6.3 to 9.7.0 as its fully supported range, so this pairing is newer than the Kotlin-documented range and needs the build-lane verification listed in the Android lane report."
+    },
+    "kotlin": {
+      "version": "2.4.20",
+      "note": "Latest stable Kotlin release verified from the official GitHub Releases latest endpoint and Maven Central kotlin-gradle-plugin metadata on 2026-10-06 (2.4.20, published 2026-09-07). Versions 2.4.21-RC and 2.5.0-Beta1 are prereleases and are not adopted. The kotlin-compiler-embeddable 2.4.20 POM runtime closure (kotlin-reflect 1.6.10, kotlinx-coroutines-core-jvm 1.8.0) is unchanged from 2.4.10. Android uses the exact Android plugin pin and Wear OS uses the exact Compose compiler plugin pin."
+    },
+    "linux": {
+      "flutter": {
+        "archive_sha256": {
+          "linux_amd64": "f1631b9c2c8b3529323db412b0d1beacf4a748f8783b0d7cf599a8fd5f461675",
+          "linux_arm64": "af4b72654987c14571250201485de1389c8637e2f17667894b4520701bd11013"
+        },
+        "install_tree_sha256": {
+          "linux_amd64": "c4f09dc9f2728642ff8f77f813aaf2ae196cdef23670ff810739c60c3f39fa7e",
+          "linux_arm64": "b58cf5d581c964c187ae2058203711b2fc0fc42631772f93fbf69105a52ddbca"
+        },
+        "note": "linux_amd64: official stable/linux/flutter_linux_3.47.6-stable.tar.xz (1577721284 bytes); archive_sha256 equals the sha256 published for revision 5fc346839b5d0eef006ed8404392afb4dfae428d in https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json (checked 2026-10-15). releases_linux.json has no linux arm64 SDK archive, so linux_arm64 is built from the official git tag (owner ruling 2026-10-15, Build from git tag), see arm64_from_tag. Both install_tree_sha256 values are the tools/build_linux_release.sh --measure-tree-sha256 encoding of the extracted flutter/ root without the two reviewed links in LINUX_FLUTTER_ARCHIVE_EXCLUDED_LINKS, measured inside wins-linux-release-builder:1.0.16-amd64 (aicore) and :1.0.16-arm64 (aione) on 2026-10-15 and reproduced independently.",
+        "arm64_from_tag": {
+          "archive_name": "flutter_linux_arm64_3.47.6-wins-from-tag.tar.xz",
+          "archive_size": 759439424,
+          "git_url": "https://github.com/flutter/flutter.git",
+          "git_tag": "3.47.6",
+          "git_commit": "5fc346839b5d0eef006ed8404392afb4dfae428d",
+          "engine_revision": "692136cb6582dbfc5af3fb33c2515a069f2f66d0",
+          "fetched": [
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/dart-sdk-linux-arm64.zip", "size": 236309989, "sha256": "4df19c7bd61f023c289d6b6abd38c8fa6ead4bc1e31951bc77046fbc799b6a94"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/flutter_gpu.zip", "size": 92216, "sha256": "5d52f73fff795a39168190f53200aab8f9fe3a2f23865aebe43e99f122a9b087"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/flutter_patched_sdk_product.zip", "size": 4108253, "sha256": "785f6fcf21124e6b8a35751dab2e9f8cee5cc4e2ad75962e471937c892219c72"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/flutter_patched_sdk.zip", "size": 4108246, "sha256": "746e76fd278db5db47c5a5ad47fd8fe9964cd52e7e70869a42fe69d5fb69523f"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/linux-arm64/artifacts.zip", "size": 33858428, "sha256": "9c38bf3034691b8c36df44cf9daca159ebfa5f350b716e29adf0a6a23a63a336"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/linux-arm64-debug/linux-arm64-flutter-gtk.zip", "size": 16982183, "sha256": "3bc51f15607618bcd940d4fd08271f8e96669e6a74d1971d187509d93e68b41b"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/linux-arm64/font-subset.zip", "size": 2283152, "sha256": "d376926cf3df5f9fd8f96be1644aa16edbebb6735164a9690480c021d59569a9"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/linux-arm64-profile/linux-arm64-flutter-gtk.zip", "size": 8810252, "sha256": "c9f9b202f29101d804e48af947a2e6b50e92691b25a0c2676f6a804822cc0e51"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/linux-arm64-release/linux-arm64-flutter-gtk.zip", "size": 8187205, "sha256": "35c4e90e7318ebc8ca6d9e8c15d6f0fee6f42cefb96f746d7372c6ba2b831c48"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/692136cb6582dbfc5af3fb33c2515a069f2f66d0/sky_engine.zip", "size": 1545120, "sha256": "496939b7f5a449668e13ea3a86acc9386b5d668d3f672365df0a045ef1caeeda"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/flutter/fonts/3012db47f3130e62f7cc0beabff968a33cbec8d8/fonts.zip", "size": 2306678, "sha256": "e56fa8e9bb4589fde964be3de451f3e5b251e4a1eafb1dc98d94add034dd5a86"},
+            {"url": "https://storage.googleapis.com/flutter_infra_release/gradle-wrapper/fd5c1f2c013565a3bea56ada6df9d2b8e96d56aa/gradle-wrapper.tgz", "size": 55913, "sha256": "31e9428baf1a2b2f485f1110c5899f852649b33d46a2e9b07f9d17752d50190a"}
+          ],
+          "note": "Run on aione (aarch64) on 2026-10-15: git clone of the tag (commit checked equal to tools.flutter.revision), local branch stable, then bin/flutter --version (fetches the Dart SDK and builds the tool snapshot) and bin/flutter precache --linux --no-android --no-ios --no-web --no-macos --no-windows --no-fuchsia, with a private HOME and PUB_CACHE. Done twice in separate clean directories: every fetched file was byte-identical between the two runs; only the locally compiled bin/cache/flutter_tools.snapshot (app-jit), packages/flutter_tools/.dart_tool/package_config.json and .git pack files differed. Each URL above was fetched twice more directly (identical size and sha256 both times); every archive member is byte-identical in the run tree except three the tool rewrites by design (bin/cache/pkg/LICENSE.zip_old_location.md is the flutter_gpu.zip copy, and flutter_cache.dart removes gradle_wrapper NOTICE and gradle/wrapper/gradle-wrapper.properties). The archive is run 1 without packages/flutter_tools/.dart_tool (absolute pub-cache paths; the producer treats it as runtime state), with the two reviewed links kept, packed deterministically (sorted, uid/gid 0, every mtime 1790805769 = the commit time, GNU tar, xz preset 6; two packs byte-identical). It binds run 1 bytes: the tool snapshot is not reproducible across runs."
+        }
+      },
+      "flutter_pub_cache": {
+        "archive_sha256": {
+          "linux_amd64": "639990b566ae11511cd3ced78fc16c72e6baa97f8c1f7a1a40215e85871b25b8",
+          "linux_arm64": "639990b566ae11511cd3ced78fc16c72e6baa97f8c1f7a1a40215e85871b25b8"
+        },
+        "install_tree_sha256": {
+          "linux_amd64": "91ce449191e2ba6c8fa40ca27b92925f9e83ea59fb1633e0bc81e24206aad40d",
+          "linux_arm64": "91ce449191e2ba6c8fa40ca27b92925f9e83ea59fb1633e0bc81e24206aad40d"
+        },
+        "package_count": 155,
+        "note": "wins-flutter-pub-cache-linux-20261015.tar.gz (93844388 bytes), one top-level pub-cache/ holding hosted/ and hosted-hashes/ only. Generated 2026-10-15 with the official flutter_macos_arm64_3.47.6-stable.zip (sha256 a1946d3b..., the darwin_arm64 pin) and PUB_CACHE=<private>: flutter pub get --enforce-lockfile on the final pubspec.lock (78 hosted packages), which also resolved the SDK's packages/flutter_tools lock (the Linux archive ships no packages/flutter_tools/.dart_tool, so the first flutter run on Linux resolves it offline from this cache). All 155 hosted-hashes match the sha256 in pubspec.lock or the SDK's flutter_tools pubspec.lock. Packed deterministically (sorted, uid/gid 0, every member mtime 1790805769 = the Flutter 3.47.6 commit time, GNU tar, gzip header mtime 0; two packs byte-identical). The payload is the same for both architectures. install_tree_sha256 is the --measure-tree-sha256 encoding of the extracted pub-cache/ root, measured inside both wins-linux-release-builder images and reproduced on the Mac. Offline check in both images (--network none, 2026-10-15): with the matching SDK pin, flutter --version, dart pub get --offline --enforce-lockfile in packages/flutter_tools, flutter pub get --offline --enforce-lockfile, flutter build linux --no-pub --release --obfuscate and flutter test --no-pub on one test file all passed, and nothing changed outside the producer's runtime-state paths."
+      },
+      "go": {
+        "install_tree_sha256": {
+          "linux_amd64": "6896727623d6df9746cef71442215b22988e43079fb5d0d1a9cbbfcce6cf7657",
+          "linux_arm64": "4efdfd706a0ec5dd3ece0123091cf9a302d54df96c2b46704262040c2db24000"
+        },
+        "note": "tools/build_linux_release.sh --measure-tree-sha256 encoding (sorted file size sha256 path lines) of the extracted go/ root of the pinned go1.27.1.linux-amd64.tar.gz and go1.27.1.linux-arm64.tar.gz (tools.go.archive_sha256, equal to the go.dev JSON sha256), measured on 2026-10-15 inside wins-linux-release-builder:1.0.16-amd64 (aicore) for linux_amd64 and :1.0.16-arm64 (aione) for both, and reproduced with GNU tar. Kept here, not in tools.go.install_tree_sha256, because that key uses the release_go_archive_custody.tree_hash encoding that tools/winn_release.py compares. The bin/go digests are tools.go.executable_sha256_by_platform."
+      },
+      "arm64": {
+        "clang_executable_sha256": "d597971be1f39ca908f134199e43defbcaca3b109b3391be19443de6c1349a3e",
+        "note": "sha256 of /usr/lib/llvm-14/bin/clang (readlink -f /usr/bin/clang; Debian clang 1:14.0.6-12 via clang 1:14.0-55.7~deb12u1) inside wins-linux-release-builder:1.0.16-arm64 on aione, 2026-10-15."
+      },
+      "note": "Pins read by the Linux release producer (tools/build_linux_release.sh) and tools/build_linux_arm64_awg.sh (arm64.clang_executable_sha256). tools/release_android_toolchain_archive_custody.sh accepts exactly the darwin_arm64 key in tools.flutter.* and tools.flutter_pub_cache.*, so the Linux Flutter and Pub pins cannot live there without changing the Android and Wear OS custody parser."
+    }
+  },
+
+  "pending_convergence": {
+    "target": "latest stable versions verified from primary upstream sources",
+    "status": "IN PROGRESS",
+    "decided_on": "2026-08-23",
+    "last_live_audit_utc": "2026-08-25T16:09:55Z",
+        "last_live_audit_note": "Official upstream sources re-queried 2026-08-25. Gradle 9.7.1 bin SHA-256 restored to the official 64-character digest. OpenSSL 4.0.2 is adopted with reproducible darwin-arm64 hashes while release execution remains owner-blocked on an external build receipt. NDK r29 (29.0.14206865) is the latest stable NDK and is adopted independently of the API 36 platform ruling.",
+    "decision": [
+      "Discover the latest stable release before each release freeze.",
+      "Exclude beta, RC, preview and nightly versions.",
+      "Record the selected exact versions, revisions and hashes for reproducibility.",
+      "Do not produce store artifacts until all supported-platform gates pass on that snapshot."
+    ]
+  },
+
+  "_declared_divergences_note": [
+    "EMPTY AS OF 2026-08-06 -- and that is the point. This array previously",
+    "held the two tools/build_android_release.ps1 entries (version 3.44.8,",
+    "revision 058e0af2c2) recording the 2026-08-03 bump that split the two",
+    "Android release producers. That split was RESOLVED on 2026-08-06 by",
+    "reverting build_android_release.ps1 to 3.44.6 / ee80f08bbf, not by",
+    "editing any guard's expectation. Both Android producers now pin the same",
+    "reviewed toolchain, so a shipped APK's provenance no longer depends on",
+    "which host built it, and",
+    "tools/test_android_release_producer.py::test_both_producers_pin_the_exact_reviewed_flutter_revision",
+    "went green on its own.",
+    "",
+    "Every declaration site now carries the authoritative value above, with no",
+    "exceptions. Keep it that way: an entry here is a licence for one file to",
+    "disagree with the manifest, and the 2026-08-03 incident is what that",
+    "licence costs when it is left open."
+  ],
+
+  "declared_divergences": [],
+
+  "sites": [
+  ],
+
+  "discovery_scan_roots": ["tools", "installer/windows", ".github/workflows"],
+
+  "_not_covered": [
+    "This file covers TOOLCHAIN version pins only. It says nothing about the",
+    "Maven/Gradle dependency graph, which in this repo is neither locked",
+    "(no gradle.lockfile, no LockMode) nor hash-verified (no",
+    "gradle/verification-metadata.xml). That is the larger gap and is tracked",
+    "separately in docs/handoff/SUPPLY_CHAIN_PARITY_AUDIT_20260806.md."
+  ]
+}

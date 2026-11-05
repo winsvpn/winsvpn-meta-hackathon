@@ -1,0 +1,1 @@
+No direct/transitive calls to synchronous DB, process, network or sleep primitives from top-level async bodies. Nested functions are only executed through worker offloads. Manual review also covers indirect provider calls.

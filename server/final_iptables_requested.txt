@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# Win's VPN Inc. - Production Edge Hardening Framework v1
+set -euo pipefail
+
+HUB_IP="203.0.113.27"
+
+echo "======================================================================"
+echo " RUNNING COMPREHENSIVE FRONTLINE HARDENING LOOP (9-SECTION MATRIX)"
+echo "======================================================================"
+
+# 1. HARDWARE DATA-PLANE HARDENING (RPS)
+TOTAL_CORES=$(nproc)
+CORE_BITMASK=$(printf '%x' $(( (1 << TOTAL_CORES) - 1 )))
+echo "[+] Binding Receive Packet Steering (RPS) across all $TOTAL_CORES CPU cores..."
+for rps_file in /sys/class/net/*/queues/rx-*/rps_cpus; do
+    if [ -f "$rps_file" ]; then
+        echo "$CORE_BITMASK" > "$rps_file" 2>/dev/null || true
+    fi
+done
+
+# 2. CORE KERNEL NETWORKING & MEMORY TUNING (SYSCTL)
+echo "[+] Optimizing network buffers, swappiness, and forwarding keys..."
+sysctl -w net.ipv4.ip_forward=1 >/dev/null
+sysctl -w vm.swappiness=10 >/dev/null
+sysctl -w net.core.rmem_max=16777216 >/dev/null
+sysctl -w net.core.wmem_max=16777216 >/dev/null
+sysctl -w net.ipv4.tcp_rmem="4096 87380 16777216" >/dev/null
+sysctl -w net.ipv4.tcp_wmem="4096 65536 16777216" >/dev/null
+
+echo "[+] Nuking IPv6 stack at kernel level to prevent firewall bypass leaks..."
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null
+sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null
+sysctl -w net.ipv6.conf.lo.disable_ipv6=1 >/dev/null
+
+# 3. FIREWALL RESET & DEFAULT POLICIES
+echo "[+] Restructuring local iptables engine to default drop posture..."
+iptables -P INPUT ACCEPT && iptables -P FORWARD ACCEPT && iptables -P OUTPUT ACCEPT
+iptables -F && iptables -X
+iptables -t nat -F && iptables -t nat -X
+iptables -t mangle -F && iptables -t mangle -X
+
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# 4. GLOBAL INPUT SECURITY (HOST COMPANION PORTS & ISOLATION)
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+
+# Bind Secure Management Link (SSH Port 22 Allowed ONLY from Hub)
+iptables -A INPUT -p tcp -s "$HUB_IP" --dport 22 -j ACCEPT
+
+# SECURE DASHBOARD ACCESS: Only allow the Hub to touch the Web UI
+iptables -A INPUT -p tcp -s "$HUB_IP" --dport 8080 -j ACCEPT
+
+# CLIENT CLOAKING: Explicitly drop any internal VPN interface attempts to see AdGuard Web GUI
+iptables -A INPUT -i amn0 -p tcp --dport 8080 -j DROP
+
+# Open Remaining Fleet Interfaces Globally (WAN-facing)
+iptables -A INPUT -p udp --dport 9110 -j ACCEPT  # AmneziaWG Main Tunneling Lane
+iptables -A INPUT -p tcp --dport 8000 -j ACCEPT  # Companion Proxy Applications
+
+# Drop all other unprompted hits to 8080 from the public web
+iptables -A INPUT -p tcp --dport 8080 -j DROP
+
+# Bad Port Drops
+iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+iptables -A INPUT -p udp --dport 6881:6889 -j DROP
+iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
+iptables -A INPUT -p tcp --dport 6969 -j DROP
+
+# 5. FORWARD CHAIN: DATA-PLANE CLIENT ISOLATION
+echo "[+] Injecting client isolating gates and MSS clamping..."
+iptables -A FORWARD -s 10.8.1.0/24 -d 10.8.1.0/24 -i amn0 -o amn0 -j REJECT --reject-with icmp-port-unreachable 2>/dev/null || true
+iptables -A FORWARD -p tcp --dport 6881:6889 -j DROP
+iptables -A FORWARD -p udp --dport 6881:6889 -j DROP
+iptables -A FORWARD -p tcp --dport 6969 -j DROP
+
+# Hard-clamp MSS to 1240 to perfectly align with the app's 1280 MTU ceiling for legacy devices
+iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1240
+
+# Block Encrypted DNS Leaks (Forces users to stick to your AdGuard pipeline)
+if ip link show amn0 >/dev/null 2>&1; then
+    iptables -A FORWARD -i amn0 -p tcp --dport 853 -j REJECT --reject-with icmp-port-unreachable
+    iptables -A FORWARD -i amn0 -p udp --dport 784 -j REJECT --reject-with icmp-port-unreachable
+    iptables -A FORWARD -i amn0 -p udp --dport 8853 -j REJECT --reject-with icmp-port-unreachable
+fi
+
+# 6. FLOOD CAP SPEED TRAPS
+echo "[+] Engaging source-limiting UDP/SYN hashlimit speed traps on amn0..."
+if ip link show amn0 >/dev/null 2>&1; then
+    iptables -A FORWARD -i amn0 -p tcp --dport 25 -j DROP
+    iptables -A FORWARD -i amn0 -p udp --dport 123 -j DROP
+    iptables -A FORWARD -i amn0 -p udp --dport 1900 -j DROP
+    iptables -A FORWARD -i amn0 -p udp --dport 389 -j DROP
+    
+    # Process rate limits first before letting unmetered traffic pass
+    iptables -A FORWARD -i amn0 -p udp -m hashlimit --hashlimit-upto 200/sec --hashlimit-burst 400 --hashlimit-mode srcip --hashlimit-name vpn_udp_limit_amn0 -j ACCEPT
+    iptables -A FORWARD -i amn0 -p udp --dport 53 -j ACCEPT
+    iptables -A FORWARD -i amn0 -p udp -j DROP
+    
+    iptables -A FORWARD -i amn0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -m hashlimit --hashlimit-upto 50/sec --hashlimit-burst 100 --hashlimit-mode srcip --hashlimit-name vpn_syn_limit_amn0 -j ACCEPT
+    iptables -A FORWARD -i amn0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -j DROP
+fi
+
+iptables -A FORWARD -i amn0 -o eth0 -j ACCEPT 2>/dev/null || true
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# 7. DOCKER INTEGRATION
+echo "[+] Structuring Docker user-space isolating filters safely..."
+if ! iptables -L DOCKER-USER -n >/dev/null 2>&1; then
+    iptables -N DOCKER-USER
+fi
+iptables -F DOCKER-USER
+iptables -A DOCKER-USER -s 10.8.1.0/24 -d 10.8.1.0/24 -i amn0 -o amn0 -j REJECT --reject-with icmp-port-unreachable 2>/dev/null || true
+iptables -A DOCKER-USER -j RETURN
+
+# 8. NAT DATA-PLANE REDIRECTION (PREROUTING INTERCEPT TO TARGET LOCAL SYSTEM INTERFACES)
+echo "[+] Intercepting tunnel port 53 inquiries and binding them natively to AdGuard subnets..."
+iptables -t nat -A PREROUTING -i amn0 -p tcp --dport 53 -j DNAT --to-destination 172.29.172.1 2>/dev/null || true
+iptables -t nat -A PREROUTING -i amn0 -p udp --dport 53 -j DNAT --to-destination 172.29.172.1 2>/dev/null || true
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# 9. PERSISTENCE & SERVICE SYNCHRONIZATION
+echo "[+] Locking rules to persistent disk space and cycling dependencies..."
+mkdir -p /etc/iptables
+iptables-save > /etc/iptables/rules.v4
+
+if command -v netfilter-persistent >/dev/null 2>&1; then
+    netfilter-persistent save >/dev/null 2>&1 || true
+fi
+
+systemctl restart docker 2>/dev/null || true
+
+echo "======================================================================"
+echo " SYSTEM INSTANTLY HARDENED: v1 MATRIX ALIGNED TO ACTIVE amn0 TUBE"
+echo "======================================================================"

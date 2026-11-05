@@ -1,0 +1,12 @@
+{
+  "requested_model": "cursor-grok-4.6-xhigh",
+  "lanes": [
+    "native",
+    "linux",
+    "flutter",
+    "go"
+  ],
+  "result": "all stopped before work: account usage limit",
+  "codex_worker_fallback": "failed to create task thread",
+  "independent_model_review": false
+}

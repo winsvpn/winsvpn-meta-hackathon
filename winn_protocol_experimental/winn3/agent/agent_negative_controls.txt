@@ -1,0 +1,102 @@
+Winn3 agent schema negative controls -- validator refuses unknown kinds and empty param names
+Lane: gen_agent_schema_negative
+Date: 2026-08-12
+Package: winn_protocol_experimental/winn3/agent
+
+1. WHAT WAS PROVED
+   - validator.go: now rejects any Action whose Kind is not in validKinds (closed set: connect, rotate_key, report) via IsValidKind, returning ErrUnknownKind.
+   - validator.go: now rejects any Action carrying a Param with empty Name (p.Name == ""), returning ErrMalformed: param name empty, regardless of kind or contract.
+     This guards kinds with empty Allowed sets (ActionReport, ActionRotateKey) that previously accepted a nameless param as valid (probe showed report+empty => <nil> before fix, now => ErrMalformed).
+
+2. PATCH APPLIED (validator.go, lines 130-148)
+   Backed up as validator.go.bak_20260811_gen_agent_schema_negative (sha256 5cada28a0d7350a0ff19f906d62053aaf511aa4c2aae6666baebf74fd5e6a5a3).
+   Diff:
+     + for _, p := range a.Params {
+     +   if p.Name == "" {
+     +     return fmt.Errorf("%w: param name empty", ErrMalformed)
+     +   }
+     + }
+   Inserted at top of ActionSchema.Validate, before contract lookup, so empty-name is caught even when Allowed is empty.
+
+   Also updated doc comment to name the two negative controls explicitly.
+
+3. NEW PASSING ASSERTIONS (negative_controls_test.go)
+   File: winn3/agent/negative_controls_test.go (compiled and run via go test ./winn3/agent/... -count=1)
+
+   TestNegative_UnknownKindNotInValidKinds
+     - Asserts IsValidKind("erase_all_billing") == false (closed set is [connect rotate_key report]).
+     - Action{Kind:"erase_all_billing", Policy:{Name:"default",Version:3}} via ActionSchema.Validate => ErrUnknownKind.
+     - Same via DecodeAndValidate(JSON) => ErrUnknownKind.
+     - Same via ContractRegistry.Validate => ErrUnknownKind.
+
+   TestNegative_EmptyParamNameRejected (table, 4 subtests)
+     - report_empty_name:      ActionReport  Params=[{Name:"",Value:"x"}] => ErrMalformed via Validate, DecodeAndValidate, and registry.
+     - rotate_key_empty_name:  ActionRotateKey Params=[{Name:"",Value:"y"}] => ErrMalformed.
+     - connect_single_empty_name: ActionConnect Params=[{Name:"",Value:"z"}] => ErrMalformed.
+     - connect_host_plus_empty_name: ActionConnect Params=[{Name:"host",Value:"spain-madrid:443"},{Name:"",Value:"evil"}] => ErrMalformed.
+
+   TestNegative_EmptyNamePrecedesRequired
+     - ActionConnect Params=[{Name:"",Value:"x"}] (missing required "host" and empty) => ErrMalformed with message "param name empty", not just missing-required, pinning check order.
+
+4. VERIFICATION -- NO MUTATION (must pass)
+   $ go test -count=1 ./winn3/agent/... -run TestNegative -v
+   === RUN   TestNegative_UnknownKindNotInValidKinds
+   --- PASS: TestNegative_UnknownKindNotInValidKinds (0.00s)
+   === RUN   TestNegative_EmptyParamNameRejected
+   === RUN   TestNegative_EmptyParamNameRejected/report_empty_name
+   === RUN   TestNegative_EmptyParamNameRejected/rotate_key_empty_name
+   === RUN   TestNegative_EmptyParamNameRejected/connect_single_empty_name
+   === RUN   TestNegative_EmptyParamNameRejected/connect_host_plus_empty_name
+   --- PASS: TestNegative_EmptyParamNameRejected (0.00s)
+       --- PASS: TestNegative_EmptyParamNameRejected/report_empty_name (0.00s)
+       --- PASS: TestNegative_EmptyParamNameRejected/rotate_key_empty_name (0.00s)
+       --- PASS: TestNegative_EmptyParamNameRejected/connect_single_empty_name (0.00s)
+       --- PASS: TestNegative_EmptyParamNameRejected/connect_host_plus_empty_name (0.00s)
+   === RUN   TestNegative_EmptyNamePrecedesRequired
+   --- PASS: TestNegative_EmptyNamePrecedesRequired (0.00s)
+   PASS
+   ok  winsvpn.local/winnprotocol/winn3/agent 0.174s
+
+   Full suite (existing + new):
+   $ go test -count=1 ./winn3/agent/... 
+   ok  winsvpn.local/winnprotocol/winn3/agent 0.26s (all 40+ tests pass, including TestControl_UnknownKindMustBeDenied, TestControl_SchemaInvalidMustBeRejected, TestActionSchemaGolden*, TestConformance_*, TestRouteSafety_*, etc.)
+   This covers testdata/schema_invalid.json and testdata/unknown_kind.json as before; new controls do not touch testdata/.
+
+5. VERIFICATION -- COMMENT-ONLY CONTROL (must pass)
+   No source change beyond comment already verified by the no-mutation run above. The validator's behavior is identical to the previous run; the suite remains green.
+
+6. VERIFICATION -- DELIBERATE BREAK (must go red, scored inverted)
+   a) Empty-name guard removed via go test -overlay (mutant replaces validator.go block with comment):
+      $ go test -count=1 -overlay overlay.json -run TestNegative_EmptyParamNameRejected ./winn3/agent/... -v
+      === RUN   TestNegative_EmptyParamNameRejected/report_empty_name
+          Validate empty Name (report_empty_name) = <nil>, want ErrMalformed
+      === RUN   TestNegative_EmptyParamNameRejected/rotate_key_empty_name
+          Validate empty Name (rotate_key_empty_name) = <nil>, want ErrMalformed
+      --- FAIL: TestNegative_EmptyParamNameRejected (0.00s)
+          --- FAIL: report_empty_name
+          --- FAIL: rotate_key_empty_name
+          --- PASS: connect_single_empty_name (caught by Allowed check)
+          --- PASS: connect_host_plus_empty_name (caught by Allowed)
+      FAIL -- proves the new empty-name check is the sole guard for report/rotate_key; connect is double-guarded (Allowed also rejects ""), but report/rotate would silently accept without it.
+
+   b) Closed-kind gate broken via overlay (IsValidKind => return true):
+      $ go test -count=1 -overlay overlay2.json -run TestNegative_UnknownKindNotInValidKinds|TestControl_UnknownKindMustBeDenied ./winn3/agent/... -v
+      --- FAIL: TestNegative_UnknownKindNotInValidKinds
+          IsValidKind("erase_all_billing")=true, want false
+      --- FAIL: TestControl_UnknownKindMustBeDenied
+          unknown kind was accepted; expected ErrUnknownKind
+      FAIL -- proves unknown-kind rejection is load-bearing, not tautological.
+
+   Both inverted controls correctly go red naming what broke; therefore the green above is evidence, not a false green.
+
+7. FILES
+   - winn3/agent/validator.go (patched, backup .bak_20260811_gen_agent_schema_negative)
+   - winn3/agent/negative_controls_test.go (new, 3 tests, 6 subtests)
+   - winn3/agent/agent_negative_controls.txt (this file)
+   - testdata/ untouched (owned by another lane, per instruction)
+
+8. REPRO
+   cd source/wins_vpn/winn_protocol_experimental
+   go test -count=1 ./winn3/agent/... -v
+   go test -count=1 ./winn3/agent/... -run TestNegative -v
+

@@ -1,0 +1,511 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+__pycache__/
+.artifacts/
+.codex-sync-backups/
+.codex-sync-state/
+*.swp
+.DS_Store
+.vs/
+tmp/
+output/
+debug-info/
+proton_support_screenshots/
+tmp_wins_ui.xml
+*.tmp
+*.bak
+*.orig
+
+# ...and the SUFFIXED forms, which are the ones this project actually writes.
+# `*.bak` matches a file whose name ENDS in `.bak`; every backup convention in
+# use here appends a reason and a date after it --
+# `.bak_20260807_disclosure_scrub`, `.bak.d7_clock_skew_removal.20260806T175404Z`
+# -- so none of them were covered.
+#
+# Measured on 2026-08-07: 130 such files sat untracked and unignored, and 24 of
+# them carried 80 infrastructure-address occurrences. They are the PRE-SCRUB
+# originals written by the disclosure-scrub lanes. So every scrub was leaving a
+# verbatim copy of exactly what it had just removed, one `git add -A` away from
+# the index -- the cleanup and its own undo, side by side. Backups are worth
+# keeping; they are not worth committing.
+*.bak_*
+*.bak.*
+*.orig_*
+*.orig.*
+*.zip
+*.xpi
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Cross-device reconciliation evidence is not canonical deployable source
+/_merge_metadata/
+/_merge_variants/
+/MacCodexSync-*/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/build/
+/coverage/
+
+# Root-level native/release outputs are generated evidence, never source.
+/*.obj
+/wins-vpn-linux-x64.tar.gz
+
+# Flutter generated platform intermediates
+/windows/flutter/ephemeral/
+/linux/flutter/ephemeral/
+/macos/Flutter/ephemeral/
+/ios/Flutter/ephemeral/
+
+# Symbolication related
+app.*.symbols
+/.artifacts/private-release-symbols/
+/.private-symbols/
+/debug-info-google-play/
+/debug-info-xray/
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Android release signing secrets
+/android/key.properties
+/android/*.jks
+/android/app/*.jks
+
+# Apple signing identity (macOS now, iOS later). The real Signing.xcconfig
+# names the signing identity and provisioning profile — attribution material,
+# never committed, mirroring the Android keystore rule above. Commit only
+# Signing.xcconfig.example. Fresh checkout: cp the .example to Signing.xcconfig
+# beside it, or builds fail on the hard #include in AppInfo/Debug/Release.
+**/Signing.xcconfig
+
+# Local environment/secrets copied beside scripts on deployed servers
+.env
+*.env
+vpn_auth.env
+wins_*.env
+# Operator injection files. Also covered by *.env; named so a future
+# narrowing of that glob cannot re-admit them. The committed names-only
+# template is server/hub-commerce.env.example (does not match *.env).
+winsvpn-secrets.env
+hub-commerce.env
+# A live AWG client config for the GCP proof control VM; the committed
+# source is the key-free awg0.conf.example beside it (R4, 2026-10-14).
+tools/gcp_proof_attempt_broker/awg0.conf
+ssh key*.txt
+RSA key*.txt
+backup keys.txt
+upcloud_vps_key*
+*private_key*
+*.pem
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+id_rsa*
+
+# Local Netlify folder
+.netlify
+
+# Local deployment/auth tool cache
+.wrangler/
+
+# Machine-transfer bundles and external AI review worktrees are local-only.
+# The private handoff archive is encrypted, but its recovery secret must remain
+# outside this repository and the bundle must never enter Git history.
+/.private-handoff/
+/wins_vpn_handoffs/
+/handoffs/
+
+# Deprecated Gemini/Hoppy prototype runtime state. Its old recursive source
+# index captured deployment credentials; only reviewed source files belong in
+# Git, while generated embeddings and downloaded executables stay external.
+/Gemini Antigravity/ai_backend/chroma_db/
+/Gemini Antigravity/ai_backend/venv/
+/Gemini Antigravity/ai_backend/__pycache__/
+/Gemini Antigravity/ai_backend/cloudflared
+/Gemini Antigravity/ai_backend/config.yml
+/Gemini Antigravity/ai_backend/.DS_Store
+
+# Local captures and diagnostics
+tmp*.xml
+tmp*.png
+speedtest*.xml
+FalsePositive Google Flag.png
+
+# Local backup/certificate material kept outside source control
+backups/
+Sectigo - 3185833204/
+/3185833204/
+WIN'S VPN INC Certificate.pdf
+=
+
+# Local runtime/test state and virtual environments
+/v/
+/venv/
+/.venv/
+/var/
+/state/
+
+# Local signed Apple packet-engine artifacts
+/apple/EngineArtifacts/**
+!/apple/EngineArtifacts/
+!/apple/EngineArtifacts/README.md
+
+# macOS AppleDouble sidecars. ~6,100 of these accumulate in this tree from
+# copying across non-native filesystems. They are metadata, never source, and
+# they inflate every file count and line count taken over the tree. The owner
+# asked on 2026-08-03 that they be set aside rather than deleted, so they are
+# ignored here rather than removed.
+._*
+**/._*
+
+# Test and conformance evidence: ~82 MB of json, txt, pcap and nftables dumps
+# regenerated by every run. Kept out of the sync so the repository stays a
+# record of source, not of output.
+#
+# DO NOT `git add -f` a capture bundle. This comment used to end with exactly
+# that invitation -- "commit a specific evidence bundle by path with `git add
+# -f` when one needs to be preserved as an artifact" -- and preserving a bundle
+# is a real need, so the invitation was always going to be taken. It is the
+# wrong mechanism. When a bundle must outlive the working tree: record its
+# per-file sha256 manifest (the failed-batch-14/15 pattern), move the bytes
+# BYTE-EXACT into the no-remote archive repository (`wins/docs`, which holds
+# the node map already and cannot push anywhere), and cite it from handoff
+# docs by manifest hash plus placeholder-scrubbed excerpts. Raw bytes in the
+# archive; placeholders in any repository that has a remote.
+#
+# UNANCHORED ON PURPOSE -- this rule was `/winn_protocol_experimental/evidence/`
+# until 2026-08-07. A leading slash anchors to the repository root, and on
+# 2026-08-03 commit d93e80d wrote a DOUBLED path:
+#
+#     winn_protocol_experimental/winn_protocol_experimental/evidence/...
+#
+# The anchor did not match it, so 108 files entered the index and were pushed
+# to GitHub the same day -- three of them real `.pcap` binaries, which the
+# pre-push gate passed WITHOUT READING because it sniffed binary blobs and
+# silently skipped them.
+#
+# Do not read that last sentence as history. It was true of the gate as
+# shipped, and it was still true this morning. It stopped being true in the
+# SAME change that rewrote this rule (2026-08-07): `tools/ipscrub/ipscrub.py`
+# now raises a blocking `binary-evidence` finding instead of skipping, for any
+# binary blob it cannot read on an evidence path. If you are reading this
+# comment to decide whether the hole is closed, do not trust the comment --
+# run `python3 tools/ipscrub/ipscrub.py scan` and look for
+# "Unscannable binary on an evidence path". A comment that claims a fix is
+# worse than a known gap, because the next person reads it and stops looking.
+#
+# Nobody decided to publish those captures; a path shape decided it. So the
+# rule is now written so that no path shape can step around it.
+winn_protocol_experimental/**/evidence/
+
+# ...with two named exceptions, because the rule above is deliberately blunt
+# and this subtree contains directories called `evidence` that are SOURCE, not
+# capture output. Both are tracked today; without these lines any NEW file
+# added beside them would be silently ignored, which is the same class of
+# silent failure this block exists to fix.
+#
+# `Evidence/` is spelled with a capital E, and on this checkout
+# core.ignorecase=true (measured, not assumed -- macOS), so the blunt rule
+# reaches it here and would NOT reach it on Linux CI. Listing both spellings is
+# what makes the two platforms agree.
+!winn_protocol_experimental/spikes/ios_maximum_privacy/Evidence/
+!winn_protocol_experimental/spikes/ios_maximum_privacy/stagebphysicalverify/testdata/canonical/evidence/
+
+# Packet captures, anywhere in the tree. `.pcap` is the one file class here
+# that CANNOT be placeholder-scrubbed: the addresses are in IP headers with
+# checksums over them, so "redacting" a pcap manufactures a new file rather
+# than editing one. Keep-as-is, relocate, or destroy are the only honest
+# options -- which makes "never commit it" the only control that actually
+# works. Three were committed anyway, through the doubled path above.
+*.pcap
+*.pcapng
+
+# Sibling evidence drops. Lanes also write dated capture directories NEXT TO
+# the evidence tree instead of inside it -- `.e8_linux_evidence_20260802/` is
+# one, and it was untracked and unignored until this line. Matched by shape,
+# not by instance, so the next one is covered on the day it is created.
+**/*_evidence_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+**/.*_evidence_*/
+
+# Built binaries and packaged Flutter assets. 71 MB of build output that was
+# tracked; rebuild it rather than clone it.
+/release/
+
+# Staged Winn Protocol engine binaries (~19 MB per rebuild).
+#
+# DERIVED ARTIFACT, NOT A VENDORED DEPENDENCY -- that distinction is the whole
+# decision. libxray.so IS tracked, and correctly so: Xray's source is not in
+# this repository, so the binary is the only copy and committing it is what
+# makes the build reproducible. libwinnengine.so is built from
+# winn_protocol_experimental/, which IS in this repository, by
+# android/tools/prepare_android_winn_assets.sh --stage in about a minute given
+# Go and the NDK.
+#
+# Committing a build output of in-repo source creates a staleness trap, and that
+# trap has already fired on this project: on 2026-08-04 the checked-in
+# libwinn-datapath-{darwin,ios}-arm64.a archives were built at 07:39, before
+# s1..s4 were added to datapath.AWGHeaderTypes at 13:56. Their cgo header was
+# byte-identical, so verify_winn_abi_conformance.sh PASSED while WinnTunnelCreate
+# refused every config with `json: unknown field "s1"`. Signature checking
+# structurally cannot catch that, because datapath.Config uses
+# DisallowUnknownFields. A tracked binary that silently disagrees with the source
+# beside it is worse than no binary.
+#
+# Also: each rebuild is a new ~19 MB blob in history forever. This repository
+# was 1.5 GB and had to be rewritten to remove 190 MB of images.
+#
+# These live in the DEBUG source set on purpose -- item D2 defers the release
+# variant while 1.0.14+29 is in store review. Do not move them to src/main.
+/android/app/src/debug/jniLibs/**/libwinnengine.so
+
+# Winn conformance build output -- the SAME rule as the block above, applied to
+# the artifacts that incident was actually discovered in.
+#
+# These 23 files were tracked: five datapath c-archives with their cgo headers,
+# an iOS client binding, and nine winn-clientinfo binaries across android/darwin/
+# linux/windows on both amd64 and arm64. All of them are output of
+# tools/build_winn_protocol_engine.sh, which builds from
+# winn_protocol_experimental/ -- in this repository -- so every argument above
+# applies unchanged: derived artifact, not a vendored dependency.
+#
+# The staleness cited above was found HERE. These were the archives built before
+# s1..s4 joined datapath.AWGHeaderTypes, that passed every ABI check because
+# their cgo header was byte-identical while refusing every current config.
+#
+# Nothing needs them checked in. tools/winn_conformance_verify.py always built
+# its own -- build_matrix() invokes the build script for every target and reports
+# a missing NDK or Xcode as UNVERIFIED with real stderr. The two scripts that
+# merely EXPECTED them, tools/verify_winn_abi_conformance.sh and
+# tools/build_apple_engine_wrappers.sh, now build what they are missing, after
+# the model tools/verify_apple_winn_seam.sh already set: build what you verify,
+# so what you verify cannot be older than what it is verified against. No CI
+# workflow references any of it.
+/tools/winn_conformance_build_out/
+
+# The whole directory, one level down from the repository root's own
+# tools/ -- not just the winn_conformance_build_out/ subdirectory previously
+# named here. Widened to the parent on 2026-08-09 after a second, independent
+# incident confirmed the same conclusion the first one reached: nothing
+# genuinely source ever lives at winn_protocol_experimental/tools/, so the
+# directory itself is the thing worth ignoring, not one accident shape under
+# it.
+#
+# Incident 1 (found 2026-08-06, committed by d93e80d): this path held 23
+# TRACKED files -- winn_conformance_verify.py's BUILD_OUT_DIR
+# (ROOT/"tools"/"winn_conformance_build_out") resolved against
+# winn_protocol_experimental/ instead of the repository root. Five of its
+# seven binaries were already modified in the working tree against their
+# committed copies -- rebuilt 2026-08-04 06:39 -- so tracking them was
+# generating permanent dirty-tree noise on top of everything in the block
+# above. Untracked via git rm --cached at the time.
+#
+# Incident 2 (found 2026-08-09): a RELATIVE OUTPUT_ARG bug in
+# tools/build_winn_protocol_engine.sh -- the script `cd`s to
+# winn_protocol_experimental/ (MODULE_DIR) to run `go build`, so a caller
+# passing a relative output path like
+# "tools/winn_conformance_build_out/libwinn-datapath-darwin-arm64.a.rebuilt"
+# got it written under winn_protocol_experimental/tools/... while every
+# other check in the script read the SAME relative path from the caller's
+# own working directory instead, validated whatever stale file already sat
+# there, and reported success. Orphans dated 2026-08-08 15:15
+# (libwinn-datapath-darwin-arm64.a.h and .a.rebuilt -- the .h because go's
+# c-archive header naming replaces the LAST extension, so a ".a.rebuilt"
+# output produced a ".a.h" header) were that build; they were left in place
+# as evidence and have since been deleted by hand (untracked, so no `git rm`
+# was needed). The script itself is fixed now -- OUTPUT_ARG is absolutised
+# before use, and every build lands in a private staging directory and is
+# identity-checked by digest before anything is validated or installed --
+# but the fix lives in the script, not in what gets ignored here, so it does
+# not by itself stop a future relative path (a different filename, a
+# different caller) from spilling somewhere else directly under
+# winn_protocol_experimental/tools/ that the old, narrower rule would have
+# missed.
+#
+# Checked before widening (2026-08-09): no script, workflow, build file, or
+# Go import anywhere in the repository treats winn_protocol_experimental/tools/
+# as a real source location -- the module's actual build tooling
+# (build_winn_protocol_engine.sh, winn_conformance_verify.py, the verify_*.sh
+# scripts) lives under the repository root's own tools/, not inside the Go
+# module. The directory held nothing but the two incidents above both times
+# it was inspected.
+/winn_protocol_experimental/tools/
+
+# Backups taken by the iOS winn/3 dev-session safety lane (2026-08-06).
+.ios_winn3_backups_20260806/
+
+# Run evidence for winn/3 capability decisions is committed under
+# .winn_platform_progress/evidence/ -- but *.log above (line 3) silently
+# swallowed anything dropped there with a .log extension, and git gives no
+# warning when that happens; it just omits the file from `git status`. The
+# two Android device-check logs that back kWinnHostCapabilities['android']
+# in lib/winn_protocol_dispatch.dart (devicecheck_20260804T*.log) sat
+# untracked in this directory for exactly this reason. *.log stays global --
+# this negates it for this ONE directory only, non-recursively, so build
+# logs everywhere else stay ignored exactly as before. Confirmed with
+# `git check-ignore -v` that neither .winn_platform_progress/ nor
+# .winn_platform_progress/evidence/ is excluded as a directory anywhere in
+# this file, which is what would have silently defeated a negation like this
+# one (git does not descend into an already-ignored directory to evaluate
+# per-file re-includes).
+!/.winn_platform_progress/evidence/*.log
+
+# Backups taken by the winn/3 evidence-gate + dangling-citation repair lane
+# (2026-08-06). Same convention as .ios_winn3_backups_20260806/ above.
+.winn3_evidence_gate_backups_20260806/
+
+# Added 2026-08-12: 6.6 GB of watch-build scratch, 15,109 untracked files.
+# Never work product; it swamped `git status` and would have bloated the repo.
+scratch_watch/
+
+# Added 2026-08-13: 5,941 tracked files / 80 MB of LANE SCRATCH were being
+# committed -- iOS Payload bundles, .so binaries, .xcresult, unzipped APKs.
+# Build artifacts carry infrastructure addresses baked into them, which is why
+# they dominated the ipscrub push blockers. Scratch is per-lane working state
+# and is never a deliverable; it must not be versioned.
+.spark_lanes/scratch/
+
+# work-history noise (never push)
+.spark_lanes/
+.mimosa/
+# Multi-model debate receipts, raw seat transcripts and local Arbiter custody.
+# CLAUDE.md 13.6 and 13.9.7 keep these local; they carry node addresses,
+# kernel and qdisc dumps and provider reasoning blobs. Nothing builds from it.
+/.agent/
+.winn_platform_progress/
+builds/
+gen_ios_dist_ipa_archive/
+*.xcresult/
+*.pcap
+*.pcapng
+*.log
+*recommendations.md
+
+# dated work-history docs (never push)
+docs/handoff/
+*_2026*.md
+*_2026*.txt
+FINAL_RECOMMENDATIONS_FIX_HANDOFF_*.md
+NEW_MACBOOK_*.txt
+WINN_E8_R7_*.md
+winn_protocol_experimental/docs/handoff/
+
+__pycache__/
+*.pyc
+
+# built artifacts for the website (large, keep out of git)
+web/downloads/
+
+# compiled winn binaries must never be committed (ipscrub packed-scan + size)
+/winn3-gateway
+/winn3-probe
+/winn3-datapath
+/winn3-server
+/winn-datapath
+/winn-server
+/server/boostd
+/windows/winn3_engine/winsvpnwinn3engine
+/winn_protocol_experimental/winn-server
+/winn_protocol_experimental/winn-datapath
+# Nested `go build ./cmd/winn3-gateway` outputs. `/winn3-gateway` above is
+# root-anchored and does not cover these module-root binaries. Exact names
+# only: a glob would ignore checksums, provenance, and cmd/ source.
+/winn_protocol_experimental/winn3-gateway
+/winn_protocol_experimental/winn3-gateway.exe
+
+
+# Compiled executables untracked 2026-08-22 (hygiene lane H1, F3/F8).
+# Each is a build output of in-tree Go source -- `go build ./cmd/X` from
+# winn_protocol_experimental/ emits `X` at the module root, and the root Go
+# module emits `e8r7promoterr2` -- or a dart compile exe of
+# tools/native_messaging/host/bin/. Rebuild them; never commit them.
+# Anchored one line per binary on purpose: a glob here would also swallow
+# source directories that happen to share a name (cmd/ stays tracked).
+/e8r7promoterr2
+/tools/native_messaging/host/wins_bridge_host
+/winn_protocol_experimental/winn-acceptance
+/winn_protocol_experimental/winn-auto-e2e
+/winn_protocol_experimental/winn3-labrig
+/winn_protocol_experimental/evidenceverify
+/winn_protocol_experimental/fixturegen
+/winn_protocol_experimental/matrixverify
+/winn_protocol_experimental/trace
+/winn_protocol_experimental/v3probe
+/winn_protocol_experimental/winn-carrier-keys
+/winn_protocol_experimental/winn-cost
+/winn_protocol_experimental/winn-phase1-anchor-pin
+/winn_protocol_experimental/winn-phase1-controller-close
+/winn_protocol_experimental/winn-phase1-matrix-verify
+/winn_protocol_experimental/winn-phase1-soak-controller
+/winn_protocol_experimental/winn-real-cycle-admitted-adapter
+/winn_protocol_experimental/winn-real-cycle-controller-binding
+/winn_protocol_experimental/winn-teardown-e2e
+/winn_protocol_experimental/winn-token
+/winn_protocol_experimental/winn3-conformance
+/winn_protocol_experimental/cmd/winn-phase1-matrix-verify/winn-phase1-matrix-verify
+/winn_protocol_experimental/cmd/winn-phase1-soak-controller/admitted_checkpoint
+
+# Same rule, observed untracked during audit A4 (2026-08-22) but not yet
+# ignored: the Windows cross-build lane echoes its compiled outputs back to the
+# Mac as .exe (line 430 covers the no-suffix form only), and the android
+# devicecheck module's Go build drops awgresponder beside its main.go. All
+# three are build outputs of in-repo source; never commit them.
+/windows/winn3_engine/winsvpnwinn3engine.exe
+/windows/awg_engine/winsvpnawgengine.exe
+/android/devicecheck/awgresponder/awgresponder
+
+# Run-evidence scratch dirs from gateway installer keyfile suites (see
+# server/wins_winn3_gateway_install_forward_loud_test.sh). Never commit.
+/tmp_fwd_vmwork
+/tmp_fwd_vmwork2
+/tmp_fwd_vmwork3
+
+# Found untracked during the 2026-08-27 merge audit: seven hidden
+# `.release_*.winsvpn-apple-mod-<content-hash>.py` snapshots of the Apple
+# cross-store gate's REQUIRED_MODULE_FILES support modules. The name
+# `winsvpn-apple-mod-` appears in no current source; it is leftover scratch
+# from an earlier gate iteration that snapshotted modules to hidden files
+# before compiling them. The current gate holds bytes via O_NOFOLLOW
+# descriptors and imports under private in-memory module names
+# (`apple_cross_store_artifact_gate._load_required_modules`), writing nothing,
+# and test_apple_cross_store_gate_adapters.py asserts no
+# `.*.winsvpn-apple-mod-*` file may linger after a load. Stale copies are
+# never source; ignore the whole shape so a future `git add -A` cannot
+# commit the next leftover.
+/tools/.*.winsvpn-apple-mod-*
+
+# Compiled Go binary of in-tree source (`go build` inside
+# tools/gcp_proof_client/ drops it beside main.go). Same rule as the
+# anchored one-line-per-binary block above: rebuild it, never commit it.
+/tools/gcp_proof_client/gcpproofclient

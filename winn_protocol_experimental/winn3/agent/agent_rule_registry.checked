@@ -1,0 +1,1 @@
+agent_rule_registry checked 2026-08-12T16:09:06Z: Register rotate_key twice second errors=agent: register: rule already registered for kind "rotate_key"; one-rule-per-kind verified; go test ./winn3/agent passed

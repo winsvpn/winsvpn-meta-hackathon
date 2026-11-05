@@ -1,0 +1,10 @@
+# agent policy audit trace
+# Register: connect=DenyGateway(), rotate_key=DenyRotateKeyUnlessOwner(owner), report=AllowRule()
+# Decisions go through ContractRegistry.Admit (schema then policy)
+# Each line is kind principal decision rule
+kind=connect principal=n/a decision=allow rule=DenyGateway case=connect_allowed
+kind=rotate_key principal=owner decision=allow rule=DenyRotateKeyUnlessOwner case=rotate_key_owner_allowed
+kind=rotate_key principal=attacker decision=deny rule=DenyRotateKeyUnlessOwner case=rotate_key_nonowner_denied
+kind=rotate_key principal=n/a decision=deny rule=DenyRotateKeyUnlessOwner case=rotate_key_no_principal_denied
+kind=report principal=n/a decision=allow rule=AllowRule case=report_allowed
+kind=wipe_disk principal=n/a decision=deny rule=none case=unregistered_denied

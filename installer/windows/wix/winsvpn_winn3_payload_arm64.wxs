@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Win's VPN — Winn Protocol v3 Windows engine payload for ARM64, as an MSI.
+
+  This is the ARM64 sibling of winsvpn_winn3_payload.wxs. Windows on ARM
+  emulates x64 USER-MODE code, but the Winn v3 datapath drives Wintun, a
+  KERNEL-MODE driver, and drivers are never emulated. An ARM64 Windows host
+  therefore needs native ARM64 halves of both first-party engines and the
+  ARM64 build of the Wintun DLL, packaged with wiX `-arch arm64` so the MSI
+  records ProcessorArchitecture=Arm64 and Windows Installer refuses it on any
+  non-ARM64 edition rather than installing a payload that cannot run.
+
+  Same package discipline as the x64 sibling: own UpgradeCode, own install
+  folder, no service, no driver install, no adapter, no route. The v3 relay
+  creates its Wintun adapter at runtime and tears it down on stop.
+
+  The ARM64 UpgradeCode and component GUIDs are distinct from the x64 package
+  on purpose: the two packages install to the same-named folder on different
+  machine architectures and must never be treated as upgrades of each other.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="Win's VPN Winn Protocol v3 Engines (ARM64)"
+      Manufacturer="WIN'S VPN INC"
+      Version="$(var.AppVersion)"
+      UpgradeCode="a7b416d7-d4d8-4cfa-9e63-4ae00bcdf831"
+      Scope="perMachine"
+      Compressed="yes"
+      InstallerVersion="500">
+
+    <SummaryInformation Description="Winn Protocol v3 datapath and Wintun relay for Windows ARM64" />
+
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of the Winn Protocol v3 engines is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- ARM64 only. The relay and the datapath are both PE32+ AArch64; the CPU
+         architecture is enforced by wiX -arch arm64 (Package Template: Arm64),
+         and this condition covers the 64-bit-edition requirement. -->
+    <Launch
+        Condition="VersionNT64"
+        Message="The Winn Protocol v3 engines are 64-bit and require a 64-bit edition of Windows." />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="WinsVPN Winn3 Engines arm64">
+        <Directory Id="LICENSEFOLDER" Name="licenses" />
+      </Directory>
+    </StandardDirectory>
+
+    <ComponentGroup Id="Winn3Payload" Directory="INSTALLFOLDER">
+      <Component Id="C_WinnDatapath" Guid="4dbc62db-cca7-4d3c-b470-3d0ca57aa77f">
+        <File Id="F_WinnDatapath" Source="$(var.PayloadDir)\winn-datapath.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_Winn3Relay" Guid="f97a2254-c2a6-4dca-9d45-5a97c655570e">
+        <File Id="F_Winn3Relay" Source="$(var.PayloadDir)\winsvpn_winn3_engine.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_Wintun" Guid="3169aa1b-1af1-40f7-a449-d71794d78a05">
+        <File Id="F_Wintun" Source="$(var.PayloadDir)\wintun.dll" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_Manifest" Guid="1c8f0b0c-6b93-4727-8c31-183388bd588f">
+        <File Id="F_Manifest" Source="$(var.PayloadDir)\payload-manifest.json" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="Winn3Licenses" Directory="LICENSEFOLDER">
+      <Component Id="C_LicWintun" Guid="7cb68b5d-8426-4332-8e8a-91202a2cc6df">
+        <File Id="F_LicWintun" Source="$(var.LicensesDir)\Wintun-Prebuilt-Binaries-License.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="C_LicReadme" Guid="cff83d21-40b7-4d33-a0b2-87200293d857">
+        <File Id="F_LicReadme" Source="$(var.LicensesDir)\README-STANDALONE-WINN3.txt" Name="README.txt" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <Feature Id="Main" Title="Winn Protocol v3 engines (ARM64)" Level="1">
+      <ComponentGroupRef Id="Winn3Payload" />
+      <ComponentGroupRef Id="Winn3Licenses" />
+    </Feature>
+  </Package>
+</Wix>

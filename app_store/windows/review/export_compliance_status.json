@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-windows-export-compliance-v1",
+  "canonical_release": "1.0.17+34",
+  "product_version": "1.0.17",
+  "four_part_version": "1.0.17.34",
+  "pubspec_version": "1.0.17+34",
+  "identity_map": "docs/rulings/RELEASE_IDENTITY_MAP_20260824.json",
+  "status": "pending_owner_legal",
+  "owner_state": "OWNER-BLOCKED: ABSENT",
+  "uses_encryption": true,
+  "exemption_claimed": false,
+  "partner_center_declaration_approved": false,
+  "unsigned_artifact_may_carry_declaration": false,
+  "owner_signoff_status": "pending",
+  "facts_file": "app_store/windows/review/export_compliance_facts.txt",
+  "required_surfaces": [
+    "windows-x64-installer",
+    "windows-x64-partner-center",
+    "windows-arm64-installer",
+    "windows-arm64-partner-center"
+  ],
+  "non_upload_surfaces": [
+    "windows-x64-msix-development-identity"
+  ]
+}

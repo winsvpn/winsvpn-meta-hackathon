@@ -1,0 +1,449 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.local/schemas/apple_winn_v3_engine_provenance.json",
+  "title": "Apple Winn v3 engine provenance",
+  "description": "Fail-closed binding for Apple Winn Protocol v3 core and relay engine wrappers. A matching document is produced only by a verified rebuild from a Winn release directory written by tools/winn_release.py; absence, a symlink, or a hash mismatch is rebuild-required. Architectures, platform, minimum OS, UUID, strip state, role symbols, Mach-O filetype, install name, and dependency closure are derived per slice from the actual dylibs. The release manifest SHA-256, the Ed25519 release signature public key, the reproducible per-slice archive and header digests, the wrapper source, Apple tools, builders, and outputs are hash-bound. An unsigned-dev release is accepted only outside release mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apple_toolchain",
+    "archives",
+    "builders",
+    "component",
+    "generation",
+    "release",
+    "role_binding",
+    "schema_version",
+    "source",
+    "wrappers"
+  ],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 5},
+    "component": {"type": "string", "const": "winn-apple-engine-wrappers"},
+    "generation": {"type": "string", "const": "v3"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "module",
+        "wrapper_path",
+        "wrapper_sha256"
+      ],
+      "properties": {
+        "module": {"type": "string", "const": "winsvpn.local/winnprotocol"},
+        "wrapper_path": {
+          "type": "string",
+          "const": "apple/EngineWrappers/WinsWinnPacketEngine.m"
+        },
+        "wrapper_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "apple_toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tools"],
+      "properties": {
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ar", "clang", "file", "lipo", "nm", "otool", "strip", "vtool"],
+          "properties": {
+            "ar": {"$ref": "#/$defs/path_digest"},
+            "clang": {"$ref": "#/$defs/path_digest"},
+            "file": {"$ref": "#/$defs/path_digest"},
+            "lipo": {"$ref": "#/$defs/path_digest"},
+            "nm": {"$ref": "#/$defs/path_digest"},
+            "otool": {"$ref": "#/$defs/path_digest"},
+            "strip": {"$ref": "#/$defs/path_digest"},
+            "vtool": {"$ref": "#/$defs/path_digest"}
+          }
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "go",
+        "manifest_sha256",
+        "producer",
+        "signature_public_key",
+        "signature_state",
+        "source"
+      ],
+      "properties": {
+        "contract": {"type": "string", "const": "winsvpn-winn-release-manifest-v1"},
+        "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "signature_state": {"type": "string", "enum": ["signed", "unsigned-dev"]},
+        "signature_public_key": {"type": "string", "pattern": "^([0-9a-f]{64})?$"},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["binding", "commit", "tree_sha256"],
+          "properties": {
+            "binding": {"type": "string", "enum": ["git-archive", "export"]},
+            "commit": {"type": "string", "pattern": "^[0-9a-f]{7,64}$"},
+            "tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "go": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["archive_sha256", "executable_sha256", "install_tree_sha256", "version"],
+          "properties": {
+            "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+            "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "executable_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "install_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "producer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["builder_sha256", "driver_sha256", "toolchain_pins_sha256"],
+          "properties": {
+            "builder_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "driver_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "toolchain_pins_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "builders": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wrapper_builder",
+        "wrapper_header"
+      ],
+      "properties": {
+        "wrapper_builder": {"$ref": "#/$defs/path_digest"},
+        "wrapper_header": {"$ref": "#/$defs/path_digest"}
+      }
+    },
+    "archives": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iphoneos_arm64",
+        "iphonesimulator_arm64",
+        "iphonesimulator_x86_64",
+        "macosx_arm64",
+        "macosx_x86_64"
+      ],
+      "properties": {
+        "iphoneos_arm64": {"$ref": "#/$defs/archive_record"},
+        "iphonesimulator_arm64": {"$ref": "#/$defs/archive_record"},
+        "iphonesimulator_x86_64": {"$ref": "#/$defs/archive_record"},
+        "macosx_arm64": {"$ref": "#/$defs/archive_record"},
+        "macosx_x86_64": {"$ref": "#/$defs/archive_record"}
+      }
+    },
+    "wrappers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["iphoneos", "iphonesimulator", "macosx"],
+      "properties": {
+        "iphoneos": {"$ref": "#/$defs/iphoneos_wrapper_record"},
+        "iphonesimulator": {"$ref": "#/$defs/iphonesimulator_wrapper_record"},
+        "macosx": {"$ref": "#/$defs/macosx_wrapper_record"}
+      }
+    },
+    "role_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["core", "relay"],
+      "properties": {
+        "core": {"$ref": "#/$defs/core_role"},
+        "relay": {"$ref": "#/$defs/relay_role"}
+      }
+    }
+  },
+  "$defs": {
+    "path_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "archive_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectures",
+        "build_a_sha256",
+        "build_b_sha256",
+        "filetype",
+        "header_path",
+        "header_sha256",
+        "path",
+        "platform",
+        "sha256",
+        "target"
+      ],
+      "properties": {
+        "architectures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "build_a_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "build_b_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "filetype": {"type": "string", "enum": ["ar-archive", "mach-o-archive"]},
+        "header_path": {"type": "string", "minLength": 1},
+        "header_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "path": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "enum": ["IOS", "IOSSIMULATOR", "MACOS"]},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "target": {
+          "type": "string",
+          "enum": [
+            "datapath-archive-darwin-amd64",
+            "datapath-archive-darwin-arm64",
+            "datapath-ios-arm64",
+            "datapath-iossimulator-amd64",
+            "datapath-iossimulator-arm64"
+          ]
+        }
+      }
+    },
+    "wrapper_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectures",
+        "filetype",
+        "path",
+        "platform",
+        "roles",
+        "sha256",
+        "slices",
+        "strip_state"
+      ],
+      "properties": {
+        "architectures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "filetype": {"type": "string", "const": "mach-o-dylib"},
+        "path": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "enum": ["IOS", "IOSSIMULATOR", "MACOS"]},
+        "roles": {"type": "array", "const": ["core", "relay"]},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "signature_normalized_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "slices": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "arm64": {"$ref": "#/$defs/dylib_slice"},
+            "x86_64": {"$ref": "#/$defs/dylib_slice"}
+          }
+        },
+        "strip_state": {"type": "string", "const": "stripped"}
+      }
+    },
+    "iphoneos_wrapper_record": {
+      "allOf": [
+        {"$ref": "#/$defs/wrapper_record"},
+        {
+          "type": "object",
+          "properties": {
+            "architectures": {"type": "array", "const": ["arm64"]},
+            "platform": {"type": "string", "const": "IOS"},
+            "slices": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["arm64"],
+              "properties": {
+                "arm64": {"$ref": "#/$defs/iphoneos_arm64_slice"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "iphonesimulator_wrapper_record": {
+      "allOf": [
+        {"$ref": "#/$defs/wrapper_record"},
+        {
+          "type": "object",
+          "properties": {
+            "architectures": {"type": "array", "const": ["arm64", "x86_64"]},
+            "platform": {"type": "string", "const": "IOSSIMULATOR"},
+            "slices": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["arm64", "x86_64"],
+              "properties": {
+                "arm64": {"$ref": "#/$defs/iphonesimulator_arm64_slice"},
+                "x86_64": {"$ref": "#/$defs/iphonesimulator_x86_64_slice"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "macosx_wrapper_record": {
+      "allOf": [
+        {"$ref": "#/$defs/wrapper_record"},
+        {
+          "type": "object",
+          "properties": {
+            "architectures": {"type": "array", "const": ["arm64", "x86_64"]},
+            "platform": {"type": "string", "const": "MACOS"},
+            "slices": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["arm64", "x86_64"],
+              "properties": {
+                "arm64": {"$ref": "#/$defs/macosx_arm64_slice"},
+                "x86_64": {"$ref": "#/$defs/macosx_x86_64_slice"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dylib_slice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "dependencies",
+        "filetype",
+        "install_name",
+        "minos",
+        "platform",
+        "role_symbols",
+        "uuid"
+      ],
+      "properties": {
+        "architecture": {"type": "string", "enum": ["arm64", "x86_64"]},
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "filetype": {"type": "string", "const": "MH_DYLIB"},
+        "install_name": {
+          "type": "string",
+          "const": "@rpath/WinsWinnPacketEngine.framework/WinsWinnPacketEngine"
+        },
+        "minos": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+        "platform": {"type": "string", "enum": ["IOS", "IOSSIMULATOR", "MACOS"]},
+        "role_symbols": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["core", "relay"],
+          "properties": {
+            "core": {"type": "array", "const": ["WinnTunnelCreateWinn3"]},
+            "relay": {
+              "type": "array",
+              "const": ["WinnTunnelCreate", "WinnTunnelCreateWithCarrier"]
+            }
+          }
+        },
+        "uuid": {
+          "type": "string",
+          "pattern": "^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$"
+        }
+      }
+    },
+    "iphoneos_arm64_slice": {
+      "allOf": [
+        {"$ref": "#/$defs/dylib_slice"},
+        {
+          "type": "object",
+          "properties": {
+            "architecture": {"type": "string", "const": "arm64"},
+            "minos": {"type": "string", "const": "13.0"},
+            "platform": {"type": "string", "const": "IOS"}
+          }
+        }
+      ]
+    },
+    "iphonesimulator_arm64_slice": {
+      "allOf": [
+        {"$ref": "#/$defs/dylib_slice"},
+        {
+          "type": "object",
+          "properties": {
+            "architecture": {"type": "string", "const": "arm64"},
+            "minos": {"type": "string", "const": "14.0"},
+            "platform": {"type": "string", "const": "IOSSIMULATOR"}
+          }
+        }
+      ]
+    },
+    "iphonesimulator_x86_64_slice": {
+      "allOf": [
+        {"$ref": "#/$defs/dylib_slice"},
+        {
+          "type": "object",
+          "properties": {
+            "architecture": {"type": "string", "const": "x86_64"},
+            "minos": {"type": "string", "const": "13.0"},
+            "platform": {"type": "string", "const": "IOSSIMULATOR"}
+          }
+        }
+      ]
+    },
+    "macosx_arm64_slice": {
+      "allOf": [
+        {"$ref": "#/$defs/dylib_slice"},
+        {
+          "type": "object",
+          "properties": {
+            "architecture": {"type": "string", "const": "arm64"},
+            "minos": {"type": "string", "const": "13.0"},
+            "platform": {"type": "string", "const": "MACOS"}
+          }
+        }
+      ]
+    },
+    "macosx_x86_64_slice": {
+      "allOf": [
+        {"$ref": "#/$defs/dylib_slice"},
+        {
+          "type": "object",
+          "properties": {
+            "architecture": {"type": "string", "const": "x86_64"},
+            "minos": {"type": "string", "const": "13.0"},
+            "platform": {"type": "string", "const": "MACOS"}
+          }
+        }
+      ]
+    },
+    "core_role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_symbol", "payload_class", "required_symbols"],
+      "properties": {
+        "entry_symbol": {"type": "string", "const": "WinnTunnelCreateWinn3"},
+        "payload_class": {"type": "string", "const": "ip-packet"},
+        "required_symbols": {"type": "array", "const": ["WinnTunnelCreateWinn3"]}
+      }
+    },
+    "relay_role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_symbols", "payload_class", "required_symbols"],
+      "properties": {
+        "entry_symbols": {
+          "type": "array",
+          "const": ["WinnTunnelCreate", "WinnTunnelCreateWithCarrier"]
+        },
+        "payload_class": {"type": "string", "const": "awg-datagram"},
+        "required_symbols": {
+          "type": "array",
+          "const": ["WinnTunnelCreate", "WinnTunnelCreateWithCarrier"]
+        }
+      }
+    }
+  }
+}

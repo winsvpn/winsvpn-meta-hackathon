@@ -1,0 +1,27 @@
+T-I RERUN — flutter console evidence (flutter run, defines
+WINN_IOS_RAW_CONFIG_LAB=true WINN_IOS_RAW_CONFIG_PATH=container:winn3_raw_lab.ini
+WINS_WINN3_ENABLED_PLATFORMS=ios, --use-application-binary of the b029ed7 xcodebuild
+Debug-iphoneos Runner.app; device <IOS_UDID>).
+
+[08:29Z] owner's Allow tap lands (second dialog, re-prompt caused by the 07:49Z reinstall
+         purging the first save):
+flutter: WINN IOS RAW CONFIG LAB: native start requested; read provider status before claiming a session
+flutter: WINN IOS RAW CONFIG SUMMARY: {"schema_valid":true,"protocol_version":"winn/3",
+  "carrier":"winn3","endpoint":"<DATA_SIM_IP>:9111","inner_v4":"10.10.0.2",
+  "inner_router_v4":"10.10.0.1","path_mtu":"1450","carrier_classes":"udp",
+  "secret_fields_redacted":["admission_key","gateway_static","static_private"],
+  "sections":["interface","peer","winsdevcontainment","winn"],"bytes":878}
+
+[08:33:40Z] hot restart (SIGUSR2) re-run, accepted with no dialog (config already saved):
+Restarted application in 784ms.
+flutter: WINN IOS RAW CONFIG LAB: native start requested; ...
+flutter: WINN IOS RAW CONFIG SUMMARY: {"schema_valid":true,...}  (identical)
+
+[08:37:15Z] + [08:39:39Z] two more hot-restart re-runs (same accepted outcome) — these two
+spawned the PacketTunnel appex (PID 2922 / 2923) after the NE registration recovered.
+
+T-I-READINESS via VM-service evaluate of MethodChannel('wins_vpn/tunnel').invokeMethod('getTunnelReadiness'):
+  full field dump captured in t-i-provider-status-fields.txt; verdict fields:
+  provider_engine_runtime_winn_engine_winn3_gate_state=carrying, rx_packets=1, tx_packets=1,
+  dev_containment_observed_contained=true, prefix_lengths=32, default_ipv4_route_installed=false,
+  ipv6_settings_installed=false, dns_settings_installed=false, error 1034 (promotion held on purpose)

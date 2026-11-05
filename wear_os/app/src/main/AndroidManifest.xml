@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="true" />
+
+    <!--
+      No INTERNET permission on purpose. The watch never talks to a VPN
+      server directly, never holds an account number or key, and never
+      carries tunnel traffic; it only exchanges intent and status with the
+      paired phone over the Wearable Data Layer, which needs no permission
+      of its own. Native Winn v3 primary and Winn v1 AWG/Xray fallback stay
+      on the paired phone form factor of this same application ID.
+    -->
+
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <!--
+          Not standalone: without the paired phone app there is nothing to
+          remote-control, so Play must not offer this to watches whose phone
+          does not have the companion phone app installed.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="false" />
+
+        <!-- taskAffinity="" keeps the app out of the phone-style shared task so
+             Wear's recents shows it as its own card. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

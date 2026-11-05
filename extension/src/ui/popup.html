@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Win's VPN Proxy</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body class="popup">
+    <!-- No inline script anywhere in this extension. The CSP is script-src
+         'self', so an inline handler would simply not run; keeping the markup
+         free of them means the rule is never the thing that breaks a feature. -->
+    <div id="stateCard" class="card" role="status" aria-live="polite">
+      <p class="headline" id="stateHeadline">Loading…</p>
+      <p class="detail" id="stateDetail"></p>
+      <p class="action" id="stateAction"></p>
+    </div>
+
+    <div class="row">
+      <button id="toggle" disabled>Checking routing status</button>
+      <span class="spacer"></span>
+      <button id="openOptions">Sites &amp; settings</button>
+    </div>
+
+    <!-- Desktop VPN control (R20 A1). Shown only when the desktop app answers
+         through the bridge. Connect and disconnect need this browser to be
+         paired: the first request asks the app to approve it. -->
+    <div class="card" id="vpnCard" hidden>
+      <p class="headline" id="vpnHeadline"></p>
+      <p class="pairing-code" id="vpnCode" hidden></p>
+      <p class="small muted" id="vpnDetail"></p>
+      <div class="row">
+        <button id="vpnAction"></button>
+      </div>
+    </div>
+
+    <div class="card" id="siteCard" hidden>
+      <p class="small muted" id="siteLabel"></p>
+      <div class="row">
+        <button id="siteAction"></button>
+      </div>
+    </div>
+
+    <div class="notes">
+      <p id="scopeNote"></p>
+      <p id="dnsNote"></p>
+      <p id="webrtcNote"></p>
+      <p id="incognitoNote"></p>
+      <p id="tunnelNote"></p>
+      <p id="errNote" class="err" role="alert" hidden></p>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

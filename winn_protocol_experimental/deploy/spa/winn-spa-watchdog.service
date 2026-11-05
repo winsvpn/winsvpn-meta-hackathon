@@ -1,0 +1,28 @@
+[Unit]
+# Independent backstop for the fail-open guarantee.
+#
+# winn-knockd.service already reverts the gate via ExecStopPost. This exists
+# because ExecStopPost is not guaranteed to run in every possible failure:
+# a hard power loss followed by a boot in which winn-knockd fails to start, a
+# systemd state corruption, or an operator who ran `systemctl mask winn-knockd`
+# and forgot the firewall. In each of those the gate would be installed with no
+# daemon feeding it, which is the exact state that locks every user out.
+#
+# The check is deliberately dumb and one-directional: if the gate is installed
+# AND the daemon is not active, remove the gate. It never installs anything and
+# never restarts the daemon.
+Description=Winn SPA watchdog (removes the SPA gate if the knock daemon is not running)
+Documentation=file:///usr/local/share/doc/winn-protocol/SPA_DESIGN.md
+
+[Service]
+Type=oneshot
+# The same family/table the knock daemon and its ExecStopPost revert use; the
+# revert below inherits them from this environment.
+EnvironmentFile=-/etc/winn/spa/knockd.env
+ExecStart=/bin/sh -c '\
+  if /usr/sbin/nft list table "$${WINN_SPA_FAMILY:-inet}" "$${WINN_SPA_TABLE:-winn_spa}" >/dev/null 2>&1; then \
+    if ! systemctl is-active --quiet winn-knockd.service; then \
+      logger -t winn-spa-watchdog "SPA gate installed but winn-knockd is not active; reverting to fail open"; \
+      /usr/local/sbin/winn-spa-nft revert; \
+    fi; \
+  fi'

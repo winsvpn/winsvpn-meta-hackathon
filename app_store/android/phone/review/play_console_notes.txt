@@ -1,0 +1,27 @@
+Phone/tablet Play Console notes for org.winsvpn.app 1.0.16+33 (versionCode 33).
+
+Form factor:
+- Application ID org.winsvpn.app
+- Installed application label: Calculator
+- Play listing name: Win's VPN
+- Phone listing/screenshot inventory: owner-blocked
+- QUERY_ALL_PACKAGES declaration: PENDING
+
+Protocol (local phone/tablet engines):
+- Primary: Winn v3 (libwinnengine.so)
+- Winn v1 compatibility path: AWG (libam-go.so)
+- A served Winn v3 lead attempt cannot be skipped
+- libam.so, libam-quick.so and libxray.so must not ship
+
+Reviewer path:
+1. Install the phone release of org.winsvpn.app.
+2. Set a six-digit PIN. Fresh enrollment cannot use a four-digit PIN.
+   Repeated digits such as 000000 are refused.
+3. Tap Try Free Server (100 Mbps upload and download).
+4. Accept the legal notice and the VpnService disclosure.
+5. Approve the Android VPN permission prompt.
+6. Confirm the VPN notification and that the app shows SECURED.
+7. Disconnect from the power control and confirm the notification disappears.
+
+Do not instruct reviewers to use 0000 or 000000.
+This package never uploads.

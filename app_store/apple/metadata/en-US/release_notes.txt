@@ -1,0 +1,7 @@
+Win's VPN 1.0.17 (34)
+
+Winn v3 is the primary protocol. If Winn v3 cannot connect, this version uses the Winn v1 compatibility path: AWG first, then Xray.
+
+After activation, iPhone and iPad always use calculator camouflage; it cannot be switched off in the app, and entering the configured six-digit PIN reveals the VPN interface. On iPhone, iPad, and Apple Watch the app installs under the name Win's VPN; the calculator safety screen and the alternate calculator icon stay. The iPhone app embeds an Apple Watch companion for connect, disconnect, and location selection. The Mac app does not include calculator camouflage or the Watch companion.
+
+Use Try Free Server or an existing account number. This Apple build does not include in-app purchases.

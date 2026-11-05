@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Win's VPN — Winn Protocol v3 Windows engine payload, as an MSI.
+
+  WHY AN MSI, AND WHY A SEPARATE ONE
+
+  The shipping product installer is installer/windows/winsvpn.iss, built by
+  build_installer.ps1 with Inno Setup. Inno Setup is ABSENT from the build host
+  this package was produced on, and the machine already carries a live Inno
+  installation of the v1/AmneziaWG product under C:\Program Files\WinsVPN with a
+  running WinsVpnTunnelManager service. This package therefore:
+
+    * uses its own UpgradeCode and its own install folder, so it can never
+      upgrade, downgrade, repair or uninstall that existing product; and
+    * carries ONLY the two Winn Protocol v3 halves plus the Wintun DLL they
+      drive, which is exactly the payload the Inno route has no way to produce
+      on a host without ISCC.
+
+  WHAT IS DELIBERATELY NOT IN HERE
+
+  No service, no driver install, no scheduled task, no network adapter, no
+  firewall rule and no route. Every one of those is machine state that an
+  uninstall can fail to reverse, and the point of this package is an install
+  and uninstall that provably leave nothing behind. The v3 relay creates its
+  Wintun adapter at RUNTIME and tears it down on stop (windows/winn3_engine/
+  main_windows.go), so adapter lifetime is not an installer concern and is not
+  made into one here.
+
+  The Flutter runner and wins_vpn_tunnel_service.exe are not in this package
+  either: neither was rebuilt from the current tree on this host, and shipping
+  a July build inside an August package would make the artifact claim more than
+  it measured.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="Win's VPN Winn Protocol v3 Engines"
+      Manufacturer="WIN'S VPN INC"
+      Version="$(var.AppVersion)"
+      UpgradeCode="f6a3a5a4-789a-4941-a7f8-7371626fe6b2"
+      Scope="perMachine"
+      Compressed="yes"
+      InstallerVersion="500">
+
+    <SummaryInformation Description="Winn Protocol v3 datapath and Wintun relay for Windows x64" />
+
+    <!-- A same-version reinstall replaces rather than stacking, so repeated
+         install/uninstall cycles cannot leave two products in Add/Remove. -->
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of the Winn Protocol v3 engines is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- x64 only. The relay and the datapath are both PE32+ x86-64; an arm64
+         host needs the arm64 halves the relay builder also produces, and those
+         belong in their own package rather than in a mixed one. -->
+    <Launch
+        Condition="VersionNT64"
+        Message="The Winn Protocol v3 engines are 64-bit and require a 64-bit edition of Windows." />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="WinsVPN Winn3 Engines">
+        <Directory Id="LICENSEFOLDER" Name="licenses" />
+      </Directory>
+    </StandardDirectory>
+
+    <ComponentGroup Id="Winn3Payload" Directory="INSTALLFOLDER">
+      <!-- winn-datapath.exe IS the winn/3 cryptography under -winn3-profile.
+           The build script refuses to package a copy that does not contain the
+           winsvpn.local/winnprotocol/winn3 marker, which is the same decision
+           build_installer.ps1's Write-Winn3CarrierCompleteness makes. -->
+      <Component Id="C_WinnDatapath" Guid="a1f2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d">
+        <File Id="F_WinnDatapath" Source="$(var.PayloadDir)\winn-datapath.exe" KeyPath="yes" />
+      </Component>
+
+      <!-- The name is load-bearing: windows/runner/winn3_supervisor.cpp
+           resolves winsvpn_winn3_engine.exe beside the service image with NO
+           fallback search path, precisely so that a rename degrades into a
+           legible refusal instead of starting the AmneziaWG engine against an
+           inner-packet datapath. -->
+      <Component Id="C_Winn3Relay" Guid="b2c3d4e5-6f70-4b8c-9dae-1f2a3b4c5d6e">
+        <File Id="F_Winn3Relay" Source="$(var.PayloadDir)\winsvpn_winn3_engine.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_Wintun" Guid="c3d4e5f6-7081-4c9d-aebf-2a3b4c5d6e7f">
+        <File Id="F_Wintun" Source="$(var.PayloadDir)\wintun.dll" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_Manifest" Guid="d4e5f607-8192-4dae-bfc0-3b4c5d6e7f80">
+        <File Id="F_Manifest" Source="$(var.PayloadDir)\payload-manifest.json" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="Winn3Licenses" Directory="LICENSEFOLDER">
+      <Component Id="C_LicWintun" Guid="e5f60718-92a3-4ebf-c0d1-4c5d6e7f8091">
+        <File Id="F_LicWintun" Source="$(var.LicensesDir)\Wintun-Prebuilt-Binaries-License.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="C_LicReadme" Guid="f6071829-a3b4-4fc0-d1e2-5d6e7f8091a2">
+        <File Id="F_LicReadme" Source="$(var.LicensesDir)\README-STANDALONE-WINN3.txt" Name="README.txt" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <Feature Id="Main" Title="Winn Protocol v3 engines" Level="1">
+      <ComponentGroupRef Id="Winn3Payload" />
+      <ComponentGroupRef Id="Winn3Licenses" />
+    </Feature>
+  </Package>
+</Wix>

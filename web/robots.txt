@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /pay/
+
+Sitemap: https://winsvpn.org/sitemap.xml

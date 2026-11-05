@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-wear-os-external-tools-v1",
+  "latest_stable": true,
+  "bundletool": {
+    "version": "1.18.3",
+    "artifact": "bundletool-all-1.18.3.jar",
+    "sha256": "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29",
+    "source_url": "https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar",
+    "source_repository": "https://github.com/google/bundletool",
+    "archive_path": "/Users/owner/.winsvpn/tool-cache/bundletool/bundletool-all-1.18.3.jar",
+    "latest_stable": true
+  },
+  "android_sdk": {
+    "root": "/Users/owner/.local/android-sdk"
+  }
+}

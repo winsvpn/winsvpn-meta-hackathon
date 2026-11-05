@@ -1,0 +1,86 @@
+[
+  {
+    "path": "extension/src/background/background.js",
+    "before_sha256": "f25fb2bced5843056e052ddbad5e0386af12fac89a027f0eec5a146b42d27b22",
+    "after_sha256": "652c14ebc1c1a9d79301c49c6a4b03c0f7be7fe1f381a92006c93f3886770fd2",
+    "CR_bytes": 0
+  },
+  {
+    "path": "extension/tools/test_background_lifecycle.py",
+    "before_sha256": null,
+    "after_sha256": "98c268b1710074e5b29120dc37234232435477071223f03eb74de7d3474feed1",
+    "CR_bytes": 0
+  },
+  {
+    "path": "linux/runner/linux_tunnel_backend.cc",
+    "before_sha256": "d4abd32c5479678713f03497633ca306ef956b7f3fb29740faac0f02700837e8",
+    "after_sha256": "559030b209b25c66075e77dac7f583899ab239b3fe10fb0cf00ee3c5b00e0d34",
+    "CR_bytes": 0
+  },
+  {
+    "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+    "before_sha256": "63c20591d85463a5cb3328cea781ae5dcc95ed52e2eabe10e5d9e693b67394c1",
+    "after_sha256": "f41b1fbcbb67a00cdce4c1e51ead02c6cd1ba9fca0c257542c479b91ec7089a5",
+    "CR_bytes": 0
+  },
+  {
+    "path": "server/test_donor_acknowledgment_hub.py",
+    "before_sha256": "70446b05b082d5fa43f2ed3d36ea6d9ffee3e4c567877dfe1a04e68b15fef031",
+    "after_sha256": "06759aad3caf10e72bcd9032e3c33e9c8e1d99d03ca17c84a60c6387768d2893",
+    "CR_bytes": 0
+  },
+  {
+    "path": "server/test_control_plane_round10.py",
+    "before_sha256": null,
+    "after_sha256": "cfad57d6258871fdd5280260c5af2c830be629414b143cb0ccdb8b38c7639f2b",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/native_messaging/host/bin/wins_bridge_host.dart",
+    "before_sha256": "6b7596897abc4a5d98cc826596efa62d33ed29e6969f3d14fa3e12b19a947d19",
+    "after_sha256": "eec5fe5f056561c22f3db13a497eb1ed922a108c356f2a2b36391d0b1f45facb",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/native_messaging/host/bin/wins_bridge_host_harness.dart",
+    "before_sha256": "dbebbe29423d0746c751608e122878f35ae1914e1f3d9277fea687821c71cb0b",
+    "after_sha256": "2f9d40b82dd5a2de819a0ed64e7b0fa51373e7b5be62bfa5d0092e50d789984f",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/native_messaging/host/test/wins_bridge_host_identity_test.dart",
+    "before_sha256": "cb8a80150638dc9a11aab754f0e3953e5210538caf3f3cf2f5f1374991b73116",
+    "after_sha256": "d075216d2ba40a0d3d79d4463736ef7c5ae3e47ed7ead88782b04030bfb231d8",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/test_linux_tunnel_shutdown.py",
+    "before_sha256": "a5bda222bb438f701570fb88a499685ba9e9a9da0e55e1d52c10246134a8e471",
+    "after_sha256": "3fd4990d753331ec4f7e6bebaf0d74b417f94b97697f0699ca2563d4c8533c49",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/test_windows_awg_runtime_validation.py",
+    "before_sha256": "4b306d9078785163a3e0c2930615c2058a931915897e007e8393bc11101d2548",
+    "after_sha256": "ee41b3832174582c7716d6ad8ce1574025bd4a49f43e81c725b766e5053a0dc3",
+    "CR_bytes": 0
+  },
+  {
+    "path": "tools/test_windows_arm64_release_readiness.py",
+    "before_sha256": "82b5252c819dd4d56a4943c3ed37debb5f2a6a041d9c80d387b9c21efc0abe3e",
+    "after_sha256": "c1d27a50f5f44bfe3b2b3624177f74f6b04521f872adeee474ff9da921042bbe",
+    "CR_bytes": 0
+  },
+  {
+    "path": "winn_protocol_experimental/cmd/winn3-gateway/forward.go",
+    "before_sha256": "416ccf5b6c58a33496b26571ceffbb2124dba2be87a1a3de0f8d55be181855fa",
+    "after_sha256": "fffadcaebab648fd809a43f42eb8836b3440c7d31dd31635ab8f2d7507369621",
+    "CR_bytes": 0
+  },
+  {
+    "path": "winn_protocol_experimental/cmd/winn3-gateway/forward_round10_test.go",
+    "before_sha256": null,
+    "after_sha256": "cf0d4f7e220df6a650782aa9301f145a3dd5dfb4151167b00f60cbb8dcd4bf8e",
+    "CR_bytes": 0
+  }
+]

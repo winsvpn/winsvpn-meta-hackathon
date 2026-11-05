@@ -1,0 +1,4 @@
+{"id":"dur-01","action":"duress_promote_tunnel","category":"tunnel","target":"host/utun","principal":"attacker","seq":1,"expected":"deny"}
+{"id":"dur-02","action":"duress_default_route","category":"tunnel","target":"host/route","principal":"attacker","seq":2,"expected":"deny"}
+{"id":"dur-03","action":"duress_git_clean","category":"destructive","target":"wins_security","principal":"attacker","seq":3,"expected":"deny"}
+{"id":"dur-04","action":"duress_register_spain","category":"registry","target":"spain-madrid","principal":"attacker","seq":4,"expected":"deny"}

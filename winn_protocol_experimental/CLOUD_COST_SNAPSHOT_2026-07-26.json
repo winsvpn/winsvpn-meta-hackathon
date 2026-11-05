@@ -1,0 +1,35 @@
+{
+  "schema": "winn-cloud-cost-snapshot/v1",
+  "observed_at_local": "2026-07-26T23:35:00-04:00",
+  "provider": "upcloud",
+  "source": "authenticated UpCloud dashboard and server inventory",
+  "balance": {
+    "currency": "EUR",
+    "amount": 199.83
+  },
+  "daily_use": {
+    "currency": "EUR",
+    "amount": 1.86
+  },
+  "provider_projected_balance_exhaustion_date": "2026-11-10",
+  "inventory": {
+    "cloud_servers_total": 1,
+    "cloud_servers_running": 0,
+    "gpu_servers_total": 0,
+    "servers": [
+      {
+        "uuid": "<UPCLOUD_SERVER_UUID_EXIT_CHI>",
+        "name": "ubuntu-4cpu-8gb-us-chi1",
+        "project_role": "winn-exit-chi",
+        "state": "stopped",
+        "location": "US-CHI1",
+        "public_ipv4": "<NODE_EXIT_CHI>",
+        "cpu_cores": 4,
+        "memory_gb": 8,
+        "storage_gb": 100
+      }
+    ]
+  },
+  "action": "confirmed server <UPCLOUD_SERVER_UUID_EXIT_CHI> remains stopped",
+  "reason": "No authorized provider workload is active. The server remains shut down and its data is preserved. UpCloud's current documentation says Starter and Premium Cloud Servers remain billable while shut down, so this power-off is operational protection rather than a zero-burn state; deletion was not authorized."
+}

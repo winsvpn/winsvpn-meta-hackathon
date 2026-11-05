@@ -1,0 +1,2399 @@
+package org.winsvpn.app
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
+import android.content.pm.ServiceInfo
+import android.net.VpnService
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.system.Os
+import android.system.OsConstants
+import android.system.StructPollfd
+import android.util.Base64
+import android.util.Log
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.channels.DatagramChannel
+import java.security.MessageDigest
+import java.security.SecureRandom
+import java.util.Collections
+import java.util.TreeMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import wins_awg.Wins_awg
+
+class VpnTunnelService : VpnService() {
+    private var vpnInterface: ParcelFileDescriptor? = null
+    private var xrayProcess: Process? = null
+    private var smartBoostEngine: SmartBoostEngine? = null
+    private var tunnelWakeLock: android.os.PowerManager.WakeLock? = null
+    private val channelId = "wins_vpn_channel"
+    @Volatile private var tearingDown = false
+
+    companion object {
+        @JvmStatic
+        @Volatile
+        var isServiceActive = false
+
+        @JvmStatic
+        @Volatile
+        var smartBoostStatus: Map<String, Any> = stoppedSmartBoostStatus()
+
+        @JvmStatic
+        fun stoppedSmartBoostStatus(reason: String = "stopped"): Map<String, Any> {
+            return mapOf(
+                "active" to false,
+                "secondary_qualified" to false,
+                "probe_complete" to false,
+                "reason" to reason,
+                "paths" to emptyList<Map<String, Any>>(),
+            )
+        }
+    }
+
+    override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+        if (action == "ACTION_DISCONNECT") {
+            executeTunnelTeardown(intent.getBooleanExtra("KEEP_VPN_LAUNCHER", false))
+            return START_NOT_STICKY
+        }
+
+        val config = intent?.getStringExtra("CONFIG_PAYLOAD") ?: ""
+        if (config.isBlank()) {
+            Log.e("WinsVpnService", "Empty tunnel configuration payload")
+            executeTunnelTeardown()
+            return START_NOT_STICKY
+        }
+
+        resetTunnelBeforeConnect()
+        createNotificationChannel()
+        startAsForegroundService()
+        acquireTunnelWakeLock()
+
+        val debugSection = parseConfigSection(config, "winsdebug")
+        val appSection = parseConfigSection(config, "winsapp")
+
+        try {
+            startXrayTransportIfNeeded(config)
+        } catch (e: Exception) {
+            Log.e("WinsVpnService", "Xray stealth transport failed to start", e)
+            executeTunnelTeardown()
+            return START_NOT_STICKY
+        }
+
+        val awgConfig = stripConfigSection(
+            stripConfigSection(
+                stripConfigSection(stripConfigSection(config, "xray"), "winsdebug"),
+                "winsapp"
+            ),
+            "winsboost"
+        )
+        val clientIp = parseConfigValue(awgConfig, "Address")?.split("/")?.getOrNull(0) ?: "10.8.1.3"
+        val dnsServer = parseConfigValue(awgConfig, "DNS") ?: "10.8.1.1"
+        val mtu = parseConfigValue(awgConfig, "MTU")?.toIntOrNull() ?: 1280
+        val peerEndpoint = parseConfigValue(awgConfig, "Endpoint") ?: "unknown"
+        val allowedIps = parseConfigValue(awgConfig, "AllowedIPs") ?: "unknown"
+        val peerPublicKey = parseConfigValue(awgConfig, "PublicKey") ?: ""
+        val presharedKey = parseConfigValue(awgConfig, "PresharedKey") ?: ""
+        val clientPublicKey = debugSection["clientpublickey"] ?: ""
+        val mode = if (parseBool(parseConfigSection(config, "xray")["enabled"])) {
+            "stealth-xray"
+        } else {
+            "direct-awg"
+        }
+
+        try {
+            Log.d("WinsVpnService", "Creating native VPN interface: $clientIp DNS=$dnsServer MTU=$mtu")
+            Log.d(
+                "WinsVpnService",
+                "Starting VPN engine mode=$mode endpoint=$peerEndpoint allowed=$allowedIps peer=${keyFingerprint(peerPublicKey)} client=${keyFingerprint(clientPublicKey)} psk=${keyFingerprint(presharedKey)}"
+            )
+
+            val builder = Builder()
+                .setSession("WinsVPN")
+                .addAddress(clientIp, 32)
+                .addDnsServer(dnsServer)
+                .addRoute("0.0.0.0", 0)
+                .setMtu(mtu)
+
+            try {
+                builder.addDisallowedApplication(packageName)
+                Log.d("WinsVpnService", "App UID excluded from VPN tunnel to prevent control-plane and Xray routing loops.")
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e("WinsVpnService", "Failed to exclude app from VPN tunnel", e)
+            }
+            applyUserExcludedApplications(builder, appSection)
+
+            try {
+                builder.addAddress("fd00:d951:0001::1", 128)
+                builder.addRoute("::", 0)
+            } catch (e: Exception) {
+                Log.w("WinsVpnService", "IPv6 blackhole/protection route skipped", e)
+            }
+
+            vpnInterface?.close()
+            vpnInterface = builder.establish()
+
+            if (vpnInterface == null) {
+                Log.e("WinsVpnService", "Builder.establish() returned null")
+                executeTunnelTeardown()
+                return START_NOT_STICKY
+            }
+
+            isServiceActive = true
+            tearingDown = false
+            setLauncherComponentState(true)
+            val tunFd = vpnInterface!!.fd
+
+            Thread {
+                setTunnelThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY)
+                try {
+                    val engineStatus = Wins_awg.startStealthTunnelEngine(awgConfig, tunFd.toLong())
+                    if (engineStatus.contains("REJECTED") || engineStatus.contains("error", ignoreCase = true)) {
+                        Log.e("WinsVpnService", "Tunnel engine failure: $engineStatus")
+                        executeTunnelTeardown()
+                    }
+                } catch (e: Exception) {
+                    Log.e("WinsVpnService", "Tunnel engine crashed", e)
+                    executeTunnelTeardown()
+                }
+            }.start()
+        } catch (e: Exception) {
+            Log.e("WinsVpnService", "Failed to allocate interface or start tunnel", e)
+            executeTunnelTeardown()
+            return START_NOT_STICKY
+        }
+
+        return START_NOT_STICKY
+    }
+
+    private fun resetTunnelBeforeConnect() {
+        try {
+            stopXrayTransport()
+            stopSmartBoostEngine()
+            try {
+                Wins_awg.stopStealthTunnelEngine()
+            } catch (e: Exception) {
+                Log.w("WinsVpnService", "Previous engine stop warning", e)
+            }
+            vpnInterface?.close()
+            vpnInterface = null
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Previous tunnel reset warning", e)
+        } finally {
+            isServiceActive = false
+            smartBoostStatus = stoppedSmartBoostStatus("reset")
+            tearingDown = false
+        }
+    }
+
+    private fun startXrayTransportIfNeeded(config: String) {
+        val section = parseConfigSection(config, "xray")
+        val enabled = parseBool(section["enabled"])
+        if (!enabled) {
+            stopXrayTransport()
+            return
+        }
+
+        val uuid = section["uuid"].orEmpty()
+        val host = section["host"].orEmpty()
+        val port = section["port"]?.toIntOrNull() ?: 80
+        val serverName = section["servername"]?.ifBlank { host } ?: host
+        val path = section["path"]?.ifBlank { "/wins-stealth-tunnel" } ?: "/wins-stealth-tunnel"
+        val security = section["security"]?.lowercase()?.ifBlank { "none" } ?: "none"
+        val localPort = section["localport"]?.toIntOrNull() ?: 42110
+        val remoteAwgHost = section["remoteawghost"]?.ifBlank { "127.0.0.1" } ?: "127.0.0.1"
+        val remoteAwgPort = section["remoteawgport"]?.toIntOrNull() ?: 9110
+
+        require(uuid.isNotBlank()) { "Xray UUID missing" }
+        require(host.isNotBlank()) { "Xray host missing" }
+
+        stopXrayTransport()
+
+        val xray = resolveXrayExecutable()
+        val conf = writeXrayClientConfig(
+            uuid = uuid,
+            host = host,
+            port = port,
+            serverName = serverName,
+            path = path,
+            security = security,
+            localPort = localPort,
+            remoteAwgHost = remoteAwgHost,
+            remoteAwgPort = remoteAwgPort,
+        )
+
+        Log.d("WinsVpnService", "Starting Xray VLESS-WS transport: 127.0.0.1:$localPort -> $host:$port$path security=$security")
+        xrayProcess = ProcessBuilder(xray.absolutePath, "run", "-c", conf.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val processForLog = xrayProcess
+        Thread {
+            try {
+                processForLog?.inputStream?.bufferedReader()?.useLines { lines ->
+                    lines.forEach { Log.d("WinsXray", it.take(500)) }
+                }
+            } catch (_: Exception) {}
+        }.start()
+
+        Thread.sleep(900)
+        if (xrayProcess?.isAlive != true) {
+            throw IOException("Xray process exited during startup. Check generated client config and native binary ABI.")
+        }
+    }
+
+    private fun writeXrayClientConfig(
+        uuid: String,
+        host: String,
+        port: Int,
+        serverName: String,
+        path: String,
+        security: String,
+        localPort: Int,
+        remoteAwgHost: String,
+        remoteAwgPort: Int,
+    ): File {
+        val inboundSettings = JSONObject()
+            .put("address", remoteAwgHost)
+            .put("port", remoteAwgPort)
+            .put("network", "tcp,udp")
+            .put("followRedirect", false)
+
+        val inbound = JSONObject()
+            .put("tag", "awg-local-in")
+            .put("listen", "127.0.0.1")
+            .put("port", localPort)
+            .put("protocol", "dokodemo-door")
+            .put("settings", inboundSettings)
+
+        val user = JSONObject()
+            .put("id", uuid)
+            .put("encryption", "none")
+            .put("level", 0)
+
+        val vnext = JSONObject()
+            .put("address", host)
+            .put("port", port)
+            .put("users", JSONArray().put(user))
+
+        val wsSettings = JSONObject()
+            .put("path", path)
+            .put("headers", JSONObject().put("Host", serverName))
+
+        val streamSettings = JSONObject()
+            .put("network", "ws")
+            .put("security", security)
+            .put("wsSettings", wsSettings)
+
+        if (security == "tls") {
+            streamSettings.put(
+                "tlsSettings",
+                JSONObject()
+                    .put("serverName", serverName)
+                    .put("allowInsecure", false)
+            )
+        }
+
+        val outbound = JSONObject()
+            .put("tag", "vless-ws-out")
+            .put("protocol", "vless")
+            .put("settings", JSONObject().put("vnext", JSONArray().put(vnext)))
+            .put("streamSettings", streamSettings)
+            .put("mux", JSONObject()
+                .put("enabled", true)
+                .put("concurrency", 8)
+                .put("xudpConcurrency", 16)
+                .put("xudpProxyUDP443", "allow")
+            )
+
+        val routingRule = JSONObject()
+            .put("type", "field")
+            .put("inboundTag", JSONArray().put("awg-local-in"))
+            .put("outboundTag", "vless-ws-out")
+
+        val root = JSONObject()
+            .put("log", JSONObject().put("loglevel", "warning"))
+            .put("inbounds", JSONArray().put(inbound))
+            .put("outbounds", JSONArray().put(outbound))
+            .put("routing", JSONObject().put("rules", JSONArray().put(routingRule)))
+
+        val file = File(filesDir, "wins_xray_client.json")
+        file.writeText(root.toString())
+        return file
+    }
+
+    private fun resolveXrayExecutable(): File {
+        val nativeLib = File(applicationInfo.nativeLibraryDir, "libxray.so")
+        if (nativeLib.exists()) {
+            nativeLib.setExecutable(true, true)
+            return nativeLib
+        }
+
+        val fallback = File(filesDir, "xray")
+        if (fallback.exists()) {
+            fallback.setExecutable(true, true)
+            return fallback
+        }
+
+        throw IOException(
+            "Missing Xray native binary. Run tools/prepare_android_xray_assets.sh before building the APK. " +
+                "Expected libxray.so under android/app/src/main/jniLibs/<abi>/; device ABIs=${Build.SUPPORTED_ABIS.joinToString()}"
+        )
+    }
+
+    private fun stopXrayTransport() {
+        try {
+            xrayProcess?.destroy()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                xrayProcess?.destroyForcibly()
+            }
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Xray process stop warning", e)
+        } finally {
+            xrayProcess = null
+        }
+    }
+
+    private fun stopSmartBoostEngine() {
+        try {
+            smartBoostEngine?.stop()
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Smart Boost stop warning", e)
+        } finally {
+            smartBoostEngine = null
+            smartBoostStatus = stoppedSmartBoostStatus("stopped")
+        }
+    }
+
+    private fun startAsForegroundService() {
+        val notification: Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, channelId)
+                .setContentTitle("Wins VPN Active")
+                .setContentText("Encrypted network tunnel is running.")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setOngoing(true)
+                .build()
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+                .setContentTitle("Wins VPN Active")
+                .setContentText("Encrypted network tunnel is running.")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setOngoing(true)
+                .build()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(4242, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(4242, notification)
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(channelId, "Wins VPN Core Services", NotificationManager.IMPORTANCE_LOW)
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(serviceChannel)
+        }
+    }
+
+    private fun executeTunnelTeardown(keepVpnLauncher: Boolean = false) {
+        if (tearingDown) return
+        tearingDown = true
+        val hadActiveSession = isServiceActive || vpnInterface != null
+        try {
+            stopXrayTransport()
+            stopSmartBoostEngine()
+            vpnInterface?.close()
+            vpnInterface = null
+        } catch (e: IOException) {
+            Log.e("WinsVpnService", "Teardown exception handled", e)
+        } catch (e: Exception) {
+            Log.e("WinsVpnService", "Engine teardown exception handled", e)
+        } finally {
+            isServiceActive = false
+            Thread { Wins_awg.stopStealthTunnelEngine() }.start()
+            releaseTunnelWakeLock()
+            if (hadActiveSession && !keepVpnLauncher) setLauncherComponentState(false)
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+        }
+    }
+
+    private fun acquireTunnelWakeLock() {
+        try {
+            if (tunnelWakeLock?.isHeld == true) return
+            val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            tunnelWakeLock = powerManager.newWakeLock(
+                android.os.PowerManager.PARTIAL_WAKE_LOCK,
+                "WinsVPN:TunnelFastPath"
+            ).apply {
+                setReferenceCounted(false)
+                acquire()
+            }
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Tunnel wake lock unavailable", e)
+        }
+    }
+
+    private fun releaseTunnelWakeLock() {
+        try {
+            tunnelWakeLock?.takeIf { it.isHeld }?.release()
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Tunnel wake lock release skipped", e)
+        } finally {
+            tunnelWakeLock = null
+        }
+    }
+
+    private fun setTunnelThreadPriority(priority: Int) {
+        try {
+            android.os.Process.setThreadPriority(priority)
+        } catch (e: Exception) {
+            Log.w("WinsVpnService", "Tunnel thread priority unchanged", e)
+        }
+    }
+
+    override fun onRevoke() {
+        executeTunnelTeardown()
+        super.onRevoke()
+    }
+
+    override fun onDestroy() {
+        if (!tearingDown) executeTunnelTeardown()
+        super.onDestroy()
+    }
+
+    private fun setLauncherComponentState(showRealVpn: Boolean) {
+        try {
+            val pm = packageManager
+            val realComponent = ComponentName(this, "org.winsvpn.app.LauncherReal")
+            val decoyComponent = ComponentName(this, "org.winsvpn.app.LauncherDecoy")
+            if (showRealVpn) {
+                pm.setComponentEnabledSetting(realComponent, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(decoyComponent, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            } else {
+                pm.setComponentEnabledSetting(decoyComponent, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(realComponent, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            }
+        } catch (e: Exception) {
+            Log.e("WinsVpnService", "Failed to update launcher component state", e)
+        }
+    }
+
+    private fun applyUserExcludedApplications(builder: Builder, appSection: Map<String, String>) {
+        val packages = appSection["excludedpackages"]
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() && it != packageName }
+            ?.distinct()
+            ?: emptyList()
+
+        for (excludedPackage in packages) {
+            try {
+                builder.addDisallowedApplication(excludedPackage)
+                Log.d("WinsVpnService", "Excluded package from VPN: $excludedPackage")
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.w("WinsVpnService", "Skipped missing split-tunnel package: $excludedPackage")
+            } catch (e: Exception) {
+                Log.w("WinsVpnService", "Failed to exclude package from VPN: $excludedPackage", e)
+            }
+        }
+    }
+
+    private class SmartBoostEngine(
+        private val service: VpnTunnelService,
+        private val vpnInterface: ParcelFileDescriptor,
+        private val endpoint: String,
+        private val configuredPort: Int,
+        keyText: String,
+        private val clientIp: String,
+    ) {
+        private val connectivity =
+            service.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        private val key = decodeKey(keyText)
+        private val secretKey = SecretKeySpec(key, "AES")
+        private val running = AtomicBoolean(false)
+        private val sequence = AtomicLong(0)
+        private val dataSequence = AtomicLong(0)
+        private val random = SecureRandom()
+        private val noncePrefix = ByteArray(4).also { random.nextBytes(it) }
+        private val nonceCounter = AtomicLong(0)
+        private val encryptCipher = ThreadLocal.withInitial { Cipher.getInstance("AES/GCM/NoPadding") }
+        private val decryptCipher = ThreadLocal.withInitial { Cipher.getInstance("AES/GCM/NoPadding") }
+        private val encryptFrameBuffer = ThreadLocal.withInitial { ByteArray(MAX_FRAME_BUFFER_SIZE) }
+        private val encryptWriteBuffer = ThreadLocal.withInitial { ByteBuffer.wrap(encryptFrameBuffer.get()) }
+        private val decryptFrameBuffer = ThreadLocal.withInitial { MutableBoostFrame() }
+        private val paths = Collections.synchronizedList(mutableListOf<BoostPath>())
+        private val callbacks = mutableListOf<ConnectivityManager.NetworkCallback>()
+        private val writerLock = Object()
+        private val pathOpenLock = Object()
+        private val inboundReorder = ReorderBuffer()
+        private val inboundFlowReorder = FlowReorderBufferMap()
+        private val flowPaths = mutableMapOf<Long, FlowChoice>()
+        private val sessionId = ByteArray(16).also { random.nextBytes(it) }
+        private var tunInput: FileInputStream? = null
+        @Volatile private var lastMetricsLogMs: Long = 0
+        @Volatile private var nativeCoreStatus: String = SmartBoostNative.versionOrFallback()
+
+        fun start() {
+            val server = parseEndpoint(endpoint, configuredPort)
+            running.set(true)
+            smartBoostStatus = mapOf(
+                "active" to true,
+                "secondary_qualified" to false,
+                "probe_complete" to false,
+                "reason" to "starting",
+                "paths" to emptyList<Map<String, Any>>(),
+            )
+            requestTransport(NetworkCapabilities.TRANSPORT_WIFI, server)
+            requestTransport(NetworkCapabilities.TRANSPORT_CELLULAR, server)
+            Thread.sleep(1200)
+            tunInput = FileInputStream(vpnInterface.fileDescriptor)
+            val wifiNetwork = findNetwork(NetworkCapabilities.TRANSPORT_WIFI)
+            val cellularNetwork = findNetwork(NetworkCapabilities.TRANSPORT_CELLULAR)
+            nativeCoreStatus = probeNativeSmartBoostCore(server, wifiNetwork, cellularNetwork)
+            Log.d("WinsVpnService", "Smart Boost native core probe: $nativeCoreStatus")
+            if (wifiNetwork != null) {
+                openTransportPaths(NetworkCapabilities.TRANSPORT_WIFI, wifiNetwork, server)
+            }
+            if (cellularNetwork != null) {
+                openTransportPaths(NetworkCapabilities.TRANSPORT_CELLULAR, cellularNetwork, server)
+            }
+            if (paths.isEmpty()) {
+                openNetworkPath(0, null, server)
+            }
+            if (paths.isEmpty()) {
+                throw IOException("Smart Boost could not open any UDP path")
+            }
+            Log.d(
+                "WinsVpnService",
+                "Smart Boost started with ${paths.size} path(s), nativeCore=$nativeCoreStatus"
+            )
+            startBoostThread("WinsBoostTunReader", android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY) {
+                tunReaderLoop()
+            }
+            startBoostThread("WinsBoostHeartbeat", android.os.Process.THREAD_PRIORITY_DISPLAY) {
+                heartbeatLoop()
+            }
+            startBoostThread("WinsBoostReorder", android.os.Process.THREAD_PRIORITY_DISPLAY) {
+                reorderMaintenanceLoop()
+            }
+        }
+
+        fun stop() {
+            running.set(false)
+            synchronized(paths) {
+                paths.forEach { path ->
+                    try {
+                        path.channel.close()
+                    } catch (_: Exception) {
+                    }
+                }
+                paths.clear()
+            }
+            callbacks.forEach { callback ->
+                try {
+                    connectivity.unregisterNetworkCallback(callback)
+                } catch (_: Exception) {
+                }
+            }
+            callbacks.clear()
+            try {
+                tunInput?.close()
+            } catch (_: Exception) {
+            }
+            smartBoostStatus = stoppedSmartBoostStatus("engine-stopped")
+        }
+
+        private fun requestTransport(transport: Int, server: InetSocketAddress) {
+            try {
+                val request = NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(transport)
+                    .build()
+                val callback = object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        if (!running.get()) return
+                        startBoostThread(
+                            "WinsBoostOpen-${transportName(transport)}",
+                            android.os.Process.THREAD_PRIORITY_DISPLAY,
+                        ) {
+                            openTransportPaths(transport, network, server)
+                        }
+                    }
+
+                    override fun onLost(network: Network) {
+                        closePathsForNetwork(network)
+                    }
+                }
+                connectivity.requestNetwork(request, callback)
+                callbacks.add(callback)
+            } catch (e: Exception) {
+                Log.w("WinsVpnService", "Smart Boost network request skipped", e)
+            }
+        }
+
+        private fun findNetwork(transport: Int): Network? {
+            val candidates = connectivity.allNetworks.mapNotNull { network ->
+                val capabilities = connectivity.getNetworkCapabilities(network) ?: return@mapNotNull null
+                if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ||
+                    !capabilities.hasTransport(transport) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+                ) {
+                    return@mapNotNull null
+                }
+                var score = (pathCapacityHintBytesPerSecond(transport, capabilities) / 125L) +
+                    capabilities.linkUpstreamBandwidthKbps.toLong()
+                if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)) {
+                    score += 1_000_000L
+                }
+                if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+                    score += 500_000L
+                }
+                if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)) {
+                    score += 50_000L
+                }
+                NetworkCandidate(network, capabilities, score)
+            }
+            val selected = candidates.maxByOrNull { it.score }
+            if (selected != null) {
+                Log.d(
+                    "WinsVpnService",
+                    "Smart Boost selected ${transportName(transport)} network score=${selected.score} " +
+                        "down=${selected.capabilities.linkDownstreamBandwidthKbps}Kbps " +
+                        "up=${selected.capabilities.linkUpstreamBandwidthKbps}Kbps " +
+                        "hint=${(pathCapacityHintBytesPerSecond(transport, selected.capabilities) * 8.0) / 1_000_000.0}Mbps"
+                )
+            } else {
+                Log.w("WinsVpnService", "Smart Boost found no ${transportName(transport)} network")
+            }
+            return selected?.network
+        }
+
+        private fun openTransportPaths(transport: Int, network: Network?, server: InetSocketAddress) {
+            if (network == null) return
+            when (transport) {
+                NetworkCapabilities.TRANSPORT_WIFI -> {
+                    openNetworkPathIfMissing(WIFI_PATH_ID, network, server)
+                    for (offset in 0 until WIFI_SUBPATH_COUNT) {
+                        openNetworkPathIfMissing(WIFI_SUBPATH_BASE_ID + offset, network, server)
+                    }
+                }
+                NetworkCapabilities.TRANSPORT_CELLULAR -> {
+                    for (offset in 0 until CELLULAR_SUBPATH_COUNT) {
+                        openNetworkPathIfMissing(2 + offset, network, server)
+                    }
+                }
+            }
+        }
+
+        private fun probeNativeSmartBoostCore(
+            server: InetSocketAddress,
+            wifiNetwork: Network?,
+            cellularNetwork: Network?,
+        ): String {
+            val pathIds = mutableListOf<Int>()
+            val handles = mutableListOf<Long>()
+            if (wifiNetwork != null) {
+                pathIds.add(WIFI_PATH_ID)
+                handles.add(wifiNetwork.networkHandle)
+                for (offset in 0 until WIFI_SUBPATH_COUNT) {
+                    pathIds.add(WIFI_SUBPATH_BASE_ID + offset)
+                    handles.add(wifiNetwork.networkHandle)
+                }
+            }
+            if (cellularNetwork != null) {
+                for (offset in 0 until CELLULAR_SUBPATH_COUNT) {
+                    pathIds.add(2 + offset)
+                    handles.add(cellularNetwork.networkHandle)
+                }
+            }
+            if (pathIds.isEmpty()) {
+                pathIds.add(0)
+                handles.add(0L)
+            }
+            val probe = SmartBoostNative.probeSocketBindingsOrNull(
+                service = service,
+                host = server.hostString,
+                port = server.port,
+                pathIds = pathIds.toIntArray(),
+                networkHandles = handles.toLongArray(),
+            )
+            return probe ?: SmartBoostNative.versionOrFallback()
+        }
+
+        private fun openNetworkPathIfMissing(pathId: Int, network: Network?, server: InetSocketAddress) {
+            synchronized(pathOpenLock) {
+                val now = nowMs()
+                val existing = synchronized(paths) {
+                    paths.firstOrNull { it.id == pathId && it.channel.isOpen && it.isHealthy(now) }
+                }
+                if (existing != null) return
+                openNetworkPath(pathId, network, server)
+            }
+        }
+
+        private fun closePathsForNetwork(network: Network) {
+            val closing = mutableListOf<BoostPath>()
+            synchronized(paths) {
+                val iterator = paths.iterator()
+                while (iterator.hasNext()) {
+                    val path = iterator.next()
+                    if (path.network == network) {
+                        iterator.remove()
+                        closing.add(path)
+                    }
+                }
+            }
+            closing.forEach { path ->
+                try {
+                    path.channel.close()
+                } catch (_: Exception) {
+                }
+            }
+        }
+
+        private fun openNetworkPath(pathId: Int, network: Network?, server: InetSocketAddress) {
+            try {
+                var capacityHintBytesPerSecond = 0L
+                var wifiTransport = pathId == WIFI_PATH_ID || isWifiSubpathId(pathId)
+                if (network != null) {
+                    val capabilities = connectivity.getNetworkCapabilities(network)
+                    if (capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
+                        return
+                    }
+                    wifiTransport = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                    capacityHintBytesPerSecond = pathCapacityHintBytesPerSecond(pathId, capabilities)
+                    Log.d(
+                        "WinsVpnService",
+                        "Smart Boost binding path $pathId to network " +
+                            "down=${capabilities.linkDownstreamBandwidthKbps}Kbps " +
+                            "up=${capabilities.linkUpstreamBandwidthKbps}Kbps " +
+                            "hint=${(capacityHintBytesPerSecond * 8.0) / 1_000_000.0}Mbps"
+                    )
+                }
+                val channel = DatagramChannel.open()
+                channel.configureBlocking(false)
+                val socket = channel.socket()
+                socket.reuseAddress = true
+                socket.receiveBufferSize = 4 * 1024 * 1024
+                socket.sendBufferSize = 4 * 1024 * 1024
+                service.protect(socket)
+                network?.bindSocket(socket)
+                channel.connect(server)
+                channel.configureBlocking(true)
+                val path = BoostPath(pathId, network, channel, capacityHintBytesPerSecond, wifiTransport)
+                paths.add(path)
+                sendFrame(path, TYPE_HELLO, helloPayload())
+                sendFrame(path, TYPE_PING, pingPayload(path))
+                startBoostThread("WinsBoostUdpReader-$pathId", android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY) {
+                    socketReaderLoop(path)
+                }
+            } catch (e: Exception) {
+                Log.w("WinsVpnService", "Smart Boost path $pathId unavailable", e)
+            }
+        }
+
+        private fun startBoostThread(name: String, priority: Int, block: () -> Unit) {
+            Thread({
+                try {
+                    android.os.Process.setThreadPriority(priority)
+                } catch (e: Exception) {
+                    Log.w("WinsVpnService", "Smart Boost thread priority unchanged for $name", e)
+                }
+                block()
+            }, name).start()
+        }
+
+        private fun pathCapacityHintBytesPerSecond(
+            transportOrPathId: Int,
+            capabilities: NetworkCapabilities,
+        ): Long {
+            val downstreamKbps = capabilities.linkDownstreamBandwidthKbps
+                .toLong()
+                .coerceAtLeast(0L)
+            val upstreamKbps = capabilities.linkUpstreamBandwidthKbps
+                .toLong()
+                .coerceAtLeast(0L)
+            var bestKbps = maxOf(downstreamKbps, upstreamKbps)
+            val isWifi = transportOrPathId == WIFI_PATH_ID ||
+                isWifiSubpathId(transportOrPathId) ||
+                transportOrPathId == NetworkCapabilities.TRANSPORT_WIFI ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+
+            if (isWifi) {
+                val wifiInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    capabilities.transportInfo as? WifiInfo
+                } else {
+                    null
+                }
+                if (wifiInfo != null) {
+                    val wifiKbps = mutableListOf<Long>()
+                    if (wifiInfo.linkSpeed > 0) {
+                        wifiKbps.add(wifiInfo.linkSpeed.toLong() * 1000L)
+                    }
+                    if (wifiInfo.rxLinkSpeedMbps > 0) {
+                        wifiKbps.add(wifiInfo.rxLinkSpeedMbps.toLong() * 1000L)
+                    }
+                    if (wifiInfo.txLinkSpeedMbps > 0) {
+                        wifiKbps.add(wifiInfo.txLinkSpeedMbps.toLong() * 1000L)
+                    }
+                    val bestWifiKbps = wifiKbps.maxOrNull() ?: 0L
+                    if (bestWifiKbps > 0) {
+                        bestKbps = maxOf(
+                            bestKbps,
+                            (bestWifiKbps * WIFI_LINK_EFFICIENCY_PERCENT) / 100L,
+                        )
+                    }
+                }
+            }
+
+            val floorBps = if (isWifi) WIFI_CAPACITY_FLOOR_BPS else CELLULAR_CAPACITY_FLOOR_BPS
+            return ((bestKbps * 1000L) / 8L)
+                .coerceAtLeast(floorBps)
+                .coerceAtMost(MAX_CAPACITY_HINT_BPS)
+        }
+
+        private fun tunReaderLoop() {
+            val input = tunInput ?: return
+            val buffer = ByteArray(65535)
+            val txBatch = TxBatchBuffer()
+            val pollFd = StructPollfd().apply {
+                fd = vpnInterface.fileDescriptor
+                events = OsConstants.POLLIN.toShort()
+            }
+            while (running.get()) {
+                try {
+                    pollFd.revents = 0
+                    val ready = Os.poll(arrayOf(pollFd), 1000)
+                    if (!running.get()) return
+                    if (ready <= 0) continue
+                    val events = pollFd.revents.toInt()
+                    if ((events and (OsConstants.POLLERR or OsConstants.POLLHUP or OsConstants.POLLNVAL)) != 0) {
+                        throw IOException("Smart Boost TUN poll failed: revents=$events")
+                    }
+                    if ((events and OsConstants.POLLIN) == 0) continue
+                    if (!readAndQueueTunPacket(input, buffer, txBatch)) {
+                        txBatch.flush()
+                        Thread.sleep(1)
+                        continue
+                    }
+                    var drained = 1
+                    while (running.get() && drained < MAX_TUN_BATCH) {
+                        pollFd.revents = 0
+                        val burstReady = Os.poll(arrayOf(pollFd), 0)
+                        if (burstReady <= 0) break
+                        val burstEvents = pollFd.revents.toInt()
+                        if ((burstEvents and (OsConstants.POLLERR or OsConstants.POLLHUP or OsConstants.POLLNVAL)) != 0) {
+                            throw IOException("Smart Boost TUN burst poll failed: revents=$burstEvents")
+                        }
+                        if ((burstEvents and OsConstants.POLLIN) == 0) break
+                        if (!readAndQueueTunPacket(input, buffer, txBatch)) break
+                        drained += 1
+                    }
+                    txBatch.flush()
+                } catch (_: IOException) {
+                    if (running.get()) {
+                        service.executeTunnelTeardown()
+                    }
+                    return
+                } catch (e: Exception) {
+                    Log.w("WinsVpnService", "Smart Boost TUN read warning", e)
+                }
+            }
+        }
+
+        private fun readAndQueueTunPacket(input: FileInputStream, buffer: ByteArray, txBatch: TxBatchBuffer): Boolean {
+            val read = input.read(buffer)
+            if (read <= 0) return false
+            if (((buffer[0].toInt() ushr 4) and 0x0F) != 4) return true
+            val path = choosePathForPacket(buffer, read) ?: return true
+            txBatch.queue(path, buffer, read)
+            return true
+        }
+
+        private fun socketReaderLoop(path: BoostPath) {
+            val backing = ByteArray(65535)
+            val decrypted = ByteArray(65535)
+            val buffer = ByteBuffer.wrap(backing)
+            while (running.get() && path.channel.isOpen) {
+                try {
+                    buffer.clear()
+                    val read = path.channel.read(buffer)
+                    if (read <= 0) {
+                        continue
+                    }
+                    val frame = decrypt(backing, read, decrypted) ?: continue
+                    when (frame.type) {
+                        TYPE_DATA -> {
+                            val singleOffset = singleDataPayloadOffset(frame.payload, frame.payloadLength)
+                            if (!GLOBAL_REORDER_ENABLED) {
+                                path.markDataRx(read)
+                                val packets = if (singleOffset >= 0) {
+                                    listOf(PayloadSlice(frame.payload, singleOffset, frame.payloadLength - singleOffset))
+                                } else {
+                                    extractDataPayloads(frame.payload, frame.payloadLength)
+                                }
+                                writeIncomingPackets(frame.sequence, packets)
+                                continue
+                            }
+                            if (singleOffset >= 0 && inboundReorder.tryAcceptFast(frame.sequence)) {
+                                path.markDataRx(read)
+                                writeReadyPacket(frame.payload, singleOffset, frame.payloadLength - singleOffset)
+                                continue
+                            }
+                            val packets = if (singleOffset >= 0) {
+                                listOf(PayloadSlice(frame.payload, singleOffset, frame.payloadLength - singleOffset))
+                            } else {
+                                extractDataPayloads(frame.payload, frame.payloadLength)
+                            }
+                            if (packets.isNotEmpty()) {
+                                path.markDataRx(read)
+                                writeReadyPackets(inboundReorder.push(frame.sequence, packets))
+                            }
+                        }
+                        TYPE_PONG -> path.recordPong(frame.payload, frame.payloadLength)
+                        TYPE_PROBE_DATA -> path.markProbeRx(frame.payloadLength)
+                        TYPE_HELLO -> path.markControlAlive()
+                    }
+                } catch (_: InterruptedException) {
+                    return
+                } catch (e: Exception) {
+                    if (running.get()) {
+                        Log.w("WinsVpnService", "Smart Boost UDP read warning", e)
+                    }
+                    Thread.sleep(25)
+                }
+            }
+        }
+
+        private fun heartbeatLoop() {
+            while (running.get()) {
+                val snapshot = synchronized(paths) { paths.toList() }
+                val payload = helloPayload()
+                val now = nowMs()
+                snapshot.forEach { path ->
+                    path.decayCounters()
+                    sendFrame(path, TYPE_HELLO, payload)
+                    sendFrame(path, TYPE_PING, pingPayload(path))
+                    if (path.shouldRequestProbe(now)) {
+                        sendFrame(path, TYPE_PROBE, probePayload())
+                    }
+                }
+                if (now - lastMetricsLogMs > METRICS_LOG_INTERVAL_MS) {
+                    lastMetricsLogMs = now
+                    publishStatus(snapshot, now)
+                    Log.d(
+                        "WinsVpnService",
+                        "Smart Boost path metrics: ${
+                            snapshot.joinToString("; ") { it.debugSummary(now) }
+                        }"
+                    )
+                }
+                Thread.sleep(1000)
+            }
+        }
+
+        private fun publishStatus(snapshot: List<BoostPath>, now: Long) {
+            val wifi = snapshot.firstOrNull { it.id == WIFI_PATH_ID }
+            val secondaryPaths = snapshot.filter { it.id != WIFI_PATH_ID }
+            val cellularPaths = secondaryPaths.filter { !it.wifiTransport }
+            val secondary = secondaryPaths
+                .maxByOrNull { it.selectionBps() }
+            val secondaryBps = secondary?.selectionBps() ?: 0L
+            val secondaryProbeBytes = secondaryPaths
+                .maxOfOrNull { it.rxByteCount() } ?: 0L
+            val cellularProbeBytes = cellularPaths
+                .maxOfOrNull { it.rxByteCount() } ?: 0L
+            val wifiRtt = wifi?.rttMs?.coerceAtLeast(1) ?: DEFAULT_RTT_MS
+            val rttCeiling = maxOf(
+                wifiRtt + STRIPE_RTT_HEADROOM_MS,
+                (wifiRtt * STRIPE_RTT_MULTIPLIER_NUM) / STRIPE_RTT_MULTIPLIER_DEN,
+            )
+            val probeComplete = secondaryProbeBytes >= SECONDARY_MIN_PROBE_BYTES
+            val cellularProbeComplete = cellularProbeBytes >= SECONDARY_MIN_PROBE_BYTES
+            val rttEligibleSecondaries = secondaryPaths.filter { path ->
+                path.rttMs.coerceAtLeast(1) <= rttCeiling &&
+                    path.rttMs.coerceAtLeast(1) <= STRIPE_ABSOLUTE_RTT_CEILING_MS
+            }
+            val freshSecondaries = rttEligibleSecondaries.filter { path ->
+                path.hasRecentDataRx(now, SECONDARY_STALE_DATA_BACKOFF_MS)
+            }
+            val aggregateCandidates = freshSecondaries.filter { path ->
+                path.selectionBps() >= MIN_PROVEN_SECONDARY_BPS
+            }
+            val cellularCandidates = aggregateCandidates.filter { !it.wifiTransport }
+            val aggregateSecondaryBps = aggregateCandidates
+                .sumOf { it.selectionBps() }
+            val aggregateCellularBps = cellularCandidates
+                .sumOf { it.selectionBps() }
+            val cellularQualified = cellularProbeComplete &&
+                cellularCandidates.isNotEmpty() &&
+                aggregateCellularBps >= MIN_AGGREGATE_CELLULAR_BPS
+            val secondaryQualified = secondary != null &&
+                probeComplete &&
+                cellularQualified &&
+                aggregateCandidates.isNotEmpty() &&
+                aggregateSecondaryBps >= MIN_AGGREGATE_SECONDARY_BPS
+            val reason = when {
+                secondary == null -> "no-secondary-path"
+                cellularPaths.isEmpty() -> "no-cellular-path"
+                !probeComplete -> "probe-running"
+                !cellularProbeComplete -> "cellular-probe-running"
+                rttEligibleSecondaries.isEmpty() -> "secondary-rtt-high"
+                freshSecondaries.isEmpty() -> "secondary-stale"
+                cellularCandidates.isEmpty() -> "cellular-too-slow"
+                aggregateCellularBps < MIN_AGGREGATE_CELLULAR_BPS -> "cellular-too-slow"
+                aggregateSecondaryBps < MIN_AGGREGATE_SECONDARY_BPS -> "secondary-too-slow"
+                else -> "qualified"
+            }
+            smartBoostStatus = mapOf(
+                "active" to running.get(),
+                "secondary_qualified" to secondaryQualified,
+                "cellular_qualified" to cellularQualified,
+                "probe_complete" to probeComplete,
+                "cellular_probe_complete" to cellularProbeComplete,
+                "reason" to reason,
+                "native_core" to nativeCoreStatus,
+                "secondary_mbps" to ((secondaryBps * 8.0) / 1_000_000.0),
+                "aggregate_secondary_mbps" to ((aggregateSecondaryBps * 8.0) / 1_000_000.0),
+                "aggregate_cellular_mbps" to ((aggregateCellularBps * 8.0) / 1_000_000.0),
+                "secondary_probe_bytes" to secondaryProbeBytes,
+                "cellular_probe_bytes" to cellularProbeBytes,
+                "paths" to snapshot.map { path ->
+                    mapOf(
+                        "id" to path.id,
+                        "transport" to if (path.wifiTransport) "wifi" else "cellular",
+                        "rtt_ms" to path.rttMs,
+                        "rx_mbps" to ((path.sampleDownBps() * 8.0) / 1_000_000.0),
+                        "rx_bytes" to path.rxByteCount(),
+                        "age_ms" to (now - path.lastRxMs),
+                        "failures" to path.sendFailures.get(),
+                    )
+                },
+            )
+        }
+
+        private fun writeReadyPackets(packets: List<PayloadSlice>) {
+            if (packets.isEmpty()) return
+            synchronized(writerLock) {
+                packets.forEach { payload ->
+                    Os.write(vpnInterface.fileDescriptor, payload.bytes, payload.offset, payload.length)
+                }
+            }
+        }
+
+        private fun writeReadyPacket(bytes: ByteArray, offset: Int, length: Int) {
+            synchronized(writerLock) {
+                Os.write(vpnInterface.fileDescriptor, bytes, offset, length)
+            }
+        }
+
+        private fun writeIncomingPackets(frameSequence: Long, packets: List<PayloadSlice>) {
+            if (packets.isEmpty()) return
+            if (!SINGLE_FLOW_STRIPING_ENABLED || packets.size == 1 && flowKey(packets[0]) == 0L) {
+                writeReadyPackets(packets)
+                return
+            }
+            writeReadyPackets(inboundFlowReorder.push(frameSequence, packets))
+        }
+
+        private fun reorderMaintenanceLoop() {
+            while (running.get()) {
+                writeReadyPackets(inboundReorder.flushExpired())
+                writeReadyPackets(inboundFlowReorder.flushExpired())
+                Thread.sleep(5)
+            }
+        }
+
+        private fun choosePathForPacket(packet: ByteArray, packetLength: Int): BoostPath? {
+            val now = nowMs()
+            val healthy = synchronized(paths) { paths.filter { it.isHealthy(now) } }
+            val candidates = if (healthy.isNotEmpty()) {
+                healthy
+            } else {
+                synchronized(paths) { paths.filter { it.channel.isOpen } }
+            }
+            if (candidates.isEmpty()) return null
+            if (isLatencySensitiveTcpAck(packet, packetLength)) {
+                return chooseLowestLatencyPath(candidates)
+            }
+            val flowCandidates = flowEligibleCandidates(candidates, now)
+            if (flowCandidates.size == 1) {
+                return flowCandidates.first()
+            }
+            val key = flowKey(packet, packetLength)
+            val stripingAllowed = shouldStripeFlow(key, flowCandidates, now)
+            val burstPath = chooseCachedBurstPath(key, flowCandidates, now, packetLength, stripingAllowed)
+            if (burstPath != null) {
+                return burstPath
+            }
+            if (key != 0L && !stripingAllowed) {
+                synchronized(flowPaths) {
+                    val cached = flowPaths[key]
+                    val cachedPath = cached?.let { choice ->
+                        flowCandidates.firstOrNull { it.id == choice.pathId && it.isHealthy(now) }
+                    }
+                    if (cachedPath != null) {
+                        cached.lastUsedMs = now
+                        return cachedPath
+                    }
+                    if (cached != null) {
+                        flowPaths.remove(key)
+                    }
+                }
+            }
+            val selected = chooseBestPath(flowCandidates, now)
+            if (key != 0L && selected != null) {
+                synchronized(flowPaths) {
+                    val cached = flowPaths[key]
+                    flowPaths[key] = FlowChoice(
+                        pathId = selected.id,
+                        lastUsedMs = now,
+                        bytes = (cached?.bytes ?: 0L) + packetLength.toLong(),
+                        bonded = stripingAllowed,
+                        burstPathId = if (stripingAllowed) selected.id else 0,
+                        burstRemaining = if (stripingAllowed) burstPacketsForPath(selected.id) - 1 else 0,
+                    )
+                    pruneFlowCacheLocked(now)
+                }
+            }
+            return selected
+        }
+
+        private fun chooseCachedBurstPath(
+            key: Long,
+            candidates: List<BoostPath>,
+            now: Long,
+            packetLength: Int,
+            stripingAllowed: Boolean,
+        ): BoostPath? {
+            if (key == 0L || !stripingAllowed) return null
+            synchronized(flowPaths) {
+                val cached = flowPaths[key] ?: return null
+                if (cached.burstRemaining <= 0) return null
+                val path = candidates.firstOrNull {
+                    it.id == cached.burstPathId && it.isHealthy(now)
+                } ?: return null
+                cached.lastUsedMs = now
+                cached.bytes += packetLength.toLong()
+                cached.burstRemaining -= 1
+                cached.bonded = true
+                return path
+            }
+        }
+
+        private fun shouldStripeFlow(key: Long, candidates: List<BoostPath>, now: Long): Boolean {
+            if (!SINGLE_FLOW_STRIPING_ENABLED) return false
+            if (key == 0L) return false
+            if (candidates.size < 2) return false
+            val wifi = candidates.firstOrNull { it.id == WIFI_PATH_ID } ?: return false
+            val secondaryReady = candidates.any { path ->
+                if (path.id == WIFI_PATH_ID || !path.isHealthy(now)) {
+                    false
+                } else {
+                        secondaryCanStripeFlow(path, wifi, now, allowExploration = true)
+                }
+            }
+            if (!secondaryReady) return false
+            synchronized(flowPaths) {
+                pruneFlowCacheLocked(now)
+                val activeBondedSlots = flowPaths.entries
+                    .filter {
+                        it.value.bonded &&
+                            it.value.bytes >= FLOW_BOND_SLOT_MIN_BYTES &&
+                            now - it.value.lastUsedMs <= FLOW_BOND_ACTIVE_WINDOW_MS
+                    }
+                    .map { it.key }
+                    .toSet()
+                val cached = flowPaths[key]
+                return activeBondedSlots.size < FLOW_BOND_ACTIVE_LIMIT ||
+                    activeBondedSlots.contains(key) ||
+                    (cached?.bonded == true && cached.bytes < FLOW_BOND_SLOT_MIN_BYTES)
+            }
+        }
+
+        private fun chooseBestPath(candidates: List<BoostPath>, now: Long): BoostPath? {
+            if (candidates.isEmpty()) return null
+            val bestRtt = candidates.minOf { it.rttMs }
+            val rttCeiling = Math.max(bestRtt + 45, (bestRtt * 16) / 10)
+            val eligible = candidates.filter { it.rttMs <= rttCeiling && it.sendFailures.get() < 8 }
+                .ifEmpty { listOf(candidates.minByOrNull { it.rttMs }!!) }
+            if (eligible.size == 1) return eligible.first()
+            val wifi = eligible.firstOrNull { it.id == WIFI_PATH_ID }
+            if (wifi != null) {
+                val secondaryReady = eligible
+                    .filter { it.id != WIFI_PATH_ID }
+                    .any { path ->
+                        secondaryCanCarryData(path, wifi, now, allowExploration = true)
+                }
+                if (!secondaryReady && !canDistributeSeparateFlows(eligible, wifi, now)) return wifi
+            }
+            if (NATIVE_SCHEDULER_ENABLED) {
+                choosePathNative(eligible, now)?.let { nativeChoice ->
+                    if (nativeChoice.isHealthy(now) && eligible.any { it.id == nativeChoice.id }) {
+                        return nativeChoice
+                    }
+                }
+            }
+            return eligible.minWith(compareBy<BoostPath> { it.weightedLoad() }.thenBy { it.rttMs })
+        }
+
+        private fun flowEligibleCandidates(candidates: List<BoostPath>, now: Long): List<BoostPath> {
+            val wifi = candidates.firstOrNull { it.id == WIFI_PATH_ID } ?: return candidates
+            val eligible = candidates.filter { path ->
+                path.id == WIFI_PATH_ID || secondaryCanCarryData(path, wifi, now, allowExploration = true)
+            }
+            return eligible.ifEmpty { listOf(wifi) }
+        }
+
+        private fun chooseLowestLatencyPath(candidates: List<BoostPath>): BoostPath? {
+            return candidates
+                .filter { it.sendFailures.get() < 8 }
+                .minWithOrNull(compareBy<BoostPath> { it.rttMs }.thenBy { it.weightedLoad() })
+        }
+
+        private fun canDistributeSeparateFlows(candidates: List<BoostPath>, wifi: BoostPath, now: Long): Boolean {
+            return candidates.any { path ->
+                path.id != WIFI_PATH_ID && secondaryCanCarryData(path, wifi, now, allowExploration = true)
+            }
+        }
+
+        private fun secondaryCanCarryData(
+            path: BoostPath,
+            wifi: BoostPath,
+            now: Long,
+            allowExploration: Boolean,
+        ): Boolean {
+            if (path.id == WIFI_PATH_ID || !path.isHealthy(now)) return false
+            val wifiRtt = wifi.rttMs.coerceAtLeast(1)
+            val rttCeiling = maxOf(
+                wifiRtt + SECONDARY_RTT_HEADROOM_MS,
+                (wifiRtt * SECONDARY_RTT_MULTIPLIER_NUM) / SECONDARY_RTT_MULTIPLIER_DEN,
+            )
+            if (path.rttMs > rttCeiling || path.rttMs > SECONDARY_ABSOLUTE_RTT_CEILING_MS) {
+                return allowExploration && path.sentBytes.get() < STRIPE_EXPLORE_MAX_BYTES
+            }
+            val pathBps = path.selectionBps()
+            if (path.hasMatureThroughputSample()) {
+                if (!path.hasRecentDataRx(now, SECONDARY_STALE_DATA_BACKOFF_MS)) {
+                    return allowExploration && path.sentBytes.get() < SECONDARY_MIN_PROBE_BYTES
+                }
+                return pathBps >= MIN_PROVEN_SECONDARY_BPS
+            }
+            return allowExploration && path.sentBytes.get() < SECONDARY_EXPLORE_MAX_BYTES
+        }
+
+        private fun secondaryCanStripeFlow(
+            path: BoostPath,
+            wifi: BoostPath,
+            now: Long,
+            allowExploration: Boolean,
+        ): Boolean {
+            if (!secondaryCanCarryData(path, wifi, now, allowExploration)) return false
+            val wifiRtt = wifi.rttMs.coerceAtLeast(1)
+            val stripeCeiling = maxOf(
+                wifiRtt + STRIPE_RTT_HEADROOM_MS,
+                (wifiRtt * STRIPE_RTT_MULTIPLIER_NUM) / STRIPE_RTT_MULTIPLIER_DEN,
+            )
+            if (path.rttMs > stripeCeiling || path.rttMs > STRIPE_ABSOLUTE_RTT_CEILING_MS) {
+                return false
+            }
+            if (path.hasMatureThroughputSample()) {
+                if (!path.hasRecentDataRx(now, SECONDARY_STALE_DATA_BACKOFF_MS)) {
+                    return false
+                }
+                return path.selectionBps() >= MIN_STRIPE_SECONDARY_BPS
+            }
+            return allowExploration && path.sentBytes.get() < STRIPE_EXPLORE_MAX_BYTES
+        }
+
+
+        private fun pruneFlowCacheLocked(now: Long) {
+            val iterator = flowPaths.entries.iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                if (now - entry.value.lastUsedMs > FLOW_CACHE_TTL_MS) {
+                    iterator.remove()
+                }
+            }
+            if (flowPaths.size <= MAX_FLOW_CACHE) return
+            val overflow = flowPaths.size - MAX_FLOW_CACHE
+            val oldestKeys = flowPaths.entries
+                .sortedBy { it.value.lastUsedMs }
+                .take(overflow)
+                .map { it.key }
+            oldestKeys.forEach { flowPaths.remove(it) }
+        }
+
+        private fun isLatencySensitiveTcpAck(packet: ByteArray, packetLength: Int): Boolean {
+            if (packetLength < 40) return false
+            val version = (packet[0].toInt() ushr 4) and 0x0F
+            if (version != 4) return false
+            val ihl = (packet[0].toInt() and 0x0F) * 4
+            if (ihl < 20 || packetLength < ihl + 20) return false
+            if ((packet[9].toInt() and 0xFF) != 6) return false
+            val totalLength = u16(packet, 2).coerceAtMost(packetLength)
+            val tcpOffset = ((packet[ihl + 12].toInt() ushr 4) and 0x0F) * 4
+            if (tcpOffset < 20 || totalLength < ihl + tcpOffset) return false
+            val flags = packet[ihl + 13].toInt() and 0x3F
+            val payloadLength = totalLength - ihl - tcpOffset
+            val ackSet = (flags and 0x10) != 0
+            val setupOrClose = (flags and 0x07) != 0
+            return ackSet && !setupOrClose && payloadLength <= 0
+        }
+
+        private fun flowKey(packet: ByteArray, packetLength: Int): Long {
+            return flowKey(packet, 0, packetLength)
+        }
+
+        private fun flowKey(payload: PayloadSlice): Long {
+            return flowKey(payload.bytes, payload.offset, payload.length)
+        }
+
+        private fun flowKey(packet: ByteArray, packetOffset: Int, packetLength: Int): Long {
+            if (packetLength < 20) return 0L
+            val version = (packet[packetOffset].toInt() ushr 4) and 0x0F
+            if (version != 4) return 0L
+            val ihl = (packet[packetOffset].toInt() and 0x0F) * 4
+            if (ihl < 20 || packetLength < ihl) return 0L
+            val protocol = packet[packetOffset + 9].toInt() and 0xFF
+            val src = ipv4U32(packet, packetOffset + 12)
+            val dst = ipv4U32(packet, packetOffset + 16)
+            if ((protocol == 6 || protocol == 17) && packetLength >= ihl + 4) {
+                return canonicalFlowKey(
+                    protocol,
+                    src,
+                    u16(packet, packetOffset + ihl),
+                    dst,
+                    u16(packet, packetOffset + ihl + 2),
+                )
+            }
+            return canonicalFlowKey(protocol, src, 0, dst, 0)
+        }
+
+        private fun canonicalFlowKey(protocol: Int, src: Long, srcPort: Int, dst: Long, dstPort: Int): Long {
+            var leftIp = src
+            var leftPort = srcPort
+            var rightIp = dst
+            var rightPort = dstPort
+            if (leftIp > rightIp || (leftIp == rightIp && leftPort > rightPort)) {
+                leftIp = dst
+                leftPort = dstPort
+                rightIp = src
+                rightPort = srcPort
+            }
+            var hash = 1125899906842597L
+            hash = hash * 31 + protocol.toLong()
+            hash = hash * 31 + leftIp
+            hash = hash * 31 + leftPort.toLong()
+            hash = hash * 31 + rightIp
+            hash = hash * 31 + rightPort.toLong()
+            return if (hash == 0L) 1L else hash
+        }
+
+        @Suppress("unused")
+        private fun choosePathNative(candidates: List<BoostPath>, now: Long): BoostPath? {
+            val ids = IntArray(candidates.size)
+            val rtts = LongArray(candidates.size)
+            val loads = LongArray(candidates.size)
+            val capacities = LongArray(candidates.size)
+            val failures = IntArray(candidates.size)
+            val rxAges = LongArray(candidates.size)
+            candidates.forEachIndexed { index, path ->
+                ids[index] = path.id
+                rtts[index] = path.rttMs
+                loads[index] = path.nativeLoadBytes()
+                capacities[index] = path.selectionBps()
+                failures[index] = path.sendFailures.get()
+                rxAges[index] = (now - path.lastRxMs).coerceAtLeast(0)
+            }
+            val index = SmartBoostNative.choosePathIndexOrNull(
+                ids = ids,
+                rttsMs = rtts,
+                sentLoads = loads,
+                capacitiesBps = capacities,
+                failures = failures,
+                rxAgesMs = rxAges,
+            ) ?: return null
+            return candidates.getOrNull(index)
+        }
+
+        private fun sendFrame(path: BoostPath, type: Int, payload: ByteArray) {
+            try {
+                val frame = encrypt(type, path.id, payload, 0, payload.size)
+                writeEncryptedFrame(path, frame)
+                path.recordSent(type, payload.size)
+            } catch (e: Exception) {
+                path.recordFailure()
+                if (running.get()) {
+                    Log.w("WinsVpnService", "Smart Boost send warning", e)
+                }
+            }
+        }
+
+        private fun sendDataFrame(path: BoostPath, payload: ByteArray, payloadLength: Int) {
+            try {
+                val frame = encryptData(dataSequence.incrementAndGet(), path.id, payload, 0, payloadLength)
+                writeEncryptedFrame(path, frame)
+                path.recordSent(TYPE_DATA, payloadLength)
+            } catch (e: Exception) {
+                path.recordFailure()
+                if (running.get()) {
+                    Log.w("WinsVpnService", "Smart Boost send warning", e)
+                }
+            }
+        }
+
+        private fun sendDataBatchFrame(path: BoostPath, packets: List<ByteArray>, packetBytes: Int) {
+            if (packets.isEmpty()) return
+            if (packets.size == 1) {
+                val packet = packets.first()
+                sendDataFrame(path, packet, packet.size)
+                return
+            }
+            try {
+                val payloadLength = DATA_BATCH_HEADER_SIZE + packets.sumOf { it.size + 2 }
+                if (payloadLength > MAX_DATA_PAYLOAD_BUFFER_SIZE || packets.size > MAX_DATA_BATCH_PACKETS) {
+                    packets.forEach { packet -> sendDataFrame(path, packet, packet.size) }
+                    return
+                }
+                val payload = ByteArray(payloadLength)
+                System.arraycopy(DATA_BATCH_MAGIC, 0, payload, 0, DATA_BATCH_MAGIC.size)
+                System.arraycopy(sessionId, 0, payload, DATA_BATCH_MAGIC.size, sessionId.size)
+                putU16(payload, DATA_PREFIX_SIZE, packets.size)
+                var offset = DATA_BATCH_HEADER_SIZE
+                packets.forEach { packet ->
+                    putU16(payload, offset, packet.size)
+                    offset += 2
+                    System.arraycopy(packet, 0, payload, offset, packet.size)
+                    offset += packet.size
+                }
+                val frame = encryptData(dataSequence.incrementAndGet(), path.id, payload, 0, payload.size)
+                writeEncryptedFrame(path, frame)
+                path.recordSent(TYPE_DATA, packetBytes)
+            } catch (e: Exception) {
+                path.recordFailure()
+                if (running.get()) {
+                    Log.w("WinsVpnService", "Smart Boost batch send warning", e)
+                }
+            }
+        }
+
+        private fun writeEncryptedFrame(path: BoostPath, frame: PayloadSlice) {
+            val output = encryptWriteBuffer.get()
+            output.clear()
+            output.limit(frame.offset + frame.length)
+            output.position(frame.offset)
+            synchronized(path.lock) {
+                while (output.hasRemaining()) {
+                    path.channel.write(output)
+                }
+            }
+        }
+
+        private fun helloPayload(): ByteArray {
+            return ByteBuffer.allocate(28)
+                .put(sessionId)
+                .put(ipv4Bytes(clientIp))
+                .putInt(CLIENT_FEATURE_BATCH_TX)
+                .putInt(CLIENT_FEATURE_MAGIC)
+                .array()
+        }
+
+        private fun pingPayload(path: BoostPath): ByteArray {
+            return ByteBuffer.allocate(52)
+                .put(sessionId)
+                .put(ipv4Bytes(clientIp))
+                .putLong(nowMs())
+                .putLong(path.rttMs.coerceIn(1, 5000))
+                .putLong(path.serverDownBpsHint())
+                .putInt(CLIENT_FEATURE_BATCH_TX)
+                .putInt(CLIENT_FEATURE_MAGIC)
+                .array()
+        }
+
+        private fun probePayload(): ByteArray {
+            return ByteBuffer.allocate(28)
+                .put(sessionId)
+                .put(ipv4Bytes(clientIp))
+                .putInt(PROBE_BYTES)
+                .putInt(PROBE_CHUNK_BYTES)
+                .array()
+        }
+
+        private fun encrypt(
+            type: Int,
+            pathId: Int,
+            payload: ByteArray,
+            payloadOffset: Int,
+            payloadLength: Int,
+        ): PayloadSlice {
+            val frameSequence = sequence.incrementAndGet()
+            return encryptWithSequence(frameSequence, type, pathId, payload, payloadOffset, payloadLength)
+        }
+
+        private fun encryptData(
+            frameSequence: Long,
+            pathId: Int,
+            payload: ByteArray,
+            payloadOffset: Int,
+            payloadLength: Int,
+        ): PayloadSlice {
+            return encryptWithSequence(frameSequence, TYPE_DATA, pathId, payload, payloadOffset, payloadLength)
+        }
+
+        private fun encryptWithSequence(
+            frameSequence: Long,
+            type: Int,
+            pathId: Int,
+            payload: ByteArray,
+            payloadOffset: Int,
+            payloadLength: Int,
+        ): PayloadSlice {
+            val frame = encryptFrameBuffer.get()
+            val needed = HEADER_SIZE + payloadLength + GCM_TAG_SIZE
+            if (needed > frame.size) {
+                throw IOException("Smart Boost frame too large: $needed")
+            }
+            System.arraycopy(MAGIC, 0, frame, 0, MAGIC.size)
+            frame[4] = type.toByte()
+            frame[5] = pathId.toByte()
+            putLongBE(frame, 6, frameSequence)
+            System.arraycopy(noncePrefix, 0, frame, 14, noncePrefix.size)
+            putLongBE(frame, 14 + noncePrefix.size, nonceCounter.incrementAndGet())
+            val cipher = encryptCipher.get()
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, frame, 14, 12))
+            cipher.updateAAD(frame, 0, AAD_SIZE)
+            val written = cipher.doFinal(payload, payloadOffset, payloadLength, frame, HEADER_SIZE)
+            return PayloadSlice(frame, 0, HEADER_SIZE + written)
+        }
+
+        private fun decrypt(packet: ByteArray, packetLength: Int, payload: ByteArray): MutableBoostFrame? {
+            if (packetLength < HEADER_SIZE) return null
+            for (index in MAGIC.indices) {
+                if (packet[index] != MAGIC[index]) return null
+            }
+            val type = packet[4].toInt() and 0xFF
+            val sequence = readLongBE(packet, 6)
+            val cipher = decryptCipher.get()
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, packet, 14, 12))
+            cipher.updateAAD(packet, 0, AAD_SIZE)
+            val written = cipher.doFinal(packet, HEADER_SIZE, packetLength - HEADER_SIZE, payload, 0)
+            return decryptFrameBuffer.get().apply {
+                this.type = type
+                this.sequence = sequence
+                this.payload = payload
+                this.payloadLength = written
+            }
+        }
+
+        private fun extractDataPayloads(payload: ByteArray, payloadLength: Int): List<PayloadSlice> {
+            if (
+                payloadLength > DATA_BATCH_HEADER_SIZE &&
+                payload[0] == DATA_BATCH_MAGIC[0] &&
+                payload[1] == DATA_BATCH_MAGIC[1] &&
+                payload[2] == DATA_BATCH_MAGIC[2] &&
+                payload[3] == DATA_BATCH_MAGIC[3]
+            ) {
+                for (index in sessionId.indices) {
+                    if (payload[DATA_BATCH_MAGIC.size + index] != sessionId[index]) {
+                        return emptyList()
+                    }
+                }
+                val count = u16(payload, DATA_PREFIX_SIZE)
+                if (count <= 0 || count > MAX_DATA_BATCH_PACKETS) {
+                    return emptyList()
+                }
+                val packets = ArrayList<PayloadSlice>(count)
+                var offset = DATA_BATCH_HEADER_SIZE
+                repeat(count) {
+                    if (offset + 2 > payloadLength) return emptyList()
+                    val packetLength = u16(payload, offset)
+                    offset += 2
+                    if (packetLength < 20 || offset + packetLength > payloadLength) {
+                        return emptyList()
+                    }
+                    if ((payload[offset].toInt() ushr 4) != 4) {
+                        return emptyList()
+                    }
+                    packets.add(PayloadSlice(payload, offset, packetLength))
+                    offset += packetLength
+                }
+                return packets
+            }
+            if (
+                payloadLength > DATA_PREFIX_SIZE &&
+                payload[0] == DATA_MAGIC[0] &&
+                payload[1] == DATA_MAGIC[1] &&
+                payload[2] == DATA_MAGIC[2] &&
+                payload[3] == DATA_MAGIC[3] &&
+                ((payload[DATA_PREFIX_SIZE].toInt() ushr 4) == 4)
+            ) {
+                for (index in sessionId.indices) {
+                    if (payload[DATA_MAGIC.size + index] != sessionId[index]) {
+                        return emptyList()
+                    }
+                }
+                return listOf(PayloadSlice(payload, DATA_PREFIX_SIZE, payloadLength - DATA_PREFIX_SIZE))
+            }
+            return if (payloadLength > 0 && (payload[0].toInt() ushr 4) == 4) {
+                listOf(PayloadSlice(payload, 0, payloadLength))
+            } else {
+                emptyList()
+            }
+        }
+
+        private fun extractSingleDataPayload(payload: ByteArray, payloadLength: Int): PayloadSlice? {
+            val offset = singleDataPayloadOffset(payload, payloadLength)
+            return if (offset >= 0) {
+                PayloadSlice(payload, offset, payloadLength - offset)
+            } else {
+                null
+            }
+        }
+
+        private fun singleDataPayloadOffset(payload: ByteArray, payloadLength: Int): Int {
+            if (
+                payloadLength > DATA_PREFIX_SIZE &&
+                payload[0] == DATA_MAGIC[0] &&
+                payload[1] == DATA_MAGIC[1] &&
+                payload[2] == DATA_MAGIC[2] &&
+                payload[3] == DATA_MAGIC[3] &&
+                ((payload[DATA_PREFIX_SIZE].toInt() ushr 4) == 4)
+            ) {
+                for (index in sessionId.indices) {
+                    if (payload[DATA_MAGIC.size + index] != sessionId[index]) {
+                        return -1
+                    }
+                }
+                return DATA_PREFIX_SIZE
+            }
+            return if (payloadLength > 0 && (payload[0].toInt() ushr 4) == 4) {
+                0
+            } else {
+                -1
+            }
+        }
+
+        private class BoostPath(
+            val id: Int,
+            val network: Network?,
+            val channel: DatagramChannel,
+            private val capacityHintBytesPerSecond: Long,
+            val wifiTransport: Boolean,
+        ) {
+            val lock = Object()
+            private val createdMs = nowMs()
+            @Volatile var lastRxMs: Long = createdMs
+            @Volatile private var lastDataRxMs: Long = 0
+            @Volatile var lastPongMs: Long = 0
+            @Volatile var rttMs: Long = 220
+            @Volatile private var lastBpsSampleMs: Long = createdMs
+            @Volatile private var lastBpsSampleBytes: Long = 0
+            @Volatile private var downBps: Long = 0
+            @Volatile private var lastProbeRequestMs: Long = 0
+            @Volatile private var probeStartMs: Long = 0
+            @Volatile private var probeStartBytes: Long = 0
+            private val rxBytes = AtomicLong(0)
+            val sentPackets = AtomicLong(0)
+            val sentBytes = AtomicLong(0)
+            val sendFailures = AtomicInteger(0)
+
+            private fun markRx() {
+                lastRxMs = nowMs()
+            }
+
+            fun markDataRx(bytes: Int) {
+                markRx()
+                if (bytes > 0) {
+                    lastDataRxMs = lastRxMs
+                    rxBytes.addAndGet(bytes.toLong())
+                }
+            }
+
+            fun markProbeRx(bytes: Int) {
+                markDataRx(bytes)
+                val startMs = probeStartMs
+                if (startMs <= 0) return
+                val total = rxBytes.get()
+                val delta = (total - probeStartBytes).coerceAtLeast(0)
+                val elapsedMs = (nowMs() - startMs).coerceAtLeast(1)
+                if (delta >= PROBE_RATE_SAMPLE_MIN_BYTES && elapsedMs >= PROBE_RATE_SAMPLE_MIN_MS) {
+                    val sample = (delta * 1000L) / elapsedMs
+                    downBps = maxOf(downBps, sample.coerceIn(MIN_SERVER_REPORTED_BPS, 10_000_000_000L))
+                }
+            }
+
+            fun markControlAlive() {
+                markRx()
+                lastPongMs = lastRxMs
+                sendFailures.set(0)
+            }
+
+            fun recordPong(payload: ByteArray, payloadLength: Int) {
+                val now = nowMs()
+                if (payloadLength >= 28) {
+                    val sent = readLongBE(payload, 20)
+                    val sample = (now - sent).coerceIn(1, 5000)
+                    rttMs = ((rttMs * 3) + sample) / 4
+                }
+                lastRxMs = now
+                lastPongMs = now
+                sendFailures.set(0)
+            }
+
+            fun recordSent(type: Int, bytes: Int) {
+                if (type == TYPE_DATA) {
+                    sentPackets.incrementAndGet()
+                    sentBytes.addAndGet(bytes.coerceAtLeast(1).toLong())
+                }
+            }
+
+            fun recordFailure() {
+                sendFailures.incrementAndGet()
+            }
+
+            fun decayCounters() {
+                val now = nowMs()
+                sentPackets.set(sentPackets.get() / 2)
+                sentBytes.set(sentBytes.get() / 2)
+                val staleDataMs = if (lastDataRxMs > 0) now - lastDataRxMs else 0
+                if (downBps > 0 && id != WIFI_PATH_ID && staleDataMs > SECONDARY_STALE_DATA_BACKOFF_MS) {
+                    downBps = maxOf(MIN_SERVER_REPORTED_BPS, downBps / 3)
+                } else if (now - lastRxMs > 3000 && downBps > 0) {
+                    downBps = (downBps * 7) / 10
+                }
+                if (sendFailures.get() > 0 && now - lastRxMs < 4000) {
+                    sendFailures.decrementAndGet()
+                }
+            }
+
+            fun shouldRequestProbe(now: Long): Boolean {
+                if (id == WIFI_PATH_ID || !isHealthy(now)) return false
+                if (now - lastProbeRequestMs < PROBE_INTERVAL_MS) return false
+                if (hasMatureThroughputSample() &&
+                    hasRecentDataRx(now, SECONDARY_STALE_DATA_BACKOFF_MS) &&
+                    selectionBps() >= MIN_PROVEN_SECONDARY_BPS
+                ) {
+                    return false
+                }
+                lastProbeRequestMs = now
+                probeStartMs = now
+                probeStartBytes = rxBytes.get()
+                return true
+            }
+
+            fun sampleDownBps(): Long {
+                val now = nowMs()
+                val total = rxBytes.get()
+                val elapsedMs = now - lastBpsSampleMs
+                if (elapsedMs >= 500) {
+                    val delta = (total - lastBpsSampleBytes).coerceAtLeast(0)
+                    val sample = (delta * 1000L) / elapsedMs
+                    downBps = if (downBps <= 0) sample else ((downBps * 3) + sample) / 4
+                    lastBpsSampleMs = now
+                    lastBpsSampleBytes = total
+                }
+                return downBps.coerceIn(0, 10_000_000_000L)
+            }
+
+            fun selectionBps(): Long {
+                val sampled = sampleDownBps()
+                val pathHint = if (wifiTransport) {
+                    (capacityHintBytesPerSecond * WIFI_SELECTION_HINT_PERCENT) / 100L
+                } else {
+                    (capacityHintBytesPerSecond * CELLULAR_SELECTION_HINT_PERCENT) / 100L
+                }
+                val healthyPathFloor = if (wifiTransport) {
+                    maxOf((pathHint * 3L) / 4L, WIFI_CAPACITY_FLOOR_BPS / WIFI_HEALTHY_PATH_FLOOR_DIVISOR)
+                } else {
+                    maxOf(pathHint / CELLULAR_HEALTHY_PATH_FLOOR_DIVISOR, MIN_PROVEN_SECONDARY_BPS)
+                }
+                if (sampled > 0 && rxBytes.get() >= SERVER_HINT_SAMPLE_MIN_BYTES) {
+                    if (id != WIFI_PATH_ID && !hasRecentDataRx(nowMs(), SECONDARY_STALE_DATA_BACKOFF_MS)) {
+                        return MIN_SERVER_REPORTED_BPS
+                    }
+                    if (id != WIFI_PATH_ID) {
+                        return sampled.coerceAtLeast(healthyPathFloor)
+                    }
+                    return sampled.coerceAtLeast(healthyPathFloor)
+                }
+                if (id != WIFI_PATH_ID) {
+                    return maxOf(MIN_PROVEN_SECONDARY_BPS, PROBE_SECONDARY_BPS / 2L)
+                }
+                return maxOf(pathHint, PROBE_SECONDARY_BPS / 2L)
+            }
+
+            fun serverDownBpsHint(): Long {
+                val sampled = sampleDownBps()
+                val initialHint = initialServerHint()
+                if (sampled > 0 && rxBytes.get() >= SERVER_HINT_SAMPLE_MIN_BYTES) {
+                    if (id != WIFI_PATH_ID && !hasRecentDataRx(nowMs(), SECONDARY_STALE_DATA_BACKOFF_MS)) {
+                        return MIN_SERVER_REPORTED_BPS
+                    }
+                    val measuredRamp = ((sampled * 11L) / 10L).coerceAtLeast(MIN_SERVER_REPORTED_BPS)
+                    if (id == WIFI_PATH_ID) {
+                        val stableWifiFloor = ((initialHint * 7L) / 10L).coerceAtLeast(DEFAULT_PATH_BPS)
+                        return measuredRamp.coerceAtLeast(stableWifiFloor).coerceAtMost(serverHintCeiling())
+                    }
+                    return measuredRamp.coerceAtMost(serverHintCeiling())
+                }
+                return initialHint
+            }
+
+            private fun initialServerHint(): Long {
+                if (capacityHintBytesPerSecond <= 0) return DEFAULT_PATH_BPS
+                val percent = if (wifiTransport) {
+                    WIFI_SERVER_HINT_PERCENT
+                } else {
+                    CELLULAR_SERVER_HINT_PERCENT
+                }
+                if (!wifiTransport) {
+                    return ((capacityHintBytesPerSecond * percent) / 100L)
+                        .coerceIn(PROBE_SECONDARY_BPS / 2L, MAX_CELLULAR_SERVER_HINT_BPS)
+                }
+                return ((capacityHintBytesPerSecond * percent) / 100L)
+                    .coerceIn(DEFAULT_PATH_BPS, serverHintCeiling())
+            }
+
+            private fun serverHintCeiling(): Long {
+                return if (wifiTransport) {
+                    MAX_WIFI_SERVER_HINT_BPS
+                } else {
+                    MAX_CELLULAR_SERVER_HINT_BPS
+                }
+            }
+
+            fun hasMatureThroughputSample(): Boolean {
+                return downBps > 0 && rxBytes.get() >= SECONDARY_MIN_PROBE_BYTES
+            }
+
+            fun hasRecentDataRx(now: Long, maxAgeMs: Long): Boolean {
+                return lastDataRxMs > 0 && now - lastDataRxMs <= maxAgeMs
+            }
+
+            fun rxByteCount(): Long {
+                return rxBytes.get()
+            }
+
+            fun isHealthy(now: Long): Boolean {
+                return channel.isOpen &&
+                    sendFailures.get() < 8 &&
+                    (now - lastRxMs < 7000 || now - createdMs < 5000)
+            }
+
+            fun weightedLoad(): Long {
+                val capacity = selectionBps().coerceAtLeast(256_000L)
+                val rttPenalty = Math.max(35, rttMs)
+                return ((sentBytes.get() * 1_000_000L) / capacity) * rttPenalty
+            }
+
+            fun nativeLoadBytes(): Long {
+                return sentBytes.get()
+            }
+
+            fun debugSummary(now: Long): String {
+                val bps = sampleDownBps()
+                val mbps = (bps * 8.0) / 1_000_000.0
+                val hintMbps = (capacityHintBytesPerSecond * 8.0) / 1_000_000.0
+                val transport = if (wifiTransport) "wifi" else "cellular"
+                return "path=$id/$transport rtt=${rttMs}ms rx=${"%.1f".format(mbps)}Mbps hint=${"%.1f".format(hintMbps)}Mbps sent=${sentPackets.get()} sentBytes=${sentBytes.get()} age=${now - lastRxMs}ms failures=${sendFailures.get()}"
+            }
+        }
+
+        private class ReorderBuffer {
+            private val pending = TreeMap<Long, PendingPacket>()
+            private var expected: Long = 1
+
+            @Synchronized
+            fun tryAcceptFast(sequence: Long): Boolean {
+                resetIfSequenceRestarted(sequence)
+                if (sequence != expected || pending.isNotEmpty()) return false
+                expected += 1
+                return true
+            }
+
+            @Synchronized
+            fun push(sequence: Long, payloads: List<PayloadSlice>): List<PayloadSlice> {
+                resetIfSequenceRestarted(sequence)
+                if (sequence < expected) return emptyList()
+                if (sequence == expected) {
+                    expected += 1
+                    val ready = payloads.toMutableList()
+                    while (true) {
+                        val packet = pending.remove(expected) ?: break
+                        ready.addAll(packet.payloads)
+                        expected += 1
+                    }
+                    return ready
+                }
+                pending.putIfAbsent(sequence, PendingPacket(copyPayloads(payloads), nowMs()))
+                return drainReadyLocked()
+            }
+
+            @Synchronized
+            fun flushExpired(): List<PayloadSlice> {
+                if (pending.isEmpty()) return emptyList()
+                val first = pending.firstEntry()
+                if (pending.size > REORDER_MAX_PACKETS || nowMs() - first.value.createdMs > REORDER_WAIT_MS) {
+                    expected = first.key
+                    return drainReadyLocked()
+                }
+                return emptyList()
+            }
+
+            private fun drainReadyLocked(): List<PayloadSlice> {
+                val ready = mutableListOf<PayloadSlice>()
+                var next = expected
+                while (true) {
+                    val packet = pending.remove(next) ?: break
+                    ready.addAll(packet.payloads)
+                    next += 1
+                }
+                expected = next
+                if (ready.isEmpty() && pending.isNotEmpty()) {
+                    val first = pending.firstEntry()
+                    if (pending.size > REORDER_MAX_PACKETS || nowMs() - first.value.createdMs > REORDER_WAIT_MS) {
+                        expected = first.key
+                        return drainReadyLocked()
+                    }
+                }
+                return ready
+            }
+
+            private fun resetIfSequenceRestarted(sequence: Long) {
+                if (sequence > 0 && expected == 1L && pending.isEmpty() && sequence > SEQUENCE_RESTART_GAP) {
+                    expected = sequence
+                    return
+                }
+                if (sequence > 0 && expected > SEQUENCE_RESTART_GAP && sequence + SEQUENCE_RESTART_GAP < expected) {
+                    pending.clear()
+                    expected = sequence
+                }
+            }
+
+            private fun copyPayloads(payloads: List<PayloadSlice>): List<PayloadSlice> {
+                return payloads.map { payload ->
+                    val copy = ByteArray(payload.length)
+                    System.arraycopy(payload.bytes, payload.offset, copy, 0, payload.length)
+                    PayloadSlice(copy, 0, copy.size)
+                }
+            }
+
+            private data class PendingPacket(val payloads: List<PayloadSlice>, val createdMs: Long)
+        }
+
+        private inner class FlowReorderBufferMap {
+            private val lock = Object()
+            private val buffers = HashMap<Long, ReorderBuffer>()
+            private val lastSeen = HashMap<Long, Long>()
+
+            fun push(frameSequence: Long, packets: List<PayloadSlice>): List<PayloadSlice> {
+                if (packets.isEmpty()) return emptyList()
+                val ready = ArrayList<PayloadSlice>(packets.size)
+                val now = nowMs()
+                synchronized(lock) {
+                    packets.forEachIndexed { index, packet ->
+                        val key = flowKey(packet)
+                        if (key == 0L) {
+                            ready.add(packet)
+                            return@forEachIndexed
+                        }
+                        val orderSequence = (frameSequence * FLOW_ORDER_SEQUENCE_MULTIPLIER) + index + 1L
+                        val buffer = buffers.getOrPut(key) { ReorderBuffer() }
+                        lastSeen[key] = now
+                        ready.addAll(buffer.push(orderSequence, listOf(packet)))
+                    }
+                    pruneLocked(now)
+                }
+                return ready
+            }
+
+            fun flushExpired(): List<PayloadSlice> {
+                val ready = ArrayList<PayloadSlice>()
+                val now = nowMs()
+                synchronized(lock) {
+                    val iterator = buffers.entries.iterator()
+                    while (iterator.hasNext()) {
+                        val entry = iterator.next()
+                        ready.addAll(entry.value.flushExpired())
+                        if (now - (lastSeen[entry.key] ?: 0L) > FLOW_REORDER_TTL_MS) {
+                            iterator.remove()
+                            lastSeen.remove(entry.key)
+                        }
+                    }
+                    pruneLocked(now)
+                }
+                return ready
+            }
+
+            private fun pruneLocked(now: Long) {
+                val stale = lastSeen
+                    .filterValues { now - it > FLOW_REORDER_TTL_MS }
+                    .keys
+                    .toList()
+                stale.forEach { key ->
+                    buffers.remove(key)
+                    lastSeen.remove(key)
+                }
+                if (buffers.size <= MAX_FLOW_REORDER_BUFFERS) return
+                val oldest = lastSeen.entries
+                    .sortedBy { it.value }
+                    .take(buffers.size - MAX_FLOW_REORDER_BUFFERS)
+                    .map { it.key }
+                oldest.forEach { key ->
+                    buffers.remove(key)
+                    lastSeen.remove(key)
+                }
+            }
+        }
+
+        private class MutableBoostFrame {
+            var type: Int = 0
+            var sequence: Long = 0
+            lateinit var payload: ByteArray
+            var payloadLength: Int = 0
+        }
+
+        private inner class TxBatchBuffer {
+            private var path: BoostPath? = null
+            private val packets = ArrayList<ByteArray>(MAX_DATA_BATCH_PACKETS)
+            private var packetBytes = 0
+            private var payloadBytes = 0
+
+            fun queue(nextPath: BoostPath, source: ByteArray, length: Int) {
+                if (length > CLIENT_TX_BATCH_MAX_PACKET_BYTES) {
+                    flush()
+                    sendDataFrame(nextPath, source, length)
+                    return
+                }
+                if (path != null && path !== nextPath) {
+                    flush()
+                }
+                if (length + 2 > CLIENT_TX_BATCH_MAX_PAYLOAD_BYTES) {
+                    sendDataFrame(nextPath, source, length)
+                    return
+                }
+                if (packets.isNotEmpty() &&
+                    (packets.size >= MAX_DATA_BATCH_PACKETS ||
+                        payloadBytes + length + 2 > CLIENT_TX_BATCH_MAX_PAYLOAD_BYTES)
+                ) {
+                    flush()
+                }
+                path = nextPath
+                val packet = ByteArray(length)
+                System.arraycopy(source, 0, packet, 0, length)
+                packets.add(packet)
+                packetBytes += length
+                payloadBytes += length + 2
+                if (packets.size >= MAX_DATA_BATCH_PACKETS ||
+                    payloadBytes >= CLIENT_TX_BATCH_MAX_PAYLOAD_BYTES
+                ) {
+                    flush()
+                }
+            }
+
+            fun flush() {
+                val selectedPath = path
+                if (selectedPath != null && packets.isNotEmpty()) {
+                    sendDataBatchFrame(selectedPath, packets.toList(), packetBytes)
+                }
+                packets.clear()
+                path = null
+                packetBytes = 0
+                payloadBytes = 0
+            }
+        }
+
+        private data class PayloadSlice(val bytes: ByteArray, val offset: Int, val length: Int)
+        private data class FlowChoice(
+            val pathId: Int,
+            var lastUsedMs: Long,
+            var bytes: Long = 0L,
+            var bonded: Boolean = false,
+            var burstPathId: Int = 0,
+            var burstRemaining: Int = 0,
+        )
+        private data class NetworkCandidate(
+            val network: Network,
+            val capabilities: NetworkCapabilities,
+            val score: Long,
+        )
+
+        companion object {
+            private val MAGIC = byteArrayOf(0x57.toByte(), 0x42.toByte(), 0x53.toByte(), 0x54.toByte())
+            private const val TYPE_DATA = 1
+            private const val TYPE_HELLO = 2
+            private const val TYPE_PING = 3
+            private const val TYPE_PONG = 4
+            private const val TYPE_PROBE = 5
+            private const val TYPE_PROBE_DATA = 6
+            private val DATA_MAGIC = byteArrayOf(0x57.toByte(), 0x53.toByte(), 0x44.toByte(), 0x31.toByte())
+            private val DATA_BATCH_MAGIC = byteArrayOf(0x57.toByte(), 0x53.toByte(), 0x44.toByte(), 0x32.toByte())
+            private const val DATA_PREFIX_SIZE = 20
+            private const val DATA_BATCH_HEADER_SIZE = 22
+            private const val MAX_DATA_BATCH_PACKETS = 16
+            private const val CLIENT_TX_BATCH_MAX_PAYLOAD_BYTES = 1350
+            private const val CLIENT_TX_BATCH_MAX_PACKET_BYTES = 640
+            private const val HEADER_SIZE = 26
+            private const val AAD_SIZE = 14
+            private const val GCM_TAG_SIZE = 16
+            private const val MAX_DATA_PAYLOAD_BUFFER_SIZE = 65535 + DATA_PREFIX_SIZE
+            private const val MAX_FRAME_BUFFER_SIZE = HEADER_SIZE + MAX_DATA_PAYLOAD_BUFFER_SIZE + GCM_TAG_SIZE
+            private const val REORDER_WAIT_MS = 18L
+            private const val REORDER_MAX_PACKETS = 16384
+            private const val SEQUENCE_RESTART_GAP = 4096L
+            private const val FLOW_ORDER_SEQUENCE_MULTIPLIER = 32L
+            private const val FLOW_REORDER_TTL_MS = 60_000L
+            private const val MAX_FLOW_REORDER_BUFFERS = 4096
+            private const val MAX_TUN_BATCH = 256
+            private const val MAX_FLOW_CACHE = 4096
+            private const val FLOW_CACHE_TTL_MS = 60_000L
+            private const val FLOW_BOND_ACTIVE_LIMIT = 16
+            private const val FLOW_BOND_ACTIVE_WINDOW_MS = 5_000L
+            private const val FLOW_BOND_SLOT_MIN_BYTES = 512_000L
+            private const val WIFI_BURST_PACKETS = 1
+            private const val SECONDARY_BURST_PACKETS = 1
+            private const val WIFI_PATH_ID = 1
+            private const val WIFI_SUBPATH_BASE_ID = 10
+            private const val WIFI_SUBPATH_COUNT = 1
+            private const val SINGLE_FLOW_STRIPING_ENABLED = true
+            private const val NATIVE_SCHEDULER_ENABLED = true
+            private const val GLOBAL_REORDER_ENABLED = false
+            private const val DEFAULT_RTT_MS = 220L
+            private const val DEFAULT_PATH_BPS = 25_000_000L
+            private const val PROBE_SECONDARY_BPS = 25_000_000L
+            private const val WIFI_CAPACITY_FLOOR_BPS = 80_000_000L
+            private const val CELLULAR_CAPACITY_FLOOR_BPS = 8_000_000L
+            private const val MAX_CAPACITY_HINT_BPS = 10_000_000_000L
+            private const val WIFI_LINK_EFFICIENCY_PERCENT = 70L
+            private const val WIFI_SELECTION_HINT_PERCENT = 80L
+            private const val WIFI_SERVER_HINT_PERCENT = 90L
+            private const val CELLULAR_SELECTION_HINT_PERCENT = 65L
+            private const val CELLULAR_SERVER_HINT_PERCENT = 65L
+            private const val MAX_WIFI_SERVER_HINT_BPS = 220_000_000L
+            private const val MAX_CELLULAR_SERVER_HINT_BPS = 180_000_000L
+            private const val WIFI_HEALTHY_PATH_FLOOR_DIVISOR = 4L
+            private const val CELLULAR_HEALTHY_PATH_FLOOR_DIVISOR = 6L
+            private const val MIN_PROVEN_SECONDARY_BPS = 3_750_000L
+            private const val MIN_AGGREGATE_SECONDARY_BPS = 22_500_000L
+            private const val MIN_AGGREGATE_CELLULAR_BPS = 18_750_000L
+            private const val MIN_SERVER_REPORTED_BPS = 1_000_000L
+            private const val CELLULAR_SUBPATH_COUNT = 2
+            private const val SECONDARY_MIN_PROBE_BYTES = 2_000_000L
+            private const val SECONDARY_EXPLORE_MAX_BYTES = 8_000_000L
+            private const val SECONDARY_STALE_DATA_BACKOFF_MS = 12_000L
+            private const val MIN_STRIPE_SECONDARY_BPS = 6_250_000L
+            private const val STRIPE_EXPLORE_MAX_BYTES = 2_000_000L
+            private const val STRIPE_RTT_HEADROOM_MS = 75L
+            private const val STRIPE_RTT_MULTIPLIER_NUM = 3L
+            private const val STRIPE_RTT_MULTIPLIER_DEN = 2L
+            private const val STRIPE_ABSOLUTE_RTT_CEILING_MS = 320L
+            private const val SERVER_HINT_SAMPLE_MIN_BYTES = 2_000_000L
+            private const val SECONDARY_RTT_HEADROOM_MS = 110L
+            private const val SECONDARY_RTT_MULTIPLIER_NUM = 3L
+            private const val SECONDARY_RTT_MULTIPLIER_DEN = 2L
+            private const val SECONDARY_ABSOLUTE_RTT_CEILING_MS = 360L
+            private const val METRICS_LOG_INTERVAL_MS = 5_000L
+            private const val PROBE_INTERVAL_MS = 3_000L
+            private const val PROBE_BYTES = 8_000_000
+            private const val PROBE_CHUNK_BYTES = 1152
+            private const val PROBE_RATE_SAMPLE_MIN_BYTES = 256_000L
+            private const val PROBE_RATE_SAMPLE_MIN_MS = 20L
+            private const val CLIENT_FEATURE_BATCH_TX = 1
+            private const val CLIENT_FEATURE_MAGIC = 0x57424631
+
+            private fun nowMs(): Long = System.nanoTime() / 1_000_000
+
+            private fun burstPacketsForPath(pathId: Int): Int {
+                return if (pathId == WIFI_PATH_ID || isWifiSubpathId(pathId)) {
+                    WIFI_BURST_PACKETS
+                } else {
+                    SECONDARY_BURST_PACKETS
+                }
+            }
+
+            private fun isWifiSubpathId(pathId: Int): Boolean {
+                return pathId in WIFI_SUBPATH_BASE_ID until (WIFI_SUBPATH_BASE_ID + WIFI_SUBPATH_COUNT)
+            }
+
+            private fun transportName(transport: Int): String {
+                return when (transport) {
+                    NetworkCapabilities.TRANSPORT_WIFI -> "Wi-Fi"
+                    NetworkCapabilities.TRANSPORT_CELLULAR -> "cellular"
+                    else -> "transport-$transport"
+                }
+            }
+
+            private fun decodeKey(text: String): ByteArray {
+                return try {
+                    val decoded = Base64.decode(text, Base64.DEFAULT)
+                    if (decoded.size == 16 || decoded.size == 24 || decoded.size == 32) {
+                        decoded
+                    } else {
+                        MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8))
+                    }
+                } catch (_: Exception) {
+                    MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8))
+                }
+            }
+
+            private fun parseEndpoint(endpoint: String, defaultPort: Int): InetSocketAddress {
+                val trimmed = endpoint.trim()
+                val idx = trimmed.lastIndexOf(':')
+                val host = if (idx > 0) trimmed.substring(0, idx).trim().trim('[', ']') else trimmed
+                val port = if (idx > 0) {
+                    trimmed.substring(idx + 1).toIntOrNull() ?: defaultPort
+                } else {
+                    defaultPort
+                }
+                require(host.isNotBlank()) { "Smart Boost endpoint host missing" }
+                return InetSocketAddress(host, port)
+            }
+
+            private fun ipv4Bytes(value: String): ByteArray {
+                val parts = value.split(".").mapNotNull { it.toIntOrNull() }
+                if (parts.size != 4 || parts.any { it !in 0..255 }) {
+                    return byteArrayOf(10, 88, 0, 2)
+                }
+                return byteArrayOf(
+                    parts[0].toByte(),
+                    parts[1].toByte(),
+                    parts[2].toByte(),
+                    parts[3].toByte(),
+                )
+            }
+
+            private fun ipv4U32(packet: ByteArray, offset: Int): Long {
+                return ((packet[offset].toLong() and 0xFF) shl 24) or
+                    ((packet[offset + 1].toLong() and 0xFF) shl 16) or
+                    ((packet[offset + 2].toLong() and 0xFF) shl 8) or
+                    (packet[offset + 3].toLong() and 0xFF)
+            }
+
+            private fun u16(packet: ByteArray, offset: Int): Int {
+                return ((packet[offset].toInt() and 0xFF) shl 8) or
+                    (packet[offset + 1].toInt() and 0xFF)
+            }
+
+            private fun putLongBE(target: ByteArray, offset: Int, value: Long) {
+                target[offset] = (value ushr 56).toByte()
+                target[offset + 1] = (value ushr 48).toByte()
+                target[offset + 2] = (value ushr 40).toByte()
+                target[offset + 3] = (value ushr 32).toByte()
+                target[offset + 4] = (value ushr 24).toByte()
+                target[offset + 5] = (value ushr 16).toByte()
+                target[offset + 6] = (value ushr 8).toByte()
+                target[offset + 7] = value.toByte()
+            }
+
+            private fun putU16(target: ByteArray, offset: Int, value: Int) {
+                target[offset] = ((value ushr 8) and 0xFF).toByte()
+                target[offset + 1] = (value and 0xFF).toByte()
+            }
+
+            private fun readLongBE(source: ByteArray, offset: Int): Long {
+                return ((source[offset].toLong() and 0xFF) shl 56) or
+                    ((source[offset + 1].toLong() and 0xFF) shl 48) or
+                    ((source[offset + 2].toLong() and 0xFF) shl 40) or
+                    ((source[offset + 3].toLong() and 0xFF) shl 32) or
+                    ((source[offset + 4].toLong() and 0xFF) shl 24) or
+                    ((source[offset + 5].toLong() and 0xFF) shl 16) or
+                    ((source[offset + 6].toLong() and 0xFF) shl 8) or
+                    (source[offset + 7].toLong() and 0xFF)
+            }
+        }
+    }
+
+    private fun parseConfigValue(config: String?, key: String): String? {
+        if (config == null) return null
+        val lines = config.split("\n")
+        var currentSection = ""
+        for (line in lines) {
+            val trimmedLine = line.trim()
+            if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
+                currentSection = trimmedLine.lowercase()
+                continue
+            }
+
+            val isCorrectSection = when (key.lowercase()) {
+                "address", "dns", "mtu", "privatekey", "jc", "jmin", "jmax", "s1", "s2", "s3", "s4", "h1", "h2", "h3", "h4" -> currentSection == "[interface]"
+                "publickey", "presharedkey", "endpoint", "allowedips", "persistentkeepalive" -> currentSection == "[peer]"
+                else -> true
+            }
+
+            if (isCorrectSection && trimmedLine.startsWith(key, ignoreCase = true)) {
+                val parts = trimmedLine.split("=", limit = 2)
+                if (parts.size > 1) return parts[1].trim()
+            }
+        }
+        return null
+    }
+
+    private fun parseConfigSection(config: String, sectionName: String): Map<String, String> {
+        val out = linkedMapOf<String, String>()
+        var inSection = false
+        for (line in config.split("\n")) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inSection = trimmed.removePrefix("[").removeSuffix("]").equals(sectionName, ignoreCase = true)
+                continue
+            }
+            if (inSection && trimmed.contains("=")) {
+                val parts = trimmed.split("=", limit = 2)
+                out[parts[0].trim().lowercase()] = parts[1].trim()
+            }
+        }
+        return out
+    }
+
+    private fun stripConfigSection(config: String, sectionName: String): String {
+        val out = StringBuilder()
+        var skip = false
+        for (line in config.split("\n")) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                skip = trimmed.removePrefix("[").removeSuffix("]").equals(sectionName, ignoreCase = true)
+            }
+            if (!skip) out.append(line).append('\n')
+        }
+        return out.toString().trim()
+    }
+
+    private fun parseBool(value: String?): Boolean {
+        val v = value?.trim()?.lowercase() ?: return false
+        return v == "true" || v == "1" || v == "yes" || v == "y"
+    }
+
+    private fun keyFingerprint(value: String): String {
+        if (value.isBlank()) return "missing"
+        return try {
+            val digest = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+            digest.take(8).joinToString("") { "%02x".format(it) }
+        } catch (_: Exception) {
+            "unavailable"
+        }
+    }
+}

@@ -1,0 +1,1 @@
+{"protocol_version":"winn/3","protocol_params":{},"server_endpoint":"127.0.0.1:51820","client_ip":"10.99.0.2","client_private_key":"<redacted>","client_public_key":"<REDACTED_WG_KEY>","server_public_key":"<REDACTED_WG_KEY>","mtu":1280,"dns":"10.99.0.1","stealth_active":false,"obfuscation":{"H1":11,"H2":22,"H3":33,"H4":44}}

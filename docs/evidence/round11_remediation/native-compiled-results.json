@@ -1,0 +1,20 @@
+[
+  {
+    "browser": "chrome",
+    "installed_launch": "ALLOW",
+    "no_origin": "DENY",
+    "foreign_origin": "DENY"
+  },
+  {
+    "browser": "edge",
+    "installed_launch": "ALLOW",
+    "no_origin": "DENY",
+    "foreign_origin": "DENY"
+  },
+  {
+    "browser": "firefox",
+    "installed_launch": "ALLOW",
+    "no_origin": "DENY",
+    "foreign_origin": "DENY"
+  }
+]

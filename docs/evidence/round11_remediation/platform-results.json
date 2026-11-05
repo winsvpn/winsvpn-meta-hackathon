@@ -1,0 +1,47 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.34,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/website_security_audit.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.05,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/verify_apple_method_channel_contract.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_apple_standalone_v3_wiring.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.04,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_apple_standalone_v3_wiring.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_windows_awg_runtime_validation.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.04,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/test_windows_awg_runtime_validation.log"
+  },
+  {
+    "command": [
+      "sh",
+      "tools/verify_rulings.sh"
+    ],
+    "exit_code": 0,
+    "seconds": 2.94,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/verify_rulings.log"
+  }
+]

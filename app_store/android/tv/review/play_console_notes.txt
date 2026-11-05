@@ -1,0 +1,26 @@
+Android TV Play Console notes for org.winsvpn.app 1.0.16+33 (versionCode 3302).
+
+Form factor:
+- Same application ID as phone/tablet: org.winsvpn.app
+- LEANBACK_LAUNCHER, application label Win's VPN, banner @drawable/banner
+- leanback and touchscreen features are required=false
+- TV listing/screenshot inventory: owner-blocked
+- QUERY_ALL_PACKAGES declaration: PENDING for this shared application ID
+- A phone/tablet AAB or a TV APK is not this TV AAB
+
+Protocol (local TV engines):
+- Primary: Winn v3 (libwinnengine.so)
+- Winn v1 compatibility path: AWG (libam-go.so)
+- A served Winn v3 lead attempt cannot be skipped
+- libam.so, libam-quick.so and libxray.so must not ship
+
+Reviewer path:
+1. Install the TV flavor of org.winsvpn.app on an Android TV or Leanback device.
+2. Set a six-digit PIN. TV never presents the decoy calculator.
+3. Activate with Try Free Server (100 Mbps upload and download) using D-pad navigation.
+4. Accept the legal notice and the VpnService disclosure.
+5. Approve the Android VPN permission prompt.
+6. Confirm the VPN is active, then disconnect from the power control.
+
+Do not instruct reviewers to use 0000 or 000000.
+This package never uploads.

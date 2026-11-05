@@ -1,0 +1,16 @@
+// Signing.xcconfig.example — COMMITTED TEMPLATE.
+// The real Signing.xcconfig is gitignored (root .gitignore) and must never be
+// committed: its values identify the signing entity. Do not put an identity
+// name, team ID, or profile name in this file.
+//
+// Fresh checkout: cp Signing.xcconfig.example Signing.xcconfig, then fill in
+// values on the signing machine. Builds FAIL until the copy exists — this file
+// is hard-#included by AppInfo.xcconfig, Debug.xcconfig and Release.xcconfig,
+// and project.pbxproj consumes the $(WINS_APPLE_*) variables defined here.
+//
+// The defaults below are safe to commit: Xcode-managed automatic signing,
+// generic identity, no profile pin. Distribution signing requires the real
+// filled-in file — missing values fail closed at the codesign step.
+WINS_APPLE_CODE_SIGN_IDENTITY = Apple Development
+WINS_APPLE_CODE_SIGN_STYLE = Automatic
+WINS_APPLE_PROVISIONING_PROFILE_SPECIFIER =

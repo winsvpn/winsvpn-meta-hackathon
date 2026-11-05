@@ -1,0 +1,7 @@
+{
+  "kind": "connect",
+  "params": [
+    {"name": "host", "value": "spain-madrid:443"}
+  ],
+  "policy": {"name": "default", "version": 3}
+}

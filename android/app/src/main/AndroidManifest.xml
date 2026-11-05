@@ -1,0 +1,286 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      NETWORK CARVE-OUTS. A censor-resistant tunnel is only useful while the
+      device has a network to carry it, so these are normal (install-time,
+      non-dangerous) permissions pinned to the app rather than left to default:
+        - INTERNET: the socket the VpnService routes through. Without it the
+          tunnel cannot egress anything. Always present.
+        - ACCESS_NETWORK_STATE / ACCESS_WIFI_STATE: the datapath reads the
+          live network state (interface up/down, transport type, default
+          route) to decide whether a tunnel that is up is actually carrying
+          traffic. Read-only; no location, no coarse position derivation.
+      These two (plus the forbidden ones below) are the full runtime surface
+      the disguise exposes in Settings > Apps > (this app) > Permissions.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--
+      FOREGROUND_SERVICE + FOREGROUND_SERVICE_SPECIAL_USE: the tunnel runs as a
+      foreground service (the only route that can survive for hours unattended
+      on modern Android), declared with foregroundServiceType="specialUse" on
+      the VpnTunnelService below and justified there via
+      android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE. POST_NOTIFICATIONS lets the
+      running-tunnel foreground notification be shown on API 33+ (it is
+      requested at runtime, never assumed). WAKE_LOCK keeps the CPU up for the
+      datapath while the screen is off. A tunnel that sleeps is a tunnel a
+      censor's network jamming simply waits out.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+      BATTERY_EXEMPTION CONTRACT. REQUEST_IGNORE_BATTERY_OPTIMIZATIONS is the
+      platform hook that lets this app ask the user to be excluded from Doze /
+      App Standby, so a running tunnel is not frozen mid-session. For a
+      censored user a tunnel silently frozen by the battery optimizer is
+      indistinguishable from the censor cutting the connection. It is a
+      NORMAL permission (automatically granted, no runtime prompt); the code
+      that must translate it into a user-visible request is
+      VpnTunnelService, and it is merely an ask. Doze is never bypassed, the
+      user always approves it in the system battery screen.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!--
+      SYSTEM_ALERT_WINDOW IS DELIBERATELY ABSENT. Declaring it would put
+      "Display over other apps" in the Settings permission list and trigger
+      Play's restricted-permission review; nothing in this app renders a
+      TYPE_APPLICATION_OVERLAY window on any platform (panic/duress paths all
+      run inside the normal activity/frame). Adding an unused dangerous
+      permission would be a fingerprint the disguise exists to avoid.
+    -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!--
+      OI-9 (Round 36 treaty): QUERY_ALL_PACKAGES is retained ONLY because the
+      split-tunnel picker enumerates the full installed-application inventory
+      (loadInstalledAppsForSplitTunnel uses getInstalledApplications, including
+      non-launching system apps a <queries> LAUNCHER filter cannot surface).
+      Play distribution requires a Permissions Declaration Form asserting this
+      core-functionality use; that declaration is an operator action and must
+      be completed before the next Play submission. The <queries> entries below
+      keep browser and launcher visibility correct even if this permission is
+      ever narrowed or revoked.
+    -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+    </queries>
+
+    <!--
+      THE APPLICATION LABEL IS PERMANENTLY THE DISGUISE, AND IT HAS TO BE.
+
+      This attribute is resolved by the package manager at INSTALL time, into
+      ApplicationInfo.nonLocalizedLabel, and cached there for the life of the
+      install. Nothing in the SDK changes it afterwards: PackageManager
+      exposes getApplicationLabel with no counterpart setter, and a javap
+      sweep of every public class in android.content.pm, android.content.om
+      and android.app on API 36 finds no label setter that reaches an
+      INSTALLED package. TaskDescription.Builder, ShortcutInfo.Builder,
+      RemoteInput.Builder, PackageInstaller.SessionParams.setAppLabel and
+      PreapprovalDetails.Builder each label something else (a Recents card, a
+      launcher shortcut, an inline reply, an install session, an install
+      prompt). Because the value below is a LITERAL rather than an @string
+      reference it is stored as nonLocalizedLabel with labelRes == 0, so
+      there is not even a resource id for a runtime resource overlay to
+      retarget. The latched-surface pattern the VPN session name and the two
+      notification channels use (read the camouflage state, rename on the
+      next Activity start) therefore cannot be applied to this attribute at
+      all. It cannot FOLLOW the disguise; it can only BE the disguise.
+
+      What it feeds is the widest surface this app has, and none of it needs
+      a tunnel, a notification, or any user action to be visible:
+
+        Settings > Apps: the list row, and the App info title
+        Settings > Apps > (this app) > Notifications: the SCREEN TITLE over
+          the very channel rows two earlier lanes disguised
+        Settings > Network and internet > VPN
+        the "wants to set up a VPN connection" consent dialog
+        the POST_NOTIFICATIONS runtime permission prompt
+        the app-name byline Android draws above every notification we post
+        battery, storage, data-usage and permission-manager entries
+
+      That is what somebody who already suspects the owner of this phone
+      reads first, and it was the last surface still naming the product.
+
+      The un-camouflaged identity is carried instead by the .LauncherReal
+      activity-alias below, which overrides this label for the launcher entry:
+      the same mechanism .LauncherDecoy already uses, applied to the other
+      state. The two configurations are:
+
+        camouflage ON  -> home screen decoy name, Settings decoy name
+        camouflage OFF -> home screen real name,  Settings decoy name
+
+      The asymmetry is real and is confined to the second row: a user who has
+      opted OUT of camouflage sees the product on the home screen and the
+      decoy in Settings, and pays mild confusion for it. Before this change
+      the asymmetry landed on the FIRST row instead, on the users relying on
+      the disguise, and they paid disclosure. An app that is never
+      identifiable in the app list is worth more than a tidy Settings entry.
+
+      Pinned to VpnTunnelService.DISGUISED_DISPLAY_NAME and to the
+      .LauncherDecoy alias by CamouflageLatchedSurfaceTest, which parses this
+      file. The Play Store LISTING name is a separate thing and is not this.
+    -->
+    <application
+        android:label="Calculator"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+        </activity>
+
+        <activity
+            android:name=".RealLauncherActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity="org.winsvpn.app.launcher"
+            android:theme="@style/LaunchTheme" />
+
+        <activity
+            android:name=".DecoyLauncherActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity="org.winsvpn.app.launcher"
+            android:theme="@style/LaunchTheme" />
+
+        <activity-alias
+            android:name=".LauncherReal"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Win's VPN"
+            android:targetActivity=".RealLauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".LauncherDecoy"
+            android:enabled="true"
+            android:icon="@mipmap/ic_calculator"
+            android:label="Calculator"
+            android:targetActivity=".DecoyLauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!--
+          THE VPN BINDING CONTRACT. This is the one declaration the platform
+          enforces: a service with android:permission="android.permission.BIND_VPN_SERVICE"
+          and an <action android:name="android.net.VpnService"/> intent-filter is
+          the ONLY shape the system's VpnService grant accepts. That pair gives us
+          everything else:
+            - the permission attribute restricts who may call bindService to the
+              system alone, so no third party can bind this tunnel. That is
+              why android:exported="false" is also safe and correct (the system
+              is exempt from exported gating for this permissioned binding);
+            - the intent-filter is what VpnService.prepare() and the consent
+              dialog key on to identify the app a user is about to trust;
+            - foregroundServiceType="specialUse" + the PROPERTY_SPECIAL_USE_FGS_SUBTYPE
+              justify the running-tunnel foreground service to API 34+.
+          The wrapping app complicates the label but never this mapping: the
+          disguise changes the visible NAME (see the application label note
+          above), not the class that owns the tunnel.
+        -->
+        <service
+            android:name=".VpnTunnelService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="specialUse"
+            android:stopWithTask="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Maintains the user-requested Win's VPN encrypted network tunnel." />
+        </service>
+
+        <!-- The bundled AWG library declares its own backend service. This app uses the
+             audited service above, so remove the unused duplicate VpnService. -->
+        <service
+            android:name="org.amnezia.awg.backend.GoBackend$VpnService"
+            tools:node="remove" />
+
+        <!-- OI-10 (Round 36 treaty): the exported Telephony.SECRET_CODE receiver was
+             removed. The dialer code *#*#9467#*#* fingerprinted the covert app in an
+             extractable manifest; covert entry stays inside the calculator digit
+             sequence only. -->
+
+        <!-- Wear OS companion. Must be exported because Google Play services
+             binds it on behalf of the paired watch; the Data Layer only routes
+             between nodes running this same package signed with this same
+             certificate, and the path filter keeps the surface to one route. -->
+        <service
+            android:name=".WatchCommandService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:scheme="wear"
+                    android:host="*"
+                    android:pathPrefix="/winsvpn/cmd" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!--
+          STRIP THE LIBRARY-ADDED PROFILEINSTALL RECEIVER.
+
+          androidx.profileinstaller (pulled in transitively by the Flutter /
+          AndroidX stack) declares its own ProfileInstallReceiver as
+          android:exported="true", protected only by the platform's
+          android.permission.DUMP signature grant. The exported-component
+          whitelist in AndroidExportedComponentAndVpnPermissionContractTest
+          treats THIS file plus the tv variant as the whole exported surface,
+          but the receiver is merged in by Gradle and therefore never appears
+          in either source manifest. So the contract passed while the
+          produced release bytes exported a component the app neither declares
+          nor needs. Removing it by the exact name the AAR declares closes the
+          gap: what the merged release manifest exports is again exactly the
+          justified set. The app does not ship baseline profiles, so the
+          receiver has nothing to do.
+        -->
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            tools:ignore="MissingClass"
+            tools:node="remove" />
+    </application>
+</manifest>

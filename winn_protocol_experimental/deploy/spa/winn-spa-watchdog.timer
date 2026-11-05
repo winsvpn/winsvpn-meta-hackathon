@@ -1,0 +1,15 @@
+[Unit]
+Description=Winn SPA watchdog timer
+
+[Timer]
+# Runs soon after boot (the case that matters most: the gate persisted in a
+# saved ruleset but the daemon failed to start) and then every minute. One
+# minute is far inside the 30m default grace, so a stranded gate is removed long
+# before any authorized user's element expires.
+OnBootSec=30s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Unit=winn-spa-watchdog.service
+
+[Install]
+WantedBy=timers.target

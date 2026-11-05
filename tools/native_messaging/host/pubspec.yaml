@@ -1,0 +1,43 @@
+name: wins_bridge_host
+description: >-
+  Native-messaging host for the Win's VPN browser extension. Compiles to a
+  single self-contained executable that the browser launches over stdio.
+publish_to: 'none'
+version: 1.0.0
+
+# DELIBERATELY MINIMAL.
+#
+# This package is a security boundary: it holds the node data the extension is
+# not allowed to see, and it is launched automatically by a browser. Every
+# third-party package in its graph is code running in that position, so the
+# only dependencies allowed here are the two pure-Dart crypto packages below.
+#
+# THEY ARE NOT OPTIONAL. The shared `lib/winn_protocol_dispatch.dart` (a
+# relative symlink into the app's own `lib/`) performs Winn v3 descriptor
+# verification there: SHA-256 ring fingerprinting (`package:crypto`) and
+# Ed25519 signature checks (`package:cryptography`). A build of this host that
+# omits either resolves as "Couldn't resolve the package" and fails, which is
+# how this break was found on 2026-08-22. Both packages are pure Dart (no
+# native build hooks), so `dart compile exe` keeps working; versions mirror the
+# app's pubspec.yaml pins (crypto 3.0.7, cryptography 2.9.0).
+#
+# It is also why this is a separate package rather than `bin/` inside the app.
+# The app additionally depends on `flutter_map` and others, and one of those
+# pulls in `objective_c`, which has build hooks; `dart compile exe` refuses to
+# run in a package whose graph contains them, and `dart build cli` would ship a
+# bundle of dynamic libraries this host never calls.
+#
+# The shared source files in `lib/` are RELATIVE SYMLINKS back into the app's
+# own `lib/`, so there is exactly one copy of the protocol under version
+# control and the Dart test suite and this executable compile the same bytes.
+# The tidier long-term arrangement is a path dependency in the other direction
+# (app depends on this package); that needs an edit to the app's pubspec.yaml
+# and a `flutter pub get`, which was not safe to do while several lanes were
+# building.
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  crypto: ^3.0.3
+  cryptography: ^2.9.0

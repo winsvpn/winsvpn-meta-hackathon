@@ -1,0 +1,27 @@
+[
+  {
+    "path": "extension/dist/wins-vpn-companion-chrome.zip",
+    "bytes": 93385,
+    "sha256": "1a94f1683027c6917f6b560bd68dfe25d5f6acefaa9acdd0fde6a6966d2e5b06"
+  },
+  {
+    "path": "extension/dist/wins-vpn-companion-edge.zip",
+    "bytes": 93392,
+    "sha256": "bc80240e9e3c523c31417a297f0497c2534edbb9e32af854ddde0b9e29828c5a"
+  },
+  {
+    "path": "extension/dist/wins-vpn-companion-firefox.xpi",
+    "bytes": 93468,
+    "sha256": "2ac98c21c2ea124c9cce75404929249f58ba24107e59c7c475def31a218e5270"
+  },
+  {
+    "path": "extension/dist/wins-vpn-companion-firefox.zip",
+    "bytes": 93468,
+    "sha256": "2ac98c21c2ea124c9cce75404929249f58ba24107e59c7c475def31a218e5270"
+  },
+  {
+    "path": "extension/dist/wins-vpn-proxy-safari.zip",
+    "bytes": 93307,
+    "sha256": "c8204cef6a6e29e405e36f1ad33786d74e57f3b8f3d371185a4d6aade1dd834f"
+  }
+]

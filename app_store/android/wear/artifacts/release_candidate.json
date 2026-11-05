@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-wear-os-release-candidate-v1",
+  "canonical_release": "1.0.16+33",
+  "target_id": "wear-os-aab",
+  "package": "org.winsvpn.app",
+  "version_name": "1.0.16",
+  "version_code": 3301,
+  "standalone": false,
+  "artifact": {
+    "path": "wear_os/app/build/outputs/bundle/release/app-release.aab",
+    "build_variant": "release",
+    "obfuscated": true,
+    "debug_artifact_allowed": false,
+    "owner_signing_required": true,
+    "produced": false,
+    "upload_performed": false,
+    "publication_authorized": false
+  },
+  "phone_tunnel_protocol": {
+    "executed_on": "paired-phone",
+    "local_wear_inclusion": false,
+    "primary": "winn-v3",
+    "fallback": ["awg", "xray"],
+    "forbidden_local_engines": [
+      "amneziawg.aar",
+      "libam-go.so",
+      "libam-quick.so",
+      "libam.so",
+      "libwinnengine.so",
+      "libxray.so"
+    ]
+  }
+}

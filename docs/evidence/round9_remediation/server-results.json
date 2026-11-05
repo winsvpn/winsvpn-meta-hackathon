@@ -1,0 +1,90 @@
+[
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:30.150096+00:00",
+    "exit_code": 0,
+    "seconds": 1.86,
+    "log": "control_plane_deepseek_round2.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:32.013681+00:00",
+    "exit_code": 0,
+    "seconds": 2.97,
+    "log": "control_plane_round4.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:34.984441+00:00",
+    "exit_code": 0,
+    "seconds": 3.64,
+    "log": "control_plane_round5.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:38.623374+00:00",
+    "exit_code": 0,
+    "seconds": 3.04,
+    "log": "control_plane_round6.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:41.664682+00:00",
+    "exit_code": 0,
+    "seconds": 6.63,
+    "log": "control_plane_round7.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:48.293022+00:00",
+    "exit_code": 0,
+    "seconds": 2.95,
+    "log": "control_plane_round8.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:51.243076+00:00",
+    "exit_code": 0,
+    "seconds": 20.33,
+    "log": "winn3_descriptor_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:36:11.570910+00:00",
+    "exit_code": 0,
+    "seconds": 3.26,
+    "log": "account_deletion_hub.log"
+  }
+]

@@ -1,0 +1,11 @@
+# Win's VPN Inc. — security contact
+# https://www.winsvpn.org/vdp/
+
+Contact: mailto:security@winsvpn.org
+Contact: https://www.winsvpn.org/vdp/
+Policy: https://www.winsvpn.org/vdp/
+Preferred-Languages: en
+Canonical: https://www.winsvpn.org/.well-known/security.txt
+
+# Expires must be refreshed at least annually or this file is treated as stale.
+Expires: 2027-07-24T00:00:00.000Z

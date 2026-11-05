@@ -1,0 +1,19 @@
+{
+  "_purpose": "Pin for garble, which obfuscates only the Winn client engines that ship from winsvpn.org (owner ruling 2026-10-27). Kept out of tools/toolchain-pins.json so the reviewed pins that bind that file's digest stay unchanged.",
+  "tools": {
+    "garble": {
+      "module": "mvdan.cc/garble",
+      "version": "v0.18.0",
+      "module_sum": "h1:PWKaJuaU7pN8Wdb8R++L324hjRCYb53HWRAj+/g8aJY=",
+      "go_mod_sum": "h1:CKUeF8Iv9cDz2UraZbKufmbv/wX8dUqVjUijcLf5W0s=",
+      "built_with_go": "1.27.1",
+      "install_path": {
+        "darwin_arm64": "/Users/owner/.local/toolchains/garble-v0.18.0/bin/garble"
+      },
+      "executable_sha256_by_platform": {
+        "darwin_arm64": "a7af84c8fd5e7af373f5817aec9198062fbcc72764f3029e629377c6fa6fc4f4"
+      },
+      "note": "Obfuscates only the Winn client engines that ship from winsvpn.org (owner ruling 2026-10-27). v0.18.0 (2026-09-19) is the first garble release supporting Go 1.27. Built on 2026-10-27 with the pinned Go: GOTOOLCHAIN=local GOFLAGS='-trimpath -buildvcs=false' CGO_ENABLED=0 go install mvdan.cc/garble@v0.18.0 (no -buildid= strip: garble keys its cache on its own Go build ID and panics without one); two builds with separate empty caches were byte-identical."
+    }
+  }
+}

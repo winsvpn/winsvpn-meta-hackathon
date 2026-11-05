@@ -1,0 +1,92 @@
+[Unit]
+Description=Winn Protocol authenticated self-healing AWG carrier
+Documentation=file:///usr/local/share/doc/winn-protocol/MOBILITY_AND_CARRIER.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=winn-carrier
+Group=winn-carrier
+EnvironmentFile=/etc/winn/carrier-server.env
+LoadCredential=server.pem:/etc/winn/credentials/server.pem
+LoadCredential=server-key.pem:/etc/winn/credentials/server-key.pem
+LoadCredential=ech-server-keys.json:/etc/winn/credentials/ech-server-keys.json
+LoadCredential=ca.pem:/etc/winn/credentials/ca.pem
+LoadCredential=controller-pq.seed:/etc/winn/credentials/controller-pq.seed
+LoadCredential=device-registry.json:/etc/winn/credentials/device-registry.json
+LoadCredential=cover.pem:/etc/winn/credentials/cover.pem
+LoadCredential=cover-key.pem:/etc/winn/credentials/cover-key.pem
+LoadCredential=audit.key:/etc/winn/credentials/carrier-audit.key
+ExecStart=/usr/local/libexec/winn/winn-carrier-server \
+  -addr ${WINN_CARRIER_LISTEN} \
+  -metrics-addr ${WINN_CARRIER_METRICS_LISTEN} \
+  -public-target ${WINN_CARRIER_PUBLIC_TARGET} \
+  -awg-backend ${WINN_CARRIER_AWG_BACKEND} \
+  -cert %d/server.pem \
+  -key %d/server-key.pem \
+  -ech-keys %d/ech-server-keys.json \
+  -cover-cert %d/cover.pem \
+  -cover-key %d/cover-key.pem \
+  -client-ca %d/ca.pem \
+  -device-registry %d/device-registry.json \
+  -controller-pq-seed %d/controller-pq.seed \
+  -controller-pq-pins /etc/winn/trust/controller-pq-pins.json \
+  -gateway-manifest /etc/winn/trust/gateway-manifest.json \
+  -transparency-log /etc/winn/trust/transparency-log.jsonl \
+  -transparency-checkpoint /etc/winn/trust/transparency-checkpoint.json \
+  -device-revocation-list /etc/winn/trust/device-revocation-list.json \
+  -device-revocation-state /var/lib/winn-carrier/device-revocation-state.json \
+  -node-id ${WINN_CARRIER_NODE_ID} \
+  -authorization-mode ${WINN_CARRIER_AUTHORIZATION_MODE} \
+  -audit-log /var/log/winn-carrier/audit.jsonl \
+  -audit-key %d/audit.key \
+  -max-datagram ${WINN_CARRIER_MAX_DATAGRAM} \
+  -replay-limit ${WINN_CARRIER_REPLAY_LIMIT} \
+  -rate-burst ${WINN_CARRIER_RATE_BURST} \
+  -rate-per-minute ${WINN_CARRIER_RATE_PER_MINUTE} \
+  -rate-max-keys ${WINN_CARRIER_RATE_MAX_KEYS} \
+  -max-concurrent ${WINN_CARRIER_MAX_CONCURRENT}
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGTERM
+StateDirectory=winn-carrier
+StateDirectoryMode=0700
+RuntimeDirectory=winn-carrier
+RuntimeDirectoryMode=0700
+LogsDirectory=winn-carrier
+LogsDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateMounts=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RemoveIPC=yes
+SystemCallArchitectures=native
+ReadWritePaths=/var/lib/winn-carrier /var/log/winn-carrier /run/winn-carrier
+LimitNOFILE=8192
+TasksMax=512
+
+[Install]
+WantedBy=multi-user.target

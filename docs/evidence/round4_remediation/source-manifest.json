@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-13",
+  "base_head": "89be66e75747c0b493583ca9c9efd7787c88a974",
+  "scope": "eight owner-requested Round 4 remediation items, plus API callsite repairs exposed by lint",
+  "source_sha256": {
+    "android/app/build.gradle.kts": "00486cf11053837e2f1ce20d7bb2d25ac3a0a928154e11a29bb26709cd8f63f9",
+    "android/app/src/main/AndroidManifest.xml": "75caac45412af2288124694239194a3fc68e00da1ccfbac7358cd27cf01da2eb",
+    "android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt": "539ecca47f2d36ef5676b4940dfd3d75b72c68de4d003e246de9d9d17d66041b",
+    "android/app/src/main/kotlin/org/winsvpn/app/WinnV3Keys.kt": "da68fa8f9f6bd643d44d442baa5f7125140f8108c8674c92ec5ccabe48787c65",
+    "ios/PacketTunnel/PacketTunnelProvider.swift": "8217962a530dc15348bdcd4afb0c562c314f1872264640f9fff81d43db11e1b0",
+    "lib/main.dart": "82101daee4b795c0a9ee395d89e361e22ca66bce9debe058402034eadb6974ca",
+    "lib/winn_protocol_dispatch.dart": "a90abe8f9a2898dc340e0678effc363ebc607d90d4fc8f6057b2ce521822b274",
+    "linux/runner/linux_winn3_host.cc": "e044a66edb83bebb7df3e0f5cf6573c2aa34fcabfd752c15facd375e42306d42",
+    "linux/runner/linux_winn_host.cc": "1948138cedc272b1f04db57c196cb74bf2727f72c96f8da0fb5c4d489f23303e",
+    "linux/runner/main.cc": "97de2cb57968cb79ca1293bd3e3554b23cec5245f529fbc578122474d5299e1e",
+    "macos/PacketTunnel/PacketTunnelProvider.swift": "e8e4e0bc6d9a2d3dab11709597ac582d87a4f554e3b1d6d023d719c2265913a5",
+    "server/wins_control_plane_setup_ONETOUCH.sh": "f74ab1c7eda7254ef0040b1d678b5a7cb8057b41e8f2897756818cca97b0231d",
+    "test/vpn_config_gateway_normalization_test.dart": "3abac9a47717c1574aa1f8fa445580e1c156cf77af70d97dc57436d96c8a4dc5",
+    "windows/runner/windows_tunnel_service_client_test.cc": "6cfc3d2b0131b3e3b7930eedacd426164001483251deef2eac2273f950b28f2e",
+    "windows/runner/windows_tunnel_service_protocol.h": "27f099bd4132e9df0fe76d83a26c79b33670c2417b1d8234f99d3ce4936a709b",
+    "server/test_control_plane_round4.py": "b5273e9cecede8d7c67dab7cc74da40603869bfeec68fee5fe21edc34459365d",
+    "tools/test_linux_engine_pipe.py": "a1920184476b69006f8b8ec58b786a4844e15b81c1ecd2061ec9631231d39164",
+    "tools/test_apple_proving_ownership.py": "c8f279855b95fff9c402aa29d84593f037f094a0f30bf86e90dff41ab3c97f32"
+  }
+}

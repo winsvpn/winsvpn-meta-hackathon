@@ -1,0 +1,2225 @@
+{
+ "document": "donor-tax-deduction-letter",
+ "source_svg": "brand/donor_recognition/donor-tax-deduction-letter.svg",
+ "source_language": "en",
+ "target_language": "my",
+ "tax_year": "2026",
+ "svg_text_elements": 92,
+ "logical_blocks": 64,
+ "segments": 102,
+ "translatable_segments": 87,
+ "verbatim_segments": 15,
+ "blocks": [
+  {
+   "id": "hdr.org",
+   "kind": "verbatim",
+   "region": "header",
+   "svg_line_indices": [
+    0
+   ],
+   "source": "WIN’S VPN INC.",
+   "segment_ids": [
+    "001"
+   ]
+  },
+  {
+   "id": "hdr.status",
+   "kind": "label",
+   "region": "header",
+   "svg_line_indices": [
+    1
+   ],
+   "source": "501(c)(3) PUBLIC CHARITY · IRC SECTION 509(a)(2)",
+   "segment_ids": [
+    "002"
+   ]
+  },
+  {
+   "id": "hdr.exempt",
+   "kind": "label",
+   "region": "header",
+   "svg_line_indices": [
+    2
+   ],
+   "source": "EXEMPT SINCE JUNE 11, 2026",
+   "segment_ids": [
+    "003"
+   ]
+  },
+  {
+   "id": "hdr.taxyear",
+   "kind": "label",
+   "region": "header",
+   "svg_line_indices": [
+    3
+   ],
+   "source": "TAX YEAR 2026",
+   "segment_ids": [
+    "004"
+   ]
+  },
+  {
+   "id": "ttl.kicker",
+   "kind": "label",
+   "region": "title",
+   "svg_line_indices": [
+    4
+   ],
+   "source": "FOR PROSPECTIVE DONORS · GENERAL INFORMATION, NOT TAX ADVICE",
+   "segment_ids": [
+    "005"
+   ]
+  },
+  {
+   "id": "ttl.title",
+   "kind": "heading",
+   "region": "title",
+   "svg_line_indices": [
+    5
+   ],
+   "source": "WHAT A DONATION IS WORTH AT TAX TIME",
+   "segment_ids": [
+    "006"
+   ]
+  },
+  {
+   "id": "ttl.sub",
+   "kind": "prose",
+   "region": "title",
+   "svg_line_indices": [
+    6
+   ],
+   "source": "The federal rules for the 2026 tax year, four worked examples, and the caveat that applies to most filers.",
+   "segment_ids": [
+    "007"
+   ]
+  },
+  {
+   "id": "body.salutation",
+   "kind": "label",
+   "region": "body",
+   "svg_line_indices": [
+    7
+   ],
+   "source": "Dear Prospective Donor,",
+   "segment_ids": [
+    "008"
+   ]
+  },
+  {
+   "id": "body.p1",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    8
+   ],
+   "source": "Thank you for considering a gift to Win’s VPN Inc. Before you give, we would rather you knew exactly what a charitable deduction does and does not do.",
+   "segment_ids": [
+    "009",
+    "010"
+   ]
+  },
+  {
+   "id": "body.p2",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    9,
+    10
+   ],
+   "source": "What follows is the federal law for the 2026 tax year in plain terms, with worked examples. It is general information, not advice about your return, and not a prediction of what any gift will be worth to you.",
+   "segment_ids": [
+    "011",
+    "012"
+   ]
+  },
+  {
+   "id": "callout.head",
+   "kind": "heading",
+   "region": "callout",
+   "svg_line_indices": [
+    11
+   ],
+   "source": "READ THIS FIRST: MOST FILERS GET NO ITEMIZED DEDUCTION FOR A CHARITABLE GIFT",
+   "segment_ids": [
+    "013"
+   ]
+  },
+  {
+   "id": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "svg_line_indices": [
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "source": "A charitable deduction reduces the income you are taxed on. It is not a credit, and it does not cut your tax bill dollar for dollar. Most people who file a federal return do not itemize, because the 2026 standard deduction ($16,100 single, $32,200 married filing jointly, $24,150 head of household) is larger than everything they could itemize. If that describes you, an itemized charitable deduction is worth nothing to you. One narrow exception begins with tax year 2026: a filer who takes the standard deduction may still deduct up to $1,000 of cash gifts, or $2,000 on a joint return. That ceiling is the entire benefit. Please give because you want the work funded, not because you expect the government to hand the money back.",
+   "segment_ids": [
+    "014",
+    "015",
+    "016",
+    "017",
+    "018",
+    "019",
+    "020"
+   ]
+  },
+  {
+   "id": "arith.head",
+   "kind": "heading",
+   "region": "body",
+   "svg_line_indices": [
+    17
+   ],
+   "source": "HOW THE ARITHMETIC WORKS",
+   "segment_ids": [
+    "021"
+   ]
+  },
+  {
+   "id": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    18,
+    19,
+    20
+   ],
+   "source": "Your approximate saving is the deductible amount multiplied by your marginal tax rate, the rate that applies to your top dollar of income. Two 2026 rules fix the deductible amount before that multiplication happens. If you itemize, only the giving above 0.5% of your adjusted gross income counts. If you do not itemize, the $1,000 or $2,000 ceiling above applies. A $1,000 gift never comes back as $1,000.",
+   "segment_ids": [
+    "022",
+    "023",
+    "024",
+    "025",
+    "026"
+   ]
+  },
+  {
+   "id": "tbl.head",
+   "kind": "heading",
+   "region": "body",
+   "svg_line_indices": [
+    21
+   ],
+   "source": "FOUR ILLUSTRATIONS, WITH EVERY ASSUMPTION WRITTEN OUT",
+   "segment_ids": [
+    "027"
+   ]
+  },
+  {
+   "id": "tbl.col.gift",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    22
+   ],
+   "source": "GIFT",
+   "segment_ids": [
+    "028"
+   ]
+  },
+  {
+   "id": "tbl.col.assumptions",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    23
+   ],
+   "source": "ASSUMPTIONS",
+   "segment_ids": [
+    "029"
+   ]
+  },
+  {
+   "id": "tbl.col.deduct",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    24,
+    25
+   ],
+   "source": "AMOUNT YOU MAY DEDUCT",
+   "segment_ids": [
+    "030"
+   ]
+  },
+  {
+   "id": "tbl.col.rate",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    26,
+    27
+   ],
+   "source": "ASSUMED MARGINAL RATE",
+   "segment_ids": [
+    "031"
+   ]
+  },
+  {
+   "id": "tbl.col.reduction",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    28,
+    29
+   ],
+   "source": "REDUCTION IN FEDERAL TAX",
+   "segment_ids": [
+    "032"
+   ]
+  },
+  {
+   "id": "tbl.col.netcost",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    30,
+    31
+   ],
+   "source": "APPROXIMATE NET COST",
+   "segment_ids": [
+    "033"
+   ]
+  },
+  {
+   "id": "row1.gift",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    32
+   ],
+   "source": "$100",
+   "segment_ids": [
+    "034"
+   ]
+  },
+  {
+   "id": "row1.assume",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    33,
+    34
+   ],
+   "source": "Single filer, about $60,000 AGI, takes the standard deduction",
+   "segment_ids": [
+    "035"
+   ]
+  },
+  {
+   "id": "row1.deduct",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    35
+   ],
+   "source": "$100",
+   "segment_ids": [
+    "036"
+   ]
+  },
+  {
+   "id": "row1.note",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    36
+   ],
+   "source": "within the $1,000 non-itemizer cap",
+   "segment_ids": [
+    "037"
+   ]
+  },
+  {
+   "id": "row1.rate",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    37
+   ],
+   "source": "12%",
+   "segment_ids": [
+    "038"
+   ]
+  },
+  {
+   "id": "row1.reduction",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    38
+   ],
+   "source": "about $12",
+   "segment_ids": [
+    "039"
+   ]
+  },
+  {
+   "id": "row1.netcost",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    39
+   ],
+   "source": "about $88",
+   "segment_ids": [
+    "040"
+   ]
+  },
+  {
+   "id": "row2.gift",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    40
+   ],
+   "source": "$1,000",
+   "segment_ids": [
+    "041"
+   ]
+  },
+  {
+   "id": "row2.assume",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    41,
+    42
+   ],
+   "source": "Single filer, about $95,000 AGI, takes the standard deduction",
+   "segment_ids": [
+    "042"
+   ]
+  },
+  {
+   "id": "row2.deduct",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    43
+   ],
+   "source": "$1,000",
+   "segment_ids": [
+    "043"
+   ]
+  },
+  {
+   "id": "row2.note",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    44
+   ],
+   "source": "exactly at the non-itemizer cap",
+   "segment_ids": [
+    "044"
+   ]
+  },
+  {
+   "id": "row2.rate",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    45
+   ],
+   "source": "22%",
+   "segment_ids": [
+    "045"
+   ]
+  },
+  {
+   "id": "row2.reduction",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    46
+   ],
+   "source": "about $220",
+   "segment_ids": [
+    "046"
+   ]
+  },
+  {
+   "id": "row2.netcost",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    47
+   ],
+   "source": "about $780",
+   "segment_ids": [
+    "047"
+   ]
+  },
+  {
+   "id": "row3.gift",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    48
+   ],
+   "source": "$10,000",
+   "segment_ids": [
+    "048"
+   ]
+  },
+  {
+   "id": "row3.assume",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    49,
+    50
+   ],
+   "source": "Married filing jointly, $300,000 AGI, itemizes deductions",
+   "segment_ids": [
+    "049"
+   ]
+  },
+  {
+   "id": "row3.deduct",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    51
+   ],
+   "source": "$8,500",
+   "segment_ids": [
+    "050"
+   ]
+  },
+  {
+   "id": "row3.note",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    52
+   ],
+   "source": "0.5% AGI floor removes $1,500",
+   "segment_ids": [
+    "051"
+   ]
+  },
+  {
+   "id": "row3.rate",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    53
+   ],
+   "source": "24%",
+   "segment_ids": [
+    "052"
+   ]
+  },
+  {
+   "id": "row3.reduction",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    54
+   ],
+   "source": "about $2,040",
+   "segment_ids": [
+    "053"
+   ]
+  },
+  {
+   "id": "row3.netcost",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    55
+   ],
+   "source": "about $7,960",
+   "segment_ids": [
+    "054"
+   ]
+  },
+  {
+   "id": "row4.gift",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    56
+   ],
+   "source": "$100,000",
+   "segment_ids": [
+    "055"
+   ]
+  },
+  {
+   "id": "row4.assume",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    57,
+    58
+   ],
+   "source": "Single filer, $600,000 AGI, itemizes deductions",
+   "segment_ids": [
+    "056"
+   ]
+  },
+  {
+   "id": "row4.deduct",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    59
+   ],
+   "source": "$97,000",
+   "segment_ids": [
+    "057"
+   ]
+  },
+  {
+   "id": "row4.note",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    60
+   ],
+   "source": "0.5% AGI floor removes $3,000",
+   "segment_ids": [
+    "058"
+   ]
+  },
+  {
+   "id": "row4.rate",
+   "kind": "figure",
+   "region": "table",
+   "svg_line_indices": [
+    61
+   ],
+   "source": "35%",
+   "segment_ids": [
+    "059"
+   ]
+  },
+  {
+   "id": "row4.reduction",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    62
+   ],
+   "source": "about $33,950",
+   "segment_ids": [
+    "060"
+   ]
+  },
+  {
+   "id": "row4.netcost",
+   "kind": "label",
+   "region": "table",
+   "svg_line_indices": [
+    63
+   ],
+   "source": "about $66,050",
+   "segment_ids": [
+    "061"
+   ]
+  },
+  {
+   "id": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    64,
+    65,
+    66,
+    67
+   ],
+   "source": "Every figure above is an illustration resting on the assumptions in its own row. It is not a prediction about you and not a promise that you will save anything. Change the filing status, the income, whether the donor itemizes, or the marginal rate, and the result changes; the marginal rates are assumed rather than derived from the incomes shown. The four gift amounts match the donor recognition tiers we plan to build (Bronze $100, Silver $1,000, Gold $10,000, Diamond $100,000) but those tiers are planned only. No badge, certificate, or tier exists today, and a gift made now does not earn one.",
+   "segment_ids": [
+    "062",
+    "063",
+    "064",
+    "065",
+    "066"
+   ]
+  },
+  {
+   "id": "ceil.head",
+   "kind": "heading",
+   "region": "body",
+   "svg_line_indices": [
+    68
+   ],
+   "source": "CEILINGS, THE CARRYFORWARD, AND THE RECEIPT YOU NEED",
+   "segment_ids": [
+    "067"
+   ]
+  },
+  {
+   "id": "ceil.lead",
+   "kind": "label",
+   "region": "body",
+   "svg_line_indices": [
+    69
+   ],
+   "source": "A ceiling based on your income.",
+   "segment_ids": [
+    "068"
+   ]
+  },
+  {
+   "id": "ceil.body",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    70,
+    71,
+    72
+   ],
+   "source": "For cash gifts to a public charity such as Win’s VPN Inc., the deduction generally cannot exceed 60% of adjusted gross income, and ceilings of 50%, 30%, or 20% apply to other kinds of gifts. Anything above the ceiling is not lost: it carries over to the next 5 tax years. (IRS Publication 526.)",
+   "segment_ids": [
+    "069",
+    "070",
+    "071"
+   ]
+  },
+  {
+   "id": "ack.lead",
+   "kind": "label",
+   "region": "body",
+   "svg_line_indices": [
+    73
+   ],
+   "source": "Gifts of $250 or more need our written acknowledgment.",
+   "segment_ids": [
+    "072"
+   ]
+  },
+  {
+   "id": "ack.body",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    74,
+    75,
+    76
+   ],
+   "source": "The IRS does not allow a deduction for any single gift of $250 or more without a contemporaneous written acknowledgment from the charity, and it has to reach you by the earlier of the date you file that year’s return or that return’s due date including extensions. If you gave $250 or more and did not receive one from us, please email support@winsvpn.org and we will issue it. (IRS Publication 1771.)",
+   "segment_ids": [
+    "073",
+    "074",
+    "075"
+   ]
+  },
+  {
+   "id": "cannot.head",
+   "kind": "heading",
+   "region": "body",
+   "svg_line_indices": [
+    77
+   ],
+   "source": "WHAT THIS LETTER CANNOT TELL YOU",
+   "segment_ids": [
+    "076"
+   ]
+  },
+  {
+   "id": "cannot.body",
+   "kind": "prose",
+   "region": "body",
+   "svg_line_indices": [
+    78,
+    79,
+    80
+   ],
+   "source": "Deductibility depends on your own circumstances: your filing status, your adjusted gross income, whether you itemize, what else you deducted, and what other gifts you made that year. State and local treatment of charitable giving varies by state and does not follow the federal rules. Win’s VPN Inc. does not provide tax advice and cannot tell you what a gift will be worth to you. Please ask a tax professional, and check the rules yourself at irs.gov.",
+   "segment_ids": [
+    "077",
+    "078",
+    "079",
+    "080"
+   ]
+  },
+  {
+   "id": "sign.closing",
+   "kind": "label",
+   "region": "body",
+   "svg_line_indices": [
+    81
+   ],
+   "source": "Sincerely,",
+   "segment_ids": [
+    "081"
+   ]
+  },
+  {
+   "id": "sign.org",
+   "kind": "verbatim",
+   "region": "body",
+   "svg_line_indices": [
+    82
+   ],
+   "source": "Win’s VPN Inc.",
+   "segment_ids": [
+    "082"
+   ]
+  },
+  {
+   "id": "sign.orgsuffix",
+   "kind": "label",
+   "region": "body",
+   "svg_line_indices": [
+    83
+   ],
+   "source": "· a 501(c)(3) tax-exempt public charity",
+   "segment_ids": [
+    "083"
+   ]
+  },
+  {
+   "id": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "svg_line_indices": [
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90
+   ],
+   "source": "Win’s VPN Inc. is exempt from federal income tax under Internal Revenue Code Section 501(c)(3). The determination letter is dated July 21, 2026; the effective date of exemption is June 11, 2026, so a contribution made on or after that date falls inside the exempt period. It is classified as a public charity under Section 509(a)(2) rather than a private foundation, uses a December 31 accounting period, and files an annual Form 990-series return. Contributions are deductible under IRC Section 170 to the extent allowed by law, and it is qualified to receive tax-deductible bequests, devises, transfers, or gifts under Section 2055, 2106, or 2522. Tax-exempt status is a determination about the organization. It is not an IRS review, approval, or endorsement of the Win’s VPN service, its security, or its performance. Check the status yourself with the IRS Tax Exempt Organization Search at apps.irs.gov/app/eos, searching the organization name, Win’s VPN Inc.; recently approved organizations can take time to appear there, so not yet finding a listing is expected rather than a warning sign. Sources: IRS Publications 526 and 1771, IRS Topic no. 506, and Rev. Proc. 2025-32. Dollar figures are for the 2026 tax year and change annually. Issued August 3, 2026.",
+   "segment_ids": [
+    "084",
+    "085",
+    "086",
+    "087",
+    "088",
+    "089",
+    "090",
+    "091",
+    "092",
+    "093"
+   ]
+  },
+  {
+   "id": "footer.domain",
+   "kind": "verbatim",
+   "region": "footer",
+   "svg_line_indices": [
+    91
+   ],
+   "source": "winsvpn.org",
+   "segment_ids": [
+    "094"
+   ]
+  },
+  {
+   "id": "notice.governing",
+   "kind": "prose",
+   "region": "notice",
+   "svg_line_indices": [],
+   "source": "This Burmese text is a translation provided for convenience. The English version of this letter is the governing text. If the Burmese and the English differ, the English version controls.",
+   "segment_ids": [
+    "095",
+    "096",
+    "097"
+   ],
+   "new_in_burmese": true
+  },
+  {
+   "id": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "svg_line_indices": [],
+   "source": "What follows is United States federal tax law. It changes what a person owes only if that person files a United States federal income tax return. Most readers in Myanmar do not file one, and for them a gift to Win’s VPN Inc. reduces no tax at all. The English version of this letter does not say so; it was written for readers who file in the United States. A gift is still a gift; it is simply not a deduction outside the United States tax system.",
+   "segment_ids": [
+    "098",
+    "099",
+    "100",
+    "101",
+    "102"
+   ],
+   "new_in_burmese": true
+  }
+ ],
+ "segment_list": [
+  {
+   "id": "001",
+   "block": "hdr.org",
+   "kind": "verbatim",
+   "region": "header",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "WIN’S VPN INC.",
+   "target_my": "",
+   "figures": [],
+   "note": "DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+  },
+  {
+   "id": "002",
+   "block": "hdr.status",
+   "kind": "label",
+   "region": "header",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "501(c)(3) PUBLIC CHARITY · IRC SECTION 509(a)(2)",
+   "target_my": "",
+   "figures": [
+    "501",
+    "3",
+    "509",
+    "2"
+   ],
+   "note": "IRS classification, paired with 'private foundation' later. Keep the two distinct."
+  },
+  {
+   "id": "003",
+   "block": "hdr.exempt",
+   "kind": "label",
+   "region": "header",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "EXEMPT SINCE JUNE 11, 2026",
+   "target_my": "",
+   "figures": [
+    "11",
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "004",
+   "block": "hdr.taxyear",
+   "kind": "label",
+   "region": "header",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "TAX YEAR 2026",
+   "target_my": "",
+   "figures": [
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "005",
+   "block": "ttl.kicker",
+   "kind": "label",
+   "region": "title",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "FOR PROSPECTIVE DONORS · GENERAL INFORMATION, NOT TAX ADVICE",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "006",
+   "block": "ttl.title",
+   "kind": "heading",
+   "region": "title",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "WHAT A DONATION IS WORTH AT TAX TIME",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "007",
+   "block": "ttl.sub",
+   "kind": "prose",
+   "region": "title",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "The federal rules for the 2026 tax year, four worked examples, and the caveat that applies to most filers.",
+   "target_my": "",
+   "figures": [
+    "2026"
+   ],
+   "note": "TRAP. 'filers' = people who file a United States federal tax return. NOT 'informer', 'notifier', 'reporter', or 'one who informs'. The machine attempt returned 'informers/notifiers'. Same word in callout.head."
+  },
+  {
+   "id": "008",
+   "block": "body.salutation",
+   "kind": "label",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Dear Prospective Donor,",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "009",
+   "block": "body.p1",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 2,
+   "source_en": "Thank you for considering a gift to Win’s VPN Inc.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "010",
+   "block": "body.p1",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 2,
+   "source_en": "Before you give, we would rather you knew exactly what a charitable deduction does and does not do.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "011",
+   "block": "body.p2",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 2,
+   "source_en": "What follows is the federal law for the 2026 tax year in plain terms, with worked examples.",
+   "target_my": "",
+   "figures": [
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "012",
+   "block": "body.p2",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 2,
+   "source_en": "It is general information, not advice about your return, and not a prediction of what any gift will be worth to you.",
+   "target_my": "",
+   "figures": [],
+   "note": "Disclaimer. Must stay a clear denial that this is tax advice.  Keep the denial explicit. This protects the organization."
+  },
+  {
+   "id": "013",
+   "block": "callout.head",
+   "kind": "heading",
+   "region": "callout",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "READ THIS FIRST: MOST FILERS GET NO ITEMIZED DEDUCTION FOR A CHARITABLE GIFT",
+   "target_my": "",
+   "figures": [],
+   "note": "'filers' = people who file a US federal tax return. See ttl.sub. Keep this line's force: it is the single most important sentence on the page and it must stay blunt.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "014",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 1,
+   "of_in_block": 7,
+   "source_en": "A charitable deduction reduces the income you are taxed on.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "015",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 2,
+   "of_in_block": 7,
+   "source_en": "It is not a credit, and it does not cut your tax bill dollar for dollar.",
+   "target_my": "",
+   "figures": [],
+   "note": "'credit' here = tax credit, a subtraction from tax owed. Distinct from 'deduction', a subtraction from taxable income. The whole letter turns on this distinction; use two clearly different Burmese terms and keep them consistent everywhere."
+  },
+  {
+   "id": "016",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 3,
+   "of_in_block": 7,
+   "source_en": "Most people who file a federal return do not itemize, because the 2026 standard deduction ($16,100 single, $32,200 married filing jointly, $24,150 head of household) is larger than everything they could itemize.",
+   "target_my": "",
+   "figures": [
+    "2026",
+    "$16,100",
+    "$32,200",
+    "$24,150"
+   ],
+   "note": "Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "017",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 4,
+   "of_in_block": 7,
+   "source_en": "If that describes you, an itemized charitable deduction is worth nothing to you.",
+   "target_my": "",
+   "figures": [],
+   "note": "TRAP. 'worth nothing' is deliberate and absolute. Do NOT soften to 'is not valuable', 'may not be useful', or 'has little benefit'. The machine attempt softened it. The reader must understand the deduction is worth zero, not merely small.  Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "018",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 5,
+   "of_in_block": 7,
+   "source_en": "One narrow exception begins with tax year 2026: a filer who takes the standard deduction may still deduct up to $1,000 of cash gifts, or $2,000 on a joint return.",
+   "target_my": "",
+   "figures": [
+    "2026",
+    "$1,000",
+    "$2,000"
+   ],
+   "note": "Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'."
+  },
+  {
+   "id": "019",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 6,
+   "of_in_block": 7,
+   "source_en": "That ceiling is the entire benefit.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "020",
+   "block": "callout.body",
+   "kind": "prose",
+   "region": "callout",
+   "order_in_block": 7,
+   "of_in_block": 7,
+   "source_en": "Please give because you want the work funded, not because you expect the government to hand the money back.",
+   "target_my": "",
+   "figures": [],
+   "note": "TRAP. 'the work' = the charity's programme activity, the thing the organization does. It must NOT become 'business', 'company', or 'trade'. A 501(c)(3) has no business to fund. A back-translation of the machine attempt returned 'businesses' here."
+  },
+  {
+   "id": "021",
+   "block": "arith.head",
+   "kind": "heading",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "HOW THE ARITHMETIC WORKS",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "022",
+   "block": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 5,
+   "source_en": "Your approximate saving is the deductible amount multiplied by your marginal tax rate, the rate that applies to your top dollar of income.",
+   "target_my": "",
+   "figures": [],
+   "note": "The rate applying to the top dollar of income, not the average rate. Do not simplify to 'tax rate'."
+  },
+  {
+   "id": "023",
+   "block": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 5,
+   "source_en": "Two 2026 rules fix the deductible amount before that multiplication happens.",
+   "target_my": "",
+   "figures": [
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "024",
+   "block": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 3,
+   "of_in_block": 5,
+   "source_en": "If you itemize, only the giving above 0.5% of your adjusted gross income counts.",
+   "target_my": "",
+   "figures": [
+    "0.5%"
+   ],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym."
+  },
+  {
+   "id": "025",
+   "block": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 4,
+   "of_in_block": 5,
+   "source_en": "If you do not itemize, the $1,000 or $2,000 ceiling above applies.",
+   "target_my": "",
+   "figures": [
+    "$1,000",
+    "$2,000"
+   ],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "026",
+   "block": "arith.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 5,
+   "of_in_block": 5,
+   "source_en": "A $1,000 gift never comes back as $1,000.",
+   "target_my": "",
+   "figures": [
+    "$1,000",
+    "$1,000"
+   ],
+   "note": ""
+  },
+  {
+   "id": "027",
+   "block": "tbl.head",
+   "kind": "heading",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "FOUR ILLUSTRATIONS, WITH EVERY ASSUMPTION WRITTEN OUT",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "028",
+   "block": "tbl.col.gift",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "GIFT",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "029",
+   "block": "tbl.col.assumptions",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "ASSUMPTIONS",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "030",
+   "block": "tbl.col.deduct",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "AMOUNT YOU MAY DEDUCT",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "031",
+   "block": "tbl.col.rate",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "ASSUMED MARGINAL RATE",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "032",
+   "block": "tbl.col.reduction",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "REDUCTION IN FEDERAL TAX",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "033",
+   "block": "tbl.col.netcost",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "APPROXIMATE NET COST",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "034",
+   "block": "row1.gift",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$100",
+   "target_my": "",
+   "figures": [
+    "$100"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "035",
+   "block": "row1.assume",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Single filer, about $60,000 AGI, takes the standard deduction",
+   "target_my": "",
+   "figures": [
+    "$60,000"
+   ],
+   "note": "Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "036",
+   "block": "row1.deduct",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$100",
+   "target_my": "",
+   "figures": [
+    "$100"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "037",
+   "block": "row1.note",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "within the $1,000 non-itemizer cap",
+   "target_my": "",
+   "figures": [
+    "$1,000"
+   ],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  The $1,000 / $2,000 ceiling for people who take the standard deduction."
+  },
+  {
+   "id": "038",
+   "block": "row1.rate",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "12%",
+   "target_my": "",
+   "figures": [
+    "12%"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "039",
+   "block": "row1.reduction",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $12",
+   "target_my": "",
+   "figures": [
+    "$12"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "040",
+   "block": "row1.netcost",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $88",
+   "target_my": "",
+   "figures": [
+    "$88"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "041",
+   "block": "row2.gift",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$1,000",
+   "target_my": "",
+   "figures": [
+    "$1,000"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "042",
+   "block": "row2.assume",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Single filer, about $95,000 AGI, takes the standard deduction",
+   "target_my": "",
+   "figures": [
+    "$95,000"
+   ],
+   "note": "Term of art. Use one Burmese rendering for 'standard deduction' throughout and never reuse it for 'itemized deduction'.  Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "043",
+   "block": "row2.deduct",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$1,000",
+   "target_my": "",
+   "figures": [
+    "$1,000"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "044",
+   "block": "row2.note",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "exactly at the non-itemizer cap",
+   "target_my": "",
+   "figures": [],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  The $1,000 / $2,000 ceiling for people who take the standard deduction."
+  },
+  {
+   "id": "045",
+   "block": "row2.rate",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "22%",
+   "target_my": "",
+   "figures": [
+    "22%"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "046",
+   "block": "row2.reduction",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $220",
+   "target_my": "",
+   "figures": [
+    "$220"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "047",
+   "block": "row2.netcost",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $780",
+   "target_my": "",
+   "figures": [
+    "$780"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "048",
+   "block": "row3.gift",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$10,000",
+   "target_my": "",
+   "figures": [
+    "$10,000"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "049",
+   "block": "row3.assume",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Married filing jointly, $300,000 AGI, itemizes deductions",
+   "target_my": "",
+   "figures": [
+    "$300,000"
+   ],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "050",
+   "block": "row3.deduct",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$8,500",
+   "target_my": "",
+   "figures": [
+    "$8,500"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "051",
+   "block": "row3.note",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "0.5% AGI floor removes $1,500",
+   "target_my": "",
+   "figures": [
+    "0.5%",
+    "$1,500"
+   ],
+   "note": "The 0.5% floor. 'removes' = this much of the gift stops being deductible."
+  },
+  {
+   "id": "052",
+   "block": "row3.rate",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "24%",
+   "target_my": "",
+   "figures": [
+    "24%"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "053",
+   "block": "row3.reduction",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $2,040",
+   "target_my": "",
+   "figures": [
+    "$2,040"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "054",
+   "block": "row3.netcost",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $7,960",
+   "target_my": "",
+   "figures": [
+    "$7,960"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "055",
+   "block": "row4.gift",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$100,000",
+   "target_my": "",
+   "figures": [
+    "$100,000"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "056",
+   "block": "row4.assume",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Single filer, $600,000 AGI, itemizes deductions",
+   "target_my": "",
+   "figures": [
+    "$600,000"
+   ],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "057",
+   "block": "row4.deduct",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "$97,000",
+   "target_my": "",
+   "figures": [
+    "$97,000"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "058",
+   "block": "row4.note",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "0.5% AGI floor removes $3,000",
+   "target_my": "",
+   "figures": [
+    "0.5%",
+    "$3,000"
+   ],
+   "note": "The 0.5% floor. 'removes' = this much of the gift stops being deductible."
+  },
+  {
+   "id": "059",
+   "block": "row4.rate",
+   "kind": "figure",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "35%",
+   "target_my": "",
+   "figures": [
+    "35%"
+   ],
+   "note": "DO NOT TRANSLATE. Reproduce the figure exactly, in Western Arabic digits (0-9). No Burmese numerals."
+  },
+  {
+   "id": "060",
+   "block": "row4.reduction",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $33,950",
+   "target_my": "",
+   "figures": [
+    "$33,950"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "061",
+   "block": "row4.netcost",
+   "kind": "label",
+   "region": "table",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "about $66,050",
+   "target_my": "",
+   "figures": [
+    "$66,050"
+   ],
+   "note": "Only the word 'about' is translated. The figure after it must stay exactly as printed, in Western Arabic digits."
+  },
+  {
+   "id": "062",
+   "block": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 5,
+   "source_en": "Every figure above is an illustration resting on the assumptions in its own row.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "063",
+   "block": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 5,
+   "source_en": "It is not a prediction about you and not a promise that you will save anything.",
+   "target_my": "",
+   "figures": [],
+   "note": "Keep the denial explicit. This protects the organization."
+  },
+  {
+   "id": "064",
+   "block": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 3,
+   "of_in_block": 5,
+   "source_en": "Change the filing status, the income, whether the donor itemizes, or the marginal rate, and the result changes; the marginal rates are assumed rather than derived from the incomes shown.",
+   "target_my": "",
+   "figures": [],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence."
+  },
+  {
+   "id": "065",
+   "block": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 4,
+   "of_in_block": 5,
+   "source_en": "The four gift amounts match the donor recognition tiers we plan to build (Bronze $100, Silver $1,000, Gold $10,000, Diamond $100,000) but those tiers are planned only.",
+   "target_my": "",
+   "figures": [
+    "$100",
+    "$1,000",
+    "$10,000",
+    "$100,000"
+   ],
+   "note": "The recognition tiers do not exist yet. Keep the denial."
+  },
+  {
+   "id": "066",
+   "block": "tbl.footnote",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 5,
+   "of_in_block": 5,
+   "source_en": "No badge, certificate, or tier exists today, and a gift made now does not earn one.",
+   "target_my": "",
+   "figures": [],
+   "note": "Keep the denial: a gift now earns no badge."
+  },
+  {
+   "id": "067",
+   "block": "ceil.head",
+   "kind": "heading",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "CEILINGS, THE CARRYFORWARD, AND THE RECEIPT YOU NEED",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "068",
+   "block": "ceil.lead",
+   "kind": "label",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "A ceiling based on your income.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "069",
+   "block": "ceil.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 3,
+   "source_en": "For cash gifts to a public charity such as Win’s VPN Inc., the deduction generally cannot exceed 60% of adjusted gross income, and ceilings of 50%, 30%, or 20% apply to other kinds of gifts.",
+   "target_my": "",
+   "figures": [
+    "60%",
+    "50%",
+    "30%",
+    "20%"
+   ],
+   "note": "Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym.  IRS classification, paired with 'private foundation' later. Keep the two distinct."
+  },
+  {
+   "id": "070",
+   "block": "ceil.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 3,
+   "source_en": "Anything above the ceiling is not lost: it carries over to the next 5 tax years.",
+   "target_my": "",
+   "figures": [
+    "5"
+   ],
+   "note": "Carryforward. The unused amount is not lost; it moves to later years. Keep the figure 5 as a Western Arabic digit."
+  },
+  {
+   "id": "071",
+   "block": "ceil.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 3,
+   "of_in_block": 3,
+   "source_en": "(IRS Publication 526.)",
+   "target_my": "",
+   "figures": [
+    "526"
+   ],
+   "note": ""
+  },
+  {
+   "id": "072",
+   "block": "ack.lead",
+   "kind": "label",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Gifts of $250 or more need our written acknowledgment.",
+   "target_my": "",
+   "figures": [
+    "$250"
+   ],
+   "note": "Term of art: the receipt the charity must issue. Not 'confirmation', 'thanks', or 'agreement'. Same rendering in ack.lead and ack.body."
+  },
+  {
+   "id": "073",
+   "block": "ack.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 3,
+   "source_en": "The IRS does not allow a deduction for any single gift of $250 or more without a contemporaneous written acknowledgment from the charity, and it has to reach you by the earlier of the date you file that year’s return or that return’s due date including extensions.",
+   "target_my": "",
+   "figures": [
+    "$250"
+   ],
+   "note": "Term of art: the receipt the charity must issue. Not 'confirmation', 'thanks', or 'agreement'. Same rendering in ack.lead and ack.body.  Legal term: obtained in time, before the filing deadline described in the same sentence. Do not drop it and do not translate it as 'modern'."
+  },
+  {
+   "id": "074",
+   "block": "ack.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 3,
+   "source_en": "If you gave $250 or more and did not receive one from us, please email support@winsvpn.org and we will issue it.",
+   "target_my": "",
+   "figures": [
+    "$250"
+   ],
+   "note": ""
+  },
+  {
+   "id": "075",
+   "block": "ack.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 3,
+   "of_in_block": 3,
+   "source_en": "(IRS Publication 1771.)",
+   "target_my": "",
+   "figures": [
+    "1771"
+   ],
+   "note": ""
+  },
+  {
+   "id": "076",
+   "block": "cannot.head",
+   "kind": "heading",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "WHAT THIS LETTER CANNOT TELL YOU",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "077",
+   "block": "cannot.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 4,
+   "source_en": "Deductibility depends on your own circumstances: your filing status, your adjusted gross income, whether you itemize, what else you deducted, and what other gifts you made that year.",
+   "target_my": "",
+   "figures": [],
+   "note": "Term of art: to list deductions individually instead of taking the standard deduction. Keep 'itemize' / 'itemized deduction' distinct from 'standard deduction' in every occurrence.  Term of art (AGI). Use one rendering throughout. Where the source says 'AGI' in a table cell, keeping the Latin abbreviation AGI is acceptable and preferred over an invented Burmese acronym."
+  },
+  {
+   "id": "078",
+   "block": "cannot.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 2,
+   "of_in_block": 4,
+   "source_en": "State and local treatment of charitable giving varies by state and does not follow the federal rules.",
+   "target_my": "",
+   "figures": [],
+   "note": "State and local rules differ from federal rules. Do not merge the two levels of government into one word."
+  },
+  {
+   "id": "079",
+   "block": "cannot.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 3,
+   "of_in_block": 4,
+   "source_en": "Win’s VPN Inc. does not provide tax advice and cannot tell you what a gift will be worth to you.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "080",
+   "block": "cannot.body",
+   "kind": "prose",
+   "region": "body",
+   "order_in_block": 4,
+   "of_in_block": 4,
+   "source_en": "Please ask a tax professional, and check the rules yourself at irs.gov.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "081",
+   "block": "sign.closing",
+   "kind": "label",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Sincerely,",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "082",
+   "block": "sign.org",
+   "kind": "verbatim",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "Win’s VPN Inc.",
+   "target_my": "",
+   "figures": [],
+   "note": "DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+  },
+  {
+   "id": "083",
+   "block": "sign.orgsuffix",
+   "kind": "label",
+   "region": "body",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "· a 501(c)(3) tax-exempt public charity",
+   "target_my": "",
+   "figures": [
+    "501",
+    "3"
+   ],
+   "note": "IRS classification, paired with 'private foundation' later. Keep the two distinct."
+  },
+  {
+   "id": "084",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 1,
+   "of_in_block": 10,
+   "source_en": "Win’s VPN Inc. is exempt from federal income tax under Internal Revenue Code Section 501(c)(3).",
+   "target_my": "",
+   "figures": [
+    "501",
+    "3"
+   ],
+   "note": ""
+  },
+  {
+   "id": "085",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 2,
+   "of_in_block": 10,
+   "source_en": "The determination letter is dated July 21, 2026; the effective date of exemption is June 11, 2026, so a contribution made on or after that date falls inside the exempt period.",
+   "target_my": "",
+   "figures": [
+    "21",
+    "2026",
+    "11",
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "086",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 3,
+   "of_in_block": 10,
+   "source_en": "It is classified as a public charity under Section 509(a)(2) rather than a private foundation, uses a December 31 accounting period, and files an annual Form 990-series return.",
+   "target_my": "",
+   "figures": [
+    "509",
+    "2",
+    "31",
+    "990"
+   ],
+   "note": "IRS classification, paired with 'private foundation' later. Keep the two distinct."
+  },
+  {
+   "id": "087",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 4,
+   "of_in_block": 10,
+   "source_en": "Contributions are deductible under IRC Section 170 to the extent allowed by law, and it is qualified to receive tax-deductible bequests, devises, transfers, or gifts under Section 2055, 2106, or 2522.",
+   "target_my": "",
+   "figures": [
+    "170",
+    "2055",
+    "2106",
+    "2522"
+   ],
+   "note": ""
+  },
+  {
+   "id": "088",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 5,
+   "of_in_block": 10,
+   "source_en": "Tax-exempt status is a determination about the organization.",
+   "target_my": "",
+   "figures": [],
+   "note": "This sentence denies any government endorsement of the VPN product. Keep the denial intact; it is the honest framing the letter exists for."
+  },
+  {
+   "id": "089",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 6,
+   "of_in_block": 10,
+   "source_en": "It is not an IRS review, approval, or endorsement of the Win’s VPN service, its security, or its performance.",
+   "target_my": "",
+   "figures": [],
+   "note": ""
+  },
+  {
+   "id": "090",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 7,
+   "of_in_block": 10,
+   "source_en": "Check the status yourself with the IRS Tax Exempt Organization Search at apps.irs.gov/app/eos, searching the organization name, Win’s VPN Inc.; recently approved organizations can take time to appear there, so not yet finding a listing is expected rather than a warning sign.",
+   "target_my": "",
+   "figures": [],
+   "note": "Explains why a lookup may find nothing. Keep it, or a reader who fails to find the listing will conclude the charity is fake."
+  },
+  {
+   "id": "091",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 8,
+   "of_in_block": 10,
+   "source_en": "Sources: IRS Publications 526 and 1771, IRS Topic no. 506, and Rev. Proc. 2025-32.",
+   "target_my": "",
+   "figures": [
+    "526",
+    "1771",
+    "506",
+    "2025",
+    "32"
+   ],
+   "note": ""
+  },
+  {
+   "id": "092",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 9,
+   "of_in_block": 10,
+   "source_en": "Dollar figures are for the 2026 tax year and change annually.",
+   "target_my": "",
+   "figures": [
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "093",
+   "block": "fine.print",
+   "kind": "prose",
+   "region": "fine",
+   "order_in_block": 10,
+   "of_in_block": 10,
+   "source_en": "Issued August 3, 2026.",
+   "target_my": "",
+   "figures": [
+    "3",
+    "2026"
+   ],
+   "note": ""
+  },
+  {
+   "id": "094",
+   "block": "footer.domain",
+   "kind": "verbatim",
+   "region": "footer",
+   "order_in_block": 1,
+   "of_in_block": 1,
+   "source_en": "winsvpn.org",
+   "target_my": "",
+   "figures": [],
+   "note": "DO NOT TRANSLATE. Reproduce exactly as printed, in Latin script. This is a legal name or a domain."
+  },
+  {
+   "id": "095",
+   "block": "notice.governing",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 1,
+   "of_in_block": 3,
+   "source_en": "This Burmese text is a translation provided for convenience.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "096",
+   "block": "notice.governing",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 2,
+   "of_in_block": 3,
+   "source_en": "The English version of this letter is the governing text.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "097",
+   "block": "notice.governing",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 3,
+   "of_in_block": 3,
+   "source_en": "If the Burmese and the English differ, the English version controls.",
+   "target_my": "",
+   "figures": [],
+   "note": "Legal clause. 'controls' = prevails, governs, takes precedence. Not 'manages' or 'operates'.",
+   "new_in_burmese": true
+  },
+  {
+   "id": "098",
+   "block": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 1,
+   "of_in_block": 5,
+   "source_en": "What follows is United States federal tax law.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "099",
+   "block": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 2,
+   "of_in_block": 5,
+   "source_en": "It changes what a person owes only if that person files a United States federal income tax return.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "100",
+   "block": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 3,
+   "of_in_block": 5,
+   "source_en": "Most readers in Myanmar do not file one, and for them a gift to Win’s VPN Inc. reduces no tax at all.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "101",
+   "block": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 4,
+   "of_in_block": 5,
+   "source_en": "The English version of this letter does not say so; it was written for readers who file in the United States.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  },
+  {
+   "id": "102",
+   "block": "notice.scope",
+   "kind": "prose",
+   "region": "notice",
+   "order_in_block": 5,
+   "of_in_block": 5,
+   "source_en": "A gift is still a gift; it is simply not a deduction outside the United States tax system.",
+   "target_my": "",
+   "figures": [],
+   "note": "",
+   "new_in_burmese": true
+  }
+ ]
+}

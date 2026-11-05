@@ -1,0 +1,47 @@
+[Unit]
+# Removes a kill switch that outlived the session that created it. See
+# /opt/wins-vpn/share/doc/wins-vpn/RECOVERY.md and the header of
+# /opt/wins-vpn/share/wins-vpn/winsvpn-recover for why this exists.
+#
+# This unit NEVER starts a tunnel. It is a oneshot that runs once at boot,
+# before the network is configured, and exits. It is deliberately NOT enabled
+# by the package's postinst: removing firewall state automatically at every
+# boot is a policy decision for the machine's owner, not for an installer.
+# Enable it with:  systemctl enable winsvpn-recover.service
+Description=Remove leftover Win's VPN kill-switch firewall rules
+Documentation=file:/opt/wins-vpn/share/doc/wins-vpn/RECOVERY.md
+DefaultDependencies=no
+After=netfilter-persistent.service iptables.service ip6tables.service nftables.service firewalld.service ufw.service
+Before=network-pre.target shutdown.target
+RequiresMountsFor=/opt/wins-vpn
+Wants=network-pre.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/opt/wins-vpn/share/wins-vpn/winsvpn-recover
+# A host without iptables, or one where the chains are already gone, is a
+# success: the goal is "no leftover block", not "a chain was deleted".
+SuccessExitStatus=0
+TimeoutStartSec=30
+# The one capability the job needs. Everything else is dropped.
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

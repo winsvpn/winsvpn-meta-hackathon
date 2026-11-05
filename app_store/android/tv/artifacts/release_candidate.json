@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-android-tv-release-candidate-v1",
+  "canonical_release": "1.0.16+33",
+  "target_id": "android-tv-aab",
+  "apk_target_id": "android-tv-apk",
+  "package": "org.winsvpn.app",
+  "version_name": "1.0.16",
+  "version_code": 3302,
+  "form_factor": "tv",
+  "artifact": {
+    "aab_path": "build/app/outputs/bundle/tvRelease/app-tv-release.aab",
+    "apk_path": "build/app/outputs/flutter-apk/app-tv-release.apk",
+    "build_variant": "release",
+    "obfuscated": true,
+    "debug_artifact_allowed": false,
+    "owner_signing_required": true,
+    "produced": false,
+    "upload_performed": false,
+    "publication_authorized": false
+  },
+  "private_symbols": {
+    "aab": ".artifacts/private-release-symbols/android-tv-aab",
+    "apk": ".artifacts/private-release-symbols/android-tv-apk",
+    "uploaded": false
+  },
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg"]
+  }
+}

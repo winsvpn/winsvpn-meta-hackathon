@@ -1,0 +1,257 @@
+ M android/app/build.gradle.kts
+ M android/app/src/main/AndroidManifest.xml
+ M android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
+ M android/app/src/main/kotlin/org/winsvpn/app/WinnV3Keys.kt
+ M android/app/src/test/kotlin/org/winsvpn/app/AndroidReleaseIdentityContractTest.kt
+ M android/gradle/verification-metadata.xml
+ M app_store/android/phone/README.md
+ M app_store/android/phone/artifacts/release_candidate.json
+ M app_store/android/phone/metadata/en-US/whats_new.txt
+ M app_store/android/phone/review/data_safety.md
+ M app_store/android/phone/review/owner_signoff.json
+ M app_store/android/phone/review/play_console_notes.txt
+ M app_store/android/phone/review/privacy_label_manifest.json
+ M app_store/android/tv/README.md
+ M app_store/android/tv/artifacts/release_candidate.json
+ M app_store/android/tv/metadata/en-US/whats_new.txt
+ M app_store/android/tv/review/data_safety.md
+ M app_store/android/tv/review/owner_signoff.json
+ M app_store/android/tv/review/play_console_notes.txt
+ M app_store/android/tv/review/privacy_label_manifest.json
+ M app_store/android/wear/README.md
+ M app_store/android/wear/artifacts/release_candidate.json
+ M app_store/android/wear/metadata/en-US/whats_new.txt
+ M app_store/android/wear/review/data_safety.md
+ M app_store/android/wear/review/owner_signoff.json
+ M app_store/android/wear/review/play_console_notes.txt
+ M app_store/android/wear/review/privacy_label_manifest.json
+ M app_store/apple/artifacts/release_candidate.json
+ M app_store/apple/artifacts/runtime_evidence.json
+ M app_store/apple/metadata/app_information.md
+ M app_store/apple/review/apple_tv_post_release_scope.json
+ M app_store/apple/review/export_compliance_status.json
+ M app_store/apple/review/privacy_label_manifest.json
+ M app_store/linux/artifacts/release_candidate.json
+ M app_store/linux/review/distribution_notes.txt
+ M app_store/linux/review/owner_signoff.json
+ M app_store/linux/review/privacy_label_manifest.json
+ M app_store/windows/artifacts/release_candidate.json
+ M app_store/windows/metadata/en-US/full_description.txt
+ M app_store/windows/metadata/en-US/whats_new.txt
+ M app_store/windows/review/age_rating_status.json
+ M app_store/windows/review/export_compliance_status.json
+ M app_store/windows/review/owner_signoff.json
+ M app_store/windows/review/partner_center_notes.txt
+ M app_store/windows/review/privacy_label_manifest.json
+ M dashboard/README.md
+ M dashboard/server.py
+ M dashboard/state.json
+ M dashboard/static/app.js
+ M dashboard/test_dashboard.py
+ M docs/CROSS_STORE_RELEASE_CHECKLIST.md
+ M docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md
+A  docs/evidence/round11_remediation.md
+A  docs/rulings/ANDROID_API36_COMPATIBILITY_EXCEPTION_20260913.json
+ M docs/rulings/RELEASE_IDENTITY_MAP_20260824.json
+ M docs/rulings/RULINGS.lock
+ M extension/src/adapters/firefox.js
+ M extension/src/background/background.js
+A  extension/tools/test_background_lifecycle.py
+ M extension/tools/test_browser_enforcement_regressions.py
+ M installer/windows/build_zip_installer.ps1
+ M installer/windows/store/certification-notes.md
+ M ios/PacketTunnel/PacketTunnelProvider.swift
+ M ios/Podfile.lock
+ M ios/Runner/AppDelegate.swift
+ M legal/WEBSITE_PRIVACY.html
+ M lib/main.dart
+A  lib/owned_keyboard_listener.dart
+ M lib/tv_dpad_support.dart
+ M lib/vpn_power_control.dart
+ M lib/winn3_cover_fallback.dart
+ M lib/winn_protocol_dispatch.dart
+ M linux/packaging/org.winsvpn.app.metainfo.xml
+ M linux/runner/linux_tunnel_backend.cc
+ M linux/runner/linux_tunnel_backend.h
+ M linux/runner/linux_winn3_host.cc
+ M linux/runner/linux_winn_host.cc
+ M linux/runner/main.cc
+ M linux/runner/my_application.cc
+ M macos/PacketTunnel/PacketTunnelProvider.swift
+ M macos/Podfile.lock
+ M macos/Runner/MainFlutterWindow.swift
+ M pubspec.yaml
+ M server/test_account_deletion_hub.py
+ M server/test_account_expiry_revocation_hub.py
+A  server/test_control_plane_round10.py
+A  server/test_control_plane_round11.py
+ M server/test_core_dark_start_latch.py
+ M server/test_data_plane_dark_start_latch.py
+ M server/test_donor_acknowledgment_hub.py
+ M server/test_emergency_dispatch_hub.py
+ M server/test_hoppy_agent_tier1_hub.py
+ M server/test_winn3_descriptor_hub.py
+ M server/test_winn3_install_time_carrier.py
+ M server/test_winn3_pathmtu_hub.py
+ M server/test_winn3_serving_hub.py
+ M server/test_winn3_sign_descriptor_tool.py
+ M server/wins_control_plane_setup_ONETOUCH.sh
+ M server/wins_data_plane_setup_ONETOUCH.sh
+A  test/account_cancellation_logout_test.dart
+ M test/android_ipv6_fail_closed_guard_test.dart
+ M test/android_vpn_launch_guard_test.dart
+A  test/owned_keyboard_listener_test.dart
+ M test/vpn_config_gateway_normalization_test.dart
+ M test/web_download_asset_decision_test.py
+ M test/win_for_all_client_contract_test.dart
+ M tools/android_version_policy.py
+ M tools/apple_cross_store_artifact_gate.py
+ M tools/apple_store_listing_metadata.py
+ M tools/ipscrub/ipscrub-allowlist.txt
+ M tools/linux_cross_store_artifact_gate.py
+ M tools/native_messaging/host/bin/wins_bridge_host.dart
+ M tools/native_messaging/host/bin/wins_bridge_host_harness.dart
+ M tools/native_messaging/host/test/wins_bridge_host_identity_test.dart
+A  tools/native_messaging/host/test/wins_bridge_host_origins_test.dart
+ M tools/native_messaging/native_host_layout.py
+ M tools/native_messaging/render_host_manifest.py
+ M tools/native_messaging/test_native_host_registration.py
+ M tools/test_android_version_policy.py
+ M tools/test_apple_standalone_v3_wiring.py
+ M tools/test_apple_store_listing_metadata.py
+ M tools/test_cross_store_packet_consistency.py
+ M tools/test_release_identity_consistency.py
+ M tools/test_verify_android_aab_signers.py
+ M tools/test_wear_os_signed_aab_receipt.py
+ M tools/test_website_download_custody.py
+ M tools/test_website_public_download_gate.py
+ M tools/test_windows_arm64_release_readiness.py
+ M tools/test_windows_awg_runtime_validation.py
+ M tools/verify_android_aab_signers.py
+ M tools/verify_apple_method_channel_contract.py
+ M tools/verify_rulings.sh
+ M tools/verify_shipped_native_artifact_freshness.py
+ M tools/website_download_custody.py
+ M tools/website_security_audit.py
+ M tools/windows_cross_store_artifact_gate.py
+ M wear_os/app/build.gradle.kts
+ M wear_os/app/src/test/kotlin/org/winsvpn/app/wear/WearReleaseIdentityContractTest.kt
+ M wear_os/tools/assert_release_aab.py
+ M wear_os/tools/create_signed_aab_receipt.py
+ M wear_os/tools/prepare_release.sh
+ M wear_os/tools/signed_aab_receipt.py
+ M web/_headers
+ M web/_worker.js
+ M web/i18n/major.json
+ M web/index.html
+ M web/releases/README.md
+ M web/releases/download-custody.json
+ M web/releases/downloads.json
+ M web/source/index.html
+ M windows/runner/Runner.rc
+ M windows/runner/windows_tunnel_backend.cpp
+ M windows/runner/windows_tunnel_service_client_test.cc
+ M windows/runner/windows_tunnel_service_protocol.h
+ M winn_protocol_experimental/cmd/winn3-gateway/forward.go
+A  winn_protocol_experimental/cmd/winn3-gateway/forward_round10_test.go
+A  winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
+ M winn_protocol_experimental/cmd/winn3-gateway/main.go
+ M winn_protocol_experimental/cmd/winn3-gateway/peer_registry.go
+A  winn_protocol_experimental/cmd/winn3-gateway/peer_registry_round11_test.go
+ M winn_protocol_experimental/internal/carrier/h3.go
+A  winn_protocol_experimental/internal/carrier/h3_receive_window_test.go
+ M winn_protocol_experimental/winn3/carrier/udp_socket_buffers.go
+ M winn_protocol_experimental/winn3/carrier/udp_socket_buffers_test.go
+?? docs/evidence/codex_astra_audit.md
+?? docs/evidence/codex_astra_audit_round10.md
+?? docs/evidence/codex_astra_audit_round11.md
+?? docs/evidence/codex_astra_audit_round12.md
+?? docs/evidence/codex_astra_audit_round2.md
+?? docs/evidence/codex_astra_audit_round3.md
+?? docs/evidence/codex_astra_audit_round4.md
+?? docs/evidence/codex_astra_audit_round5.md
+?? docs/evidence/codex_astra_audit_round6.md
+?? docs/evidence/codex_astra_audit_round7.md
+?? docs/evidence/codex_astra_audit_round8.md
+?? docs/evidence/codex_astra_audit_round9.md
+?? docs/evidence/codex_daybreak_blue_audit.md
+?? docs/evidence/codex_daybreak_blue_audit_round10.md
+?? docs/evidence/codex_daybreak_blue_audit_round11.md
+?? docs/evidence/codex_daybreak_blue_audit_round12.md
+?? docs/evidence/codex_daybreak_blue_audit_round3.md
+?? docs/evidence/codex_daybreak_blue_audit_round4.md
+?? docs/evidence/codex_daybreak_blue_audit_round5.md
+?? docs/evidence/codex_daybreak_blue_audit_round6.md
+?? docs/evidence/codex_daybreak_blue_audit_round7.md
+?? docs/evidence/codex_daybreak_blue_audit_round8.md
+?? docs/evidence/codex_daybreak_blue_audit_round9.md
+?? docs/evidence/codex_sol_audit.md
+?? docs/evidence/codex_sol_audit_round10.md
+?? docs/evidence/codex_sol_audit_round11.md
+?? docs/evidence/codex_sol_audit_round12.md
+?? docs/evidence/codex_sol_audit_round2.md
+?? docs/evidence/codex_sol_audit_round3.md
+?? docs/evidence/codex_sol_audit_round4.md
+?? docs/evidence/codex_sol_audit_round5.md
+?? docs/evidence/codex_sol_audit_round6.md
+?? docs/evidence/codex_sol_audit_round7.md
+?? docs/evidence/codex_sol_audit_round8.md
+?? docs/evidence/codex_sol_audit_round9.md
+?? docs/evidence/deepseek_all_targets_audit.md
+?? docs/evidence/deepseek_round1_audit.md
+?? docs/evidence/deepseek_round2_consensus.md
+?? docs/evidence/round10_remediation.md
+?? docs/evidence/round10_remediation/
+?? docs/evidence/round11_remediation/
+?? docs/evidence/round12_remediation/
+?? docs/evidence/round4_remediation.md
+?? docs/evidence/round4_remediation/
+?? docs/evidence/round5_remediation.md
+?? docs/evidence/round5_remediation/
+?? docs/evidence/round6_remediation.md
+?? docs/evidence/round6_remediation/
+?? docs/evidence/round7_remediation.md
+?? docs/evidence/round7_remediation/
+?? docs/evidence/round8_remediation.md
+?? docs/evidence/round8_remediation/
+?? docs/evidence/round9_remediation.md
+?? docs/evidence/round9_remediation/
+?? docs/evidence/target_fuzz_and_audit_report.json
+?? server/backup/
+?? server/db/
+?? server/downloads/
+?? server/test_control_plane_deepseek_round2.py
+?? server/test_control_plane_round4.py
+?? server/test_control_plane_round5.py
+?? server/test_control_plane_round6.py
+?? server/test_control_plane_round7.py
+?? server/test_control_plane_round8.py
+?? server/test_control_plane_round9.py
+?? tools/deepseek_debate_harness.py
+?? tools/run_astra_remediation.py
+?? tools/run_astra_remediation_round10.py
+?? tools/run_astra_remediation_round11.py
+?? tools/run_astra_remediation_round12.py
+?? tools/run_astra_remediation_round5.py
+?? tools/run_astra_remediation_round6.py
+?? tools/run_astra_remediation_round7.py
+?? tools/run_astra_remediation_round8.py
+?? tools/run_astra_remediation_round9.py
+?? tools/run_codex_tripartite_audit.py
+?? tools/run_deepseek_all_targets_audit.py
+?? tools/run_deepseek_audit_round.py
+?? tools/run_deepseek_debate_turn2.py
+?? tools/run_tripartite_cycle.py
+?? tools/sync_lanes.py
+?? tools/target_fuzz_and_audit.py
+?? tools/test_apple_proving_ownership.py
+?? tools/test_ios_winn_memory_watchdog.py
+?? tools/test_linux_engine_pipe.py
+?? tools/test_linux_round7.py
+?? tools/test_linux_runargv_round9.py
+?? tools/test_linux_tunnel_shutdown.py
+?? tools/test_round5_crypto_checkout.py
+?? tools/test_rulings_round8.py
+?? tools/update_banner_translations.py
+?? web/assets/wins-vpn-email-logo.png
+?? web/assets/wins-vpn-home-logo.png

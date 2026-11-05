@@ -1,0 +1,197 @@
+{
+  "control_plane_deepseek_round2": {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.92,
+    "log": "control_plane_deepseek_round2-final.log"
+  },
+  "control_plane_round4": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.02,
+    "log": "control_plane_round4-final.log"
+  },
+  "control_plane_round5": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.92,
+    "log": "control_plane_round5-final.log"
+  },
+  "control_plane_round6": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.55,
+    "log": "control_plane_round6-final.log"
+  },
+  "control_plane_round7": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "exit_code": 0,
+    "seconds": 5.63,
+    "log": "control_plane_round7-final.log"
+  },
+  "control_plane_round8": {
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.86,
+    "log": "control_plane_round8-final.log"
+  },
+  "winn3_descriptor_hub": {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 22.3,
+    "log": "winn3_descriptor_hub-final.log"
+  },
+  "account_deletion_hub": {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.39,
+    "log": "account_deletion_hub-final.log"
+  },
+  "winn3_serving_hub": {
+    "command": [
+      "python3",
+      "server/test_winn3_serving_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 7.3,
+    "log": "winn3_serving_hub-final.log"
+  },
+  "winn3_install_time_carrier": {
+    "command": [
+      "python3",
+      "server/test_winn3_install_time_carrier.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.84,
+    "log": "winn3_install_time_carrier-final.log"
+  },
+  "core_dark_start_latch": {
+    "command": [
+      "python3",
+      "server/test_core_dark_start_latch.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.96,
+    "log": "core_dark_start_latch-final.log"
+  },
+  "winn3_pathmtu_hub": {
+    "command": [
+      "python3",
+      "server/test_winn3_pathmtu_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 4.5,
+    "log": "winn3_pathmtu_hub-final.log"
+  },
+  "winn3_sign_descriptor_tool": {
+    "command": [
+      "python3",
+      "server/test_winn3_sign_descriptor_tool.py"
+    ],
+    "exit_code": 0,
+    "seconds": 4.22,
+    "log": "winn3_sign_descriptor_tool-final.log"
+  },
+  "data_plane_dark_start_latch": {
+    "command": [
+      "python3",
+      "server/test_data_plane_dark_start_latch.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.28,
+    "log": "data_plane_dark_start_latch-final.log"
+  },
+  "hoppy_agent_tier1_hub": {
+    "command": [
+      "python3",
+      "server/test_hoppy_agent_tier1_hub.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.67,
+    "log": "hoppy_agent_tier1_hub-final.log"
+  },
+  "rulings": {
+    "command": [
+      "sh",
+      "tools/verify_rulings.sh"
+    ],
+    "exit_code": 0,
+    "seconds": 3.32,
+    "log": "rulings-final.log"
+  },
+  "apple-contract": {
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.05,
+    "log": "apple-contract-final.log"
+  },
+  "ruling-regressions": {
+    "command": [
+      "python3",
+      "tools/test_rulings_round8.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.29,
+    "log": "ruling-regressions-final.log"
+  },
+  "website": {
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.37,
+    "log": "website-final.log"
+  },
+  "edge-verify": {
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "edge",
+      "extension/dist/wins-vpn-companion-edge.zip"
+    ],
+    "exit_code": 0,
+    "seconds": 3.51,
+    "log": "edge-verify-final.log"
+  },
+  "firefox-verify": {
+    "command": [
+      "python3",
+      "extension/build.py",
+      "--verify",
+      "firefox",
+      "extension/dist/wins-vpn-companion-firefox.zip"
+    ],
+    "exit_code": 0,
+    "seconds": 3.27,
+    "log": "firefox-verify-final.log"
+  }
+}

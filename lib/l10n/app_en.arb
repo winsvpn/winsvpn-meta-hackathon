@@ -1,0 +1,620 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-08-11",
+  "appName": "Win's VPN",
+  "appNameAnnouncement": "Win's VPN Announcement",
+  "welcomeMessage": "Welcome to Win's VPN! Thank you for helping yourself by using our services!!",
+  "secureConnectionEstablished": "Secure Connection Established.",
+  "startingProtocol": "Starting Winn Protocol®...",
+  "securingRoute": "Securing VPN route...",
+  "finalizingRoute": "Finalizing secure route...",
+  "trafficSecured": "Traffic Secured & Obfuscated",
+  "disconnected": "Disconnected",
+  "secured": "SECURED",
+  "unprotected": "UNPROTECTED",
+  "selectedProtocol": "Selected Protocol:",
+  "status": "Status:",
+  "referral": "Referral",
+  "shareApp": "Share Win's VPN",
+  "gate": "Gate:",
+  "traffic": "Traffic:",
+  "notConnected": "Not connected",
+  "connecting": "Connecting...",
+  "establishingRoute": "Establishing secure route...",
+  "carryingTraffic": "Carrying traffic",
+  "connectedNoLiveProbe": "Connected, no live probe on this device",
+  "flowing": "Flowing",
+  "idle": "Idle",
+  "notAvailable": "Not available",
+  "received": "Received",
+  "sent": "Sent",
+  "session": "Session:",
+  "version1": "Version 1",
+  "version3": "Version 3",
+  "versionNotRecognised": "Version not recognised by this app",
+  "directTransport": "direct transport",
+  "stealthTransport": "stealth transport",
+  "openSourceLicences": "Open source licences",
+  "thirdPartyNotices": "Notices for the software this app is built on",
+  "serverUnreachable": "Server unreachable right now",
+  "notReachableFromDevice": "Not reachable from this device right now",
+  "somethingWentWrong": "Something went wrong",
+  "actionFailed": "The app could not complete that action. Please try again later.",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "close": "Close",
+  "continueButton": "Continue",
+  "goBack": "Go Back",
+  "notNow": "Not now",
+  "allow": "Allow",
+  "deny": "Deny",
+  "save": "Save",
+  "refreshStatus": "Refresh status",
+  "allowBackgroundVpn": "Allow background VPN protection?",
+  "allowBackgroundVpnDetail": "To keep Win's VPN connected when the screen is off or when your network changes, allow the app to run without battery optimization.",
+  "deleteAccount": "Delete Account",
+  "deactivateDevice": "Deactivate Device",
+  "cancelDeletion": "Cancel Deletion",
+  "privacyPolicyAndLegalConsent": "Privacy Policy and Legal Consent",
+  "openingShareOptions": "Opening share options...",
+  "websiteLinkCopied": "Win's VPN website link copied.",
+  "referralLinkCopied": "Referral link copied.",
+  "planOneMonth": "1 Month Subscription",
+  "planOneYear": "1 Year Subscription",
+  "planOneTimeTenYears": "One-Time Payment (10 Years)",
+  "planLifetimeTechSupport": "Lifetime Access + Tech Support",
+  "planLifetimeNoTechSupport": "Lifetime Access (No Tech Support)",
+  "generalDonation": "Make a General Donation",
+  "premiumAutoRenews": "Premium Auto-renews",
+  "standardAutoRenews": "Standard Auto-renews",
+  "transportAutomatic": "Automatic",
+  "transportDirectUdp": "Direct (UDP) only",
+  "transportTcp": "TCP only",
+  "featureDoubleVpn": "Double VPN",
+  "featureSplitTunneling": "Split Tunneling",
+  "installedAppAccess": "Installed app access",
+  "referralInvite": "Invite a friend and both accounts receive 20% extra VPN time after activation.",
+  "referralShareDetail": "Share Win's VPN with friends. Paid referral bonuses are available after upgrading.",
+  "openWin": "Open Win",
+  "duressSmsWithLocation": "Safety alert: someone who listed you as an emergency contact may need help. Approx. location: {link}",
+  "@duressSmsWithLocation": {
+    "description": "Recipient-facing SMS body sent from the handset when coarse coordinates exist. Deliberately neutral: must never name the app, a VPN, censorship, duress or a panic feature. The whole body must fit one GSM-7 SMS part; the maps link is the coordinates payload.",
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "duressSmsWithoutLocation": "Safety alert: someone who listed you as an emergency contact may need help. Location not available.",
+  "@duressSmsWithoutLocation": {
+    "description": "Recipient-facing SMS body sent from the handset when no coordinates are available. Neutral, no app-identifying wording."
+  },
+  "duressHumanMessageWithLocation": "Automated safety alert: your contact may need help and asked you to be notified. Last known location: {lat}, {lng} ({link}). Sent {time}.",
+  "@duressHumanMessageWithLocation": {
+    "description": "Human-readable alert forwarded to a trusted contact when coordinates exist. Neutral, no app-identifying wording.",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "duressHumanMessageWithoutLocation": "Automated safety alert: your contact may need help and asked you to be notified. Last known location is unavailable. Sent {time}.",
+  "@duressHumanMessageWithoutLocation": {
+    "description": "Human-readable alert forwarded to a trusted contact when no coordinates are available. Neutral, no app-identifying wording.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "accept": "Accept",
+  "acceptPrivacyPolicy": "Accept Privacy Policy",
+  "agree": "Agree",
+  "activateDevice": "Activate Device",
+  "buyPremiumAccess": "Buy Premium Access",
+  "confirmOnThisDevice": "Confirm On This Device",
+  "yesDeleteMyAccount": "Yes, Delete My Account",
+  "yesConfirmDeletionOnThisDevice": "Yes, Confirm Deletion On This Device",
+  "thisCannotBeUndone": "This Cannot Be Undone",
+  "permanentlyEraseAccount": "Permanently erase this account, its devices, and its data",
+  "premiumAccessInfo": "Premium Access Info",
+  "premiumAccessOptions": "Premium Access Options",
+  "openWebsite": "Open Win's VPN Website",
+  "exploreMap": "Explore map",
+  "closeMap": "Close map",
+  "download": "Download",
+  "upload": "Upload",
+  "launchOutsideVpn": "Launch outside VPN",
+  "connectVpnToLaunchOutside": "Connect VPN to launch outside",
+  "useLaunchButtonOutside": "Use the launch button to open outside the VPN",
+  "selectAppForBypassFirst": "Select app for bypass first",
+  "iHaveSavedIt": "I have saved it",
+  "wipeOnly": "Wipe only",
+  "setUpEmergencyAlert": "Set up emergency alert",
+  "setUpEmergencyAlertLong": "Set up an emergency alert",
+  "createRecoveryCode": "Create a recovery code",
+  "saveThisRecoveryCode": "Save this recovery code",
+  "chooseNewUnlockCode": "Choose a new unlock code",
+  "confirmEmergencyCode": "Confirm emergency code",
+  "emergencyCode": "Emergency code",
+  "emergencyAlert": "Set Up An Emergency Alert",
+  "reviewPrivacyPolicyToContinue": "Review Privacy Policy to continue",
+  "reviewAndAcceptPrivacyPolicy": "Review and accept bundled Privacy Policy",
+  "viewBundledPrivacyPolicy": "View bundled Privacy Policy",
+  "bundledOfflinePrivacyPolicy": "Bundled offline Privacy Policy",
+  "tryFreeServer": "Try Free Server",
+  "tryFreeServerLimited": "Try Free Server (100 Mbps upload and download)",
+  "freeServerLimited": "Free Plan: 100 Mbps upload and download",
+  "freeServer": "Free Server",
+  "smartProtocol": "Smart Protocol",
+  "applyingVpnRouteSettings": "Applying VPN route settings...",
+  "connectBeforeSensitive": "Connect before you open or fetch anything sensitive. Until the ",
+  "connectingOverTcpOnly": "Connecting over TCP only...",
+  "directRouteUnavailableTryingTcp": "Direct route unavailable. Trying TCP...",
+  "fetching": "Fetching...",
+  "loading": "Loading...",
+  "ready": "Ready",
+  "searching": "Searching...",
+  "syncingFreeServerList": "Syncing free server list...",
+  "syncingSecurityUpdates": "Syncing latest security updates...",
+  "testing": "Testing",
+  "testingTcpFallback": "Testing TCP fallback...",
+  "testingUpload": "Testing upload...",
+  "tryingTcpFallback": "Trying TCP fallback...",
+  "usingTcpFallback": "Using TCP fallback...",
+  "disconnecting": "Disconnecting...",
+  "maintenanceInProgress": "Maintenance in progress. Please wait.",
+  "maintenanceUnderway": "Maintenance underway: Some servers may be offline.",
+  "coreServerOfflineMaintenance": "Our core server is currently offline for maintenance.",
+  "applyOnAndroidDevice": "in Settings to let the app try it. ",
+  "allTrafficUsesVpn": "All traffic currently uses the VPN.",
+  "allIpv4UseVpn": "All IPv4 destinations will use the VPN.",
+  "connectingTo": "Connecting to {serverName}...",
+  "@connectingTo": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "serverName": {
+        "type": "String"
+      }
+    }
+  },
+  "switchingServer": "Switching VPN server...",
+  "freeServerChanged": "Free server changed.",
+  "freeServerChangedConfigSync": "Free server changed. Config will sync when you connect.",
+  "freeServerIsReady": "Free server is ready.",
+  "deviceSuccessfullyActivated": "Device Successfully Activated!",
+  "freeCount": "{count} free servers available",
+  "@freeCount": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "oneFreeServer": "1 free server available",
+  "alwaysConnectOverTcp": "Always connect over TCP",
+  "alwaysOnVpn": "Always-on VPN",
+  "allowTextAlert": "Allow text alert",
+  "contactEmailOptional": "Contact email (optional)",
+  "trustedContactPhoneNumber": "Trusted contact phone number",
+  "optional": "Optional",
+  "requiredForTextAlert": "Required for the text alert",
+  "diagnostics": "Diagnostics",
+  "protocol": "Protocol",
+  "additionalPermissions": "Additional permissions",
+  "autoSelected": "Auto Selected",
+  "doubleVpnCoreOffline": "Double VPN core is offline for maintenance. Connecting with standard VPN instead...",
+  "applyBypassDestinations": "Apply bypass destinations",
+  "clearSearch": "Clear search",
+  "destinationsOutsideVpn": "Destinations outside VPN (all operating systems)",
+  "enterIpv4OrCidr": "Enter IPv4 addresses or CIDR networks. These destinations use your normal connection; everything else stays in the VPN.",
+  "exampleCidr": "Example: 192.168.0.0/16, 203.0.113.9",
+  "excludeAllApps": "Exclude all {platform}",
+  "@excludeAllApps": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "searchToExclude": "Search {platform} to exclude",
+  "@searchToExclude": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "noAppsMatchSearch": "No apps match your search.",
+  "appListNotReady": "App list is not ready yet.",
+  "selectThisAppForBypass": "Select this app for bypass before launching it.",
+  "linuxBypassLauncherScoped": "Linux bypass is launcher-scoped: connect, select an app, then use its launch button here. Apps opened normally remain protected by the VPN.",
+  "linuxAppLaunchedOutside": "Linux app launched outside the VPN.",
+  "linuxAppCouldNotLaunch": "The Linux app could not be launched.",
+  "connectFirstThenLaunchLinux": "Connect Win's VPN first, then launch the selected Linux app outside the VPN.",
+  "useNoMoreThan64Destinations": "Use no more than 64 destination networks.",
+  "tooManyRoutes": "Split tunneling produced too many routes. Use broader destination ranges.",
+  "cannotExcludeAllIpv4": "Split tunneling cannot exclude the entire IPv4 space.",
+  "zeroCannotBeExcluded": "0.0.0.0/0 cannot be excluded because it would block the VPN.",
+  "exclusionsTooManyRoutes": "Those exclusions produce too many routes; combine nearby networks.",
+  "onlyYourIpv4": "Only your selected IPv4 destinations: {routes}",
+  "@onlyYourIpv4": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "routes": {
+        "type": "String"
+      }
+    }
+  },
+  "androidApps": "Android apps",
+  "linuxApps": "Linux apps",
+  "windowsApps": "Windows apps",
+  "perAppExplanation": "To show Exclude Apps From VPN, Win's VPN needs to access the list of installed apps on this device. The list is used only on your device to build the split-tunneling picker. The full list is not uploaded, shared, sold, or used for ads or analytics. Only package names you select for exclusion are stored locally and passed to Android VpnService. You can choose Not now and continue using the VPN without per-app exclusions.",
+  "diagnosticsExplanation": "Records redacted connection-diagnostic information to help ",
+  "diagnosticsOffNoFile": "support. When off, no diagnostic file is written.",
+  "keepUpdated": "Keep this app and your operating system updated.",
+  "thisAppResistsCensorship": "This app works to resist censorship, but it does not make you ",
+  "reachableInEverySituation": "reachable in every situation.",
+  "showsWhatAppContacts": "tunnel is up, your network can see what the app contacts.",
+  "cannotVerifyAgainstAddress": "cannot be verified against an address.",
+  "resolveToPublicIpv4": "resolve to a public IPv4 address.",
+  "anyDirectServerAddress": "anything directly to a server's own address. This is ",
+  "directlyToServer": "directly to a server",
+  "normallyUsed": "normally used",
+  "atAllInsteadOfFallback": "at all instead of falling back.",
+  "removesTheFallbackRoute": "removes the fallback route.",
+  "routeWhenDirectUnavailable": "route when the direct route is unavailable.",
+  "willNotConnectAtAll": "will not connect at all.",
+  "keepsVpnRunningAndBlocks": "Keeps the VPN running and blocks traffic if the tunnel drops.",
+  "triesDirectThenTcp": "Tries the direct route first, then falls back to the TCP ",
+  "usesOnlyTcpRoute": "Uses only the TCP route and will never send anything ",
+  "usesOnlyDirectNoFallback": "Uses only the direct route and will not fall back. On a ",
+  "appWillOnlyUseTcpRoute": "The app will only use the TCP route, and will never send ",
+  "onNoFallbackLeft": "On: there is no fallback left. If TCP does not work on ",
+  "networkWhereTcpFails": "network where TCP does not work, the app will not connect ",
+  "networkWhereDirectFails": "network where the direct route does not work, the app ",
+  "isOnSoFasterNotTried": "is on, so the faster direct route was not tried. Turn that setting off ",
+  "onlyIsOnSoTcpNotTried": "only\" is on, so the TCP route was not tried. Turn that setting off in ",
+  "overTcpIsOn": "over TCP\" is on, so the direct route was not tried. Choose a ",
+  "differentServerOrTurnOff": "different server, or turn that setting off in Settings.",
+  "clearsDeviceShowsError": "shows an error; it does not send any message.",
+  "errorItWillNotSendMessage": "error: it just will not send a message.",
+  "onThisDeviceCannotSend": "error. On this device it CANNOT send any ",
+  "messageNotPossibleHere": "message (that is not possible here) so no ",
+  "textedIfYouUseTheCode": "texted if you use the code.",
+  "thisAppCanQuietlyText": "this app can quietly text your trusted contact ",
+  "notifiesTrustedContact": "notifies a trusted contact if you are ever forced to unlock ",
+  "youAreForcedToUnlock": "you are forced to unlock this device.",
+  "theCodeStillClears": "the code still clears this device and shows the ",
+  "beforeYouStart": "Before you start - what this protects, and what it cannot",
+  "iHaveReadAndAgree": "I have read and agree to the Privacy Policy and understand the data handling described above.",
+  "iUnderstandVpnService": "I understand and agree to the Android VpnService disclosure.",
+  "iAgreeHoldHarmless": "I agree to the Hold Harmless Agreement.",
+  "iAgreeLimitationOfLiability": "I agree to the Limitation of Liability.",
+  "iAgreeTermsOfService": "I agree to the Terms of Service.",
+  "iAgreeElectronicRecords": "I consent to receive service records electronically.",
+  "iAgreeAllTerms": "I agree to the Privacy Policy, Terms of Service, Hold Harmless Agreement, Limitation of Liability, and Electronic Records consent.",
+  "privacyPolicyAndLegalRequired": "Privacy Policy and Legal Acceptance Required",
+  "privacyPolicyVersion": "Version {version}",
+  "@privacyPolicyVersion": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "copyrightNotice": "© 2026 Win's VPN Inc.",
+  "planLifetime": "Lifetime Access",
+  "doesNotCreateOrRenewVpn": "Does not create or renew VPN access",
+  "accessPurchasesEmail": "Access purchases are instantly provisioned and emailed to you.",
+  "premiumAccessDescription": "Premium access opens the official Win's VPN purchase section. Store-specific billing options may be added later where required.",
+  "appleStoreBillingNote": "For the Apple App Store build, use an existing Win's VPN account number or Try Free Server. Apple subscription options may be added through App Store billing after review.",
+  "googlePlayBillingNote": "For this Google Play build, use an existing Win's VPN account number or Try Free Server. Premium purchase options may be added through supported store billing where required.",
+  "accessExpires": "Access: {date}",
+  "@accessExpires": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planExpires": "Plan Expires: {date}",
+  "@planExpires": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "referralInviteBenefit": "Invite a friend and both accounts receive 20% extra VPN time after activation.",
+  "likeShareSubscribe": "Like, share, subscribe, donate. Win for the People!",
+  "enterSecureAccountNumber": "Enter Secure Account Number",
+  "type12DigitAccountNumber": "Type the 12-digit Account Number here.",
+  "setupKeyHint": "Setup Key (new/reinstalled devices only)",
+  "accountNumberHint": "XXXX-XXXX-XXXX",
+  "accountNumberOrSetupKeyIncorrect": "Account number or setup key is incorrect. Check your welcome email and try again.",
+  "newOrReinstalledDevice": "New or reinstalled device: enter the setup key from your welcome email, then click \"Activate Device\" again.",
+  "fromYourWelcomeEmail": "From your welcome email. Not needed once this device is activated.",
+  "pleaseType12DigitAndPin": "Please type your 12-digit Account Number and set a {length}-digit PIN before clicking \"Activate Device\".",
+  "@pleaseType12DigitAndPin": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "pleaseType12Digit": "Please type your 12-digit Account Number before clicking \"Activate Device\".",
+  "setPinBeforeActivating": "Please set a {length}-digit PIN by typing it in the PIN box before activating.",
+  "@setPinBeforeActivating": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "setPinHereBeforeFree": "Please set the PIN by typing it here and click the \"Try Free Server\" button again.",
+  "setYourPinHere": "Set your {length}-digit PIN here.",
+  "@setYourPinHere": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "createPinHint": "Create {length}-Digit PIN",
+  "@createPinHint": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "pinDigitsHint": "{length} digits",
+  "@pinDigitsHint": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "freeAccessDisabled": "Free access is currently disabled.",
+  "freeAccessTempUnavailable": "Free access is temporarily unavailable. Check your connection, or contact support if this keeps happening.",
+  "freeServerNotReachable": "Free server is not reachable through the protected gateway network. Please try again soon.",
+  "freeServerSetupFailed": "Free server setup could not be completed. Check your connection and try again, or contact support if it keeps failing.",
+  "noFreeServerOnline": "No free server is online right now. Please try again soon.",
+  "noFreeServersOnlineYet": "No free servers are online yet.",
+  "freeDeviceIdentityConflict": "Free-device identity conflict. Please reinstall or contact support.",
+  "freeActivationRejected": "The free activation request was rejected. Please reinstall or contact support.",
+  "freeServiceMaintenance": "The free service is undergoing maintenance. Please try again soon.",
+  "tooManyFreeActivationAttempts": "Too many free activation attempts. Please wait a minute and try again.",
+  "legalAcceptanceRequired": "Legal acceptance is required before activation.",
+  "activationFailed": "Activation could not be completed. Check your connection, then try again, or contact support.",
+  "serverAtCapacity": "Selected server is at capacity. Please choose a different server.",
+  "vpnConfigMissing": "VPN config missing. Deactivate and activate again.",
+  "authenticatedIncompleteConfig": "Authenticated, but server returned an incomplete VPN config. Check node registration/public key.",
+  "invalidNumber": "Invalid number",
+  "actionFailedRetry": "The app could not complete that action. Please try again later.",
+  "nothingWasChanged": "Nothing was changed. Check your connection and try again.",
+  "couldNotReachAccountService": "Could not reach the account service. ",
+  "couldNotRefreshVpnConfig": "Could not refresh VPN config. Check hub connection and try again.",
+  "couldNotOpenPaymentLink": "Could not open payment link.",
+  "couldNotOpenSocialLink": "Could not open social link.",
+  "couldNotOpenUpdatePage": "Could not open the update page. Visit our website to update.",
+  "couldNotReachHub": "Could not reach Wins Hub through the protected gateway network. Please try again or contact support.",
+  "couldNotCheckDeletionStatus": "Could not reach the account service to check deletion status. Check your connection and try again.",
+  "couldNotSafelyQueueCleanup": "Could not safely queue server cleanup. Try again before deactivating.",
+  "accountDeleted": "Your account and its data have been deleted.",
+  "deviceRemovedKeysNotCleared": "Device removed, but some VPN keys stored on this device could not be fully cleared.",
+  "deviceRemovedLocally": "Device was removed locally. Server cleanup will retry when the hub is reachable.",
+  "freeFeatureForPaid": "This feature is for paid users only.",
+  "requiredUpdate": "A required update is available. Please update to the latest version to continue.",
+  "smartProtocolUnavailable": "This server has no TCP route registered yet, and \"Always connect ",
+  "tcpFallbackNotRegistered": "TCP fallback is not registered for this server yet.",
+  "couldNotConnectOverTcp": "Could not connect over TCP on this network. \"Always connect over TCP\" ",
+  "couldNotConnectOverUdp": "Could not connect over direct UDP on this network, and \"Direct (UDP) ",
+  "setUpEmergencyAlertDescription": "Set up an emergency alert. Choose a second code that quietly ",
+  "emergencyAlertSetup": "Emergency alert is set up. Your trusted contact will be ",
+  "emergencyCodeSetup": "Emergency code is set up. Using it clears this device and ",
+  "chooseSecondCode": "Choose a second code. If you ever enter it on ",
+  "theLockScreenInstead": "the lock screen instead of your normal code, ",
+  "theLockScreenOrPin": "your approximate location, then clear itself, ",
+  "thisDevice": "this device.",
+  "contactWillBeNotified": "contact will be notified.",
+  "enterConnectionCode": "Enter connection code",
+  "currentUnlockCode": "Current unlock code",
+  "enterValidPhoneNumber": "Enter a valid phone number for your contact.",
+  "validPhoneRequired": "A valid phone number is required for the SMS alert",
+  "sendingTextNeedsSmsPermission": "Sending a text needs SMS permission, which you ",
+  "willBeAskedFor": "will be asked for. If you choose not to allow it, ",
+  "itWillNotSendMessage": "it will just not send a message.",
+  "twoEmergencyCodesDoNotMatch": "The two emergency codes do not match.",
+  "unlockCodeUpdated": "Unlock code updated.",
+  "thatUnlockCodeIncorrect": "That unlock code is not correct.",
+  "theEmergencyCodeCouldNotStore": "The emergency code could not be stored on this device. Nothing was changed.",
+  "theNewCodeCouldNotStore": "The new code could not be stored on this device. Nothing was changed.",
+  "theRecoveryCodeCouldNotStore": "The recovery code could not be stored on this device. You can try ",
+  "againFromHomeScreen": "again from the home screen.",
+  "ifYouForgetUnlockCode": "If you forget your unlock code, this is the only way back ",
+  "useCodeFromSupport": "Use a code from support if the app cannot connect",
+  "setLongerUnlockCode": "Set a longer unlock code",
+  "useLongerCode": "Use a longer code",
+  "aLongerCodeHarderToGuess": "A {length}-digit code is much harder to guess.",
+  "@aLongerCodeHarderToGuess": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "youHaveNoRecoveryCode": "You have no recovery code. Without one, forgetting your ",
+  "unlockCodeMeansLosingAccess": "unlock code means losing access to this app.",
+  "youOpenedWithRecoveryCode": "You opened the app with your recovery code, so ",
+  "unlockCodeNow": "unlock code now.",
+  "writeItDown": "Write it down, or put it in a password manager. Keep it ",
+  "somewhereSeparate": "somewhere separate from this device.",
+  "yourUnlockCodeIs": "Your unlock code is {length} digits. ",
+  "@yourUnlockCodeIs": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "pleaseSetNewPin": "please set a new {length}-digit ",
+  "@pleaseSetNewPin": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "unlockCodeNowPrompt": "unlock code now.",
+  "pleaseDisconnectFirst": "Please disconnect the VPN first before {action}. Split Tunneling was not changed.",
+  "@pleaseDisconnectFirst": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseDisconnectDestinations": "Please disconnect the VPN first before changing bypass destinations. Split Tunneling was not changed.",
+  "pleaseDisconnectApps": "Please disconnect the VPN first before changing excluded apps. Split Tunneling was not changed.",
+  "pleaseDisconnectDoubleVpn": "Please disconnect the VPN first. Double VPN cannot be changed while the VPN is connected, so nothing was changed.",
+  "pleaseDisconnectTcpOnly": "Please disconnect the VPN first. The TCP-only setting cannot be changed while the VPN is connected, so nothing was changed.",
+  "pleaseDisconnectProtocol": "Please disconnect the VPN first. The protocol setting cannot be ",
+  "changedWhileConnected": "changed while the VPN is connected, so nothing was changed.",
+  "doubleVpnCouldNotSave": "Double VPN could not be saved because the app could not write its settings. Nothing was changed.",
+  "settingCouldNotSave": "That setting could not be saved because the app could not write its settings. Nothing was changed.",
+  "stillDisconnectingSwitch": "Still disconnecting. Please try switching again in a moment.",
+  "stillDisconnecting": "Still disconnecting. Try again in a moment.",
+  "vpnDisconnectStillFinishing": "VPN disconnect is still finishing. Please wait a moment before reconnecting.",
+  "alwaysOnVpnIsOn": "Always-on VPN is on. Win",
+  "alwaysOnVpnTurnedOff": "Always-on VPN turned off.",
+  "alwaysOnCouldNotEnable": "Always-on could not be enabled by the system on this device. It may ",
+  "alwaysOnOnlyAndroid": "Always-on is only available on Android. The setting is saved and will ",
+  "needToBeEnabled": "need to be enabled in your system VPN settings.",
+  "willAskAgainNextTime": "will ask again next time. Nothing else was affected.",
+  "failedRouteCouldNotRemove": "The failed VPN route could not be removed safely. Restart the app before retrying.",
+  "previousRouteCouldNotRemove": "The previous VPN route could not be removed safely. Restart the app before retrying.",
+  "confirmationsReceived": "Confirmations received: ",
+  "disguiseStillShowsVpn": "Your device will still show that a VPN is active. The disguise ",
+  "hidesWhichAppRunning": "hides which app is running, not the fact of a VPN connection.",
+  "savedAddresses": "Saved addresses: {count}",
+  "@savedAddresses": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "speedTestUnavailable": "Speed test unavailable",
+  "confirmVpn": "Connect",
+  "serverListStillSyncing": "Server list is still syncing.",
+  "lastSpeedTest": "Last {label} test: ",
+  "@lastSpeedTest": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "mbps": "Mbps",
+  "downloadMbps": "{download} Mbps",
+  "@downloadMbps": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "download": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadMbps": "{upload} Mbps",
+  "@uploadMbps": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "upload": {
+        "type": "String"
+      }
+    }
+  },
+  "routeCount": "{count} destination network{plural}",
+  "@routeCount": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "appCount": "{count} apps",
+  "@appCount": {
+    "description": "Count of installed apps eligible for bypass.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkCount": "{count} destinations",
+  "@networkCount": {
+    "description": "User-visible string extracted from lib/main.dart.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "perAppBypassWillBypass": " will bypass the VPN.",
+  "inThisBuild": "in this build",
+  "unsupportedInThisBuild": "unsupported in this build; routing to update-required, ",
+  "selectToEnableLauncherScoped": "Select to enable launcher-scoped bypass",
+  "systemApp": " (system app)",
+  "shareWin": "Share Win",
+  "serverLoadPercent": "Server load {percent}%",
+  "@serverLoadPercent": {
+    "description": "Accessibility label and tooltip for the per-server load bar in the server list. percent is a whole number from 0 to 100 in steps of 5, reported by the hub.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "connectVpnAction": "Connect VPN",
+  "disconnectVpnAction": "Disconnect VPN",
+  "cancelVpnConnectionAction": "Cancel VPN connection",
+  "vpnConnectionInProgress": "VPN connection in progress",
+  "cancelConnectionAction": "Cancel connection",
+  "serverLoadUnknown": "Server load unknown",
+  "@serverLoadUnknown": {
+    "description": "Accessibility label and tooltip for the per-server load bar when the hub did not report a usable load value (older hub, stale data, or a malformed value)."
+  }
+}

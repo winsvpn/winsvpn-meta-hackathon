@@ -1,0 +1,72 @@
+// Microsoft Edge fragment, merged over base.jsonc.
+//
+// Edge is Chromium and shares every code path with the Chrome package. It is a
+// separate target for two reasons that are both about packaging rather than
+// behaviour: the two stores are separate listings with separate extension ids,
+// and the native-messaging host manifest lives in a different directory on
+// disk for each browser, so the desktop installer needs to know which browser
+// it is installing for. Verified on Edge 151.0.4129.59.
+//
+// The store-visible proxy name is intentionally target-specific. Chrome and
+// Edge still share all runtime code and permissions, but distinct canonical
+// names bind each deterministic package to the store listing it is meant to
+// enter.
+{
+  "name": "Win's VPN Proxy for Microsoft Edge",
+  "description": "Routes chosen sites through the Win's VPN desktop proxy. Requires the desktop app running and connected; not a standalone VPN.",
+
+  // Chromium-only, and the pair is what makes an authenticated local proxy
+  // possible at all here.
+  //
+  // The desktop bridge answers an unauthenticated CONNECT with 407 and
+  // `Proxy-Authenticate: Basic realm="wins-bridge"`. Chromium's only way for an
+  // extension to answer that challenge is webRequest.onAuthRequired, and in MV3
+  // supplying credentials from it additionally requires webRequestAuthProvider,
+  // which exists for precisely this case.
+  //
+  // The cost is real and is stated rather than glossed: `webRequest` is an
+  // observation permission. What limits it here is that the listener is
+  // registered for onAuthRequired ONLY -- no onBeforeRequest, no
+  // onBeforeSendHeaders, nothing that sees a URL being fetched -- and that no
+  // host permission is declared, so there is no standing access to page
+  // content. Firefox pays the same pair (see firefox.jsonc): the TLS
+  // proxyAuthorizationHeader path was removed, and webRequest is now the
+  // 407 answer on every target.
+  //
+  // The alternative was an unauthenticated SOCKS5 proxy on loopback, which
+  // would let any process on the machine use the tunnel. That is a worse trade.
+  "permissions": ["webRequest", "webRequestAuthProvider"],
+
+  "background": {
+    "service_worker": "src/background/background.js",
+    "type": "module"
+  },
+  "minimum_chrome_version": "116"
+}
+
+// NATIVE-MESSAGING IDENTITY. Two facts bind this package to its desktop
+// bridge, and both have to hold for the pipe to open:
+//
+//   1. THE STORE-LISTING ID. The Microsoft Edge Add-ons store issues the
+//      packaged listing's extension id; this tree never invents one (no `key`
+//      is shipped, and the build refuses a packed key). Until a current
+//      authenticated owner-issued identity receipt exists, Edge stays
+//      owner-blocked at build time: tools/native_messaging/
+//      check_host_manifests.py REFUSES the build rather than release a
+//      placeholder. A PLACEHOLDER_EDGE_EXTENSION_ID inside the host manifest's
+//      allowed_origins (see tools/native_messaging/manifests/
+//      org.winsvpn.bridge.edge.json) is a developer diagnostic only, never a
+//      release identity.
+//
+//   2. THE BOUND ORIGIN. The host manifest's allowed_origins must name exactly
+//      `chrome-extension://<store-listing-id>/` for the browser to launch the
+//      host for THIS extension. install_native_host.sh refuses to install a
+//      manifest whose id still looks like a placeholder, so no machine ends up
+//      with a host that answers only to a fictitious origin. On the extension
+//      side, src/adapters/chromium.js reads its own runtime id and states the
+//      exact origin it is bound under (nativeMessagingIdentity), fail-closed,
+//      so a package loaded under an id the host does not name refuses to arm
+//      rather than waiting on a bridge that was never permitted to run.
+//
+// Substituting the real 32-letter store ID (and regenerating the host manifest)
+// happens only from the owner-issued identity receipt, never from a guess.

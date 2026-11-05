@@ -1,0 +1,78 @@
+{
+  "version": "winn-leak-acceptance-config/v2",
+  "run_seed": "replace-with-fresh-lowercase-64-hex",
+  "evidence_root": "/var/lib/winn-leak-v2/acceptance",
+  "client_binary": "/opt/winn-lab/bin/winn-leak-v2",
+  "webrtc_binary": "/opt/winn-lab/bin/winn-webrtc-v2",
+  "browser_binary": "/usr/bin/google-chrome",
+  "webrtc_user": "winn-webrtc",
+  "gateway_hook": "/opt/winn-lab/hooks/gateway",
+  "observer_hook": "/opt/winn-lab/hooks/observer",
+  "probe_hook": "/opt/winn-lab/hooks/probe",
+  "recovery_hook": "/opt/winn-lab/hooks/recovery",
+  "gateway_identity": "provider-a/account-a/dedicated-gateway-id",
+  "observer_identity": "provider-b/account-b/independent-observer-id",
+  "phase_timeout_seconds": 90,
+  "hook_timeout_seconds": 45,
+  "families": [
+    {
+      "family": "v4",
+      "client_args": [
+        "-gateway-endpoint=192.0.2.10:443",
+        "-gateway-pubkey=replace-with-base64-public-key",
+        "-client-private-key-file=/opt/winn-lab/private/client-v4.key",
+        "-psk-file=/opt/winn-lab/private/client-v4.psk",
+        "-inner-pool=10.250.4.4/30",
+        "-allowed-ips=0.0.0.0/0",
+        "-verification-routes=10.250.4.1/32,198.51.100.20/32",
+        "-dns-resolver=10.250.4.1:53",
+        "-dns-query-name=replace-nonce.udp.leak-v2.invalid.",
+        "-expected-dns-answer=198.51.100.20",
+        "-canary-endpoint=10.250.4.1:7007",
+        "-table-name=wlv2_client_v4",
+        "-underlay-interface=eth0",
+        "-underlay-mark=ca6c"
+      ],
+      "stun_server": "198.51.100.20:3478",
+      "expected_egress": "198.51.100.30",
+      "allowed_host_addresses": [
+        "10.250.4.5",
+        "10.250.4.6"
+      ],
+      "forbidden_addresses": [
+        "192.0.2.100",
+        "10.0.0.100"
+      ]
+    },
+    {
+      "family": "v6",
+      "client_args": [
+        "-gateway-endpoint=[2001:db8:10::10]:443",
+        "-gateway-pubkey=replace-with-base64-public-key",
+        "-client-private-key-file=/opt/winn-lab/private/client-v6.key",
+        "-psk-file=/opt/winn-lab/private/client-v6.psk",
+        "-inner-pool=fd42:250:6::4/126",
+        "-allowed-ips=::/0",
+        "-verification-routes=fd42:250:6::1/128,2001:db8:20::20/128",
+        "-dns-resolver=[fd42:250:6::1]:53",
+        "-dns-query-name=replace-nonce.udp.leak-v2.invalid.",
+        "-expected-dns-answer=2001:db8:20::20",
+        "-canary-endpoint=[fd42:250:6::1]:7007",
+        "-table-name=wlv2_client_v6",
+        "-underlay-interface=eth0",
+        "-underlay-mark=ca6d"
+      ],
+      "stun_server": "[2001:db8:20::20]:3478",
+      "expected_egress": "2001:db8:30::30",
+      "allowed_host_addresses": [
+        "fd42:250:6::5",
+        "fd42:250:6::6",
+        "fd42:250:6::7"
+      ],
+      "forbidden_addresses": [
+        "2001:db8:1::100",
+        "fd00::100"
+      ]
+    }
+  ]
+}

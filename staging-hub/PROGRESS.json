@@ -1,0 +1,14 @@
+{
+  "cards": [
+    {
+      "card": "Staging hub twin",
+      "readiness": 92,
+      "status": "LIVE-OPS pass COMPLETE: real TCP gateway probes (socket.create_connection egress_ip:9111, 3s timeout) auto-run on /nodes at most every 30s (PROBE_CACHE_S) and on /admin/probe; failed probe flips node unreachable + recent_failures+1 (real gateway kill reaches the router without the manual flip), successful probe recovers; /admin/state adds uptime_s + per-node latency_ms/last_probe_ts (router_decisions already present); STATE_FILE env honored with default unchanged, README deploy line documents -e STATE_FILE=/srv/hub/state.json + /srv/wins-hub:/srv/hub volume; 20/20 tests pass (mocked sockets). Prior pass stood: winn/3 conversion, FIELD_MAP.md, 12s router timeout, live router verified.",
+      "blockers": [
+        "supervisor has not landed descriptors/demo-route-a.json + demo-route-b.json (twin serves {} + loud log until then; client refuses by name winn3DescriptorUnverified)",
+        "G1 pubkey + ring sha live only in the APK dart-defines (supervisor); twin is shape-only by design"
+      ]
+    }
+  ],
+  "updated": "2026-08-17T00:00:00Z"
+}

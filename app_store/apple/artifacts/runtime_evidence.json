@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-24T00:00:00Z",
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "candidate_set_status": "pending_current_runtime_evidence",
+  "runtime_log": "",
+  "macos_runtime_log": "",
+  "notes": "No current 1.0.17+34 candidate-bound runtime evidence exists. iOS live-tunnel, macOS signed live-tunnel, and embedded watchOS companion smoke all remain pending. Mutable /tmp or /var/folders logs are not final authority and must not be recorded here until hash-bound durable receipts exist under repository .artifacts.",
+  "pending_reasons": [
+    "ios_physical_device_live_tunnel",
+    "macos_signed_live_tunnel",
+    "embedded_watchos_companion_smoke"
+  ],
+  "watch_companion_smoke": {
+    "status": "pending",
+    "receipt_path": "",
+    "receipt_sha256": ""
+  },
+  "platform_results": []
+}

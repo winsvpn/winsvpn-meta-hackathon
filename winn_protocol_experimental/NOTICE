@@ -1,0 +1,227 @@
+Winn Protocol
+Copyright (C) 2025-2026 Win's VPN Inc.
+
+This product includes software developed by third parties. Their licences and
+copyright notices are reproduced below and must accompany any distribution of
+this software in source or binary form, including distribution under a
+commercial licence from Win's VPN Inc.
+
+Go module versions refreshed against go.mod on 2026-10-07 (source tree text otherwise as of 2026-08-03). Regenerate when
+dependencies change. Release builds additionally emit per-module licence files
+into third_party_licenses/ and a CycloneDX SBOM; see scripts/build_release.sh.
+
+
+===============================================================================
+1. EMBEDDED THIRD-PARTY SOURCE
+===============================================================================
+
+The following third-party source is carried inside this repository, not merely
+depended upon. It is compiled into every binary that uses the HTTP/3 or MASQUE
+carrier.
+
+-------------------------------------------------------------------------------
+github.com/quic-go/masque-go v0.4.0
+Embedded at: internal/masque/
+Upstream commit: 03179c5407a332f0509fa8e165244e6410ac165a
+Licence: MIT
+Copyright 2024 Marten Seemann
+
+Full licence text: internal/masque/LICENSE
+Provenance and local modifications: internal/masque/UPSTREAM.md
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+amneziawg-go (patch context only)
+Embedded at: patches/amneziawg-go-fast-handshake-v1.patch
+Licence: see upstream project
+
+The named patch file modifies device/constants.go in amneziawg-go. As a unified
+diff it necessarily contains literal upstream source text in its removed lines
+and context lines.
+
+OUTSTANDING: the upstream licence text is not present in this repository, and
+the patch pins no upstream release or full commit identifier. Both must be
+supplied before distribution. See docs/audit/07-LICENSING-AND-COPYRIGHT-FINDINGS.md
+section 2.3.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+2. GO MODULE DEPENDENCIES
+===============================================================================
+
+Linked into distributed binaries. All permissive; none copyleft.
+
+-------------------------------------------------------------------------------
+github.com/cloudflare/circl v1.6.5
+Licence: BSD-3-Clause
+Copyright (c) 2019 Cloudflare, Inc.
+Contains a Google Inc. clause, and a nested BSD-3-Clause licence at
+ecc/p384/LICENSE, Copyright (c) 2018 Brendan McMillion.
+Used for: ML-DSA-65 and ML-DSA-87 signatures; RSABSSA blind signatures.
+-------------------------------------------------------------------------------
+github.com/dunglas/httpsfv v1.1.2
+Licence: BSD-3-Clause
+Copyright (c) 2020 Kevin Dunglas
+Used for: RFC 9651 Structured Field Values parsing.
+-------------------------------------------------------------------------------
+github.com/jackc/pgx/v5 v5.11.0
+Licence: MIT
+Copyright (c) 2013-2021 Jack Christensen
+Used for: PostgreSQL controller state backend.
+-------------------------------------------------------------------------------
+github.com/jackc/pgpassfile v1.0.0
+Licence: MIT
+Copyright (c) 2019 Jack Christensen
+-------------------------------------------------------------------------------
+github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+Licence: MIT
+Copyright (c) 2020 Jack Christensen
+-------------------------------------------------------------------------------
+github.com/jackc/puddle/v2 v2.2.3
+Licence: MIT
+Copyright (c) 2018 Jack Christensen
+-------------------------------------------------------------------------------
+github.com/quic-go/quic-go v0.60.0
+Licence: MIT
+Copyright (c) 2016 the quic-go authors & Google, Inc.
+Used for: QUIC and HTTP/3 transport.
+-------------------------------------------------------------------------------
+github.com/quic-go/qpack v0.6.0
+Licence: MIT (LICENSE.md)
+Copyright (c) 2019 Marten Seemann
+-------------------------------------------------------------------------------
+github.com/yosida95/uritemplate/v3 v3.0.2
+Licence: BSD-3-Clause
+Copyright (c) 2016, Kohei YOSHIDA
+Used for: RFC 6570 URI Templates, required by RFC 9298 CONNECT-UDP.
+-------------------------------------------------------------------------------
+golang.org/x/crypto v0.57.0
+golang.org/x/net v0.59.0
+golang.org/x/sync v0.23.0
+golang.org/x/sys v0.48.0
+golang.org/x/text v0.42.0
+Licence: BSD-3-Clause, each with an additional PATENTS grant
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+The PATENTS file accompanying each of these modules grants a patent licence
+that terminates if the recipient institutes patent litigation against Google's
+implementation of the Go programming language. That grant is reproduced in the
+PATENTS file of each module and is incorporated here by reference.
+-------------------------------------------------------------------------------
+
+BSD-3-Clause text, applying to each BSD-3-Clause module named above:
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+   3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from this
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+MIT text, applying to each MIT module named above, with each module's own
+copyright line as given:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+===============================================================================
+3. GO STANDARD LIBRARY
+===============================================================================
+
+Binaries are statically linked against the Go standard library and runtime.
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+Licence: BSD-3-Clause, with an additional PATENTS grant.
+See the LICENSE and PATENTS files in the Go distribution.
+
+Note for reviewers: the hybrid post-quantum key exchange used by this software
+(X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024) is implemented by the
+Go standard library's crypto/tls package, not by code in this repository.
+
+
+===============================================================================
+4. EXTERNAL PROGRAMS EXECUTED AT RUNTIME
+===============================================================================
+
+The Linux data path executes the following as separate programs. They are NOT
+linked into, combined with, or distributed as part of this software. They are
+listed for operator awareness.
+
+  amneziawg-go     userspace AmneziaWG data plane      permissive, MIT-style
+  awg              amneziawg-tools interface config    GPL-2.0
+  ip               iproute2                            GPL-2.0
+  nft              nftables                            GPL-2.0
+  resolvectl       systemd                             LGPL-2.1-or-later
+
+IMPORTANT: distributing a client, appliance, or server IMAGE that contains
+amneziawg-tools, iproute2, nftables, or systemd binaries carries
+corresponding-source and notice obligations under those licences. AGPL-3.0 and
+GPL-2.0-only are not compatible for combination into a single work. Invoking
+these tools as separate executables is the design, but that fact alone is not a
+legal conclusion about derivative-work scope. Qualified licence review is
+required before any image ships. See OPERATIONS.md and
+docs/audit/07-LICENSING-AND-COPYRIGHT-FINDINGS.md section 2.4.
+
+
+===============================================================================
+5. BUILD AND VERIFICATION TOOLING
+===============================================================================
+
+Not distributed with this software. Listed for reproducibility.
+
+  staticcheck 2026.1, gosec v2.25.0, govulncheck v1.6.0,
+  cyclonedx-gomod v1.10.0
+
+See scripts/scanner_matrix.sh and scripts/build_release.sh, where each is
+pinned by module hash.

@@ -1,0 +1,12 @@
+# /etc/systemd/system/wins-vpn-firewall.service
+[Unit]
+Description=Wins VPN runtime firewall subsets (egress NAT + Cloudflare-only stealth)
+After=network-online.target docker.service
+Wants=network-online.target
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/wins-vpn-firewall
+TimeoutStartSec=90
+[Install]
+WantedBy=multi-user.target

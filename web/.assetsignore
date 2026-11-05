@@ -1,0 +1,29 @@
+# Build-time tooling that lives in the deploy directory but must never be
+# served. Both of these were publicly fetchable on winsvpn.org before this
+# file existed (HTTP 200 on /wrangler.jsonc and /update_style_csp.py).
+#
+# Nothing here is a secret -- the rate-limiter namespace_ids in wrangler.jsonc
+# are placeholders -- but the config names internal endpoints and states the
+# per-minute limits on the payment and translate routes, which is free
+# reconnaissance for anyone probing them.
+#
+# Files beginning with a dot (including this one and every macOS ._ AppleDouble
+# file) are already excluded by Cloudflare Pages, so they need no entry.
+wrangler.jsonc
+update_style_csp.py
+verify_inline_csp.py
+winn3-dev-override.ini
+winn3-dev-override.json
+i18n/major.json
+__pycache__/
+# Local-only download custody records: read by the gates, never public.
+releases/owner-publication-evidence.json
+releases/download-custody-challenge.json
+releases/download-custody-consumed.jsonl
+releases/README.md
+
+# Downloads remain excluded until exact current signed artifacts and every
+# required receipt are bound by web/releases/downloads.json and pass the public
+# download custody gates. This is a custody control, not a file-size claim.
+# The Worker also reads the deployed manifest and refuses every unbound path.
+downloads/

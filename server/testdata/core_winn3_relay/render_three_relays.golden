@@ -1,0 +1,28 @@
+*nat
+:WINVPN-RELAY-PRE - [0:0]
+:WINVPN-RELAY-POST - [0:0]
+-F WINVPN-RELAY-PRE
+-F WINVPN-RELAY-POST
+-A WINVPN-RELAY-PRE -i enp5s0 -p udp -m addrtype --dst-type LOCAL --dport 9211 -j DNAT --to-destination @EXIT_A@:9111
+-A WINVPN-RELAY-PRE -i enp5s0 -p udp -m addrtype --dst-type LOCAL --dport 9212 -j DNAT --to-destination @EXIT_B@:9111
+-A WINVPN-RELAY-PRE -i enp5s0 -p udp -m addrtype --dst-type LOCAL --dport 9213 -j DNAT --to-destination @EXIT_C@:9111
+-A WINVPN-RELAY-POST -o enp5s0 -p udp -d @EXIT_A@ --dport 9111 -m conntrack --ctstate DNAT --ctorigdstport 9211 -j MASQUERADE
+-A WINVPN-RELAY-POST -o enp5s0 -p udp -d @EXIT_B@ --dport 9111 -m conntrack --ctstate DNAT --ctorigdstport 9212 -j MASQUERADE
+-A WINVPN-RELAY-POST -o enp5s0 -p udp -d @EXIT_C@ --dport 9111 -m conntrack --ctstate DNAT --ctorigdstport 9213 -j MASQUERADE
+COMMIT
+*filter
+:WINVPN-RELAY-FWD - [0:0]
+-F WINVPN-RELAY-FWD
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_A@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9211 -m hashlimit --hashlimit-name wcs9211_eceb --hashlimit-mode srcip --hashlimit-above 10/second --hashlimit-burst 20 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_A@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9211 -m hashlimit --hashlimit-name wca9211_eec5 --hashlimit-mode dstip --hashlimit-above 400/second --hashlimit-burst 800 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_A@ --dport 9111 -m conntrack --ctstate NEW,ESTABLISHED --ctdir ORIGINAL --ctorigdstport 9211 -j ACCEPT
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -s @EXIT_A@ --sport 9111 -m conntrack --ctstate ESTABLISHED --ctdir REPLY --ctorigdstport 9211 -j ACCEPT
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_B@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9212 -m hashlimit --hashlimit-name wcs9212_eceb --hashlimit-mode srcip --hashlimit-above 10/second --hashlimit-burst 20 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_B@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9212 -m hashlimit --hashlimit-name wca9212_eec5 --hashlimit-mode dstip --hashlimit-above 400/second --hashlimit-burst 800 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_B@ --dport 9111 -m conntrack --ctstate NEW,ESTABLISHED --ctdir ORIGINAL --ctorigdstport 9212 -j ACCEPT
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -s @EXIT_B@ --sport 9111 -m conntrack --ctstate ESTABLISHED --ctdir REPLY --ctorigdstport 9212 -j ACCEPT
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_C@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9213 -m hashlimit --hashlimit-name wcs9213_eceb --hashlimit-mode srcip --hashlimit-above 10/second --hashlimit-burst 20 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_C@ --dport 9111 -m conntrack --ctstate NEW --ctorigdstport 9213 -m hashlimit --hashlimit-name wca9213_eec5 --hashlimit-mode dstip --hashlimit-above 400/second --hashlimit-burst 800 -j DROP
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -d @EXIT_C@ --dport 9111 -m conntrack --ctstate NEW,ESTABLISHED --ctdir ORIGINAL --ctorigdstport 9213 -j ACCEPT
+-A WINVPN-RELAY-FWD -i enp5s0 -o enp5s0 -p udp -s @EXIT_C@ --sport 9111 -m conntrack --ctstate ESTABLISHED --ctdir REPLY --ctorigdstport 9213 -j ACCEPT
+COMMIT

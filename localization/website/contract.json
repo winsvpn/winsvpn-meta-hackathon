@@ -1,0 +1,929 @@
+{
+  "schema": "winsvpn-website-localization-contract-v1",
+  "english_source": {
+    "path": "web/index.html",
+    "file_sha256": "8f775c2446e9998c4ceba8021a1acc57c5a133b223c134c3a8153a096b964cc2",
+    "translatable_static_keys_sha256": "b7fe9a7e2dc776f9a3ffe0a6ed862494a8833e78660db8c45bf7e4c4a6513775",
+    "identity_sha256": "e37720e2a81fb6302fde4c917794f7ca3b2514a7a235154b385f97f663ee1bb6"
+  },
+  "instant_locale_inventory": {
+    "path": "web/i18n/languages.json",
+    "file_sha256": "d84a285df24c9342d75a5a4d9c090819311cca87c68fa585a0e704db9305b1c9",
+    "locales": [
+      {
+        "code": "en",
+        "name": "English"
+      },
+      {
+        "code": "my",
+        "name": "Myanmar (Burmese)"
+      },
+      {
+        "code": "es",
+        "name": "Spanish"
+      },
+      {
+        "code": "fr",
+        "name": "French"
+      },
+      {
+        "code": "de",
+        "name": "German"
+      },
+      {
+        "code": "pt",
+        "name": "Portuguese (Brazil)"
+      },
+      {
+        "code": "zh-CN",
+        "name": "Chinese (Simplified)"
+      },
+      {
+        "code": "zh-TW",
+        "name": "Chinese (Traditional)"
+      },
+      {
+        "code": "ar",
+        "name": "Arabic"
+      },
+      {
+        "code": "hi",
+        "name": "Hindi"
+      },
+      {
+        "code": "bn",
+        "name": "Bengali"
+      },
+      {
+        "code": "ru",
+        "name": "Russian"
+      },
+      {
+        "code": "ja",
+        "name": "Japanese"
+      },
+      {
+        "code": "ko",
+        "name": "Korean"
+      },
+      {
+        "code": "id",
+        "name": "Indonesian"
+      },
+      {
+        "code": "ms",
+        "name": "Malay"
+      },
+      {
+        "code": "th",
+        "name": "Thai"
+      },
+      {
+        "code": "vi",
+        "name": "Vietnamese"
+      },
+      {
+        "code": "tr",
+        "name": "Turkish"
+      },
+      {
+        "code": "fa",
+        "name": "Persian"
+      },
+      {
+        "code": "ur",
+        "name": "Urdu"
+      },
+      {
+        "code": "it",
+        "name": "Italian"
+      },
+      {
+        "code": "nl",
+        "name": "Dutch"
+      },
+      {
+        "code": "pl",
+        "name": "Polish"
+      },
+      {
+        "code": "uk",
+        "name": "Ukrainian"
+      },
+      {
+        "code": "ro",
+        "name": "Romanian"
+      },
+      {
+        "code": "el",
+        "name": "Greek"
+      },
+      {
+        "code": "iw",
+        "name": "Hebrew"
+      },
+      {
+        "code": "sv",
+        "name": "Swedish"
+      },
+      {
+        "code": "no",
+        "name": "Norwegian"
+      },
+      {
+        "code": "da",
+        "name": "Danish"
+      },
+      {
+        "code": "fi",
+        "name": "Finnish"
+      },
+      {
+        "code": "cs",
+        "name": "Czech"
+      },
+      {
+        "code": "hu",
+        "name": "Hungarian"
+      },
+      {
+        "code": "sw",
+        "name": "Swahili"
+      },
+      {
+        "code": "am",
+        "name": "Amharic"
+      },
+      {
+        "code": "tl",
+        "name": "Filipino"
+      },
+      {
+        "code": "km",
+        "name": "Khmer"
+      },
+      {
+        "code": "lo",
+        "name": "Lao"
+      }
+    ],
+    "identity_sha256": "bc476815f348a14f774118e00ca129babda0bb356f6bbacb559f5fa36c6c418b"
+  },
+  "key_classification": {
+    "normalization": "html-character-references-decoded-whitespace-collapsed-v1",
+    "translatable_static_keys": [
+      ",",
+      ", Smart Protocol, VPN Accelerator, alternative-routing and Secure Core suite rather than one protocol, so stealth, speed and multi-hop live in separate features the user has to select between, and its post-quantum coverage does not span the whole suite.",
+      ", Win's VPN first shows a separate installed-app access disclosure. The app accesses installed application names, icons, and package identifiers only after the user affirmatively chooses",
+      ", and",
+      ", with policy certificate on file. The policy carries third-party liability cover, which is the part that matters to you: it responds to claims arising from our own failures, such as a misconfiguration on our side, rather than only covering the company's losses. Cover is subject to the policy terms and is not a guarantee of any individual outcome. Due to insurance policy requirements, we do not allow torrenting or any illegal activity on our servers.",
+      ".",
+      ". Each server receives the connection IP, ordinary request metadata, and the transferred measurement traffic; no account number, device identifier, or other app data is included. These requests occur only while the user is running the speed test.",
+      ". GitHub necessarily receives the connection IP and ordinary request metadata for that request. The file can only select among gateways already built into the signed app, and no account number, device identifier, or other user data is sent with the request. This request is made only after the user accepts the bundled Privacy Policy.",
+      ". Recently approved organizations can take time to appear in the IRS database, so a delay there is expected rather than a warning sign.",
+      ". The code is read from the link address in the browser and passed to Win's VPN when a plan is purchased through it. If an account is created that way, the referring account is recorded against the referred account so the 20% account-validity bonus can be granted to both, and reversed if the funding payment is later refunded, cancelled, or reversed. Referral records are account-to-account only; they do not record what either person does through the VPN.",
+      "/.well-known/security.txt",
+      "/referral/<code>",
+      "1",
+      "1 Month",
+      "1 Year",
+      "1 absent",
+      "10 Years",
+      "2",
+      "2 limited",
+      "3",
+      "3 adequate",
+      "4",
+      "4 strong",
+      "5",
+      "5 leading",
+      "501(c)(3) Status",
+      "; choosing",
+      "A U.S. 501(c)(3) non-profit public charity \u00b7 Donations are tax-deductible",
+      "A public charity, not a private foundation.",
+      "AI-Powered VPN",
+      "Abuse prevention and rate limiting.",
+      "Acceptable use.",
+      "Acceptance.",
+      "Account number",
+      "AdGuard VPN",
+      "AdGuard\u2019s",
+      "Ads, trackers, malicious websites, and dangerous files are filtered by default using aggregated threat intelligence from leading cybersecurity sources such as IBM X-Force.",
+      "After the user accepts the bundled Privacy Policy, and while the app is disconnected, it may query the third-party service",
+      "After the user accepts the bundled Privacy Policy, the app generates a random app-install identifier on the device and transmits it to Win's VPN with account or free-access identity and device details. The identifier is created locally on first run and is not derived from a device hardware identifier or an advertising identifier. On Android, Windows, and Linux it is kept in the app's private storage and reinstalling the app produces a new one; on Apple platforms it is kept in the device keychain and can survive a reinstall on the same device. It may be linked to the account for app functionality, account management, the three-device limit, fraud prevention, security, and abuse prevention. It is not used for advertising or tracking, sold, or shared for advertising. The hub protects the retained device-limit value; it is deleted or overwritten when the device is deactivated, replaced, or no longer needed.",
+      "All payments, subscriptions, lifetime passes, tech-support passes, and donations are final and non-refundable to the maximum extent permitted by law. Canceling a subscription stops future renewals when supported by the payment provider, but it does not create a refund for past charges, lifetime access, donations, or already-issued account access. Card payments are processed by PayPal, and where cryptocurrency payment is offered and enabled it is processed through a BTCPay Server instance or a Monero wallet service. Card data is entered on PayPal-hosted payment pages and handled by PayPal's PCI DSS compliant payment infrastructure, so Win's VPN does not store card numbers or process raw card data on our servers.",
+      "Allow analytics",
+      "American Freedom",
+      "Android Demo",
+      "Android VpnService disclosure.",
+      "Android camouflage mode is an optional user-safety feature for high-risk censorship environments, including Burma/Myanmar, where visible VPN apps can expose users to retaliation; it does not hide malicious activity, and the Android VPN notification remains user-controlled.",
+      "Android demo video",
+      "Android installed-app visibility for split tunneling.",
+      "Android safety mode.",
+      "Anonymized for safety of our founder. Retired from the private sector after working for 5+ years as an IT and cybersecurity consultant at well-known global Fortune companies due to unforeseen circumstances. Future US military veteran because the US military is the only one stopping certain powerful greedy countries from taking over the world.",
+      "Anonymous Mode",
+      "Any mismatch in ECH, version, cipher group or ALPN aborts the connection rather than silently downgrading it.",
+      "Anyone who wants a safer connection. Most of our users are ordinary people avoiding scams, phishing links, malicious sites and tracking on untrusted or public networks. The same protections also serve people whose access to news and communication is restricted by censorship or surveillance.",
+      "App downloads",
+      "App-to-service and website communications use encrypted transport where supported, VPN traffic is encrypted from the device to the tunnel endpoint, production secrets are stored outside public source in root-owned server configuration, and operational identifiers are hashed or bucketed where practical. Access to production systems is limited to authorized administrators, and backups/security logs are protected by server access controls. App-collected operational data that is no longer needed for active service operation is deleted or anonymized within 90 days. Account, payment, prepaid redemption, referral, and legal acceptance records are retained only while needed to operate the account, satisfy accounting/legal obligations, prevent fraud or abuse, resolve disputes, or document customer acceptance. Users may request account deletion or privacy help by contacting privacy@winsvpn.org or support@winsvpn.org; some records may be retained longer only where required for payment, legal, security, fraud-prevention, or dispute-resolution reasons.",
+      "Architecture",
+      "Ask Hoppy",
+      "Assassinating or coercing our leadership will not stop Win's VPN and will not produce usable server access. The remaining realistic attacks are physical attacks against infrastructure, such as missile strikes. The architecture includes a deadman switch for continuity, evidence preservation, hot-site disaster recovery, regional redundancy, backups, and prepaid replacement planning.",
+      "Aung Phone Myint Credly certifications",
+      "Best Threat Intelligence Combined",
+      "Board of Directors",
+      "Built By Win Empire LLC",
+      "Built by philanthropists and experienced professionals who believe secure access to information is a basic requirement for liberty and justice.",
+      "Built on published NIST and IETF standards, not private cryptography. Every primitive below is publicly specified and independently reviewable.",
+      "By activating or using Win's VPN, you agree to use the service lawfully, not attack or abuse our services or infrastructure, and accept these Terms, the Verified No Log Policy, Acceptable Use Policy, Hold Harmless Agreement, Limitation of Liability, and Electronic Records consent. Account use requires clickwrap acceptance of the current legal terms inside the app before activation.",
+      "By checking the required boxes in the app and continuing activation, the customer consents to electronic records and agrees that the clickwrap acceptance, timestamp, document version, document hash, account or free-access identity, device bucket, source IP bucket, platform, app version, and server HMAC certificate form the service acceptance record. Company signoff is represented by a server-generated acceptance certificate ID and HMAC signature.",
+      "CEO / Strategist & Cybersecurity Engineer",
+      "CPU / battery efficiency",
+      "Capability comparison across ten categories, scored 1 to 5",
+      "Category",
+      "Censorship bypass",
+      "Chameleon",
+      "Chameleon and Smart IP",
+      "Check All of It Yourself",
+      "Choose Monthly",
+      "Choose Yearly",
+      "Close AI chat",
+      "Coming soon to the app stores.",
+      "Company identity.",
+      "Confirm I have saved these",
+      "Connection speed",
+      "Continue",
+      "Continuity by Design",
+      "Continuous connection",
+      "Copy",
+      "Covered by active cyber insurance through",
+      "Cryptographic profile",
+      "Customers may use Win's VPN for lawful privacy, security, education, and anti-censorship purposes. Customers may not use the service for attacks, unauthorized access, fraud, spam, malware, harassment, child exploitation, copyright infringement, torrenting, payment or device-limit evasion, or any activity that violates applicable law or harms people, networks, platforms, or infrastructure. We may suspend access, preserve evidence, cooperate with lawful process when required, and seek recovery of damages, costs, and fees caused by misuse, abuse, attacks, or unlawful conduct. Please note that our VPN is designed in a way we cannot store your data.",
+      "Cyber Insurance",
+      "Data use and sharing.",
+      "Dausos",
+      "Defense In Depth",
+      "Determination letter from the IRS Tax Exempt and Government Entities division, signed by Stephen A. Martin, Director, Exempt Organizations Rulings and Agreements.",
+      "Device cryptographic identity.",
+      "Device identity",
+      "Device or other ID disclosure.",
+      "Donate",
+      "Donations and Tax Deductions",
+      "Donations expand access to cybersecurity.",
+      "Donations from the public and cost-recovery subscriptions. Contributions are tax-deductible to the extent allowed by law. The IRS determination letter and our EIN are published in",
+      "Donor badges are coming.",
+      "Download",
+      "Each device carries an authenticated URI identity that must match its request, with key rotation and no downtime.",
+      "Each referred account can earn this once. Later renewals by the same person do not pay again, you cannot refer yourself, and a code only counts while the referring account is still active; if it has lapsed, neither side gets the bonus. There is no limit on how many different people you can refer. The days are added as soon as the payment settles rather than after a waiting period. If that payment is later refunded, reversed, cancelled, suspended, or fails, the bonus days are taken back off the referring account and the referred account loses the access that payment funded.",
+      "Effective back to June 11, 2026.",
+      "Eight days.",
+      "Electronic records and customer acceptance.",
+      "Email (optional, for account recovery email)",
+      "Employer Identification Number assigned by the IRS on June 17, 2026. Form 1023 user fee of $600.00 paid through Pay.gov on July 13, 2026. IRS determination letter recognizing 501(c)(3) status issued July 21, 2026, effective back to June 11, 2026.",
+      "Enter the code from under the scratch panel on your Win's VPN prepaid card. Redemption is instant, and each code can be used once. Your account number and setup key are shown on screen after redeeming \u2014 the card itself never carries them. Your 6-digit PIN is chosen by you inside the app and is never printed on the card.",
+      "Ethical Hacker, Offensive Security",
+      "Every control-plane request and response is signed, in addition to mutual X.509 authentication.",
+      "Exclude Apps From VPN (Split Tunneling)",
+      "ExpressVPN",
+      "Fail-closed",
+      "Failure behaviour",
+      "Features",
+      "Federal Tax-Exempt Status, and What It Means for Donors",
+      "Federal tax-exempt status and EIN:",
+      "Founder of USIRD.org, a 501(c) nonprofit focused on civil rights protection frameworks. Retired after working as an IT Manager at Cookie's in NYC. As a very young and talented guy surrounded by politicians, he is in a unique position to help lead Myanmar to glory one day.",
+      "Free, trial, donated, and administrator-granted access.",
+      "Fresh exchange every rotation",
+      "Future leadership profile",
+      "GRC Compliance & IT Manager",
+      "Gateway recovery and third-party connections.",
+      "Get Lifetime Pass",
+      "Get Support Pass",
+      "Get Win's VPN",
+      "Governing law.",
+      "Hardened Servers",
+      "Hi, I am Hoppy. Ask me about setup, free server access, payments, privacy, or troubleshooting. I will not reveal private infrastructure details or secrets.",
+      "Hold Harmless",
+      "Hold harmless.",
+      "Hoppy AI Support Agent",
+      "Hotspot Shield",
+      "Hotspot Shield\u2019s public",
+      "How Referrals Work",
+      "How Winn Protocol\u2122 compares",
+      "How we are funded",
+      "Hybrid, never ML-KEM alone. Protects today\u2019s traffic against future quantum decryption of recorded sessions.",
+      "Hydra",
+      "I have saved my account number and setup key securely",
+      "IRS Tax Exempt Organization Search",
+      "IRS determination letter dated July 21, 2026",
+      "IRS determination letter dated July 21, 2026 recognizing Win's VPN Inc. as exempt under Internal Revenue Code Section 501(c)(3)",
+      "ISO 27001/20000 certified server environments with 99% uptime",
+      "If someone sent you a referral link, download Win's VPN, choose a plan, and complete the purchase through that link. The code travels with the payment and is applied to both accounts once the payment settles.",
+      "If winsvpn.org is ever blocked, you can always reach us at",
+      "In addition to the random install identifier, the app generates a long-lived cryptographic key pair on first use of each account and derives a public key from it. That public key is transmitted to Win's VPN with every account verification and configuration renewal request, not only at activation, and is used as one of the persistent identifiers that identifies this device to the service for connection provisioning, the three-device limit, and abuse prevention. It is a long-lived linkable identifier: it stays the same across app relaunches and reconnects and therefore functions as a repeatable device marker, not a one-time token. It is not derived from hardware identifiers or advertising identifiers. The private key itself never leaves the device; only the derived public key is transmitted. The key pair is stored locally in the app's private storage or the platform keychain, and the corresponding account-side record is deleted or overwritten when the device is deactivated, replaced, or no longer needed.",
+      "In telecom terms, if today\u2019s leading VPN protocols are 5G, Winn Protocol\u2122 is built to be the 6G: a generation ahead in how it hides traffic, races routes, and holds a connection together across hostile networks.",
+      "Insurance Notice",
+      "Insurance and risk transfer.",
+      "Introduction",
+      "Key rotation",
+      "Language options",
+      "Leadership",
+      "Legal disclaimer: Win's VPN is provided as a privacy, cybersecurity, and anti-censorship technology service. Availability, speed, and compatibility may vary by region, device, network, and censorship conditions. Win's VPN does not encourage unlawful activity and does not allow torrenting. Account use requires clickwrap acceptance of the current legal terms inside the app before activation.",
+      "Liability Limit",
+      "Lifetime",
+      "Lifetime + Support",
+      "Lifetime pass means 10 years of account validity with tech support.",
+      "Lifetime pass means 10 years of account validity without tech support.",
+      "Lightway",
+      "Limitation of liability.",
+      "Live public-IP display.",
+      "Look us up as \u201cWin\u2019s VPN Inc.\u201d on the IRS Tax Exempt Organization Search at",
+      "ML-DSA-65 / ML-DSA-87",
+      "Make everyday internet use safer and more private, advance public education in cybersecurity, and keep the open internet reachable for people whose access is restricted by cost, censorship or surveillance.",
+      "Message to Intelligence Agencies",
+      "Metadata anonymity",
+      "Mission",
+      "Mobility & roaming",
+      "Monthly access with 99% reliability target.",
+      "Most VPN protocols trade one property for another. Mixnets buy metadata anonymity by giving up speed. Speed-first protocols give up stealth. Winn Protocol\u2122 is engineered so neither has to be sacrificed, and no score is published before its evidence gate passes.",
+      "No Refund Policy",
+      "No browsing history, no DNS query history, no traffic contents, and no record of the destinations you reach. Transient session state is cleared when the VPN disconnects. The privacy-preserving device-limit metadata behind the three-device limit is deleted or overwritten once a device is deactivated or replaced, and app-collected operational data we no longer need is deleted or anonymized within 90 days. What is left is only what an account needs: status, payment and referral state, and proof you accepted the terms.",
+      "No-Logs Privacy",
+      "Non-Profit Mission",
+      "NordLynx",
+      "NordVPN",
+      "NordVPN\u2019s",
+      "NordWhisper",
+      "Not now",
+      "Nothing on this page asks you to trust a screenshot. Every document above was issued by a government agency that keeps its own public record, and that record is the thing actually worth checking. An image can be edited by anyone. A state and federal registry cannot be edited by us.",
+      "Nym Anonymous Mode",
+      "NymVPN",
+      "On Android, Win's VPN uses Android VpnService as a core user-facing VPN function. After the user starts a connection and approves Android's standard VPN permission prompt, VpnService creates an encrypted device-level tunnel to a Win's VPN endpoint, routes selected device traffic through that tunnel, supports user-selected split-tunneling exclusions, and shows the Android VPN indicator/notification while active. Win's VPN does not use VpnService to inject ads, monetize traffic, manipulate advertising, sell traffic data, or collect browsing history, DNS query history, traffic contents, or destination activity.",
+      "One of the first AI-powered VPNs, built to keep connections reliable across hostile, unstable networks through advanced AI insights paired with rigorous human optimization and testing. Win\u2019s VPN brings together all the good stuff of your favourite ProtonVPN, NordVPN, ExpressVPN, SurfShark, Hotspot Shield, VyprVPN, Windscribe, NymVPN, and AdGuard, minus the bad bit.",
+      "One year of Win's VPN protection and Winn Protocol\u2122 access.",
+      "Open the full-size letter.",
+      "Open the full-size receipt.",
+      "Open-Source Core",
+      "Open-source announcement",
+      "Open-source notice: Android camouflage mode is an optional user-safety feature for high-risk censorship environments, including Burma/Myanmar, where visible VPN apps can expose users to retaliation; it does not hide malicious activity, and the Android VPN notification remains user-controlled. Win's VPN includes third-party open-source components governed by their own licenses and notices. Those upstream projects are separate from Win's VPN Inc. and Win Empire LLC, do not sponsor or endorse Win's VPN, and remain governed by their own licenses and notices.",
+      "Open-source software reduces zero-day exposure, while minimal app code and obfuscation reduce reverse-engineering risk.",
+      "Optional. If you add an email, your account details are also sent there as a second channel. The card itself has no buyer identity by design.",
+      "Or pay instantly with Apple Pay or Google Pay",
+      "Our",
+      "Our Mission",
+      "Our Story",
+      "Our adaptable, modified, and hardened versions of proven censorship-bypassing protocols are designed to bypass censorship without affecting speed.",
+      "Our engineers hold gold-standard industry certifications such as CISSP, OSCP, CEH, CySA+, and other US Department of War (formerly Department of Defense) baseline certifications. We encourage users to research atrocities and censorship after the Myanmar 2021 coup, Russia's war against Ukraine, and other events around the world that may not appear on your local news. Help us bring peace and defeat dictatorship through transparency by sharing this app with your friends!",
+      "Our founder is disabled.",
+      "Our mailing address is blacked out to protect our team; nothing else on the letter is altered.",
+      "Our servers have a hot site disaster recovery approach using latest hardware, weekly maintenance and backups, and 24/7 attack monitoring by Intrusion Detection & Prevention System (IDS/IPS). On every node the firewall drops inbound and forwarded traffic by default, IPv6 is disabled, torrent ports are blocked, and SSH accepts key-based logins only, with no passwords and a 24-hour ban after 10 failed logins in an hour. Security updates install automatically and core dumps are disabled, so process memory never reaches disk.",
+      "Paid accounts get a referral link inside the app. Free access is not tied to a personal account, so it cannot earn or grant referral time, though free users can still share the Win's VPN website. When someone buys a paid plan through your link and that payment settles, we add the same number of days to both accounts: 20% of the term that purchase covers, rounded up to whole days. A one-month plan works out to roughly 6 or 7 days each, a one-year plan to about 73 days each, and a 10-year lifetime pass to about 731 days each. The bonus is a set number of days taken from the purchase you referred, not a percentage of your own remaining time, so referring a one-month buyer adds about a week to your account whichever plan you are on.",
+      "Pay.gov confirmation of the Form 1023 user fee payment.",
+      "Pay.gov payment confirmation for the Form 1023 user fee, transaction dated July 13, 2026, account holder Win's VPN Inc, amount $600.00",
+      "Payment fine print: all payments, subscriptions, lifetime passes, tech-support passes, and donations are final and non-refundable to the maximum extent permitted by law.",
+      "Payment terms.",
+      "Payments are processed by PayPal. Card data is entered on PayPal-hosted payment pages and handled by PayPal's PCI DSS compliant payment infrastructure, so Win's VPN does not store card numbers or process raw card data on our servers.",
+      "Platform compatibility",
+      "Play Android demo video",
+      "Play demo",
+      "Post-quantum",
+      "Post-quantum key exchange",
+      "Post-quantum resistance",
+      "Post-quantum scope",
+      "Post-quantum signatures",
+      "Prepaid redemption codes.",
+      "Primary navigation",
+      "Privacy Policy",
+      "Privacy Policy and user data handling.",
+      "Privacy Policy, Terms, Acceptable Use, and Liability",
+      "Proof",
+      "Protection",
+      "Protocol capability comparison",
+      "Protocol source",
+      "Proton VPN",
+      "Proton\u2019s comparison is the whole",
+      "Proudly made in America so users can experience real American freedom online.",
+      "RFC 9849 ECH conceals the destination name. No classical-only or public-ClientHello fallback is offered.",
+      "Redeem Code",
+      "Redeem a Prepaid Card",
+      "Redemption code",
+      "Referral Program",
+      "Referral links take the form",
+      "Referral program data.",
+      "Release candidates are being prepared for Google Play, the Apple App Store, and the Microsoft Store. Availability will be announced only after each store accepts its signed build.",
+      "Reliability",
+      "Rust rewrite",
+      "SPIFFE-bound certificates",
+      "Save our mirror link.",
+      "Save these now \u2014 they are shown once and will not be shown again. Copy them to a secure place before you close this page.",
+      "Scores are capability-based rather than controlled head-to-head benchmarks, assessed by Win\u2019s VPN from each vendor\u2019s published documentation in July 2026, with Winn Protocol\u2122 figures taken from our own implementation and internal test suites while full independent device, cloud, DPI and soak verification continues. Product names and trademarks belong to their respective owners and appear here for identification and comparison only, with no affiliation or endorsement implied; vendor capabilities change, so verify against current documentation.",
+      "Seasoned hacker specialized in penetrating networks and maintaining the global top 50 position on HackTheBox, a respected realistic CTF challenge platform. Currently working as an IT manager in NYC.",
+      "Sectigo EV SSL identity validation",
+      "Secure handling, retention, and deletion.",
+      "Security description",
+      "Security vulnerability reports.",
+      "See activation, secure connection, and malicious-link blocking in the Android app.",
+      "Send",
+      "Service highlights",
+      "Service update",
+      "Session resumption is disabled, so each rekey performs a full hybrid post-quantum exchange.",
+      "Setup key",
+      "Share Win's VPN with someone who needs safer, more open internet access. When a paid plan is bought through your referral link, both accounts gain the same bonus: 20% of the term that purchase covers, added as whole days.",
+      "Simple plans, reliable access, and receipt emails after donation or payment.",
+      "So that the app can still reach a working gateway when the usual DNS or CDN paths are censored, it also requests a small gateway-recovery file hosted on GitHub at",
+      "Software ownership, open-source notices, and quality control.",
+      "Speed-test endpoints.",
+      "Stealth",
+      "Stealth suite",
+      "Support status",
+      "Surfshark",
+      "Surfshark describes",
+      "TLS 1.3 + Encrypted Client Hello",
+      "Terms",
+      "That is worth saying plainly, because it shapes what to expect from us. We are a small non-profit, not a large provider with a support department: replies can take longer, and features arrive when they are ready rather than on a schedule. It has not changed the standard the security work is held to, and it has not stopped a year of work and thousands of dollars going into this. We would rather you knew that now than discovered it during an outage.",
+      "The documents behind the claims: incorporation, the EIN, the Form 1023 fee, and the IRS determination letter. Each one names the agency that issued it and the public registry where you can look it up yourself.",
+      "The effective date of exemption on the determination letter is June 11, 2026, not the date the letter was issued. If you donated to Win's VPN Inc. on or after that date, your contribution falls inside the exempt period. Keep the receipt we emailed you and ask your own tax preparer how it applies to your return.",
+      "The first non-profit VPN built on its own protocol. A US 501(c)(3) public charity, expanding access to cybersecurity, uncensored news, and education.",
+      "The founder's most beloved parent was assassinated by the Myanmar (Burmese) junta in 2025. Since then, my mission has been to help people keep their freedom by providing essential cybersecurity and access to uncensored news and education because I have nothing to lose anymore.",
+      "The letter classifies Win's VPN Inc. as a public charity under Section 509(a)(2), the classification used for organizations supported by contributions and by revenue from their exempt activities. Win's VPN Inc. uses a December 31 accounting period and is required to file an annual Form 990-series return.",
+      "The recipient email address, the tracking IDs, and the card details are blacked out.",
+      "The sequence, with the date on each document.",
+      "These access types are discretionary, non-paid, and revocable. To the maximum extent permitted by law, users of free, trial, donated, or administrator-granted access receive the service without paid-service remedies, waive claims against Win's VPN Inc. and Win Empire LLC arising from that discretionary access, and remain responsible for their own conduct, local-law compliance, and third-party claims.",
+      "These terms are governed by the laws of the State of Florida, United States, without regard to conflict-of-law principles, except where non-waivable consumer protection laws require otherwise.",
+      "This Privacy Policy explains how Win's VPN handles user data. English is the controlling legal version; translations are provided for convenience only.",
+      "Throughput",
+      "In the memory of 9/11 victims, we are giving our premium VPN servers for free until October 11, 2026.",
+      "To the maximum extent permitted by law, Win's VPN Inc. and Win Empire LLC disclaim indirect, incidental, special, consequential, exemplary, punitive, lost-profit, lost-data, business-interruption, censorship, connectivity, speed, geolocation, payment-provider, app-store, and third-party-service damages. The service is provided without a guarantee that every network, country, website, app, streaming service, device, or censorship system will be reachable at all times.",
+      "To the maximum extent permitted by law, the customer agrees to defend, indemnify, and hold harmless Win's VPN Inc., Win Empire LLC, and their owners, officers, employees, contractors, and affiliates from claims, losses, damages, liabilities, fees, penalties, and expenses arising from the customer's misuse of the service, violation of these terms, unlawful activity, or violation of third-party rights.",
+      "To throttle repeated failed attempts and protect accounts, gateways, and infrastructure, the service keeps short-lived request counters and security-event records keyed to a hashed form of the source IP address, device identifier, or account number rather than to the address itself. These records exist only for security, fraud prevention, abuse response, and device-limit enforcement. They are not used to profile a user, are not used for advertising, and never contain VPN traffic, browsing history, DNS query history, or destination activity.",
+      "Trademark and patent filings in process",
+      "Traffic stealth",
+      "Transport",
+      "TrustTunnel",
+      "Up to 2.5 Gbps",
+      "Update (September 11, 2026):",
+      "User data is used to activate accounts, enforce the three-device limit, provide free and paid VPN access, operate split tunneling, process payments, donations, and prepaid redemptions, credit referrals, send account/service emails, document legal acceptance, detect abuse or attacks, triage and answer security vulnerability reports, answer support requests, improve reliability, and comply with lawful obligations. Data may be shared only with service providers that support those purposes, such as PayPal for payment processing, SMTP2GO for transactional email, Google Play or other app stores for store review and platform services, hosting/CDN/security providers for infrastructure and attack defense, and legal or governmental authorities only when required by valid legal process. GitHub hosts the gateway-recovery file described above and therefore receives the connection IP and ordinary request metadata when the app fetches it; Win's VPN sends GitHub no account, device, or user data. Win's VPN does not share VPN browsing history, DNS query history, traffic contents, or destination activity because it is not designed to collect those records.",
+      "VPN Accelerator",
+      "Verified No Log",
+      "Verified No Log policy.",
+      "Verify us yourself, please.",
+      "Vulnerability Disclosure Program",
+      "VyprVPN",
+      "WStunnel",
+      "WStunnel protocol",
+      "Watch Demo (Android)",
+      "Watch Demo (Linux)",
+      "Watch Demo (Windows)",
+      "We are preparing digital recognition badges in four tiers \u2014 Bronze from $100, Silver from $1,000, Gold from $10,000 and Diamond from $100,000 \u2014 each valid for one tax year, which we intend to issue through Credly. They are not live yet, so a donation today does not come with one, and a badge is recognition rather than anything purchased: it buys no VPN account, plan or support tier, and does not change how much of your gift is deductible.",
+      "We build and operate a no-logs VPN that blocks scams, malicious links and tracking, develop the Winn Protocol that powers it, and provide the service at a price set to cover operating costs rather than to generate profit.",
+      "We cannot provide server access under threat because privileged access is compartmentalized, rotated, root-owned, and protected by Zero Trust controls. No board member is intended to carry a simple master password or backdoor that can unlock the infrastructure on demand.",
+      "We use customized local AI for your privacy, and we keep the VPN current with real-world censorship and network conditions so it keeps working for you. We do not collect your personal data, so we cannot train on it.",
+      "Website analytics consent",
+      "What a charitable deduction actually does, and what it does not do. The documents behind our 501(c)(3) status are directly above in",
+      "What we do",
+      "When a prepaid card code is entered on this website, the code is sent to Win's VPN so it can be checked and exchanged for account credentials. A redemption code is a bearer credential until it is used: it is submitted in the request body rather than in the page address, and each code can be redeemed only once. The card itself never carries an account number or PIN. A redeemed code is treated as account and payment provisioning data and is handled under the retention terms below.",
+      "When an Android user opens",
+      "When the user starts the in-app speed test, the app measures throughput by downloading from and uploading to third-party test servers. The measured hosts are",
+      "Where to check.",
+      "Who we serve",
+      "Win's VPN Inc. and Win Empire LLC maintain insurance-readiness controls and active cyber insurance through",
+      "Win's VPN Inc. is a 501(c)(3) tax-exempt organization and contributions are tax-deductible to the extent allowed by law. Exemption is effective June 11, 2026, so donations made on or after that date fall inside the exempt period.",
+      "Win's VPN Inc. operates the Win's VPN service. Win Empire LLC designs and builds the software, websites, scripts, and infrastructure used by the service. Win's VPN Inc. is a Florida nonprofit corporation filing, document number N26000008302, with business phone (424) 946-7876 and principal operations in Florida. The Internal Revenue Service determined, in a letter dated July 21, 2026, that Win's VPN Inc. is exempt from federal income tax under Internal Revenue Code Section 501(c)(3), with an effective date of exemption of June 11, 2026, and classified Win's VPN Inc. as a public charity under Section 509(a)(2) rather than a private foundation. Donors can deduct contributions under IRC Section 170, and Win's VPN Inc. is qualified to receive tax-deductible bequests, devises, transfers, or gifts under Section 2055, 2106, or 2522. Contributions are deductible to the extent allowed by law, deductibility depends on each donor's own circumstances, and Win's VPN Inc. does not provide tax advice. Win's VPN Inc. uses a December 31 accounting period and is required to file an annual Form 990-series return. Tax-exempt status is a determination about the organization; it is not an IRS review, approval, or endorsement of the Win's VPN service. Win's VPN is provided as a privacy, cybersecurity, and anti-censorship technology service. Availability, speed, routing, compatibility, server locations, and payment features may vary by region, network, censorship conditions, device, platform, and maintenance status.",
+      "Win's VPN Inc. submitted the user fee for its Form 1023 application through Pay.gov on July 13, 2026, and the IRS determination letter is dated July 21, 2026, eight days later. The fee was $600.00, which is the user fee for the full Form 1023 rather than the streamlined Form 1023-EZ.",
+      "Win's VPN can use privacy-respecting website analytics and ad conversion tracking to understand which downloads, demos, and payment links help people most. VPN traffic and app activity are not tracked here.",
+      "Win's VPN combines open-source foundations, proprietary optimization, and layered cybersecurity controls to protect users and infrastructure.",
+      "Win's VPN does not collect or keep VPN activity logs. We do not log browsing history, DNS query history, traffic contents, raw VPN traffic, or user destination activity. The only limited service metadata we may store is the minimum needed to operate the service, such as account status, payment/referral status, legal acceptance evidence, security/abuse-prevention records, and privacy-preserving device-limit metadata for enforcing the three-device limit. Transient connection/session state is cleared when the VPN disconnects. Device-limit metadata is deleted or overwritten when the device is deactivated, replaced, or no longer needed for active account operation, and app-collected operational data that is no longer needed is deleted or anonymized within 90 days. The public website may use consent-based analytics and ad conversion tracking to measure page visits, downloads, demo views, payment-link clicks, and donation-link clicks; this website marketing tracking is separate from VPN tunnel traffic and does not track what users do through the VPN.",
+      "Win's VPN is built to continue operating even if the founder or board members are assassinated, detained, threatened, tortured, or otherwise coerced. Donation processing, backups, rebuild procedures, prepaid operating runway, and succession controls are designed to keep the service alive for at least a decade.",
+      "Win's VPN is designed and made by Win Empire LLC. Win's VPN Inc. operates the service.",
+      "Win's VPN is designed and made by Win Empire LLC. Win's VPN Inc. operates the service. Business phone: (424) 946-7876. Florida nonprofit corporation filing document number: N26000008302. Tax-exempt under Internal Revenue Code Section 501(c)(3), public charity under Section 509(a)(2); contributions are tax-deductible to the extent allowed by law. Winn Protocol\u2122 and Win's VPN branding are used for product identification. Trademark and patent filings are in process.",
+      "Win's VPN is designed to keep operating for years through resilient infrastructure and defense in depth. Our subscription and donation fees are set up to automatically pay for ongoing server cost and maintenance. Access controls are built so no individual can casually expose or compromise the server network.",
+      "Win's VPN is governed as a mission-continuity project, not a single-person dependency.",
+      "Win's VPN logo",
+      "Win's VPN may access, collect, transmit, or store only the user data needed for app and service functionality: account number, email address when provided for paid/manual accounts or support, app platform and version, device name/model, local split-tunneling package selections, device identifier bucket, source IP bucket, legal acceptance records, payment confirmation metadata received from PayPal, referral/account-validity metadata including which account referred a new account, prepaid redemption codes submitted on this website, security vulnerability reports submitted through our disclosure form, support messages the user sends, security/abuse-prevention events, diagnostics or crash information when provided by the platform, and website analytics or ad-conversion events when consented to on the website. Before the VPN connects, the app may retrieve a coarse public-IP location by querying Cloudflare's network-metadata endpoint (speed.cloudflare.com/meta) or a first-party Win's VPN edge endpoint, and may request a surrounding map from Apple Maps on Apple platforms or an OpenStreetMap-derived tile service on other platforms. The endpoint that derives the coarse location and the map provider necessarily receive the connection IP and ordinary request metadata used for that request; Win's VPN does not request device GPS for this feature or retain the returned IP, city, postal code, or map-view history. Win's VPN does not sell personal or sensitive user data.",
+      "Win's VPN on Facebook",
+      "Win's VPN on Instagram",
+      "Win's VPN on LinkedIn",
+      "Win's VPN on TikTok",
+      "Win's VPN on X",
+      "Win's VPN on YouTube",
+      "Win's VPN social links",
+      "Win's VPN uses Win Empire LLC proprietary code, configuration, deployment automation, and third-party open-source components. We do not claim ownership of upstream third-party projects. Required third-party notices are preserved where applicable. Win Empire LLC maintains internal IP and open-source license compliance, written quality control, release testing, change management, customer acceptance, and company signoff procedures for production releases.",
+      "Win's VPN | Censorship-Resistant, No-Logs VPN Made in USA",
+      "Windscribe",
+      "Windscribe\u2019s",
+      "Winn Protocol\u2122 is engineered to bypass NGFW Deep Packet Inspection as long as there is a working path from a user\u2019s country to the outside world.",
+      "Winn Protocol\u2122 prepares several routes in advance and races them. If a path degrades or drops, a replacement is established and verified",
+      "Win\u2019s VPN",
+      "Win\u2019s VPN Inc. is an IRS-recognized 501(c)(3) public charity. Determination letter and EIN in",
+      "X25519 + ML-KEM-768",
+      "XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXX",
+      "Ye Yint Myint Mo Credly certifications",
+      "Your donation helps Win's VPN fight scams, improve filtering, add servers in more countries, and build physically guarded USA infrastructure for future Double VPN. Depending on donations received, we plan to start offering cybersecurity audit services to local nonprofits in 2027. The more donations we receive, the faster we can expand more servers for everyone. You can comment which VPN location you would like in the donation note so we can prioritize it. Donation receipts are sent by email after payment.",
+      "Zero-Knowledge Administration",
+      "Zero-knowledge routing",
+      "and",
+      "api.ipify.org",
+      "as post-quantum resistant, adaptive and up to 30% faster than WireGuard in its own tests, but it is a macOS-only beta and Surfshark warns of possible connectivity or performance issues, so most users cannot run it at all.",
+      "before",
+      "cachefly.cachefly.net",
+      "description documents TLS 1.2 with ECDHE rather than a standardised hybrid post-quantum exchange, so traffic captured today stays vulnerable to future quantum decryption.",
+      "download and upload speeds depending on region, network route, Wi-Fi version, device processing power, etc...",
+      "earns the strongest metadata score because its five-hop mixnet uses fixed-size layered packets, mixing, timing delays and cover traffic, but those same mechanisms cost so much latency and battery that it is unusable as a default connection.",
+      "except the total device count to enforce three device limit",
+      "for every region, and, for nodes in the western United States,",
+      "instead of taking our word for it. Recently approved organizations can take some time to appear in that database.",
+      "intrusion detection and prevention for VPN infrastructure",
+      "is a fast WireGuard build with double NAT, but it carries no obfuscation of its own, so users in censored networks must switch to the separate NordWhisper protocol and give up NordLynx speed to get past inspection. Winn Protocol\u2122 carries stealth in the same protocol.",
+      "is now written in Rust, supports major platforms and uses ML-KEM-based post-quantum protection, but its obfuscation is applied automatically on the server side rather than exposed as selectable transports, so the observable traffic shape cannot be matched to a particular network.",
+      "is open source and hides the tunnel in plain sight, carrying it as ordinary HTTPS over HTTP/2 and HTTP/3 with an isolated stream per connection rather than a recognisable wire format of its own, so it stays workable on unstable mobile links without a separate stealth mode. Its published specification mandates only TLS 1.2 or QUIC, so the hybrid X25519MLKEM768 exchange AdGuard ships in its apps is an opt-in application setting rather than part of the protocol, and as a single-hop transport with no independent no-log audit it adds no metadata anonymity beyond an ordinary VPN.",
+      "is strong on DPI resistance and can rotate server IPs without dropping the connection, but it is an older scrambling design with no published post-quantum protection and lower throughput than modern protocols.",
+      "leaves the inventory untouched and the VPN remains usable without per-app exclusions. The installed-app inventory is used locally so the user can search for and select apps to exclude from the VPN. The full inventory is not uploaded to Win's VPN, shared with third parties, sold, or used for advertising or analytics. Only the package identifiers the user selects are retained in local app settings and passed locally to Android VpnService to apply those exclusions. The user can remove selections in the split-tunneling picker, or delete all locally retained selections by clearing Win's VPN app data or uninstalling the app.",
+      "losangeles.ca.speedtest.frontier.com",
+      "lsanca-speedtest-ookla-02.st.charter.com",
+      "page invites security researchers to report weaknesses. Submitting the form sends the name or handle, reply email address, one-line summary, the report detail, and an optional credit preference to our security team. This information is used to triage, reproduce, fix, and credit the reported issue, and to correspond with the reporter. Reporting is voluntary, and a researcher who does not want to be named can say so in the form. Our machine-readable security contact is published at",
+      "passes Win\u2019s VPN\u2019s own verification suites. Comparable physical-device, cloud, DPI, throughput and connection-time results are being completed and will be published as they are archived.",
+      "raw.githubusercontent.com",
+      "speed.cloudflare.com",
+      "speedtest.lax2.sonic.net",
+      "storage.googleapis.com/winsvpn/winsvpn.org",
+      "the old one is torn down (make-before-break) so the tunnel does not go down while it changes. The kill switch stays active throughout, so traffic never escapes during the handover.",
+      "to display the device's current public IP address next to the connection status indicator. That service necessarily receives the connection IP and ordinary request metadata for each such request; no account number, device identifier, or other app data is sent. The request is made to improve the connection-status UI and is never made while a VPN tunnel is active.",
+      "to support responsible operations and underwriting requirements. Any insurance coverage is governed only by the issued policy and is for the named insureds only. Insurance does not create a service warranty, direct claim right, third-party beneficiary status, guaranteed recovery, or higher liability cap for any customer or third party.",
+      "wraps an OpenVPN connection inside a WebSocket specifically to get past firewall-based blocking in places like China, Russia and Iran, but Windscribe\u2019s own documentation warns speeds are often slower due to the extra encryption layer, and its post-quantum claim is scoped to WireGuard only, not WStunnel.",
+      "you@example.com (optional)",
+      "\u00b7"
+    ],
+    "translatable_static_keys_sha256": "b7fe9a7e2dc776f9a3ffe0a6ed862494a8833e78660db8c45bf7e4c4a6513775",
+    "nontranslatable_static_keys": [
+      "$0.99",
+      "$11.88",
+      "24/7/365 IDPS",
+      "A+",
+      "Affordable Yet Great Product!",
+      "Android",
+      "Aung Phone Myint",
+      "CCSP",
+      "CISA",
+      "CISSP",
+      "Coalition Inc.",
+      "CySA+",
+      "HTB CPTS",
+      "HTB CWES",
+      "Hoppy",
+      "Linux",
+      "MacBook (macOS)",
+      "Mr / Mrs X",
+      "Network+",
+      "PenTest+",
+      "S",
+      "SSCP",
+      "Sectigo EV",
+      "Security+",
+      "SecurityX",
+      "Tier III+",
+      "Version 2026-08-20.v1",
+      "Win Empire LLC logo",
+      "Win's VPN",
+      "Win's VPN home",
+      "Windows",
+      "Winn Protocol\u2122",
+      "Ye Yint Myint Mo",
+      "apps.irs.gov/app/eos",
+      "iPhone (iOS)",
+      "\u00d7",
+      "\ud83c\uddfa\ud83c\uddf8"
+    ],
+    "nontranslatable_static_keys_sha256": "66e3ab55883fd529b90a2ae9cd05b8f7287f037714d60c0f571dc9517ac91cd8",
+    "inherited_translate_no_only_keys": [
+      "$10,000",
+      "$100",
+      "$100,000",
+      "$\u1041,\u1040\u1040\u1040 \u1021\u101c\u103e\u1030\u104b",
+      "$\u1041\u1040,\u1040\u1040\u1040 \u1021\u101c\u103e\u1030\u104b",
+      "$\u1041\u1040\u1040 \u1021\u101c\u103e\u1030\u104b",
+      "$\u1041\u1040\u1040,\u1040\u1040\u1040 \u1021\u101c\u103e\u1030\u104b",
+      "$\u1042\u1045\u1040 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1011\u102d\u102f\u1037\u1011\u1000\u103a\u1015\u102d\u102f\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1000\u103b\u103d\u1014\u103a\u102f\u1015\u103a\u1010\u102d\u102f\u1037\u104f \u1005\u102c\u1016\u103c\u1004\u1037\u103a\u101b\u1031\u1038\u101e\u102c\u1038\u101e\u1031\u102c \u1021\u101e\u102d\u1021\u1019\u103e\u1010\u103a\u1015\u103c\u102f\u101c\u103d\u103e\u102c \u101c\u102d\u102f\u1021\u1015\u103a\u101e\u100a\u103a\u104b",
+      ", and it is general information about the law rather than tax advice.",
+      ", and the deduction cannot be claimed without one. If you gave $250 or more to Win's VPN Inc. and did not receive one from us, email",
+      ". Please give because you want the work funded, not because you expect the government to hand the money back.",
+      "501(c)(3) \u1021\u1019\u103b\u102c\u1038\u1015\u103c\u100a\u103a\u101e\u1030\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1015\u101b\u101f\u102d\u1010\u1021\u1016\u103d\u1032\u1037 \u00b7 IRC \u1015\u102f\u1012\u103a\u1019 509(a)(2)",
+      "A deduction reduces the income you are taxed on. It is not a credit, and it does not cut your tax bill dollar for dollar. Most people take the standard deduction, which for 2026 is $16,100 for a single filer, $32,200 for a married couple filing jointly, and $24,150 for a head of household. If everything you could itemize adds up to less than that, a charitable gift produces no itemized deduction for you at all.",
+      "A filer who takes the standard deduction may still deduct up to $1,000 of cash contributions, or $2,000 on a joint return. That ceiling is the whole benefit. If you do itemize, 2026 also added a floor: only the part of your giving above 0.5% of adjusted gross income counts. See",
+      "Any other language is a translation provided for convenience. If the two differ, the English version controls.",
+      "English",
+      "Gifts of $250 or more need a written acknowledgment",
+      "How a Charitable Deduction Actually Works",
+      "IRS Topic 506",
+      "IRS \u101e\u100a\u103a $\u1042\u1045\u1040 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1011\u102d\u102f\u1037\u1011\u1000\u103a\u1015\u102d\u102f\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u1010\u1005\u103a\u1001\u102f\u1005\u102e\u1021\u1010\u103d\u1000\u103a \u1015\u101b\u101f\u102d\u1010\u1021\u1016\u103d\u1032\u1037\u1011\u1036\u1019\u103e \u1011\u102d\u102f\u1021\u1001\u103b\u102d\u1014\u103a\u1000\u102c\u101c\u1014\u103e\u1004\u1037\u103a \u1000\u102d\u102f\u1000\u103a\u100a\u102e\u101e\u100a\u1037\u103a \u1005\u102c\u1016\u103c\u1004\u1037\u103a\u101b\u1031\u1038\u101e\u102c\u1038\u101e\u1031\u102c \u1021\u101e\u102d\u1021\u1019\u103e\u1010\u103a\u1015\u103c\u102f\u101c\u103d\u103e\u102c\u1019\u1015\u102b\u1018\u1032 \u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a\u1000\u102d\u102f \u1001\u103d\u1004\u1037\u103a\u1019\u1015\u103c\u102f\u1015\u102b\u104b \u1011\u102d\u102f\u101c\u103d\u103e\u102c\u101e\u100a\u103a (\u1000) \u1011\u102d\u102f\u1014\u103e\u1005\u103a\u104f\u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038\u1000\u102d\u102f \u101e\u1004\u103a\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u100a\u1037\u103a\u1014\u1031\u1037 \u1014\u103e\u1004\u1037\u103a (\u1001) \u101e\u1000\u103a\u1010\u1019\u103a\u1038\u1010\u102d\u102f\u1038\u1019\u103e\u102f\u1019\u103b\u102c\u1038\u1021\u1015\u102b\u1021\u101d\u1004\u103a \u1011\u102d\u102f\u1005\u102c\u101b\u1004\u103a\u1038\u104f \u1014\u1031\u102c\u1000\u103a\u1006\u102f\u1036\u1038\u1011\u102c\u1038\u1014\u1031\u1037 \u1010\u102d\u102f\u1037\u1021\u1014\u1000\u103a \u1005\u1031\u102c\u101e\u1031\u102c\u1014\u1031\u1037\u1010\u103d\u1004\u103a \u101e\u1004\u1037\u103a\u1011\u1036\u101e\u102d\u102f\u1037 \u101b\u1031\u102c\u1000\u103a\u101b\u103e\u102d\u101b\u1019\u100a\u103a\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u101e\u1004\u103a\u1000 $\u1042\u1045\u1040 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1011\u102d\u102f\u1037\u1011\u1000\u103a\u1015\u102d\u102f \u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1001\u1032\u1037\u1015\u103c\u102e\u1038 \u1000\u103b\u103d\u1014\u103a\u102f\u1015\u103a\u1010\u102d\u102f\u1037\u1011\u1036\u1019\u103e \u1011\u102d\u102f\u101c\u103d\u103e\u102c\u1000\u102d\u102f \u1019\u101b\u101b\u103e\u102d\u1001\u1032\u1037\u1015\u102b\u1000 support@winsvpn.org \u101e\u102d\u102f\u1037 \u1021\u102e\u1038\u1019\u1031\u1038\u101c\u103a\u1015\u102d\u102f\u1037\u1015\u102b\u104b \u1000\u103b\u103d\u1014\u103a\u102f\u1015\u103a\u1010\u102d\u102f\u1037\u1000 \u1011\u102f\u1010\u103a\u1015\u1031\u1038\u1015\u102b\u1019\u100a\u103a\u104b (IRS Publication 1771\u104b)",
+      "If you would rather read this on a single printable page, or hand it to your own tax preparer, we have set it out as a letter on Win's VPN Inc. letterhead. It uses the same illustrations and the same assumptions as the text above, and it opens with the same caveat: most people who file a federal return do not itemize, and an itemized charitable deduction is worth nothing to them.",
+      "Letter language",
+      "One exception, new for 2026, and it is small.",
+      "One-page Win's VPN Inc. donor letter titled What a Donation Is Worth at Tax Time, explaining that a charitable deduction reduces taxable income rather than tax owed, that most filers get no itemized deduction, and showing four illustrative gift examples for the 2026 tax year",
+      "One-page donor letter on Win's VPN Inc. letterhead, written for the 2026 tax year.",
+      "Our certificate.",
+      "Publication 1771",
+      "Publication 505",
+      "Publication 526",
+      "Read this first: most filers get no itemized deduction for a gift.",
+      "Tax exemption is a determination about Win's VPN Inc. as an organization. It is not an IRS review, approval, or endorsement of the Win's VPN service, its security, or its performance.",
+      "Tax year 2026 rules, checked against IRS.gov",
+      "The English version of this letter is the governing text.",
+      "The Internal Revenue Service has determined that Win's VPN Inc. is exempt from federal income tax under Internal Revenue Code Section 501(c)(3). Donors can deduct contributions they make to Win's VPN Inc. under IRC Section 170, and the organization is qualified to receive tax-deductible bequests, devises, transfers, or gifts under Section 2055, 2106, or 2522. Contributions are deductible to the extent allowed by law. Deductibility depends on your own tax situation, and Win's VPN does not provide tax advice.",
+      "The same explanation as a one-page letter.",
+      "These records establish that Win's VPN Inc. exists and is recognized by the IRS as a tax-exempt public charity. They say nothing about the speed, security, or reliability of the VPN service itself. No government agency has reviewed, approved, or endorsed the Win's VPN product, and we are not suggesting otherwise.",
+      "These state their assumptions; they are not predictions about you. A",
+      "This is general information about the law, not tax advice.",
+      "This one is a document we wrote ourselves, not a government record like the documents in",
+      "Three illustrations.",
+      "WIN\u2019S VPN INC.",
+      "What a gift is worth to you depends on your filing status, your income, whether you itemize, and what else you gave. State treatment varies and does not follow the federal rules. Win's VPN Inc. cannot advise you on your return. Please talk to a tax professional and check the rules yourself at",
+      "What none of this proves.",
+      "Win\u2019s VPN Inc.",
+      "Win\u2019s VPN Inc. holds an extended-validation certificate issued by Sectigo, which means a certificate authority verified the identity of the organization behind this domain before issuing it. Note what you will actually see if you open the padlock: this site sits behind Cloudflare, which terminates TLS at its own edge and presents its certificate to your browser, so the issuer shown there is Cloudflare\u2019s, not Sectigo\u2019s. Browsers also stopped displaying extended-validation identity in the address bar several years ago. We would rather tell you that than let a badge imply something the padlock does not show.",
+      "Win\u2019s VPN Inc. \u1000\u1032\u1037\u101e\u102d\u102f\u1037\u101e\u1031\u102c \u1021\u1019\u103b\u102c\u1038\u1015\u103c\u100a\u103a\u101e\u1030\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1015\u101b\u101f\u102d\u1010\u1021\u1016\u103d\u1032\u1037\u101e\u102d\u102f\u1037 \u1015\u1031\u1038\u101e\u1031\u102c \u1004\u103d\u1031\u101e\u102c\u1038\u1021\u101c\u103e\u1030\u1019\u103b\u102c\u1038\u1021\u1010\u103d\u1000\u103a \u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a\u101e\u100a\u103a \u101a\u1031\u1018\u102f\u101a\u103b\u1021\u102c\u1038\u1016\u103c\u1004\u1037\u103a \u1015\u103c\u102f\u1015\u103c\u1004\u103a\u1011\u102c\u1038\u101e\u1031\u102c \u1005\u102f\u1005\u102f\u1015\u1031\u102b\u1004\u103a\u1038\u101d\u1004\u103a\u1004\u103d\u1031\u104f \u1046\u1040% \u1011\u1000\u103a \u1019\u1000\u103b\u1031\u102c\u103a\u101c\u103d\u1014\u103a\u1014\u102d\u102f\u1004\u103a\u1018\u1032 \u1021\u1001\u103c\u102c\u1038\u1021\u101c\u103e\u1030\u1021\u1019\u103b\u102d\u102f\u1038\u1021\u1005\u102c\u1038\u1019\u103b\u102c\u1038\u1021\u1010\u103d\u1000\u103a \u1045\u1040%\u104a \u1043\u1040% \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1042\u1040% \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a\u1019\u103b\u102c\u1038 \u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u103a\u104b \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a\u1011\u1000\u103a \u1015\u102d\u102f\u1014\u1031\u101e\u1031\u102c\u1015\u1019\u102c\u100f\u101e\u100a\u103a \u1015\u103b\u1031\u102c\u1000\u103a\u101e\u103d\u102c\u1038\u1001\u103c\u1004\u103a\u1038\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1014\u1031\u102c\u1004\u103a \u1045 \u1014\u103e\u1005\u103a\u1021\u1010\u103d\u1004\u103a\u1038\u101e\u102d\u102f\u1037 \u101e\u101a\u103a\u1006\u1031\u102c\u1004\u103a\u101e\u102f\u1036\u1038\u1001\u103d\u1004\u1037\u103a \u101b\u103e\u102d\u101e\u100a\u103a\u104b (IRS Publication 526\u104b)",
+      "Win\u2019s VPN Inc. \u1005\u102c\u1010\u103d\u1032\u1015\u1031\u102b\u103a\u101b\u103e\u102d \u1010\u1005\u103a\u1019\u103b\u1000\u103a\u1014\u103e\u102c\u1010\u100a\u103a\u1038 \u1021\u101c\u103e\u1030\u101b\u103e\u1004\u103a\u1005\u102c\u1000\u102d\u102f \u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a\u1021\u1010\u103d\u1000\u103a \u101b\u1031\u1038\u101e\u102c\u1038\u1011\u102c\u1038\u1015\u103c\u102e\u1038 \u1019\u103c\u1014\u103a\u1019\u102c\u1019\u1030\u1021\u1016\u103c\u1005\u103a \u1015\u102f\u1036\u1016\u103c\u1004\u1037\u103a\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1005\u102c\u101e\u102c\u1038\u1021\u1016\u103c\u1005\u103a \u1016\u1031\u102c\u103a\u1015\u103c\u1011\u102c\u1038\u101e\u100a\u103a\u104b \u1024\u1019\u1030\u1000\u102d\u102f \u1015\u102d\u102f\u1004\u103a\u101b\u103e\u1004\u103a\u104f \u1021\u1010\u100a\u103a\u1015\u103c\u102f\u1001\u103b\u1000\u103a\u1016\u103c\u1004\u1037\u103a \u1018\u102c\u101e\u102c\u1015\u103c\u1014\u103a\u1011\u102f\u1010\u103a\u101d\u1031\u1011\u102c\u1038\u1015\u103c\u102e\u1038 \u1021\u1004\u103a\u1039\u1002\u101c\u102d\u1015\u103a\u1019\u1030\u1000 \u1021\u102c\u100f\u102c\u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u103a\u104b \u104e\u1004\u103a\u1038\u101e\u100a\u103a \u1021\u1005\u102d\u102f\u1038\u101b\u1019\u103e\u1010\u103a\u1010\u1019\u103a\u1038\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1000\u103b\u103d\u1014\u103a\u102f\u1015\u103a\u1010\u102d\u102f\u1037\u1000\u102d\u102f\u101a\u103a\u1010\u102d\u102f\u1004\u103a \u101b\u1031\u1038\u101e\u102c\u1038\u1011\u102c\u1038\u101e\u1031\u102c \u1005\u102c\u101b\u103d\u1000\u103a\u1005\u102c\u1010\u1019\u103a\u1038\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u1021\u1001\u103d\u1014\u103a\u1021\u1000\u103c\u1036\u1015\u1031\u1038\u1001\u103b\u1000\u103a\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1025\u1015\u1012\u1031\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1021\u1011\u103d\u1031\u1011\u103d\u1031\u1021\u1001\u103b\u1000\u103a\u1021\u101c\u1000\u103a\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b",
+      "Win\u2019s VPN Inc. \u101e\u100a\u103a Internal Revenue Code \u1015\u102f\u1012\u103a\u1019 501(c)(3) \u1021\u101b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u101d\u1004\u103a\u1004\u103d\u1031\u1001\u103d\u1014\u103a\u1019\u103e \u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a\u101b\u101e\u100a\u103a\u104b \u1021\u1006\u102f\u1036\u1038\u1021\u1016\u103c\u1010\u103a\u1005\u102c\u104f \u101b\u1000\u103a\u1005\u103d\u1032\u1019\u103e\u102c \u1042\u1040\u1042\u1046 \u1001\u102f\u1014\u103e\u1005\u103a \u1007\u1030\u101c\u102d\u102f\u1004\u103a\u101c \u1042\u1041 \u101b\u1000\u103a\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u1021\u1001\u103d\u1014\u103a\u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a \u1005\u1010\u1004\u103a\u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u1037\u103a\u1014\u1031\u1037\u1019\u103e\u102c \u1042\u1040\u1042\u1046 \u1001\u102f\u1014\u103e\u1005\u103a \u1007\u103d\u1014\u103a\u101c \u1041\u1041 \u101b\u1000\u103a\u1016\u103c\u1005\u103a\u101e\u1031\u102c\u1000\u103c\u1031\u102c\u1004\u1037\u103a \u1011\u102d\u102f\u1014\u1031\u1037 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1014\u1031\u102c\u1000\u103a\u1015\u102d\u102f\u1004\u103a\u1038\u1010\u103d\u1004\u103a \u1015\u103c\u102f\u101c\u102f\u1015\u103a\u101e\u1031\u102c \u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1019\u103e\u102f\u101e\u100a\u103a \u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a\u1000\u102c\u101c\u1021\u1010\u103d\u1004\u103a\u1038 \u1000\u103b\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u103a\u104b \u104e\u1004\u103a\u1038\u1000\u102d\u102f \u1015\u102f\u1002\u1039\u1002\u101c\u102d\u1000\u1016\u1031\u102c\u1004\u103a\u1012\u1031\u1038\u101b\u103e\u1004\u103a\u1038\u1021\u1016\u103c\u1005\u103a\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1015\u102f\u1012\u103a\u1019 509(a)(2) \u1021\u101b \u1021\u1019\u103b\u102c\u1038\u1015\u103c\u100a\u103a\u101e\u1030\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1015\u101b\u101f\u102d\u1010\u1021\u1016\u103d\u1032\u1037\u1021\u1016\u103c\u1005\u103a \u1021\u1019\u103b\u102d\u102f\u1038\u1021\u1005\u102c\u1038\u101e\u1010\u103a\u1019\u103e\u1010\u103a\u1011\u102c\u1038\u1015\u103c\u102e\u1038 \u1012\u102e\u1007\u1004\u103a\u1018\u102c \u1043\u1041 \u101b\u1000\u103a \u1005\u102c\u101b\u1004\u103a\u1038\u1000\u102c\u101c\u1000\u102d\u102f \u1021\u101e\u102f\u1036\u1038\u1015\u103c\u102f\u1000\u102c \u1014\u103e\u1005\u103a\u1005\u1009\u103a Form 990 \u1005\u102e\u1038\u101b\u102e\u1038\u1005\u102c\u101b\u1004\u103a\u1038\u1000\u102d\u102f \u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u100a\u103a\u104b \u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1019\u103e\u102f\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1025\u1015\u1012\u1031\u1000 \u1001\u103d\u1004\u1037\u103a\u1015\u103c\u102f\u101e\u100a\u1037\u103a\u1021\u1010\u102d\u102f\u1004\u103a\u1038\u1021\u1010\u102c\u1021\u1011\u102d IRC \u1015\u102f\u1012\u103a\u1019 170 \u1021\u101b \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u1015\u103c\u102e\u1038 \u1015\u102f\u1012\u103a\u1019 2055\u104a 2106 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a 2522 \u1021\u101b \u1021\u1001\u103d\u1014\u103a\u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c \u1021\u1019\u103d\u1031\u1021\u1014\u103e\u1005\u103a\u1019\u103b\u102c\u1038\u104a \u1015\u102d\u102f\u1004\u103a\u1006\u102d\u102f\u1004\u103a\u1019\u103e\u102f\u101c\u103d\u103e\u1032\u1015\u103c\u1031\u102c\u1004\u103a\u1038\u1019\u103e\u102f\u1019\u103b\u102c\u1038 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u101c\u1000\u103a\u1006\u1031\u102c\u1004\u103a\u1019\u103b\u102c\u1038\u1000\u102d\u102f \u101c\u1000\u103a\u1001\u1036\u101b\u101b\u103e\u102d\u101b\u1014\u103a \u1021\u101b\u100a\u103a\u1021\u1001\u103b\u1004\u103a\u1038\u1015\u103c\u100a\u1037\u103a\u1019\u102e\u101e\u100a\u103a\u104b \u1021\u1001\u103d\u1014\u103a\u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a\u1021\u1006\u1004\u1037\u103a\u1021\u1010\u1014\u103a\u1038\u101e\u100a\u103a \u1021\u1016\u103d\u1032\u1037\u1021\u1005\u100a\u103a\u1038\u1014\u103e\u1004\u1037\u103a\u1015\u1010\u103a\u101e\u1000\u103a\u101e\u1031\u102c \u1006\u102f\u1036\u1038\u1016\u103c\u1010\u103a\u1001\u103b\u1000\u103a\u101e\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u104e\u1004\u103a\u1038\u101e\u100a\u103a Win\u2019s VPN \u101d\u1014\u103a\u1006\u1031\u102c\u1004\u103a\u1019\u103e\u102f\u104a \u104e\u1004\u103a\u1038\u104f\u101c\u102f\u1036\u1001\u103c\u102f\u1036\u101b\u1031\u1038 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1005\u103d\u1019\u103a\u1038\u1006\u1031\u102c\u1004\u103a\u101b\u100a\u103a\u1000\u102d\u102f IRS \u1000 \u1005\u1005\u103a\u1006\u1031\u1038\u1001\u103c\u1004\u103a\u1038\u104a \u1021\u1010\u100a\u103a\u1015\u103c\u102f\u1001\u103c\u1004\u103a\u1038 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1011\u1031\u102c\u1000\u103a\u1001\u1036\u1001\u103c\u1004\u103a\u1038 \u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b apps.irs.gov/app/eos \u101b\u103e\u102d IRS Tax Exempt Organization Search \u1010\u103d\u1004\u103a Win\u2019s VPN Inc. \u101f\u1030\u101e\u1031\u102c \u1021\u1016\u103d\u1032\u1037\u1021\u1005\u100a\u103a\u1038\u1021\u1019\u100a\u103a\u1016\u103c\u1004\u1037\u103a \u101b\u103e\u102c\u1016\u103d\u1031\u104d \u1021\u1006\u1004\u1037\u103a\u1021\u1010\u1014\u103a\u1038\u1000\u102d\u102f \u101e\u1004\u103a\u1000\u102d\u102f\u101a\u103a\u1010\u102d\u102f\u1004\u103a \u1005\u1005\u103a\u1006\u1031\u1038\u1015\u102b\u104b \u1019\u1000\u103c\u102c\u101e\u1031\u1038\u1019\u102e\u1000 \u1021\u1010\u100a\u103a\u1015\u103c\u102f\u1001\u1036\u101b\u101e\u1031\u102c \u1021\u1016\u103d\u1032\u1037\u1021\u1005\u100a\u103a\u1038\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1011\u102d\u102f\u1014\u1031\u101b\u102c\u1010\u103d\u1004\u103a \u1015\u1031\u102b\u103a\u101c\u102c\u101b\u1014\u103a \u1021\u1001\u103b\u102d\u1014\u103a\u101a\u1030\u101b\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1000\u103c\u1031\u102c\u1004\u1037\u103a \u1005\u102c\u101b\u1004\u103a\u1038\u1010\u103d\u1004\u103a \u1019\u1010\u103d\u1031\u1037\u101b\u101e\u1031\u1038\u1001\u103c\u1004\u103a\u1038\u101e\u100a\u103a \u101e\u1010\u102d\u1015\u1031\u1038\u101c\u1000\u1039\u1001\u100f\u102c\u1011\u1000\u103a \u1019\u103b\u103e\u1031\u102c\u103a\u101c\u1004\u1037\u103a\u1011\u102c\u1038\u101e\u1004\u1037\u103a\u101e\u100a\u1037\u103a\u1021\u101b\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u101b\u1004\u103a\u1038\u1019\u103c\u1005\u103a\u1019\u103b\u102c\u1038- IRS Publication 526 \u1014\u103e\u1004\u1037\u103a 1771\u104a IRS Topic no. 506 \u1014\u103e\u1004\u1037\u103a Rev. Proc. 2025-32\u104b \u1012\u1031\u102b\u103a\u101c\u102c\u1015\u1019\u102c\u100f\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a\u1021\u1010\u103d\u1000\u103a\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u1014\u103e\u1005\u103a\u1005\u1009\u103a\u1015\u103c\u1031\u102c\u1004\u103a\u1038\u101c\u1032\u101e\u100a\u103a\u104b \u1042\u1040\u1042\u1046 \u1001\u102f\u1014\u103e\u1005\u103a \u1029\u1002\u102f\u1010\u103a\u101c \u1043 \u101b\u1000\u103a\u1010\u103d\u1004\u103a \u1011\u102f\u1010\u103a\u1015\u103c\u1014\u103a\u101e\u100a\u103a\u104b",
+      "Win\u2019s VPN Inc. \u101e\u102d\u102f\u1037 \u1021\u101c\u103e\u1030\u1004\u103d\u1031\u1015\u1031\u1038\u101b\u1014\u103a \u1005\u1009\u103a\u1038\u1005\u102c\u1038\u1015\u1031\u1038\u101e\u100a\u1037\u103a\u1021\u1010\u103d\u1000\u103a \u1000\u103b\u1031\u1038\u1007\u1030\u1038\u1010\u1004\u103a\u1015\u102b\u101e\u100a\u103a\u104b \u1019\u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1019\u102e \u1015\u101b\u101f\u102d\u1010\u1021\u101c\u103e\u1030 \u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a (charitable deduction) \u101e\u100a\u103a \u1021\u1018\u101a\u103a\u1021\u101b\u102c \u101c\u102f\u1015\u103a\u1006\u1031\u102c\u1004\u103a\u1015\u1031\u1038\u101e\u100a\u103a\u104a \u1021\u1018\u101a\u103a\u1021\u101b\u102c \u1019\u101c\u102f\u1015\u103a\u1006\u1031\u102c\u1004\u103a\u1015\u1031\u1038\u101e\u100a\u103a\u1000\u102d\u102f \u1021\u1010\u102d\u1021\u1000\u103b \u101e\u102d\u1005\u1031\u101c\u102d\u102f\u1015\u102b\u101e\u100a\u103a\u104b",
+      "and we will issue it. Separately, a deduction generally cannot exceed 60% of adjusted gross income; anything above the ceiling carries forward for up to five years. See",
+      "gift from a couple with $300,000 of income who itemize loses $1,500 to the new floor, leaving $8,500 deductible, about $2,040 at 24%. A",
+      "gift from a single filer with $600,000 of income who itemizes loses $3,000 to the floor, leaving $97,000, about $33,950 at 35%. In every case the gift still costs what it costs.",
+      "gift from a single filer with roughly $60,000 of income who takes the standard deduction reduces taxable income by the full $100, worth about $12 less federal tax at a 12% marginal rate. A",
+      "irs.gov",
+      "support@winsvpn.org",
+      "winsvpn.org",
+      "\u00b7 501(c)(3) \u1021\u1001\u103d\u1014\u103a\u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a\u101b \u1021\u1019\u103b\u102c\u1038\u1015\u103c\u100a\u103a\u101e\u1030\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1015\u101b\u101f\u102d\u1010\u1021\u1016\u103d\u1032\u1037",
+      "\u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a\u1019\u103b\u102c\u1038\u104a \u101e\u101a\u103a\u1006\u1031\u102c\u1004\u103a\u101e\u102f\u1036\u1038\u1001\u103d\u1004\u1037\u103a\u1014\u103e\u1004\u1037\u103a \u101e\u1004\u103a\u101c\u102d\u102f\u1021\u1015\u103a\u101e\u1031\u102c \u101c\u1000\u103a\u1001\u1036\u1016\u103c\u1010\u103a\u1015\u102d\u102f\u1004\u103a\u1038",
+      "\u1010\u1005\u103a\u1026\u1038\u1010\u100a\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u104a AGI $\u1046\u1040\u1040,\u1040\u1040\u1040\u104a \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u101e\u100a\u103a\u104b \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f- $\u1049\u1047,\u1040\u1040\u1040 (AGI \u104f \u1040.\u1045% \u1021\u1001\u103c\u1031\u1001\u1036\u1019\u103b\u1009\u103a\u1038\u1000 $\u1043,\u1040\u1040\u1040 \u1016\u101a\u103a\u1011\u102f\u1010\u103a\u101e\u100a\u103a)\u104b \u101a\u1030\u1006\u1011\u102c\u1038\u101e\u1031\u102c \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038- \u1043\u1045%\u104b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1021\u1001\u103d\u1014\u103a \u101c\u103b\u103e\u1031\u102c\u1037\u1001\u103b\u1019\u103e\u102f- \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1043\u1043,\u1049\u1045\u1040\u104b \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 \u1021\u101e\u102c\u1038\u1010\u1004\u103a\u1000\u102f\u1014\u103a\u1000\u103b\u1005\u101b\u102d\u1010\u103a- $\u1046\u1046,\u1040\u1045\u1040\u104b",
+      "\u1010\u1005\u103a\u1026\u1038\u1010\u100a\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u104a AGI \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1046\u1040,\u1040\u1040\u1040\u104a \u1005\u1036\u1014\u102f\u1010\u103a\u101a\u1030\u1004\u103d\u1031\u1000\u102d\u102f \u1021\u101e\u102f\u1036\u1038\u1015\u103c\u102f\u101e\u100a\u103a\u104b \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f- $\u1041\u1040\u1040 (\u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1019\u1014\u102f\u1010\u103a\u101a\u1030\u101e\u1030\u1019\u103b\u102c\u1038\u1021\u1010\u103d\u1000\u103a $\u1041,\u1040\u1040\u1040 \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a\u1021\u1010\u103d\u1004\u103a\u1038)\u104b \u101a\u1030\u1006\u1011\u102c\u1038\u101e\u1031\u102c \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038- \u1041\u1042%\u104b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1021\u1001\u103d\u1014\u103a \u101c\u103b\u103e\u1031\u102c\u1037\u1001\u103b\u1019\u103e\u102f- \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1041\u1042\u104b \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 \u1021\u101e\u102c\u1038\u1010\u1004\u103a\u1000\u102f\u1014\u103a\u1000\u103b\u1005\u101b\u102d\u1010\u103a- $\u1048\u1048\u104b",
+      "\u1010\u1005\u103a\u1026\u1038\u1010\u100a\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u104a AGI \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1049\u1045,\u1040\u1040\u1040\u104a \u1005\u1036\u1014\u102f\u1010\u103a\u101a\u1030\u1004\u103d\u1031\u1000\u102d\u102f \u1021\u101e\u102f\u1036\u1038\u1015\u103c\u102f\u101e\u100a\u103a\u104b \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f- $\u1041,\u1040\u1040\u1040 (\u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1019\u1014\u102f\u1010\u103a\u101a\u1030\u101e\u1030 \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a \u1021\u1010\u102d\u1021\u1000\u103b\u1015\u103c\u100a\u1037\u103a\u1019\u102e\u101e\u100a\u103a)\u104b \u101a\u1030\u1006\u1011\u102c\u1038\u101e\u1031\u102c \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038- \u1042\u1042%\u104b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1021\u1001\u103d\u1014\u103a \u101c\u103b\u103e\u1031\u102c\u1037\u1001\u103b\u1019\u103e\u102f- \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1042\u1042\u1040\u104b \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 \u1021\u101e\u102c\u1038\u1010\u1004\u103a\u1000\u102f\u1014\u103a\u1000\u103b\u1005\u101b\u102d\u1010\u103a- $\u1047\u1048\u1040\u104b",
+      "\u1010\u103d\u1000\u103a\u1001\u103b\u1000\u103a\u1015\u102f\u1036\u1000\u102d\u102f \u101b\u103e\u1004\u103a\u1038\u101c\u1004\u103a\u1038\u1001\u103b\u1000\u103a",
+      "\u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a\u101b\u103e\u102d\u1019\u101b\u103e\u102d\u1019\u103e\u102c \u101e\u1004\u1037\u103a\u104f\u1000\u102d\u102f\u101a\u103a\u1015\u102d\u102f\u1004\u103a\u1021\u1001\u103c\u1031\u1021\u1014\u1031\u1019\u103b\u102c\u1038\u1015\u1031\u102b\u103a \u1019\u1030\u1010\u100a\u103a\u101e\u100a\u103a- \u101e\u1004\u1037\u103a\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u100a\u1037\u103a\u1021\u1006\u1004\u1037\u103a\u1021\u1010\u1014\u103a\u1038\u104a \u101e\u1004\u1037\u103a\u104f \u1015\u103c\u102f\u1015\u103c\u1004\u103a\u1011\u102c\u1038\u101e\u1031\u102c \u1005\u102f\u1005\u102f\u1015\u1031\u102b\u1004\u103a\u1038\u101d\u1004\u103a\u1004\u103d\u1031\u104a \u101e\u1004\u103a\u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103c\u1004\u103a\u1038 \u101b\u103e\u102d\u1019\u101b\u103e\u102d\u104a \u101e\u1004\u103a\u1021\u1001\u103c\u102c\u1038\u1019\u100a\u103a\u101e\u100a\u1037\u103a\u1021\u101b\u102c\u1019\u103b\u102c\u1038 \u1014\u102f\u1010\u103a\u101a\u1030\u1001\u1032\u1037\u101e\u100a\u103a\u104a \u1011\u102d\u102f\u1014\u103e\u1005\u103a\u1010\u103d\u1004\u103a \u1021\u1001\u103c\u102c\u1038\u1019\u100a\u103a\u101e\u100a\u1037\u103a\u1021\u101c\u103e\u1030\u1019\u103b\u102c\u1038 \u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1001\u1032\u1037\u101e\u100a\u103a\u1010\u102d\u102f\u1037 \u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u1015\u101b\u101f\u102d\u1010\u1021\u101c\u103e\u1030\u1019\u103b\u102c\u1038\u1014\u103e\u1004\u1037\u103a\u1015\u1010\u103a\u101e\u1000\u103a\u101e\u1031\u102c \u1015\u103c\u100a\u103a\u1014\u101a\u103a\u1014\u103e\u1004\u1037\u103a \u1012\u1031\u101e\u1014\u1039\u1010\u101b \u1006\u1000\u103a\u1006\u1036\u1019\u103e\u102f\u101e\u100a\u103a \u1015\u103c\u100a\u103a\u1014\u101a\u103a\u1021\u101c\u102d\u102f\u1000\u103a \u1000\u103d\u1032\u1015\u103c\u102c\u1038\u1015\u103c\u102e\u1038 \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1005\u100a\u103a\u1038\u1019\u103b\u1009\u103a\u1038\u1019\u103b\u102c\u1038\u1021\u1010\u102d\u102f\u1004\u103a\u1038 \u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b Win\u2019s VPN Inc. \u101e\u100a\u103a \u1021\u1001\u103d\u1014\u103a\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1021\u1000\u103c\u1036\u1015\u1031\u1038\u1001\u103c\u1004\u103a\u1038 \u1019\u1015\u103c\u102f\u1018\u1032 \u1021\u101c\u103e\u1030\u1010\u1005\u103a\u1001\u102f\u101e\u100a\u103a \u101e\u1004\u1037\u103a\u1021\u1010\u103d\u1000\u103a \u1019\u100a\u103a\u1019\u103b\u103e\u1010\u1014\u103a\u1016\u102d\u102f\u1038\u101b\u103e\u102d\u1019\u100a\u103a\u1000\u102d\u102f \u1015\u103c\u1031\u102c\u1015\u103c\u1014\u102d\u102f\u1004\u103a\u1001\u103c\u1004\u103a\u1038 \u1019\u101b\u103e\u102d\u1015\u102b\u104b \u1021\u1001\u103d\u1014\u103a\u1015\u100a\u102c\u101b\u103e\u1004\u103a\u1010\u1005\u103a\u1026\u1038\u1000\u102d\u102f \u1019\u1031\u1038\u1019\u103c\u1014\u103a\u1038\u1015\u103c\u102e\u1038 irs.gov \u1010\u103d\u1004\u103a \u1005\u100a\u103a\u1038\u1019\u103b\u1009\u103a\u1038\u1019\u103b\u102c\u1038\u1000\u102d\u102f \u101e\u1004\u103a\u1000\u102d\u102f\u101a\u103a\u1010\u102d\u102f\u1004\u103a \u1005\u1005\u103a\u1006\u1031\u1038\u1015\u102b\u104b",
+      "\u1015\u101b\u101f\u102d\u1010\u1021\u101c\u103e\u1030 \u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a\u101e\u100a\u103a \u101e\u1004\u103a\u1021\u1001\u103d\u1014\u103a\u1000\u1031\u102c\u1000\u103a\u1001\u1036\u101b\u1019\u100a\u1037\u103a \u101d\u1004\u103a\u1004\u103d\u1031\u1000\u102d\u102f \u101c\u103b\u103e\u1031\u102c\u1037\u1001\u103b\u1015\u1031\u1038\u101e\u100a\u103a\u104b \u104e\u1004\u103a\u1038\u101e\u100a\u103a \u1021\u1001\u103d\u1014\u103a\u1001\u101b\u1000\u103a\u1012\u1005\u103a (credit) \u1019\u101f\u102f\u1010\u103a\u101e\u1000\u1032\u1037\u101e\u102d\u102f\u1037 \u101e\u1004\u1037\u103a\u104f\u1021\u1001\u103d\u1014\u103a\u1000\u1031\u102c\u1000\u103a\u1001\u1036\u1004\u103d\u1031\u1000\u102d\u102f \u1010\u1005\u103a\u1012\u1031\u102b\u103a\u101c\u102c\u101c\u103e\u1030\u101c\u103b\u103e\u1004\u103a \u1010\u1005\u103a\u1012\u1031\u102b\u103a\u101c\u102c\u1005\u102e \u101c\u103b\u103e\u1031\u102c\u1037\u1015\u1031\u1038\u1001\u103c\u1004\u103a\u1038\u101c\u100a\u103a\u1038 \u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038 \u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u1021\u1019\u103b\u102c\u1038\u1005\u102f\u101e\u100a\u103a \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038 \u1019\u1014\u102f\u1010\u103a\u101a\u1030\u1000\u103c\u101e\u100a\u1037\u103a\u1021\u1000\u103c\u1031\u102c\u1004\u103a\u1038\u1019\u103e\u102c \u1042\u1040\u1042\u1046 \u1001\u102f\u1014\u103e\u1005\u103a \u1005\u1036\u1014\u102f\u1010\u103a\u101a\u1030\u1004\u103d\u1031 (standard deduction) (\u1010\u1005\u103a\u1026\u1038\u1010\u100a\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u1021\u1010\u103d\u1000\u103a $\u1041\u1046,\u1041\u1040\u1040\u104a \u1021\u102d\u1019\u103a\u1011\u1031\u102c\u1004\u103a\u1016\u1000\u103a\u1014\u103e\u1004\u1037\u103a\u1021\u1010\u1030 \u1005\u102f\u1015\u1031\u102b\u1004\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u1021\u1010\u103d\u1000\u103a $\u1043\u1042,\u1042\u1040\u1040\u104a \u1021\u102d\u1019\u103a\u1011\u1031\u102c\u1004\u103a\u1026\u1038\u1005\u102e\u1038\u1021\u1010\u103d\u1000\u103a $\u1042\u1044,\u1041\u1045\u1040) \u101e\u100a\u103a \u104e\u1004\u103a\u1038\u1010\u102d\u102f\u1037 \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u1019\u100a\u1037\u103a \u1021\u101b\u102c\u1021\u102c\u1038\u101c\u102f\u1036\u1038 \u1015\u1031\u102b\u1004\u103a\u1038\u1011\u102c\u1038\u101e\u100a\u103a\u1011\u1000\u103a \u1015\u102d\u102f\u1019\u102d\u102f\u1019\u103b\u102c\u1038\u1015\u103c\u102c\u1038\u101e\u1031\u102c\u1000\u103c\u1031\u102c\u1004\u1037\u103a\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u1011\u102d\u102f\u1021\u1001\u103b\u1000\u103a\u101e\u100a\u103a \u101e\u1004\u103a\u1014\u103e\u1004\u1037\u103a \u1000\u102d\u102f\u1000\u103a\u100a\u102e\u1015\u102b\u1000 \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u101e\u1031\u102c \u1015\u101b\u101f\u102d\u1010\u1021\u101c\u103e\u1030\u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a\u101e\u100a\u103a \u101e\u1004\u1037\u103a\u1021\u1010\u103d\u1000\u103a \u101c\u102f\u1036\u1038\u101d\u1010\u1014\u103a\u1016\u102d\u102f\u1038\u1019\u101b\u103e\u102d\u1015\u102b\u104b",
+      "\u1019\u103c\u1014\u103a\u1019\u102c",
+      "\u101a\u1030\u1006\u1001\u103b\u1000\u103a\u1010\u102d\u102f\u1004\u103a\u1038\u1000\u102d\u102f \u101b\u1031\u1038\u101e\u102c\u1038\u1016\u1031\u102c\u103a\u1015\u103c\u1011\u102c\u1038\u101e\u1031\u102c \u1025\u1015\u1019\u102c\u101c\u1031\u1038\u1001\u102f",
+      "\u101b\u102d\u102f\u101e\u1031\u101c\u1031\u1038\u1005\u102c\u1038\u1005\u103d\u102c\u1016\u103c\u1004\u1037\u103a\u104a",
+      "\u101c\u1031\u1038\u1005\u102c\u1038\u1021\u1015\u103a\u1015\u102b\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u101b\u103e\u1004\u103a\u1016\u103c\u1005\u103a\u101c\u102d\u102f\u101e\u1030\u104a",
+      "\u101e\u1004\u1037\u103a\u104f\u101d\u1004\u103a\u1004\u103d\u1031\u1015\u1031\u102b\u103a\u1021\u1001\u103c\u1031\u1001\u1036\u101e\u1031\u102c \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a\u104b",
+      "\u101e\u1004\u103a\u101e\u1000\u103a\u101e\u102c\u1019\u100a\u1037\u103a \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038\u1015\u1019\u102c\u100f\u1019\u103e\u102c \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f\u1000\u102d\u102f \u101e\u1004\u1037\u103a\u104f \u1011\u102d\u1015\u103a\u1006\u102f\u1036\u1038\u101d\u1004\u103a\u1004\u103d\u1031\u1012\u1031\u102b\u103a\u101c\u102c\u1021\u1015\u1031\u102b\u103a \u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u1037\u103a \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038 (marginal tax rate) \u1016\u103c\u1004\u1037\u103a \u1019\u103c\u103e\u1031\u102c\u1000\u103a\u101b\u1001\u103c\u1004\u103a\u1038\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u1011\u102d\u102f\u1019\u103c\u103e\u1031\u102c\u1000\u103a\u1001\u103c\u1004\u103a\u1038\u1019\u1015\u103c\u102f\u1019\u102e \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f\u1000\u102d\u102f \u101e\u1010\u103a\u1019\u103e\u1010\u103a\u1015\u1031\u1038\u101e\u100a\u1037\u103a \u1042\u1040\u1042\u1046 \u1005\u100a\u103a\u1038\u1019\u103b\u1009\u103a\u1038 \u1014\u103e\u1005\u103a\u1001\u102f\u101b\u103e\u102d\u101e\u100a\u103a\u104b \u101e\u1004\u103a\u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u1015\u102b\u1000 \u101e\u1004\u1037\u103a\u104f \u1015\u103c\u102f\u1015\u103c\u1004\u103a\u1011\u102c\u1038\u101e\u1031\u102c \u1005\u102f\u1005\u102f\u1015\u1031\u102b\u1004\u103a\u1038\u101d\u1004\u103a\u1004\u103d\u1031 (AGI) \u104f \u1040.\u1045% \u1011\u1000\u103a\u1015\u102d\u102f\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u1015\u1019\u102c\u100f\u1000\u102d\u102f\u101e\u102c \u1011\u100a\u1037\u103a\u1010\u103d\u1000\u103a\u101b\u101e\u100a\u103a\u104b \u101e\u1004\u103a\u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038 \u1019\u1014\u102f\u1010\u103a\u101a\u1030\u1015\u102b\u1000 \u1021\u1011\u1000\u103a\u1016\u1031\u102c\u103a\u1015\u103c\u1015\u102b $\u1041,\u1040\u1040\u1040 \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a $\u1042,\u1040\u1040\u1040 \u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1001\u103b\u1000\u103a \u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u103a\u104b $\u1041,\u1040\u1040\u1040 \u1021\u101c\u103e\u1030\u101e\u100a\u103a $\u1041,\u1040\u1040\u1040 \u1021\u1016\u103c\u1005\u103a \u1019\u100a\u103a\u101e\u100a\u1037\u103a\u1021\u1001\u102b\u1019\u103b\u103e \u1015\u103c\u1014\u103a\u1019\u101b\u1015\u102b\u104b",
+      "\u1021\u1001\u103c\u102c\u1038\u1018\u102c\u101e\u102c\u1005\u1000\u102c\u1038\u1019\u1030\u1010\u102d\u102f\u1004\u103a\u1038\u101e\u100a\u103a \u1021\u1006\u1004\u103a\u1015\u103c\u1031\u1005\u1031\u101b\u1014\u103a \u1015\u103c\u1014\u103a\u1006\u102d\u102f\u1011\u102c\u1038\u101e\u1031\u102c \u1018\u102c\u101e\u102c\u1015\u103c\u1014\u103a\u1019\u103b\u103e\u101e\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u1019\u1030\u1014\u103e\u1005\u103a\u1001\u102f \u1000\u103d\u1032\u101c\u103d\u1032\u1015\u102b\u1000 \u1021\u1004\u103a\u1039\u1002\u101c\u102d\u1015\u103a\u1019\u1030\u1000 \u1021\u102c\u100f\u102c\u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u100a\u103a\u104b",
+      "\u1021\u1001\u103d\u1014\u103a\u1000\u102c\u101c\u1010\u103d\u1004\u103a \u1021\u101c\u103e\u1030\u1010\u1005\u103a\u1001\u102f\u104f \u1010\u1014\u103a\u1016\u102d\u102f\u1038",
+      "\u1021\u1005\u102d\u102f\u1038\u101b\u1000 \u1004\u103d\u1031\u1000\u102d\u102f \u1015\u103c\u1014\u103a\u1015\u1031\u1038\u1019\u100a\u103a\u101f\u102f \u1019\u103b\u103e\u1031\u102c\u103a\u101c\u1004\u1037\u103a\u104d\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u1021\u1016\u103d\u1032\u1037\u1021\u1005\u100a\u103a\u1038\u104f \u101c\u102f\u1015\u103a\u1004\u1014\u103a\u1038\u1019\u103b\u102c\u1038 \u1006\u1000\u103a\u101c\u1000\u103a\u101b\u1015\u103a\u1010\u100a\u103a\u1014\u102d\u102f\u1004\u103a\u101b\u1014\u103a \u101b\u1014\u103a\u1015\u102f\u1036\u1004\u103d\u1031\u1015\u1031\u1038\u101c\u102d\u102f\u101e\u100a\u1037\u103a \u1005\u102d\u1010\u103a\u1016\u103c\u1004\u1037\u103a\u101e\u102c \u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u1015\u102b\u104b",
+      "\u1021\u1011\u1000\u103a\u1015\u102b\u1000\u102d\u1014\u103a\u1038\u1002\u100f\u1014\u103a\u1038\u1010\u102d\u102f\u1004\u103a\u1038\u101e\u100a\u103a \u1019\u102d\u1019\u102d\u1021\u1010\u1014\u103a\u1038\u101b\u103e\u102d \u101a\u1030\u1006\u1001\u103b\u1000\u103a\u1019\u103b\u102c\u1038\u1015\u1031\u102b\u103a\u1010\u103d\u1004\u103a \u1021\u1001\u103c\u1031\u1001\u1036\u1011\u102c\u1038\u101e\u1031\u102c \u1025\u1015\u1019\u102c\u1019\u103b\u103e\u101e\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u104e\u1004\u103a\u1038\u101e\u100a\u103a \u101e\u1004\u1037\u103a\u1014\u103e\u1004\u1037\u103a\u1015\u1010\u103a\u101e\u1000\u103a\u101e\u1031\u102c \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038\u1001\u103b\u1000\u103a\u1019\u101f\u102f\u1010\u103a\u101e\u1000\u1032\u1037\u101e\u102d\u102f\u1037 \u101e\u1004\u103a\u1004\u103d\u1031\u1010\u1005\u103a\u1005\u102f\u1036\u1010\u1005\u103a\u101b\u102c \u101e\u1000\u103a\u101e\u102c\u1019\u100a\u103a\u101f\u1030\u101e\u1031\u102c \u1000\u1010\u102d\u101c\u100a\u103a\u1038 \u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b \u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u100a\u1037\u103a\u1021\u1006\u1004\u1037\u103a\u1021\u1010\u1014\u103a\u1038\u104a \u101d\u1004\u103a\u1004\u103d\u1031\u104a \u1021\u101c\u103e\u1030\u101b\u103e\u1004\u103a\u1000 \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103c\u1004\u103a\u1038 \u101b\u103e\u102d\u1019\u101b\u103e\u102d \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038\u1010\u102d\u102f\u1037\u1000\u102d\u102f \u1015\u103c\u1031\u102c\u1004\u103a\u1038\u101c\u1032\u101c\u102d\u102f\u1000\u103a\u1015\u102b\u1000 \u101b\u101c\u1012\u103a\u101c\u100a\u103a\u1038 \u1015\u103c\u1031\u102c\u1004\u103a\u1038\u101c\u1032\u101e\u103d\u102c\u1038\u101e\u100a\u103a\u104b \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038\u1019\u103b\u102c\u1038\u1019\u103e\u102c \u1016\u1031\u102c\u103a\u1015\u103c\u1011\u102c\u1038\u101e\u1031\u102c \u101d\u1004\u103a\u1004\u103d\u1031\u1019\u103b\u102c\u1038\u1019\u103e \u1010\u103d\u1000\u103a\u1001\u103b\u1000\u103a\u1011\u102c\u1038\u1001\u103c\u1004\u103a\u1038\u1019\u101f\u102f\u1010\u103a\u1018\u1032 \u101a\u1030\u1006\u1001\u103b\u1000\u103a\u1019\u103b\u103e\u101e\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u1021\u101c\u103e\u1030\u1015\u1019\u102c\u100f\u101c\u1031\u1038\u1019\u103b\u102d\u102f\u1038\u101e\u100a\u103a \u1000\u103b\u103d\u1014\u103a\u102f\u1015\u103a\u1010\u102d\u102f\u1037 \u1010\u100a\u103a\u1006\u1031\u102c\u1000\u103a\u101b\u1014\u103a \u1005\u102e\u1005\u1009\u103a\u1011\u102c\u1038\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u101b\u103e\u1004\u103a\u1021\u101e\u102d\u1021\u1019\u103e\u1010\u103a\u1015\u103c\u102f\u1021\u1006\u1004\u1037\u103a\u1019\u103b\u102c\u1038 (Bronze $\u1041\u1040\u1040\u104a Silver $\u1041,\u1040\u1040\u1040\u104a Gold $\u1041\u1040,\u1040\u1040\u1040\u104a Diamond $\u1041\u1040\u1040,\u1040\u1040\u1040) \u1014\u103e\u1004\u1037\u103a \u1000\u102d\u102f\u1000\u103a\u100a\u102e\u101e\u1031\u102c\u103a\u101c\u100a\u103a\u1038 \u1011\u102d\u102f\u1021\u1006\u1004\u1037\u103a\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1005\u102e\u1005\u1009\u103a\u1006\u1032\u1019\u103b\u103e\u101e\u102c\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b \u101a\u1014\u1031\u1037\u1021\u1001\u103b\u102d\u1014\u103a\u1010\u103d\u1004\u103a \u1010\u1036\u1006\u102d\u1015\u103a\u104a \u101c\u1000\u103a\u1019\u103e\u1010\u103a \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1021\u1006\u1004\u1037\u103a\u1010\u1005\u103a\u1005\u102f\u1036\u1010\u1005\u103a\u101b\u102c \u1019\u101b\u103e\u102d\u101e\u1031\u1038\u1018\u1032 \u101a\u1001\u102f\u101c\u103e\u1030\u1012\u102b\u1014\u103a\u1038\u101e\u1031\u102c \u1021\u101c\u103e\u1030\u101e\u100a\u103a \u104e\u1004\u103a\u1038\u1010\u102d\u102f\u1037\u1000\u102d\u102f \u101b\u101b\u103e\u102d\u1005\u1031\u1019\u100a\u103a\u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b",
+      "\u1021\u101c\u103e\u1030\u101b\u103e\u1004\u103a\u1016\u103c\u1005\u103a\u101c\u102d\u102f\u101e\u1030\u1019\u103b\u102c\u1038\u1021\u1010\u103d\u1000\u103a \u00b7 \u1021\u1011\u103d\u1031\u1011\u103d\u1031\u1021\u1001\u103b\u1000\u103a\u1021\u101c\u1000\u103a\u101e\u102c\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u1021\u1001\u103d\u1014\u103a\u1006\u102d\u102f\u1004\u103a\u101b\u102c \u1021\u1000\u103c\u1036\u1015\u1031\u1038\u1001\u103b\u1000\u103a\u1019\u101f\u102f\u1010\u103a\u1015\u102b",
+      "\u1021\u102d\u1019\u103a\u1011\u1031\u102c\u1004\u103a\u1016\u1000\u103a\u1014\u103e\u1004\u1037\u103a\u1021\u1010\u1030 \u1005\u102f\u1015\u1031\u102b\u1004\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u104a AGI $\u1043\u1040\u1040,\u1040\u1040\u1040\u104a \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u101e\u100a\u103a\u104b \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u102c\u1015\u1019\u102c\u100f- $\u1048,\u1045\u1040\u1040 (AGI \u104f \u1040.\u1045% \u1021\u1001\u103c\u1031\u1001\u1036\u1019\u103b\u1009\u103a\u1038\u1000 $\u1041,\u1045\u1040\u1040 \u1016\u101a\u103a\u1011\u102f\u1010\u103a\u101e\u100a\u103a)\u104b \u101a\u1030\u1006\u1011\u102c\u1038\u101e\u1031\u102c \u1018\u1031\u1038\u1014\u103e\u102f\u1014\u103a\u1038- \u1042\u1044%\u104b \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1021\u1001\u103d\u1014\u103a \u101c\u103b\u103e\u1031\u102c\u1037\u1001\u103b\u1019\u103e\u102f- \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 $\u1042,\u1040\u1044\u1040\u104b \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038 \u1021\u101e\u102c\u1038\u1010\u1004\u103a\u1000\u102f\u1014\u103a\u1000\u103b\u1005\u101b\u102d\u1010\u103a- $\u1047,\u1049\u1046\u1040\u104b",
+      "\u1021\u1031\u102c\u1000\u103a\u1016\u1031\u102c\u103a\u1015\u103c\u1015\u102b\u1021\u1001\u103b\u1000\u103a\u1019\u103b\u102c\u1038\u101e\u100a\u103a \u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a\u1021\u1010\u103d\u1000\u103a \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1025\u1015\u1012\u1031\u1000\u102d\u102f \u101b\u102d\u102f\u1038\u101b\u103e\u1004\u103a\u1038\u101e\u1031\u102c \u1005\u1000\u102c\u1038\u101c\u102f\u1036\u1038\u1019\u103b\u102c\u1038\u1016\u103c\u1004\u1037\u103a \u101b\u103e\u1004\u103a\u1038\u101c\u1004\u103a\u1038\u1011\u102c\u1038\u1001\u103c\u1004\u103a\u1038\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u1010\u103d\u1000\u103a\u1001\u103b\u1000\u103a\u1015\u103c\u1011\u102c\u1038\u101e\u1031\u102c \u1025\u1015\u1019\u102c\u1019\u103b\u102c\u1038 \u1015\u102b\u101d\u1004\u103a\u101e\u100a\u103a\u104b \u1024\u101e\u100a\u103a\u1019\u103e\u102c \u1021\u1011\u103d\u1031\u1011\u103d\u1031\u1021\u1001\u103b\u1000\u103a\u1021\u101c\u1000\u103a\u101e\u102c\u1016\u103c\u1005\u103a\u1015\u103c\u102e\u1038 \u101e\u1004\u1037\u103a\u104f\u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038\u1014\u103e\u1004\u1037\u103a \u1015\u1010\u103a\u101e\u1000\u103a\u101e\u1031\u102c \u1021\u1000\u103c\u1036\u1015\u1031\u1038\u1001\u103b\u1000\u103a\u1019\u101f\u102f\u1010\u103a\u101e\u1000\u1032\u1037\u101e\u102d\u102f\u1037 \u1021\u101c\u103e\u1030\u1010\u1005\u103a\u1001\u102f\u1001\u102f\u101e\u100a\u103a \u101e\u1004\u1037\u103a\u1021\u1010\u103d\u1000\u103a \u1019\u100a\u103a\u1019\u103b\u103e\u1010\u1014\u103a\u1016\u102d\u102f\u1038\u101b\u103e\u102d\u1019\u100a\u103a\u1006\u102d\u102f\u101e\u100a\u1037\u103a \u1001\u1014\u1037\u103a\u1019\u103e\u1014\u103a\u1038\u1001\u103b\u1000\u103a\u101c\u100a\u103a\u1038 \u1019\u101f\u102f\u1010\u103a\u1015\u102b\u104b",
+      "\u1024\u1005\u102c\u1000 \u101e\u1004\u1037\u103a\u1021\u102c\u1038 \u1019\u1015\u103c\u1031\u102c\u1014\u102d\u102f\u1004\u103a\u101e\u100a\u1037\u103a\u1021\u101b\u102c\u1019\u103b\u102c\u1038",
+      "\u1024\u1005\u102c\u104f \u1021\u1004\u103a\u1039\u1002\u101c\u102d\u1015\u103a\u1019\u1030\u101e\u100a\u103a \u1021\u102c\u100f\u102c\u101e\u1000\u103a\u101b\u1031\u102c\u1000\u103a\u101e\u1031\u102c \u1019\u1030\u101b\u1004\u103a\u1038\u1005\u102c\u101e\u102c\u1038\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b",
+      "\u1026\u1038\u1005\u103d\u102c\u1016\u1010\u103a\u1015\u102b- \u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u1021\u1019\u103b\u102c\u1038\u1005\u102f\u101e\u100a\u103a \u1015\u101b\u101f\u102d\u1010\u1021\u101c\u103e\u1030\u1021\u1010\u103d\u1000\u103a \u1010\u1005\u103a\u1001\u102f\u1001\u103b\u1004\u103a\u1038\u1014\u102f\u1010\u103a\u101a\u1030\u1001\u103d\u1004\u1037\u103a (itemized deduction) \u1019\u101b\u101b\u103e\u102d\u1015\u102b",
+      "\u1042\u1040\u1042\u1046 \u1001\u102f\u1014\u103e\u1005\u103a \u1007\u103d\u1014\u103a\u101c \u1041\u1041 \u101b\u1000\u103a\u1019\u103e \u1005\u104d \u1021\u1001\u103d\u1014\u103a\u1000\u1004\u103a\u1038\u101c\u103d\u1010\u103a\u1001\u103d\u1004\u1037\u103a\u101b\u101e\u100a\u103a \u00b7 \u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a",
+      "\u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a\u1019\u103e \u1005\u1010\u1004\u103a\u101e\u1031\u102c \u1000\u103b\u1009\u103a\u1038\u1019\u103c\u1031\u102c\u1004\u103a\u1038\u101e\u100a\u1037\u103a \u1001\u103c\u103d\u1004\u103a\u1038\u1001\u103b\u1000\u103a\u1010\u1005\u103a\u1001\u102f\u101b\u103e\u102d\u101e\u100a\u103a- \u1005\u1036\u1014\u102f\u1010\u103a\u101a\u1030\u1004\u103d\u1031\u1000\u102d\u102f \u1021\u101e\u102f\u1036\u1038\u1015\u103c\u102f\u101e\u1031\u102c \u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u101e\u100a\u103a \u1004\u103d\u1031\u101e\u102c\u1038\u1021\u101c\u103e\u1030\u1019\u103b\u102c\u1038\u1021\u1010\u103d\u1000\u103a $\u1041,\u1040\u1040\u1040 \u1021\u1011\u102d\u104a \u101e\u102d\u102f\u1037\u1019\u101f\u102f\u1010\u103a \u1021\u102d\u1019\u103a\u1011\u1031\u102c\u1004\u103a\u1016\u1000\u103a\u1014\u103e\u1004\u1037\u103a\u1021\u1010\u1030 \u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1031\u102c\u1005\u102c\u101b\u1004\u103a\u1038\u1010\u103d\u1004\u103a $\u1042,\u1040\u1040\u1040 \u1021\u1011\u102d \u1014\u102f\u1010\u103a\u101a\u1030\u1014\u102d\u102f\u1004\u103a\u101e\u1031\u1038\u101e\u100a\u103a\u104b \u1011\u102d\u102f\u1000\u1014\u1037\u103a\u101e\u1010\u103a\u1015\u1019\u102c\u100f\u101e\u100a\u103a\u1015\u1004\u103a \u1021\u1000\u103b\u102d\u102f\u1038\u1021\u1019\u103c\u1010\u103a\u1010\u1005\u103a\u1001\u102f\u101c\u102f\u1036\u1038\u1016\u103c\u1005\u103a\u101e\u100a\u103a\u104b",
+      "\u1042\u1040\u1042\u1046 \u1021\u1001\u103d\u1014\u103a\u1014\u103e\u1005\u103a\u1021\u1010\u103d\u1000\u103a \u1015\u103c\u100a\u103a\u1011\u1031\u102c\u1004\u103a\u1005\u102f\u1005\u100a\u103a\u1038\u1019\u103b\u1009\u103a\u1038\u1019\u103b\u102c\u1038\u104a \u1010\u103d\u1000\u103a\u1001\u103b\u1000\u103a\u1015\u103c\u1011\u102c\u1038\u101e\u1031\u102c \u1025\u1015\u1019\u102c\u101c\u1031\u1038\u1001\u102f\u1014\u103e\u1004\u1037\u103a \u1021\u1001\u103d\u1014\u103a\u1005\u102c\u101b\u1004\u103a\u1038\u1010\u1004\u103a\u101e\u103d\u1004\u103a\u1038\u101e\u1030\u1021\u1019\u103b\u102c\u1038\u1005\u102f\u1014\u103e\u1004\u1037\u103a \u101e\u1000\u103a\u1006\u102d\u102f\u1004\u103a\u101e\u100a\u1037\u103a \u101e\u1010\u102d\u1015\u1031\u1038\u1001\u103b\u1000\u103a\u104b"
+    ],
+    "inherited_translate_no_only_keys_sha256": "9605f1d2bfb7f14cb430ac141a42130972592c4ca122f5921056d0ab53aca9b3",
+    "mixed_translate_context_keys": [
+      ".",
+      "Open the full-size letter.",
+      "Proof",
+      "and"
+    ],
+    "mixed_translate_context_keys_sha256": "51239a0894a3782c51cd6c66b72aa777a58bf2b5b279b500d28b2a08f59f8ccb",
+    "runtime_audit_nontranslatable_drift": {
+      "classification": "nontranslatable",
+      "keys": [
+        "Affordable Yet Great Product!",
+        "Win's VPN",
+        "Winn Protocol\u2122",
+        "apps.irs.gov/app/eos"
+      ],
+      "keys_sha256": "2a0556d5d165a3c085336a7706cc976d2a6ff78680007421a60cd3aa28868317"
+    }
+  },
+  "locale_sources": {
+    "schema": "winsvpn-website-locale-source-v1",
+    "document_keys": [
+      "schema",
+      "locale",
+      "english_source_identity_sha256",
+      "instant_locale_inventory_sha256",
+      "translatable_static_keys_sha256",
+      "translations"
+    ],
+    "targets": [
+      {
+        "locale": "my",
+        "path": "localization/website/locales/my.json"
+      },
+      {
+        "locale": "es",
+        "path": "localization/website/locales/es.json"
+      },
+      {
+        "locale": "fr",
+        "path": "localization/website/locales/fr.json"
+      },
+      {
+        "locale": "de",
+        "path": "localization/website/locales/de.json"
+      },
+      {
+        "locale": "pt",
+        "path": "localization/website/locales/pt.json"
+      },
+      {
+        "locale": "zh-CN",
+        "path": "localization/website/locales/zh-CN.json"
+      },
+      {
+        "locale": "zh-TW",
+        "path": "localization/website/locales/zh-TW.json"
+      },
+      {
+        "locale": "ar",
+        "path": "localization/website/locales/ar.json"
+      },
+      {
+        "locale": "hi",
+        "path": "localization/website/locales/hi.json"
+      },
+      {
+        "locale": "bn",
+        "path": "localization/website/locales/bn.json"
+      },
+      {
+        "locale": "ru",
+        "path": "localization/website/locales/ru.json"
+      },
+      {
+        "locale": "ja",
+        "path": "localization/website/locales/ja.json"
+      },
+      {
+        "locale": "ko",
+        "path": "localization/website/locales/ko.json"
+      },
+      {
+        "locale": "id",
+        "path": "localization/website/locales/id.json"
+      },
+      {
+        "locale": "ms",
+        "path": "localization/website/locales/ms.json"
+      },
+      {
+        "locale": "th",
+        "path": "localization/website/locales/th.json"
+      },
+      {
+        "locale": "vi",
+        "path": "localization/website/locales/vi.json"
+      },
+      {
+        "locale": "tr",
+        "path": "localization/website/locales/tr.json"
+      },
+      {
+        "locale": "fa",
+        "path": "localization/website/locales/fa.json"
+      },
+      {
+        "locale": "ur",
+        "path": "localization/website/locales/ur.json"
+      },
+      {
+        "locale": "it",
+        "path": "localization/website/locales/it.json"
+      },
+      {
+        "locale": "nl",
+        "path": "localization/website/locales/nl.json"
+      },
+      {
+        "locale": "pl",
+        "path": "localization/website/locales/pl.json"
+      },
+      {
+        "locale": "uk",
+        "path": "localization/website/locales/uk.json"
+      },
+      {
+        "locale": "ro",
+        "path": "localization/website/locales/ro.json"
+      },
+      {
+        "locale": "el",
+        "path": "localization/website/locales/el.json"
+      },
+      {
+        "locale": "iw",
+        "path": "localization/website/locales/iw.json"
+      },
+      {
+        "locale": "sv",
+        "path": "localization/website/locales/sv.json"
+      },
+      {
+        "locale": "no",
+        "path": "localization/website/locales/no.json"
+      },
+      {
+        "locale": "da",
+        "path": "localization/website/locales/da.json"
+      },
+      {
+        "locale": "fi",
+        "path": "localization/website/locales/fi.json"
+      },
+      {
+        "locale": "cs",
+        "path": "localization/website/locales/cs.json"
+      },
+      {
+        "locale": "hu",
+        "path": "localization/website/locales/hu.json"
+      },
+      {
+        "locale": "sw",
+        "path": "localization/website/locales/sw.json"
+      },
+      {
+        "locale": "am",
+        "path": "localization/website/locales/am.json"
+      },
+      {
+        "locale": "tl",
+        "path": "localization/website/locales/tl.json"
+      },
+      {
+        "locale": "km",
+        "path": "localization/website/locales/km.json"
+      },
+      {
+        "locale": "lo",
+        "path": "localization/website/locales/lo.json"
+      }
+    ],
+    "translation_key_order": "translatable_static_keys",
+    "translation_values": "nonempty-trimmed-non-english-strings",
+    "serialization": {
+      "encoding": "UTF-8",
+      "ensure_ascii": false,
+      "indent": 2,
+      "line_endings": "LF",
+      "trailing_newline": true
+    }
+  },
+  "compiler_output": {
+    "path": "web/i18n/major.json",
+    "locale_order": [
+      "en",
+      "my",
+      "es",
+      "fr",
+      "de",
+      "pt",
+      "zh-CN",
+      "zh-TW",
+      "ar",
+      "hi",
+      "bn",
+      "ru",
+      "ja",
+      "ko",
+      "id",
+      "ms",
+      "th",
+      "vi",
+      "tr",
+      "fa",
+      "ur",
+      "it",
+      "nl",
+      "pl",
+      "uk",
+      "ro",
+      "el",
+      "iw",
+      "sv",
+      "no",
+      "da",
+      "fi",
+      "cs",
+      "hu",
+      "sw",
+      "am",
+      "tl",
+      "km",
+      "lo"
+    ],
+    "mapping_key_order": "translatable_static_keys",
+    "english_values": "source-key-identity",
+    "target_values": "validated-locale-source-values",
+    "serialization": {
+      "encoding": "UTF-8",
+      "ensure_ascii": false,
+      "indent": 2,
+      "line_endings": "LF",
+      "trailing_newline": true
+    },
+    "write_strategy": "single-owner-same-directory-temp-fsync-replace-directory-fsync"
+  }
+}

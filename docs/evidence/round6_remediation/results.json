@@ -1,0 +1,127 @@
+{
+  "date_utc": "2026-09-13T16:13:58.426140+00:00",
+  "base_head": "89be66e75747c0b493583ca9c9efd7787c88a974",
+  "preexisting_dirty_tree": true,
+  "required_commands": {
+    "flutter-analyze": {
+      "command": [
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "exit_code": 0
+    },
+    "flutter-test": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub"
+      ],
+      "exit_code": 0
+    },
+    "deepseek_round2": {
+      "command": [
+        "python3",
+        "server/test_control_plane_deepseek_round2.py"
+      ],
+      "exit_code": 0
+    },
+    "control_round4": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round4.py"
+      ],
+      "exit_code": 0
+    },
+    "control_round5": {
+      "command": [
+        "python3",
+        "server/test_control_plane_round5.py"
+      ],
+      "exit_code": 0
+    },
+    "descriptor": {
+      "command": [
+        "python3",
+        "server/test_winn3_descriptor_hub.py"
+      ],
+      "exit_code": 0
+    },
+    "website": {
+      "command": [
+        "python3",
+        "tools/website_security_audit.py"
+      ],
+      "exit_code": 0
+    }
+  },
+  "artifacts": {
+    "android_jvm": {
+      "tests": 283,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "chrome_zip_sha256": "fede386e2395d7db4ef3d4b7542e57e5c9e348ed488c76db7fc11e602631ef31",
+    "chrome_zip_bytes": 93362,
+    "chrome_zip_members": 26
+  },
+  "sha256": {
+    "android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt": "256d79f56c80beb0a6a007ca9b16173f1f15efb2e715c24416e20051a50e8a98",
+    "linux/runner/linux_tunnel_backend.h": "37928f5961acb1b95492a7e1817a879f5c15c66e6790765b63cf373b4feead4e",
+    "linux/runner/linux_tunnel_backend.cc": "8d55987f055e517bacb354c28de42f7b812efc9b4a5417de4606af0d4966c88e",
+    "linux/runner/my_application.cc": "0113811a9b9cb746ece2e3ba5c22ef6a66d660c7a68c857aa89d08c727ee1f94",
+    "linux/runner/main.cc": "a253d66ae40bec9a3581a40e7f34c4459bf4aaa8882cd952ebbb1e501fcc61fa",
+    "server/wins_control_plane_setup_ONETOUCH.sh": "7b368e808ac260d82c73d1efb182a867f2cf1ce5554a8eb48766c9d17e36c9ff",
+    "test/android_vpn_launch_guard_test.dart": "98ce8756141b5fbc1fda926df5b3c038ed35c5cbf5d35c6c8ab952271eab9399",
+    "server/test_control_plane_round6.py": "f622925ff320277adf1e4c1a35f9afececed2eafdb307cb909604c911db0067a",
+    "tools/test_linux_tunnel_shutdown.py": "a5bda222bb438f701570fb88a499685ba9e9a9da0e55e1d52c10246134a8e471",
+    "winn_protocol_experimental/internal/carrier/h3_receive_window_test.go": "5851cd55302c487c2c64a9dac5a289a464f185b3b61295dc6090e1f2c2323ef3",
+    "extension/dist/wins-vpn-companion-chrome.zip": "fede386e2395d7db4ef3d4b7542e57e5c9e348ed488c76db7fc11e602631ef31"
+  },
+  "android_phone_smoke": {
+    "status": "BLOCKED",
+    "reason": "ReleaseInputIndex required; no release APK exists. Owner asked for index path. USB device connected; no uninstall or install executed."
+  },
+  "delegation": "Three Cursor/Grok processes exited with usage limits; workspace agent failed to initialize. Lead implemented and reviewed locally.",
+  "additional_verification": {
+    "linux_arm64_compile": 0,
+    "linux_arm64_glib_shutdown": 0,
+    "linux_x64_compile_and_glib_shutdown": 0,
+    "control_plane_round6": {
+      "exit_code": 0,
+      "tests": 7
+    },
+    "go_carrier_race": 0,
+    "extension_build": 0,
+    "extension_archive_verify": 0,
+    "extension_regressions": {
+      "exit_code": 0,
+      "tests": 12
+    },
+    "rulings": {
+      "exit_code": 0,
+      "general": 59,
+      "apple": 6
+    },
+    "shell_syntax": 0,
+    "pre_fix_server_negative_control": {
+      "expected_failure": true,
+      "failures": 4,
+      "errors": 36
+    },
+    "android_lint_jvm": {
+      "command": [
+        "./gradlew",
+        ":app:lintPhoneDebug",
+        ":app:testPhoneDebugUnitTest",
+        "--tests",
+        "org.winsvpn.app.WinnV3*",
+        "--tests",
+        "org.winsvpn.app.ApiLevelGateTest",
+        "--offline"
+      ],
+      "exit_code": 0
+    }
+  }
+}

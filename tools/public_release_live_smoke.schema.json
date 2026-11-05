@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.org/schemas/public-release-live-smoke-v3.json",
+  "title": "Win's VPN sanitized public-release live-smoke evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "platform",
+    "app_version",
+    "build_number",
+    "release_input_index_sha256",
+    "platform_manifest_sha256",
+    "shared_revision",
+    "artifact_input_fingerprint_sha256",
+    "artifact_sha256",
+    "evidence_bundle_index_sha256",
+    "artifact_size_bytes",
+    "build_receipt",
+    "run_id",
+    "tested_at_utc",
+    "secret_material_redacted",
+    "producer",
+    "transcript",
+    "artifact_signature_passed",
+    "clean_install_passed",
+    "ip_map_50_mile_city_context_passed",
+    "direct_awg_passed",
+    "xray_all_backup_routes_passed",
+    "split_tunneling_contract_passed",
+    "double_vpn_passed",
+    "leak_test_passed",
+    "map_screenshot",
+    "route_matrix"
+  ],
+  "properties": {
+    "schema_version": { "const": 3 },
+    "platform": { "enum": ["android", "windows", "linux", "ios", "macos"] },
+    "app_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "build_number": { "type": "string", "pattern": "^[0-9]+$" },
+    "release_input_index_sha256": { "$ref": "#/$defs/sha256" },
+    "platform_manifest_sha256": { "$ref": "#/$defs/sha256" },
+    "shared_revision": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "artifact_input_fingerprint_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "evidence_bundle_index_sha256": {
+      "allOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "not": { "const": "0000000000000000000000000000000000000000000000000000000000000000" } }
+      ]
+    },
+    "artifact_size_bytes": { "type": "integer", "minimum": 1 },
+    "build_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^\\.artifacts/" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "run_id": { "type": "string", "format": "uuid" },
+    "tested_at_utc": { "type": "string", "format": "date-time" },
+    "secret_material_redacted": { "const": true },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "path", "sha256"],
+      "properties": {
+        "contract": { "const": "winsvpn-public-release-live-smoke-v3" },
+        "path": {
+          "enum": [
+            "tools/android_public_release_live_smoke.ps1",
+            "tools/windows_public_release_live_smoke.ps1",
+            "tools/linux_public_release_live_smoke.sh",
+            "tools/apple_public_release_live_smoke.sh"
+          ]
+        },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "transcript": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^\\.artifacts/release-evidence/" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "artifact_signature_passed": { "const": true },
+    "clean_install_passed": { "const": true },
+    "ip_map_50_mile_city_context_passed": { "const": true },
+    "direct_awg_passed": { "const": true },
+    "xray_all_backup_routes_passed": { "const": true },
+    "split_tunneling_contract_passed": { "const": true },
+    "double_vpn_passed": { "const": true },
+    "leak_test_passed": { "const": true },
+    "windows_matrix_passed": { "const": true },
+    "map_screenshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^\\.artifacts/release-evidence/" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "route_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direct_awg", "xray"],
+      "properties": {
+        "direct_awg": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["protocol", "port", "passed"],
+          "properties": {
+            "protocol": { "const": "udp" },
+            "port": { "const": 9110 },
+            "passed": { "const": true }
+          }
+        },
+        "xray": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["advertised_route_count", "tested_route_count", "manifest_sha256", "routes"],
+          "properties": {
+            "advertised_route_count": { "type": "integer", "minimum": 1 },
+            "tested_route_count": { "type": "integer", "minimum": 1 },
+            "manifest_sha256": { "$ref": "#/$defs/sha256" },
+            "routes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["protocol", "port", "security", "passed"],
+                "properties": {
+                  "protocol": { "const": "tcp" },
+                  "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+                  "security": { "enum": ["none", "tls"] },
+                  "passed": { "const": true }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "platform": { "const": "windows" } },
+        "required": ["platform"]
+      },
+      "then": { "required": ["windows_matrix_passed"] },
+      "else": { "not": { "required": ["windows_matrix_passed"] } }
+    }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

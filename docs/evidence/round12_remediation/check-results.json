@@ -1,0 +1,364 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "display": "python3 tools/website_security_audit.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.342826+00:00",
+    "seconds": 0.4,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/website_security_audit.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "display": "python3 tools/verify_apple_method_channel_contract.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.746260+00:00",
+    "seconds": 0.06,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/verify_apple_method_channel_contract.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_apple_standalone_v3_wiring.py"
+    ],
+    "display": "python3 tools/test_apple_standalone_v3_wiring.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.806597+00:00",
+    "seconds": 0.05,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_apple_standalone_v3_wiring.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_windows_awg_runtime_validation.py"
+    ],
+    "display": "python3 tools/test_windows_awg_runtime_validation.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.858682+00:00",
+    "seconds": 0.06,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_windows_awg_runtime_validation.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "display": "python3 server/test_control_plane_deepseek_round2.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.341270+00:00",
+    "seconds": 2.84,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_deepseek_round2.log"
+  },
+  {
+    "command": [
+      "sh",
+      "tools/verify_rulings.sh"
+    ],
+    "display": "sh tools/verify_rulings.sh",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.916304+00:00",
+    "seconds": 4.72,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/verify-rulings.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "display": "flutter analyze --no-pub",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:36.344064+00:00",
+    "seconds": 6.52,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/flutter-analyze.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "display": "python3 server/test_control_plane_round4.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:39.189682+00:00",
+    "seconds": 4.45,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round4.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "display": "python3 server/test_control_plane_round5.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:43.644162+00:00",
+    "seconds": 12.12,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round5.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/native_messaging/test_native_host_registration.py"
+    ],
+    "display": "python3 tools/native_messaging/test_native_host_registration.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:41.638652+00:00",
+    "seconds": 17.23,
+    "exit_code": 1,
+    "mandatory": false,
+    "log": "docs/evidence/round12_remediation/native-registration.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_linux_native_host_delivery.py"
+    ],
+    "display": "python3 tools/test_linux_native_host_delivery.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:58.875223+00:00",
+    "seconds": 0.29,
+    "exit_code": 1,
+    "mandatory": false,
+    "log": "docs/evidence/round12_remediation/linux-native-delivery.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "display": "python3 server/test_control_plane_round6.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:55.767453+00:00",
+    "seconds": 6.99,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round6.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "display": "flutter test --no-pub",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:30:42.867854+00:00",
+    "seconds": 31.93,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/flutter-test.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "display": "python3 server/test_control_plane_round7.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:02.764230+00:00",
+    "seconds": 14.95,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round7.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "display": "python3 server/test_control_plane_round8.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:17.715913+00:00",
+    "seconds": 4.94,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round8.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round9.py"
+    ],
+    "display": "python3 server/test_control_plane_round9.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:22.660418+00:00",
+    "seconds": 2.19,
+    "exit_code": 1,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round9.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round10.py"
+    ],
+    "display": "python3 server/test_control_plane_round10.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:24.854228+00:00",
+    "seconds": 4.34,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round10.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round11.py"
+    ],
+    "display": "python3 server/test_control_plane_round11.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:29.194005+00:00",
+    "seconds": 1.87,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_control_plane_round11.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "display": "go test ./...",
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started_at": "2026-09-13T23:30:36.342964+00:00",
+    "seconds": 66.49,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/go-test.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "display": "python3 server/test_winn3_descriptor_hub.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:31.064460+00:00",
+    "seconds": 22.67,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_winn3_descriptor_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "display": "python3 server/test_account_deletion_hub.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:53.738483+00:00",
+    "seconds": 3.32,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_account_deletion_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_donor_acknowledgment_hub.py"
+    ],
+    "display": "python3 server/test_donor_acknowledgment_hub.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:31:57.059972+00:00",
+    "seconds": 8.39,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/test_donor_acknowledgment_hub.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./cmd/winn3-gateway"
+    ],
+    "display": "go test -race ./cmd/winn3-gateway",
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started_at": "2026-09-13T23:31:42.833288+00:00",
+    "seconds": 50.28,
+    "exit_code": 0,
+    "mandatory": false,
+    "log": "docs/evidence/round12_remediation/go-race.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "./cmd/winn3-gateway",
+      "-run",
+      "TestGatewayAuthorityExpiresWithoutFileChange",
+      "-count=10"
+    ],
+    "display": "go test ./cmd/winn3-gateway -run TestGatewayAuthorityExpiresWithoutFileChange -count=10",
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started_at": "2026-09-13T23:32:33.111903+00:00",
+    "seconds": 29.92,
+    "exit_code": 0,
+    "mandatory": false,
+    "log": "docs/evidence/round12_remediation/go-expiry-repeat.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round9.py"
+    ],
+    "display": "python3 server/test_control_plane_round9.py",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:39:17.073878+00:00",
+    "seconds": 1.59,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/round9-verified-final.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "display": "flutter analyze --no-pub",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:39:18.667055+00:00",
+    "seconds": 6.29,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/flutter-analyze.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "display": "flutter test --no-pub",
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T23:39:24.962684+00:00",
+    "seconds": 15.42,
+    "exit_code": 0,
+    "mandatory": true,
+    "log": "docs/evidence/round12_remediation/flutter-test.log"
+  }
+]

@@ -1,0 +1,12 @@
+T-L linux lane: BEFORE (no VPN) on aicore (yoga unreachable, WOL failed)
+Sun Aug 23 03:45:39 AM UTC 2026
+linux-host
+0.335052 25000000 41183583
+Sun Aug 23 03:45:40 AM UTC 2026
+before-repeat1: 78673996 bytes/s (629.4 Mbps)
+before-repeat2: 80619675 bytes/s (644.9 Mbps)
+before-post-teardown-r1: 74945664 (599.6 Mbps)
+before-post-teardown-r2: 80393607 (643.1 Mbps)
+before-post-teardown-r3: 78002389 (624.0 Mbps)
+median-before: 78.35 MB/s = 626.8 Mbps (n=6; sorted 41.2, 74.9, 78.0, 78.7, 80.4, 80.6 -> median (78.0+78.7)/2)
+Sun Aug 23 04:10:27 UTC 2026

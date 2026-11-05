@@ -1,0 +1,26 @@
+agent_default_deny checked 2026-08-12T16:14:59Z
+module=winsvpn.local/winnprotocol
+package=winn3/agent
+test=go test ./winn3/agent/... -count=1
+result=PASS (ok winsvpn.local/winnprotocol/winn3/agent 0.198s, trace no test files)
+
+fresh-engine evaluation before any Register:
+| # | kind | rules_registered | action_kind | got | want | verdict |
+| 1 | fresh engine | 0 | connect | deny | deny | PASS |
+| 2 | fresh engine | 0 | rotate_key | deny | deny | PASS |
+| 3 | fresh engine | 0 | report | deny | deny | PASS |
+| 4 | fresh engine | 0 | <nil> | deny | deny | PASS |
+| 5 | fresh engine | 0 | wipe_disk | deny | deny | PASS |
+note: all fresh-engine kinds with zero rules return Deny, including connect before any Register
+verify: go run .spark_lanes/scratch/gen_agent_policy_default_deny/verify_default_deny.go PASS
+policy.go:52 NewPolicyEngine defaultDecision=Deny verified
+policy.go:81-94 Evaluate switch default returns Deny, and per-kind not-ok returns Deny
+policy_test.go:20 TestControl_UnregisteredKindDefaultsToDeny PASS (connect defaults to Deny)
+policy_test.go:121 TestDenyAll_SchemaValidButNotAllowedIsDenied PASS (schema-valid but not allowed is denied)
+controls:
+  CONTROL_GREEN no mutation PASS
+  CONTROL_NEUTRAL comment-only PASS
+  CONTROL_POSITIVE flipped defaultDecision Allow and Evaluate deny branches to Allow => CAUGHT
+    TestControl_UnregisteredKindDefaultsToDeny FAIL unregistered kind decision = allow, want deny
+    TestDenyAll_SchemaValidButNotAllowedIsDenied FAIL unhandled schema-valid kind decision = allow, want deny
+    TestRouteSafety_IntegrationWithMultipleKinds FAIL unregistered kind decision = allow, want deny

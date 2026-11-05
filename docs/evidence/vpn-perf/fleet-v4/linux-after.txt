@@ -1,0 +1,20 @@
+T-L linux lane: AFTER (tunnel up, promoted posture)
+Sun Aug 23 04:00:36 AM UTC 2026
+default via 192.168.50.1 dev enp3s0 proto dhcp src 192.168.50.10 metric 100 
+---
+200 25000000 18594203 1.344505
+Sun Aug 23 04:00:37 AM UTC 2026
+---
+<DATA_SIM_IP>
+0.0.0.0/1 dev winsvpn3 scope link 
+128.0.0.0/1 dev winsvpn3 scope link 
+::/1 dev winsvpn3 metric 1024 pref medium
+8000::/1 dev winsvpn3 metric 1024 pref medium
+after-repeat1: 200 15085368 1.657235
+after-repeat2: 200 16909143 1.478490
+after-repeat3: 200 17485782 1.429733
+---routes---
+0.0.0.0/1 dev winsvpn3 scope link 
+128.0.0.0/1 dev winsvpn3 scope link 
+::/1 dev winsvpn3 metric 1024 pref medium
+8000::/1 dev winsvpn3 metric 1024 pref medium

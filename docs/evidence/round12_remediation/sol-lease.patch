@@ -1,0 +1,137 @@
+diff --git a/server/wins_control_plane_setup_ONETOUCH.sh b/server/wins_control_plane_setup_ONETOUCH.sh
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -5899,7 +5899,7 @@ import time
+ import urllib.request
+ import urllib.parse
+ import urllib.error
+-from contextlib import closing, contextmanager
++from contextlib import ExitStack, closing, contextmanager
+ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+ from datetime import datetime, timedelta, timezone
+ from email.mime.application import MIMEApplication
+@@ -7789,6 +7789,23 @@ def create_double_vpn_assignments_table(conn: sqlite3.Connection):
+         )
+     """)
+ 
++def create_double_vpn_enrollment_leases_table(conn: sqlite3.Connection):
++    conn.execute("""
++        CREATE TABLE IF NOT EXISTS double_vpn_enrollment_leases (
++            account_number TEXT PRIMARY KEY,
++            device_id TEXT NOT NULL,
++            lease_token TEXT NOT NULL UNIQUE,
++            expires_at REAL NOT NULL,
++            created_at TEXT NOT NULL,
++            FOREIGN KEY(account_number) REFERENCES users(account_number) ON DELETE CASCADE
++        )
++    """)
++    conn.execute(
++        "CREATE INDEX IF NOT EXISTS idx_double_vpn_enrollment_leases_expiry "
++        "ON double_vpn_enrollment_leases(expires_at)"
++    )
++
++
+ def create_core_exit_peers_table(conn: sqlite3.Connection):
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS core_exit_peers (
+@@ -8385,6 +8402,7 @@ def ensure_schema(conn: sqlite3.Connection):
+     create_node_promotion_events_table(conn)
+     create_core_promotion_events_table(conn)
+     create_double_vpn_assignments_table(conn)
++    create_double_vpn_enrollment_leases_table(conn)
+     create_core_exit_peers_table(conn)
+     create_settings_table(conn)
+     create_paypal_events_table(conn)
+@@ -14079,6 +14097,67 @@ def _wait_for_core_assignment_ready_sync(
+             return False
+         time.sleep(min(0.5, remaining))
+ 
++def acquire_double_vpn_enrollment_lease(
++    conn: sqlite3.Connection,
++    account_number: str,
++    device_id: str,
++) -> str:
++    now = time.time()
++    ttl_seconds = max(
++        60,
++        DOUBLE_VPN_ASSIGNMENT_READY_TIMEOUT_SECONDS + 30,
++    )
++    conn.execute(
++        "DELETE FROM double_vpn_enrollment_leases WHERE expires_at <= ?",
++        (now,),
++    )
++    lease_token = secrets.token_urlsafe(32)
++    try:
++        conn.execute(
++            """
++            INSERT INTO double_vpn_enrollment_leases (
++                account_number, device_id, lease_token, expires_at, created_at
++            ) VALUES (?, ?, ?, ?, ?)
++            """,
++            (
++                account_number,
++                device_id,
++                lease_token,
++                now + ttl_seconds,
++                utcnow().isoformat(),
++            ),
++        )
++    except sqlite3.IntegrityError as exc:
++        raise HTTPException(
++            status_code=409,
++            detail="A Double VPN enrollment is already being prepared for this account.",
++            headers={
++                "X-Wins-Error-Code": "double_vpn_enrollment_in_flight",
++                "Retry-After": "5",
++            },
++        ) from exc
++    return lease_token
++
++
++def release_double_vpn_enrollment_lease(
++    account_number: str,
++    lease_token: str,
++) -> None:
++    try:
++        with get_db() as cleanup_conn:
++            cleanup_conn.execute("BEGIN IMMEDIATE")
++            cleanup_conn.execute(
++                "DELETE FROM double_vpn_enrollment_leases "
++                "WHERE account_number = ? AND lease_token = ?",
++                (account_number, lease_token),
++            )
++    except sqlite3.Error:
++        logger.exception(
++            "Double VPN enrollment lease cleanup failed for account_hash=%s",
++            security_event_hash(account_number),
++        )
++
++
+ def cleanup_stale_devices(conn: sqlite3.Connection, background_tasks: Optional[BackgroundTasks] = None) -> int:
+     rows = []
+     if STALE_DEVICE_RETENTION_DAYS > 0:
+@@ -20255,7 +20334,7 @@ def _verify_account_sync(fastapi_request: Request, login: LoginRequest, background_tasks: BackgroundTasks):
+         alert_failed_login(fastapi_request, "invalid_client_public_key", acc, detail="Invalid client public key.", status_code=400)
+     selection_generation, ordinary_v3_failure_generation = typed_selection_generations(login)
+ 
+-    with get_db() as conn:
++    with ExitStack() as deferred_cleanup, get_db() as conn:
+         ensure_schema(conn)
+         cleanup_stale_devices(conn, background_tasks)
+         if not login.free_access:
+@@ -20516,6 +20595,15 @@ def _verify_account_sync(fastapi_request: Request, login: LoginRequest, background_tasks: BackgroundTasks):
+         core = select_double_vpn_core(conn) if double_vpn_requested else None
+         if double_vpn_requested and not core:
+             raise HTTPException(status_code=503, detail="Double VPN core is not available yet.")
++        if double_vpn_requested and deferred_activation_secret:
++            double_vpn_lease_token = acquire_double_vpn_enrollment_lease(
++                conn, acc, login.device_id
++            )
++            deferred_cleanup.callback(
++                release_double_vpn_enrollment_lease,
++                acc,
++                double_vpn_lease_token,
++            )
+ 
+         old_peer_to_remove = ""
+         old_peer_node_ip = ""

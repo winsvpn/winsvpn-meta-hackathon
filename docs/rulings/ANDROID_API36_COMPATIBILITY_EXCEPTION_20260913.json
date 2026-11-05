@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "ruling_id": "android-api36-compatibility-exception-20260913",
+  "decided_on": "2026-09-13",
+  "status": "approved_for_named_release_only",
+  "release": {
+    "version_name": "1.0.16",
+    "version_code": 33
+  },
+  "scope": {
+    "surfaces": [
+      "phone",
+      "android_tv",
+      "wear_os"
+    ],
+    "compile_sdk": 36,
+    "target_sdk": 36,
+    "ndk_version": "29.0.14206865",
+    "ndk_release": "r29"
+  },
+  "play_compliance": {
+    "as_of": "2026-09-13",
+    "api_36_remains_compliant": true,
+    "statement": "API 36 remains Google Play compliant for phone, Android TV, and Wear OS for release 1.0.16+33."
+  },
+  "api_37_adoption_requirements": [
+    {
+      "id": "build_tools_37",
+      "requirement": "Install and freeze reviewed Android SDK Build-Tools 37.x."
+    },
+    {
+      "id": "phone_runtime_evidence",
+      "requirement": "Complete API 37 phone runtime qualification."
+    },
+    {
+      "id": "android_tv_runtime_evidence",
+      "requirement": "Complete API 37 Android TV runtime qualification."
+    },
+    {
+      "id": "wear_os_runtime_evidence",
+      "requirement": "Complete API 37 Wear OS runtime qualification."
+    },
+    {
+      "id": "local_network_product_decision",
+      "requirement": "Decide whether private or LAN VPN gateways are supported and implement the Android 17 local-network permission contract or reject physical-LAN endpoints."
+    },
+    {
+      "id": "adaptive_tv_validation",
+      "requirement": "Validate the Android TV UI when orientation, aspect-ratio, or resizability restrictions are ignored."
+    },
+    {
+      "id": "ct_ech_validation",
+      "requirement": "Validate certificate transparency and ECH or ECH GREASE behavior, including blocked or stripped ECH and redirect-safe pinning."
+    },
+    {
+      "id": "full_native_abi_tests",
+      "requirement": "Run full native ABI load and tunnel-start tests for every shipped Flutter, Winn v3, AmneziaWG, and Xray binary."
+    }
+  ],
+  "review_trigger": {
+    "required_after_this_release": true,
+    "before_next_android_release_candidate": true,
+    "maximum_days_after_release_publication": 30,
+    "hard_deadline": "2026-09-30",
+    "expires_on_first": [
+      "any release identity other than 1.0.16+33",
+      "the next Android release-candidate freeze",
+      "30 days after publication of 1.0.16+33",
+      "2026-09-30"
+    ]
+  },
+  "decision": "Retain compileSdk 36 and targetSdk 36 for phone, Android TV, and Wear OS in release 1.0.16+33 because Android 17 / API 37 adoption requirements are in progress and API 36 remains compliant under current Google Play target API policy. Use the latest final stable NDK r29 (29.0.14206865) for all Android surfaces and native producers. This exception does not authorize reuse for another release."
+}

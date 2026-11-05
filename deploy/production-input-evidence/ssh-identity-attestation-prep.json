@@ -1,0 +1,10 @@
+{
+  "key_comment": "winsvpn-deploy-20260804",
+  "key_type": "ED25519",
+  "private_key_absent_from_this_file": true,
+  "public_key_bytes": 105,
+  "public_key_fingerprint": "SHA256:REDACTED_FINGERPRINT",
+  "public_key_mode": "0644",
+  "public_key_path": "~/.ssh/winsvpn_deploy_ed25519.pub",
+  "purpose": "Lane-produced public material for shared.ssh-identity-custody; confers no custody, no authority inferred. The manifest carries NO evidence record for this file: the supervisor binds it at collect time and the collector produces the record from the live bytes."
+}

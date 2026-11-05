@@ -1,0 +1,63 @@
+HISTORICAL TV MANIFEST LANDSCAPE VERIFICATION - NOT CURRENT RELEASE EVIDENCE
+Lane: gen_tv_manifest_landscape  (2026-08-11)
+
+Status: SUPERSEDED. This record predates the current Android TV identity
+org.winsvpn.app / versionCode 3002. It documents only the historical landscape
+attribute check and MUST NOT be used as release, package, version, or store
+evidence for 1.0.15+30. Current evidence must be regenerated from the exact
+signed Android TV AAB and bind package org.winsvpn.app, versionName 1.0.15, and
+versionCode 3002.
+
+Task: add android:screenOrientation="landscape" to org.winsvpn.app.MainActivity
+      in source/wins_vpn/android/app/src/tv/AndroidManifest.xml so a TV set always
+      renders landscape and never relayouts the banner on rotation.
+
+Source edit:
+  android/app/src/tv/AndroidManifest.xml
+    <activity
+        android:name="org.winsvpn.app.MainActivity"
+        android:exported="true"
+        tools:replace="android:exported"
+        android:screenOrientation="landscape"     <-- ADDED
+        android:focusable="true"
+        ...>
+  Backup: android/app/src/tv/AndroidManifest.xml.bak_20260811_tvlandscape
+  (backup sha256 == pre-edit sha256 == 2251b6ce2baccdcc5e4024119f4db98f689abc723e30e7d45961e42b929d0b5f)
+
+Build (EXIT 0, BUILD SUCCESSFUL):
+  WINS_ANDROID_UNSIGNED_RELEASE=1 ./gradlew -p android :app:assembleTvRelease
+  Output APK: build/app/outputs/apk/tv/release/app-tv-release-unsigned.apk
+  (the "tv" product flavor's RELEASE variant; unsigned because the
+   WINS_ANDROID_UNSIGNED_RELEASE gate nulls the signing config per the task. The
+   unsigned gate's artifact name is app-tv-release-unsigned.apk, i.e. the
+   app-tv-release.apk of this variant. The manifest attribute is what is being
+   verified, and it is present in the packaged binaries below.)
+
+aapt2 badging line -- tv variant present (aapt2 dump badging):
+  package: name='org.winsvpn.app.tv' versionCode='30' versionName='1.0.15' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+  launchable-activity: name='org.winsvpn.app.MainActivity'  label='' icon=''
+  leanback-launchable-activity: name='org.winsvpn.app.MainActivity'  label='' icon='' banner=''
+  (aapt2 "dump badging" does not emit per-activity screenOrientation; the
+   authoritative attribute is read from the packaged binary manifest below.)
+
+aapt2 xmltree --file AndroidManifest.xml -- shows android:screenOrientation on MainActivity:
+  (aapt2 dump xmltree, build-tools/36.0.0)
+  E: activity (line=201)
+    A: http://schemas.android.com/apk/res/android:name(0x01010003)="org.winsvpn.app.MainActivity" (Raw: "org.winsvpn.app.MainActivity")
+    A: http://schemas.android.com/apk/res/android:screenOrientation(0x0101001e)=0
+
+  Interpretation: android:screenOrientation resource id 0x0101001e = 0 on
+  org.winsvpn.app.MainActivity. In the Android framework
+  (android.content.pm.ActivityInfo), SCREEN_ORIENTATION_LANDSCAPE = 0, so value 0
+  is exactly screenOrientation="landscape". It is the first activity (line=201),
+  the MainActivity, which is also the single leanback-launchable activity.
+
+Contract guard (negative control): the same source ATTR would appear as 0xFFFFFFFF
+(SCREEN_ORIENTATION_UNSPECIFIED) or be absent if the attribute were dropped. The
+packaged manifest carries 0 (LANDSCAPE) on MainActivity, so the tv release APK is
+locked to landscape. This green can be made red by removing the attribute from the
+source and re-running assembleTvRelease -- the xmltree line then shows no
+screenOrientation attr on MainActivity.
+
+HISTORICAL VERDICT ONLY: the superseded APK carried
+android:screenOrientation="landscape". Current release verdict: UNVERIFIED.

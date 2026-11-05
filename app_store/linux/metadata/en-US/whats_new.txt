@@ -1,0 +1,9 @@
+Win's VPN 1.0.17 (34)
+
+Winn v3 is the primary protocol. If Winn v3 cannot connect, this version uses
+the Winn v1 compatibility path: AWG then Xray.
+
+The required website package is the native tarball, not a DEB upload. The
+derived amd64 Debian package is not a separate upload target. Flathub and Snap
+are dual-arch x64/arm64 separate manifests. Native ARM64 tarball evidence
+remains pending-owner-evidence. This listing is not an AppImage package.

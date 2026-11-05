@@ -1,0 +1,20 @@
+# Known-red standalone native tests. SHRINK-ONLY.
+#
+# tools/verify_native_standalone_tests.sh reads this file. Rules it enforces:
+#
+#   * a test that is red and listed here is reported and tolerated
+#   * a test that is red and NOT listed here fails the gate
+#   * a test that is GREEN and listed here fails the gate — delete the entry
+#   * an entry naming a test that does not exist fails the gate
+#   * an entry with no reason fails the gate
+#   * an EMPTY file is the goal state and is accepted
+#
+# This list may only get shorter. Adding a line to make a red gate green is the
+# thing this file exists to make visible, not the thing it exists to permit.
+#
+# Format:  <test basename, no .cc>  <reason, one line, say what is actually broken>
+# 
+# 2026-08-10: linux_winn_carrier_profile_test entry deleted — the test now
+# genuinely passes (13/13 checks) and a green + listed entry fails this gate.
+# The fix documented in the deleted reason (give the test's fixture h1..h4) was
+# made by another lane; the shrink-only rule requires deleting the entry.

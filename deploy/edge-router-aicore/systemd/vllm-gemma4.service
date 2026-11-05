@@ -1,0 +1,61 @@
+[Unit]
+Description=vLLM Gemma4-12B NVFP4 (RedHatAI) routing brain - Super-Lane config
+After=network.target
+
+[Service]
+User=aicore
+Group=aicore
+Slice=wins-ai.slice
+Environment=VLLM_USE_FLASHINFER_SAMPLER=0
+Environment=XDG_CACHE_HOME=/var/cache/winsvpn-vllm
+Environment=VLLM_CACHE_ROOT=/var/cache/winsvpn-vllm/vllm
+Environment=HF_HOME=/var/cache/winsvpn-vllm/huggingface
+Environment=TRITON_CACHE_DIR=/var/cache/winsvpn-vllm/triton
+Environment=TORCHINDUCTOR_CACHE_DIR=/var/cache/winsvpn-vllm/torchinductor
+Environment=CUDA_CACHE_PATH=/var/cache/winsvpn-vllm/cuda
+ExecStart=/home/aicore/venvs/gemma-xlate-nightly/bin/python -m vllm.entrypoints.openai.api_server --host 127.0.0.1 --model /home/aicore/models/RedHatAI-gemma-4-12B-it-NVFP4 --port 8002 --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 8 --max-num-batched-tokens 4096 --served-model-name gemma12b --kv-cache-dtype fp8 --enable-auto-tool-choice --tool-call-parser gemma4 --reasoning-parser gemma4 --speculative-config "{\"model\":\"/home/aicore/models/zlab-gemma4-12B-it-DFlash\",\"num_speculative_tokens\":16}"
+Restart=always
+RestartSec=10
+UMask=0077
+
+# R-1: confinement, matched to what a CUDA inference server actually needs.
+# MemoryDenyWriteExecute is deliberately ABSENT: the CUDA runtime and Triton
+# JIT both map writable-then-executable pages, and setting it here is a hard
+# startup failure rather than a hardening win. Everything that does not break
+# GPU work is set.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/aicore/models /home/aicore/venvs
+CacheDirectory=winsvpn-vllm
+CacheDirectoryMode=0700
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @obsolete
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# PrivateDevices is NOT set: it would hide /dev/nvidia*, which this unit
+# requires. The GPU nodes are allowed explicitly and nothing else is.
+DeviceAllow=/dev/nvidiactl rw
+DeviceAllow=/dev/nvidia-uvm rw
+DeviceAllow=/dev/nvidia-uvm-tools rw
+DeviceAllow=/dev/nvidia0 rw
+DevicePolicy=closed
+
+[Install]
+WantedBy=multi-user.target

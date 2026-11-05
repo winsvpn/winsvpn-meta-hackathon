@@ -1,0 +1,1 @@
+Wear remote for phone VPN. Winn v3 primary; Winn v1 AWG then Xray fallback.

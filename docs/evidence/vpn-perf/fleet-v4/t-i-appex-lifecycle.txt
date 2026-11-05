@@ -1,0 +1,47 @@
+T-I RERUN — PacketTunnel appex lifecycle (device syslog via pymobiledevice3 syslog live)
+Timestamps device-local EDT (= UTC-4); Z times in brackets.
+
+[08:37:15Z] appex PID 2922 (first hot-restart start attempt):
+  PacketTunnel{NetworkExtension}[2922]: Calling startTunnelWithOptions with options 0x10c480bc0
+  PacketTunnel{PacketTunnel.debug.dylib}[2922] INFO: Validated packet tunnel config summary
+    peer_kind=ipv4 transport_kind=ipv4 interface_ipv4_present=true route_count=1
+    default_route=true mtu=1280
+  PacketTunnel{PacketTunnel.debug.dylib}[2922] ERROR: WINS_IOS_DEV_CONTAINMENT_ABSENCE_PROBE_3d9f52a1
+    CONTAINED dev packet tunnel: no default IPv4 route, no IPv6 settings, no DNS settings.
+    One /32 included route only. This is NOT a validated full-tunnel session.
+  PacketTunnel{PacketTunnel.debug.dylib}[2922] ERROR: WINS_IOS_DEV_CONTAINMENT_ABSENCE_PROBE_3d9f52a1
+    CONTAINED dev session self-cancel armed: this tunnel will cancel itself in 900 seconds.
+  PacketTunnel{PacketTunnel.debug.dylib}[2922] INFO: WINS_WINN3_HOST_CONTRACT bootstrap posture
+    for a STANDALONE session (inner MTU 1373).
+  PacketTunnel{PacketTunnel.debug.dylib}[2922] INFO: WINS_WINN3_HOST_CONTRACT PROVEN; promotion
+    HELD on purpose. The phone's routing, IPv6 and DNS were never claimed.  (540ms after bootstrap)
+
+[08:39:39Z] appex PID 2923 (second hot-restart start attempt — identical sequence):
+  Validated packet tunnel config summary ... route_count=1 default_route=true mtu=1280
+  CONTAINED dev packet tunnel: no default IPv4 route, no IPv6 settings, no DNS settings ...
+  CONTAINED dev session self-cancel armed ... 900 seconds
+  WINS_WINN3_HOST_CONTRACT bootstrap posture for a STANDALONE session (inner MTU 1373)
+  WINS_WINN3_HOST_CONTRACT PROVEN; promotion HELD on purpose ... (604ms after bootstrap)
+
+[08:39:39.917Z] NE session end (by design, containment held):
+  neagent{NetworkExtension}[2250] DEBUG: [Host org.winsvpn.app.debug.PacketTunnel]: started with
+    error Domain=org.winsvpn.PacketTunnel Code=1034 "The winn/3 standalone datapath was proven and
+    promotion was held on purpose; full-tunnel settings were not installed."
+    UserInfo={wins_provider_status_fields={ "winn_datapath_proof_promotion_held" = 1; }, ...}
+  nesessionmanager: NESMVPNSession[Primary Tunnel:Win's VPN:2A412FC2...] didSetStatus - 0
+  nesessionmanager: ... plugin NEVPNTunnelPlugin(org.winsvpn.app.debug[packet-tunnel][inactive])
+    disconnected with reason Plugin initiated
+  nesessionmanager: Setting last stop reason to 3
+  (tunnel-intf utun7; session uninstalled — the contained dev session never claims the phone)
+
+REGISTRATION SAGA (cause of the initial "no appex" stall):
+  [08:37:15.336Z] nesessionmanager: Checking for org.winsvpn.app.debug.PacketTunnel -
+    com.apple.networkextension.packet-tunnel
+  [08:37:15.336Z] nesessionmanager: Found 0 registrations for org.winsvpn.app.debug.PacketTunnel
+    (com.apple.networkextension.packet-tunnel)
+  -> my 07:49Z devicectl reinstall purged the NE extension registration and the appex did not
+     re-register; startVPNTunnel calls before the hot restarts silently no-oped. Registration
+     recovered without a reinstall (reboot not required): later attempts show the appex running.
+  [08:37:16] runningboardd: xpcservice<org.winsvpn.app.debug.PacketTunnel([osservice<com.apple.neagent-ios>])>
+    pid 2922 ... END suppressing state updates
+  symptomsd Data Usage flow 107224 PacketTunnel: WiFi in/out 84543/87189 bytes (proof-window traffic)

@@ -1,0 +1,128 @@
+Winn Protocol
+Copyright (C) 2025-2026 Win's VPN Inc.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along
+with this program. If not, see <https://www.gnu.org/licenses/>.
+
+The full licence text is in the file LICENSE in this directory.
+
+
+COMMERCIAL LICENSING
+====================
+
+Win's VPN Inc. offers this software under a separate commercial licence for
+users who cannot or do not wish to comply with the AGPL-3.0, in particular its
+network-use provision in section 13.
+
+Contact: admin@winsvpn.org
+
+The commercial licence is only offerable because Win's VPN Inc. holds or has
+been assigned the necessary rights in contributed code. See CLA.md. Third-party
+components carry their own terms, which the commercial licence does not and
+cannot override. See NOTICE.
+
+
+HEADER CONVENTION
+=================
+
+Every new source file authored for this project SHOULD begin with an SPDX
+identifier as the first comment, before the package clause.
+
+Go:
+
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    // SPDX-FileCopyrightText: 2026 Win's VPN Inc.
+
+    package carrier
+
+Where a Go build constraint is present it must remain the first line, followed
+by a blank line, then the SPDX block:
+
+    //go:build linux
+
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    // SPDX-FileCopyrightText: 2026 Win's VPN Inc.
+
+    package directawg
+
+Shell, Python, YAML and other hash-comment files:
+
+    # SPDX-License-Identifier: AGPL-3.0-or-later
+    # SPDX-FileCopyrightText: 2026 Win's VPN Inc.
+
+C, C++, Objective-C, Swift, Java, Kotlin:
+
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    // SPDX-FileCopyrightText: 2026 Win's VPN Inc.
+
+Rules:
+
+  1. Use the SPDX form. Do not paste the full licence text into source files.
+
+  2. Use "AGPL-3.0-or-later". Do not use the deprecated "AGPL-3.0" identifier
+     alone.
+
+  3. Do not put a year range on individual files and do not update years on
+     edit. A single copyright year of first publication is sufficient and
+     churning years across thousands of files produces noise without legal
+     benefit.
+
+  4. Do not name individual authors in file headers. Copyright is held by
+     Win's VPN Inc. under the CLA. Attribution of individuals belongs in the
+     commit history, not in file headers.
+
+  5. Generated files should carry the same header plus a line identifying the
+     generator, so a reviewer can tell not to edit them by hand.
+
+
+THIRD-PARTY FILES ARE THE EXCEPTION
+===================================
+
+Files derived from third-party code MUST NOT carry the Win's VPN Inc. AGPL
+header alone. They MUST preserve the upstream licence and copyright.
+
+Files in internal/masque/ that are derived from github.com/quic-go/masque-go
+carry:
+
+    // SPDX-License-Identifier: MIT
+    // SPDX-FileCopyrightText: 2024 Marten Seemann
+    //
+    // Derived from github.com/quic-go/masque-go v0.4.0.
+    // See UPSTREAM.md in this directory for provenance and local changes.
+
+Winn-authored files in that same directory, which have no upstream counterpart,
+carry the ordinary AGPL header. internal/masque/LICENSE and
+internal/masque/UPSTREAM.md must not be removed or modified.
+
+When adding any third-party or third-party-derived file:
+
+  - preserve its original licence text in the directory that contains it;
+  - record provenance (upstream project, version, commit) in an UPSTREAM.md
+    alongside it, following the pattern in internal/masque/;
+  - add an entry to NOTICE;
+  - confirm the licence is compatible with both AGPL-3.0 outbound distribution
+    and commercial relicensing before merging.
+
+A licence that permits AGPL redistribution but not commercial relicensing is
+not acceptable in this tree, because it would silently break the dual-licensing
+model.
+
+
+STATUS
+======
+
+As of 2026-08-03 no source file in this tree carries a copyright header. This
+convention is newly adopted. Applying it across existing files is a separate,
+mechanical change that has not yet been made. Files derived from
+github.com/quic-go/masque-go are currently covered at directory level by
+internal/masque/LICENSE and at distribution level by NOTICE; adding the
+per-file headers described above is a tracked action.

@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "/tmp/winsvpn-round9-20260913T152931/server_negative.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:42:13.054933+00:00",
+    "exit_code": 0,
+    "seconds": 1.49,
+    "log": "server-negative.log"
+  }
+]

@@ -1,0 +1,14 @@
+diff --git a/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go b/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
+--- a/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
++++ b/winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go
+@@ -164,7 +164,9 @@ func TestGatewayAuthorityExpiresWithoutFileChange(t *testing.T) {
+ 	t.Parallel()
+ 	expires := time.Now().Unix() + 3
+ 	f := newAuthorityFixture(t, expires)
+-	time.Sleep(time.Until(time.Unix(expires, 0)))
++	for time.Now().Unix() < expires {
++		time.Sleep(10 * time.Millisecond)
++	}
+ 	// Keep refresh cached to prove expiry is checked on every inner lookup.
+ 	f.registry.refreshMu.Lock()
+ 	f.registry.lastCheck = time.Now()

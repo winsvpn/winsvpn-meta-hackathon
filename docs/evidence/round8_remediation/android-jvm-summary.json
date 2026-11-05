@@ -1,0 +1,35 @@
+{
+  "counts": {
+    "tests": 591,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0
+  },
+  "failures": [
+    {
+      "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+      "test": "everyStagedEngineCarriesTheMarkersTheV3ProbeDependsOn",
+      "message": "java.lang.AssertionError: expected one staged engine per variant/ABI under android/app/src/*/jniLibs/, but these are missing: [/Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/arm64-v8a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/armeabi-v7a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/x86_64/libwinnengine.so]. If the staging inventory changed, update this assertion first."
+    },
+    {
+      "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+      "test": "everyPackagedApkCarriesAnEngineWithTheV3Symbols",
+      "message": "java.lang.AssertionError: /Users/owner/xprize/winsvpnv3/build/app/outputs/apk/phone/debug/app-phone-debug.apk packages no libwinnengine.so for any ABI. The app resolves the engine through context.applicationInfo.nativeLibraryDir, so an APK without it cannot start a tunnel at all. Check that the variant's jniLibs source set is populated and that packaging.jniLibs.excludes does not match it."
+    },
+    {
+      "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+      "test": "everyAbiWithNativeCodeAlsoGetsTheEngine",
+      "message": "java.lang.AssertionError: /Users/owner/xprize/winsvpnv3/build/app/outputs/apk/phone/debug/app-phone-debug.apk ships native code for [arm64-v8a, armeabi-v7a, x86_64] but packages libwinnengine.so only for []. Devices on [arm64-v8a, armeabi-v7a, x86_64] would install this build and find no engine."
+    },
+    {
+      "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+      "test": "everyShippedNativeArtifactMatchesABuildOfCurrentSource",
+      "message": "java.lang.AssertionError: a shipped native artifact does not match a build of current source.\nThe APK would ship the first digest; every test that builds from source is exercising the second.\n\nFATAL: native inventory preflight failed closed: OWNER-BLOCKED: stale Windows native consumer authority paths: installer/windows/build_winn3_msi.ps1, installer/windows/build_winn3_msi_arm64.ps1, installer/windows/build_zip_installer.ps1, installer/windows/winsvpn.iss\n"
+    },
+    {
+      "class": "org.winsvpn.app.ShippedEngineFreshnessTest",
+      "test": "theStagedEnginesAreTheSameBuildAcrossEveryVariant",
+      "message": "java.lang.AssertionError: expected one staged engine per variant/ABI under android/app/src/*/jniLibs/, but these are missing: [/Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/arm64-v8a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/armeabi-v7a/libwinnengine.so, /Users/owner/xprize/winsvpnv3/android/app/src/debug/jniLibs/x86_64/libwinnengine.so]. If the staging inventory changed, update this assertion first."
+    }
+  ]
+}

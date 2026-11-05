@@ -1,0 +1,21 @@
+--- /Users/owner/Documents/wins/source/wins_vpn/android/app/src/main/kotlin/org/winsvpn/app/MainActivity.kt	2026-08-15 04:41:41
++++ android/app/src/main/kotlin/org/winsvpn/app/MainActivity.kt	2026-08-17 14:01:40
+@@ -63,10 +63,14 @@
+         // FLAG_SECURE makes the OS render both as blank, closing this off at
+         // the platform level instead of racing an async Dart state update
+         // against the OS's own snapshot timing on every background transition.
+-        window.setFlags(
+-            WindowManager.LayoutParams.FLAG_SECURE,
+-            WindowManager.LayoutParams.FLAG_SECURE
+-        )
++        // Debug builds allow capture so a demo can be screen-recorded; release
++        // builds keep the privacy flag unconditionally.
++        if (!BuildConfig.DEBUG) {
++            window.setFlags(
++                WindowManager.LayoutParams.FLAG_SECURE,
++                WindowManager.LayoutParams.FLAG_SECURE
++            )
++        }
+         WindowCompat.setDecorFitsSystemWindows(window, false)
+         WindowInsetsControllerCompat(window, window.decorView).apply {
+             isAppearanceLightStatusBars = false

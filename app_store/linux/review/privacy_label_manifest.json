@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-linux-privacy-label-v1",
+  "canonical_release": "1.0.17+34",
+  "appstream_version": "1.0.17",
+  "debian_version": "1.0.17-34",
+  "application_label": "Win's VPN",
+  "store_listing_name": "Win's VPN",
+  "privacy_policy_url": "https://www.winsvpn.org/privacy/",
+  "form_factor": "linux-x64",
+  "camouflage": false,
+  "tracking": false,
+  "data_collected": true,
+  "data_shared": false,
+  "listing_screenshot_inventory": "owner-blocked",
+  "private_symbols_uploaded": false,
+  "appimage_upload_target": false,
+  "collected_categories": [
+    "device_or_other_ids",
+    "user_ids",
+    "email_address",
+    "approximate_location",
+    "purchase_history",
+    "app_info",
+    "diagnostics_if_sdk_report_proves"
+  ],
+  "not_collected": [
+    "browsing_history",
+    "dns_query_history",
+    "traffic_content",
+    "raw_vpn_traffic",
+    "destination_activity"
+  ],
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg", "xray"],
+    "required_local_engines": [
+      "winn-datapath",
+      "awg",
+      "awg-quick",
+      "amneziawg-go",
+      "xray",
+      "winsvpn-bypass-bpf"
+    ],
+    "required_native_host": "tools/native_messaging/host/wins_bridge_host"
+  }
+}

@@ -1,0 +1,134 @@
+[Unit]
+# Node-side Single Packet Authorization daemon. See cmd/winn-knockd and
+# docs/SPA_DESIGN.md.
+#
+# THE CRITICAL LINE IN THIS FILE IS ExecStopPost.
+#
+# winn-knockd can only ever ADD authorization. It never removes an element and
+# never writes a rule. So if it dies while the nftables gate is installed, the
+# gate stays up, the allow set stops being refreshed, elements expire, and the
+# gated port goes dark for every user. The daemon cannot prevent that -- it is
+# dead. systemd must.
+#
+# ExecStopPost runs on every exit path systemd controls, including a crash, an
+# OOM kill and SIGKILL. Wiring the revert there is what converts "the daemon
+# died" from an outage into a silent return to the node's pre-SPA behaviour.
+# This is the deliberate fail-OPEN inversion described in internal/spagate's
+# package doc: it is correct here specifically because the users behind this
+# node cannot route around an outage.
+Description=Winn Single Packet Authorization knock daemon
+Documentation=file:///usr/local/share/doc/winn-protocol/SPA_DESIGN.md
+After=network-online.target nftables.service
+Wants=network-online.target
+
+# If the daemon flaps, stop trying and let ExecStopPost leave the gate down
+# rather than oscillating a live node's firewall.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=winn-knockd
+Group=winn-knockd
+# Defaults for env files written before WINN_SPA_FAMILY/WINN_SPA_SET_V6 were
+# added; EnvironmentFile= overrides Environment=.
+Environment=WINN_SPA_FAMILY=inet WINN_SPA_SET_V6=
+EnvironmentFile=/etc/winn/spa/knockd.env
+
+# The SPA key is a credential. LoadCredential hands it to the process through a
+# private tmpfs the unit's own user can read and nothing else can, so the key
+# never sits in a world- or group-readable path and never appears in argv.
+#
+# UNVERIFIED IN TESTING, AND THE FIRST THING TO CHECK IF THE DAEMON WILL NOT
+# START. systemd's credential mechanism could not be exercised in any container
+# available here: on both Debian 12 / systemd 252 and Ubuntu 24.04 / systemd
+# 255, /run/credentials/<unit>/ was never created and the credential was
+# unreadable EVEN FOR A ROOT SERVICE. That points to a container limitation
+# rather than a fault in this unit -- it is the same pattern
+# deploy/systemd/winn-carrier-server.service already uses -- but it means this
+# line has never been observed working. Verify on the real host:
+#
+#   systemctl start winn-knockd && systemctl is-active winn-knockd
+#   journalctl -u winn-knockd -n 20     # a key-read failure names the path
+#
+# If it fails with "reading key file: ... permission denied", the fallback is to
+# drop this line, chown BOTH the key and its directory to winn-knockd (chowning
+# only the file still leaves the 0700 parent untraversable), and point -keys at
+# the path directly:
+#
+#   chown winn-knockd /etc/winn/spa /etc/winn/spa/spa.keys
+#   chmod 400 /etc/winn/spa/spa.keys
+#   # then in ExecStart: -keys /etc/winn/spa/spa.keys
+LoadCredential=spa.keys:/etc/winn/spa/spa.keys
+
+ExecStart=/usr/local/bin/winn-knockd \
+  -keys %d/spa.keys \
+  -listen ${WINN_SPA_LISTEN} \
+  -packet-size ${WINN_SPA_PACKET_SIZE} \
+  -grace ${WINN_SPA_GRACE} \
+  -nft-family=${WINN_SPA_FAMILY} \
+  -nft-table=${WINN_SPA_TABLE} \
+  -nft-set-v4=${WINN_SPA_SET_V4} \
+  -nft-set-v6=${WINN_SPA_SET_V6}
+
+# See the header. This is the fail-open guarantee.
+#
+# The `+` prefix is LOAD-BEARING and its absence was a real defect: without it
+# this runs as User=winn-knockd, winn-spa-nft's own require_root check refuses
+# with "must run as root", the command exits 1, and the table is STILL INSTALLED
+# with no daemon feeding it -- the exact mass-lockout state this line exists to
+# prevent. `+` runs it as root regardless of User=. `-` additionally stops a
+# failure here from masking the daemon's own exit status; the watchdog below is
+# the backstop if it somehow still fails.
+ExecStopPost=-+/usr/local/sbin/winn-spa-nft revert
+
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+KillSignal=SIGTERM
+
+# CAP_NET_ADMIN is required to add an element to an nftables set, and is the
+# only capability this daemon needs. It notably does NOT need CAP_NET_RAW: it
+# reads an ordinary UDP socket, not a raw one.
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN
+NoNewPrivileges=yes
+
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RemoveIPC=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+UMask=0077
+LimitNOFILE=4096
+TasksMax=64
+
+# Sized WITH spagate.DefaultLimits().MaxSources (1<<18), not independently.
+# The rate limiter tracks up to MaxSources spoofable source addresses at roughly
+# 128 bytes of heap each, so 1<<18 is ~33 MB heap / ~42 MB RSS. The previous
+# pairing (MemoryMax=128M against MaxSources=1<<20, which needs ~166 MB RSS) was
+# unreachable: the daemon was OOM-killed at roughly 700-800k spoofed sources,
+# which handed an off-path spoofer a way to stop SPA deterministically and let
+# StartLimitBurst settle it in a failed state. Raising either of these without
+# the other reintroduces that.
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

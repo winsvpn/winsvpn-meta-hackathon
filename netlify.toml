@@ -1,0 +1,17 @@
+[[redirects]]
+from = "/referral/:code"
+to = "https://sync.winsvpn.org/referral/:code"
+status = 200
+force = true
+
+[[redirects]]
+from = "/ref/:code"
+to = "https://sync.winsvpn.org/referral/:code"
+status = 200
+force = true
+
+[[redirects]]
+from = "/pay/:option"
+to = "https://sync.winsvpn.org/pay/:option"
+status = 302
+force = true

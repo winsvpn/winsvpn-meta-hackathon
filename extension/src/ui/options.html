@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Win's VPN Proxy: sites &amp; settings</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body class="page">
+    <h1 id="whatTitle"></h1>
+    <div id="whatBody"></div>
+
+    <label for="copyLocale">Language</label>
+    <select id="copyLocale">
+      <option value="">Browser or desktop preference</option>
+      <option value="en">English</option>
+      <option value="my" disabled>Burmese (awaiting translation review)</option>
+    </select>
+
+    <h2 id="routingSettingsHeading">Which sites go through the tunnel</h2>
+    <div class="card" id="routingModeCard">
+      <label class="choice">
+        <input type="radio" name="mode" value="all" id="modeAll" />
+        <span id="modeAllLabel"></span>
+        <span class="cost" id="modeAllCost"></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="mode" value="listed" id="modeListed" />
+        <span id="modeListedLabel"></span>
+        <span class="cost" id="modeListedCost"></span>
+      </label>
+    </div>
+
+    <div class="card" id="routingRuleCard">
+      <p id="listHeading" class="headline"></p>
+      <div class="row">
+        <input type="text" id="ruleInput" aria-labelledby="listHeading" aria-describedby="ruleHelp ruleError" placeholder="example.com" autocomplete="off" spellcheck="false" />
+        <button id="addRule">Add</button>
+      </div>
+      <p class="small muted" id="ruleHelp">
+        One website name per entry. A name covers that site and everything under
+        it: example.com also covers news.example.com. Addresses and page paths
+        are not accepted: routing is chosen when the connection is made, before
+        any page path exists, so a rule with a path is one no browser could keep.
+      </p>
+      <p class="small err" id="ruleError" hidden></p>
+      <ul class="rules" id="ruleList"></ul>
+    </div>
+
+    <h2>What this browser is doing right now</h2>
+    <div class="card">
+      <p class="headline" id="liveHeadline"></p>
+      <p class="detail" id="liveDetail"></p>
+      <p class="small muted" id="liveMechanism"></p>
+      <p class="small muted" id="liveControl"></p>
+      <p class="small muted" id="livePrivacy"></p>
+      <p class="small muted" id="liveIncognito"></p>
+    </div>
+
+    <div class="card" id="firefoxCard" hidden>
+      <p class="headline">Give this proxy permission to answer the desktop app</p>
+      <p class="detail" id="firefoxDetail"></p>
+      <div class="row"><button id="grantHost" class="primary">Give permission</button></div>
+      <p class="small err" id="grantOutcome" hidden></p>
+    </div>
+
+    <h2 id="pairingHeading">Desktop app pairing</h2>
+    <div class="card" id="pairingCard">
+      <p class="detail" id="pairingStatus"></p>
+      <div class="row">
+        <button id="forgetPairing">Forget this pairing</button>
+      </div>
+      <p class="small muted" id="pairingNote"></p>
+    </div>
+
+    <h2>What is saved on this computer</h2>
+    <div class="card">
+      <p id="storageNote"></p>
+      <div class="row">
+        <button id="panic" class="danger"></button>
+      </div>
+      <p class="small muted" id="panicCost"></p>
+    </div>
+
+    <h2>What this proxy extension cannot do</h2>
+    <div class="card">
+      <ul id="cannot"></ul>
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

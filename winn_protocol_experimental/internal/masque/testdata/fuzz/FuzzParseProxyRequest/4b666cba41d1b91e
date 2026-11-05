@@ -1,0 +1,6 @@
+go test fuzz v1
+string("CONNECT")
+string("connect-udp")
+string("proxy.example.com")
+string("0")
+string("@")

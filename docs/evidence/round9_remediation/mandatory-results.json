@@ -1,0 +1,170 @@
+[
+  {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:28.994888+00:00",
+    "exit_code": 0,
+    "seconds": 3.04,
+    "log": "flutter-analyze.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:32.031339+00:00",
+    "exit_code": 0,
+    "seconds": 16.18,
+    "log": "flutter-test.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_deepseek_round2.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:30.150096+00:00",
+    "exit_code": 0,
+    "seconds": 1.86,
+    "log": "control_plane_deepseek_round2.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round4.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:32.013681+00:00",
+    "exit_code": 0,
+    "seconds": 2.97,
+    "log": "control_plane_round4.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round5.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:34.984441+00:00",
+    "exit_code": 0,
+    "seconds": 3.64,
+    "log": "control_plane_round5.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round6.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:38.623374+00:00",
+    "exit_code": 0,
+    "seconds": 3.04,
+    "log": "control_plane_round6.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round7.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:41.664682+00:00",
+    "exit_code": 0,
+    "seconds": 6.63,
+    "log": "control_plane_round7.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_control_plane_round8.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:48.293022+00:00",
+    "exit_code": 0,
+    "seconds": 2.95,
+    "log": "control_plane_round8.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_winn3_descriptor_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:35:51.243076+00:00",
+    "exit_code": 0,
+    "seconds": 20.33,
+    "log": "winn3_descriptor_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "server/test_account_deletion_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:36:11.570910+00:00",
+    "exit_code": 0,
+    "seconds": 3.26,
+    "log": "account_deletion_hub.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/website_security_audit.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:38:01.961749+00:00",
+    "exit_code": 0,
+    "seconds": 0.37,
+    "log": "website.log"
+  },
+  {
+    "command": [
+      "sh",
+      "tools/verify_rulings.sh"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:44:43.238855+00:00",
+    "exit_code": 0,
+    "seconds": 3.01,
+    "log": "rulings.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/verify_apple_method_channel_contract.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:38:44.400976+00:00",
+    "exit_code": 0,
+    "seconds": 0.05,
+    "log": "apple-contract.log"
+  },
+  {
+    "command": [
+      "python3",
+      "tools/test_apple_standalone_v3_wiring.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:41:08.026014+00:00",
+    "exit_code": 0,
+    "seconds": 0.08,
+    "log": "apple-wiring.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3/winn_protocol_experimental",
+    "started_at": "2026-09-13T19:39:59.959618+00:00",
+    "exit_code": 0,
+    "seconds": 81.03,
+    "log": "go-all.log"
+  }
+]

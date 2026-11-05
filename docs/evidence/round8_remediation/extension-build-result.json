@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python3",
+    "extension/build.py",
+    "edge",
+    "firefox"
+  ],
+  "exit_code": 0,
+  "rebuild_identical_to_verified_archives": true,
+  "sha256": {
+    "extension/dist/wins-vpn-companion-edge.zip": "22734014d0f1caa7dff0c851f6de99d371d2309e737667ba6c25d290e3d90875",
+    "extension/dist/wins-vpn-companion-firefox.zip": "e5a9a17bbb21ecb51231c2cd67964401eba72d6ede604e9224db120ce6b9ec58"
+  }
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default (English) strings for the watch app.
+
+  Everything the watch can put in front of a user lives here rather than in
+  Kotlin, because Android picks a translation by resource qualifier: a string
+  compiled into a .kt file can never follow the watch's language, no matter what
+  else is configured. Adding res/values-<lang>/strings.xml is then the whole job
+  of supporting a new language; see res/values-my/strings.xml.
+-->
+<resources>
+    <!--
+      THIS IS THE WATCH'S ENTIRE NAMING SURFACE, AND IT IS A PERMANENT
+      DISGUISE, NOT A STATE THAT FOLLOWS ANYTHING LIVE.
+
+      android:label on this app's own <application> element (see
+      AndroidManifest.xml) is "@string/app_name" — a resource reference, so
+      Settings > Apps resolves this value at read time. So do the two
+      "Open %1$s on phone" lines in WatchScreens.kt. Fixing the value here is
+      therefore the whole fix: there is no second place it needs to change.
+
+      Why this cannot instead FOLLOW the phone's camouflage state the way
+      VpnTunnelService.kt's policy functions do for the phone's own latched
+      surfaces (session name, both notification channels, the Recents card):
+
+        - There is no camouflage signal on the watch to follow in the first
+          place. The PIN, the decoy and the sticky enrollment flag all live
+          on the phone; the wire snapshot this app renders (PhoneSnapshot in
+          WatchLink.kt) deliberately carries none of them. Adding one would
+          make the disguise depend on a live Bluetooth round trip to a phone
+          that may not be in the room — failing OPEN, silently, exactly when
+          the watch is on a wrist and the phone is not. Worse than no
+          disguise at all.
+        - Even granted a signal, this value is resolved into the compiled
+          resource table once, at build time, and nothing on the watch can
+          rename it afterwards — the same fact that makes the phone's own
+          <application android:label> permanent; see the long comment on
+          that attribute in android/app/src/main/AndroidManifest.xml.
+        - The phone's escape hatch for a user who is NOT disguised — the
+          .LauncherReal activity-alias, which overrides the application
+          label for the launcher entry only — has no watch equivalent: this
+          app declares exactly one <activity> and no aliases. Building one
+          here would mean inventing a second disguise mechanism for a module
+          that has no safe way to drive even the first.
+
+      So this value does not vary with anything. It must always equal
+      VpnTunnelService.DISGUISED_DISPLAY_NAME (currently "Calculator"), never
+      the product's real, undisguised name, in every locale this app ships —
+      including the one locale registered here that none of this app's other
+      Android sources use (values-my/, see its own comment on why it can
+      never carry an override).
+
+      Pinned by two independent guards: WatchAppNameCamouflageTest (this
+      module's own build, which cannot see the other module) and
+      CamouflageLatchedSurfaceTest's census (the phone module's build, which
+      now walks this tree too). Two, not one, because this exact line
+      regressed once already — fixed and verified on 2026-08-06
+      (docs/handoff/WATCH_COMPANION_AND_RESIDUAL_BRAND_LEAKS_20260806.md),
+      found carrying the real name again on 2026-08-08.
+    -->
+    <string name="app_name">Calculator</string>
+
+    <!-- Label on the big round connect/disconnect button. Kept to one short
+         word: it has to fit inside a watch-sized circle. -->
+    <string name="watch_toggle_phone_unreachable">Phone</string>
+    <string name="watch_toggle_cancel">Cancel</string>
+    <string name="watch_toggle_on">On</string>
+    <string name="watch_toggle_off">Off</string>
+    <string name="watch_toggle_retry">Retry</string>
+
+    <!-- The single line of explanation under the button. Every one of these is
+         a state that would otherwise look like an unexplained dead button. -->
+    <string name="watch_status_reaching_phone">Reaching phone…</string>
+    <string name="watch_status_phone_unreachable">Phone not reachable</string>
+    <string name="watch_status_approve_on_phone">Approve VPN on phone</string>
+    <string name="watch_status_connecting">Connecting…</string>
+    <string name="watch_status_disconnecting">Disconnecting…</string>
+    <string name="watch_status_connection_failed">Connection failed</string>
+    <string name="watch_status_connected">Connected</string>
+    <string name="watch_status_not_connected">Not connected</string>
+    <!-- %1$s is the app name. Passed in rather than written out so translators
+         cannot accidentally translate or mistype the brand. -->
+    <string name="watch_status_open_app_on_phone">Open %1$s on phone</string>
+
+    <!-- Country picker. -->
+    <string name="watch_country_choose">Choose country</string>
+    <string name="watch_country_none_available">No servers yet</string>
+    <string name="watch_country_list_title">Country</string>
+    <!-- %1$s is the app name. -->
+    <string name="watch_country_list_empty">Open %1$s on your phone to load servers.</string>
+
+    <!-- Server load bar, spoken by TalkBack. %1$d is 0..100 in steps of 5. -->
+    <string name="watch_server_load_percent">Server load %1$d%%</string>
+    <string name="watch_server_load_unknown">Server load unknown</string>
+</resources>

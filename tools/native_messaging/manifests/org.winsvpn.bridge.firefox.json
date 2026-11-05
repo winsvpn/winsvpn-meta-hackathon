@@ -1,0 +1,20 @@
+{
+  "name": "org.winsvpn.bridge",
+  "description": "Win's VPN browser bridge",
+  "path": "PLACEHOLDER_ABSOLUTE_PATH_TO_HOST",
+  "type": "stdio",
+  // TEMPLATE, not an installed manifest. install_native_host.sh writes the
+  // installed file itself and refuses any id that is not the store-listing one
+  // below; this file is the pattern a packager follows and the value a build
+  // gate checks.
+  //
+  // REQUIRED VALUE: companion@winsvpn.org, the store-listing add-on id. It is
+  // the same value as browser_specific_settings.gecko.id in
+  // extension/manifest/firefox.jsonc, which is the canonical source
+  // check_host_manifests.py reads at build time: the two disagreeing fails
+  // the build, because Firefox would refuse the host with no user-visible
+  // error.
+  "allowed_extensions": [
+    "companion@winsvpn.org"
+  ]
+}

@@ -1,0 +1,1110 @@
+--- before/docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md
++++ after/docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md
+@@ -347,3 +347,32 @@
+ operations are simulated in the lifecycle harness, so actual packaged route and
+ firewall cleanup remains a target-device acceptance step. Cursor/Grok usage limits
+ and workspace-agent initialization failures prevented independent model review.
++
++
++### 2026-09-13: requested Round 7 source remediation
++
++Implemented all ten requested defect groups: independent Monero consensus,
++durable stale-peer cleanup, bearer rotation on slot replacement, admission
++rollback on direct/Double VPN exit sync failure, worker offload for all four
++account-deletion routes, authenticated account status and Dart bearer headers,
++fail-closed expiration, bounded durations, named Linux inhibitor service and
++Linux/Android socket-buffer comparison units. F11 resides in the Go carrier
++helper rather than the C++ runner. Free-access timestamps and one-time legacy
++migration were reconciled with strict expiration validation.
++
++Validation: all eight mandatory commands pass. Flutter analyzer clean; 1926
++Flutter tests pass with 2 existing live skips; server suites pass 11, 8, 16, 7
++and 117 tests; website passes 56 checks with 1 explicit skip. New Round 7 server
++suite: 17 pass and saved pre-fix source fails. Existing deletion, expiry and
++crypto suites pass. Go carrier race tests, Linux arm64/x64 compilation,
++inhibitor command harnesses, real Linux loopback socket tests and all 65 ruled
++invariants pass. Details, final hashes and logs:
++[Round 7 remediation](../evidence/round7_remediation.md).
++
++Remaining: Android phone smoke is blocked by the absent reviewed input index
++and release APK. The producer explicitly refuses without ReleaseInputIndex;
++the owner was asked for the path. Actual desktop systemd/logind inhibition and
++deployed control-plane behavior are not certified by these local tests.
++Existing working changes were preserved. No uninstall/install, deployment,
++push or release approval occurred. Cursor usage limits and workspace-agent
++initialization failure prevented independent model review.
+--- before/lib/main.dart
++++ after/lib/main.dart
+@@ -10376,6 +10376,12 @@
+     final token = await _currentAccountNumberForRefresh();
+     if (!_accountEpochIsCurrent(operationEpoch)) return false;
+     if (token.replaceAll('-', '').length != 12) return false;
++    final storedDeviceAuthToken = await _readDeviceAuthToken();
++    if (!_accountEpochIsCurrent(operationEpoch)) return false;
++    if (storedDeviceAuthToken == null || storedDeviceAuthToken.isEmpty) {
++      _debugLog('Account status sync skipped: device auth token unavailable.');
++      return false;
++    }
+     _lastAccountStatusSync = DateTime.now();
+ 
+     final endpoints = await _resolveDynamicEndpoints();
+@@ -10391,10 +10397,13 @@
+       'device_fingerprint': _appScopedDeviceId,
+     });
+ 
++    final statusHeaders = _jsonHeaders();
++    statusHeaders['Authorization'] = 'Bearer $storedDeviceAuthToken';
++
+     for (final url in gateways) {
+       try {
+         final response = await _controlPlaneClient
+-            .post(Uri.parse(url), headers: _jsonHeaders(), body: payload)
++            .post(Uri.parse(url), headers: statusHeaders, body: payload)
+             .timeout(const Duration(seconds: 5));
+         if (!_accountEpochIsCurrent(operationEpoch)) return false;
+         if (response.statusCode == 404 || response.statusCode == 401) {
+--- before/linux/runner/linux_tunnel_backend.cc
++++ after/linux/runner/linux_tunnel_backend.cc
+@@ -880,43 +880,22 @@
+   return path;
+ }
+ 
+-std::string PowerInhibitPidFile() {
+-  const std::string directory = DataDirectory();
+-  return directory.empty() ? "" : directory + "/wins_vpn_power_inhibit.pid";
+-}
+-
+ void StartTunnelPowerProtection() {
+-  const std::string pid_file = PowerInhibitPidFile();
+-  if (pid_file.empty()) {
++  if (RunArgv({"systemctl", "--user", "is-active", "--quiet",
++               "winsvpn-power-inhibit.service"},
++              ProcOutput::kSuppress).exit_status == 0) {
+     return;
+   }
+-  // The script body is a literal; the only dynamic value (the pid file path)
+-  // crosses as $1, so no quoting is involved anywhere.
+-  RunShScript(
+-      "PID_FILE=\"$1\"\n"
+-      "if command -v systemd-inhibit >/dev/null 2>&1; then\n"
+-      "  if [ -s \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" "
+-      ">/dev/null 2>&1; then exit 0; fi\n"
+-      "  nohup systemd-inhibit --what=sleep:idle --why=\"Win's VPN active "
+-      "tunnel\" --mode=block sleep infinity >/dev/null 2>&1 &\n"
+-      "  echo $! > \"$PID_FILE\"\n"
+-      "fi\n",
+-      "winsvpn-power-inhibit", {pid_file}, ProcOutput::kSuppress);
++  RunArgv({"systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
++           "--collect", "--property=Type=exec", "systemd-inhibit",
++           "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
++           "sleep", "infinity"},
++          ProcOutput::kSuppress);
+ }
+ 
+ void StopTunnelPowerProtection() {
+-  const std::string pid_file = PowerInhibitPidFile();
+-  if (pid_file.empty()) {
+-    return;
+-  }
+-  RunShScript(
+-      "PID_FILE=\"$1\"\n"
+-      "if [ -s \"$PID_FILE\" ]; then\n"
+-      "  PID=\"$(cat \"$PID_FILE\")\"\n"
+-      "  kill \"$PID\" >/dev/null 2>&1 || true\n"
+-      "  rm -f \"$PID_FILE\"\n"
+-      "fi\n",
+-      "winsvpn-power-inhibit", {pid_file}, ProcOutput::kSuppress);
++  RunArgv({"systemctl", "--user", "stop", "winsvpn-power-inhibit.service"},
++          ProcOutput::kSuppress);
+ }
+ 
+ // Atomically and safely writes content to path: the directory component is
+--- before/server/test_account_expiry_revocation_hub.py
++++ after/server/test_account_expiry_revocation_hub.py
+@@ -17,7 +17,7 @@
+ 
+ def seed_expiring_runtime(mod, *, status="active"):
+     expiry = (mod.utcnow() - timedelta(minutes=5)).isoformat()
+-    seed_account(mod, devices=1, expiration=expiry)
++    tokens = seed_account(mod, devices=1, expiration=expiry)
+     with sqlite3.connect(mod._DB) as conn:
+         conn.row_factory = sqlite3.Row
+         conn.execute(
+@@ -30,6 +30,7 @@
+             (status, ACCOUNT),
+         )
+         conn.commit()
++    return tokens
+ 
+ 
+ def counts(mod):
+@@ -49,12 +50,13 @@
+ 
+ def test_status_transition_queues_revocation_before_expired_response():
+     mod = load_hub()
+-    seed_expiring_runtime(mod)
++    tokens = seed_expiring_runtime(mod)
++    device, token = next(iter(tokens.items()))
+     tasks = BackgroundTasks()
+     payload = asyncio.run(
+         mod.account_status(
+-            mod.AccountStatusRequest(account_number=ACCOUNT),
+-            FakeRequest(path="/account/status"),
++            mod.AccountStatusRequest(account_number=ACCOUNT, device_id=device),
++            FakeRequest(path="/account/status", headers={"authorization": f"Bearer {token}"}),
+             tasks,
+         )
+     )
+--- before/server/test_control_plane_deepseek_round2.py
++++ after/server/test_control_plane_deepseek_round2.py
+@@ -3,6 +3,7 @@
+ import _toolchain  # noqa: F401
+ import hmac
+ import os
++import shutil
+ import sqlite3
+ import unittest
+ from datetime import datetime, timedelta, timezone
+@@ -11,17 +12,16 @@
+ 
+ 
+ class ControlPlaneDeepSeekRound2Tests(unittest.TestCase):
+-    @classmethod
+-    def setUpClass(cls):
+-        cls.mod = load_hub()
+-
+     def setUp(self):
++        # Each scenario owns its database, including legacy migration state.
++        self.mod = load_hub()
+         self.conn = sqlite3.connect(self.mod._DB)
+         self.conn.row_factory = sqlite3.Row
+         self.mod.ensure_schema(self.conn)
+ 
+     def tearDown(self):
+         self.conn.close()
++        shutil.rmtree(self.mod._TMPDIR)
+ 
+     # =========================================================================
+     # F-3.1: Timezone-aware UTC timestamping across control plane
+--- before/server/wins_control_plane_setup_ONETOUCH.sh
++++ after/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -8663,8 +8663,9 @@
+     ))
+     cutoff = (utcnow() - timedelta(days=FREE_ACCESS_EVENTS_RETENTION_DAYS)).isoformat()
+     conn.execute("DELETE FROM free_access_events WHERE created_at < ?", (cutoff,))
+-    # F-3.2: idempotent migration of legacy lifetime accounts anchored to created_at
+-    migrate_legacy_lifetime(conn)
++    # Migrate the legacy snapshot once. Later missing expirations must fail closed.
++    if not table_exists(conn, "users_pre_lifetime_migration_2025"):
++        migrate_legacy_lifetime(conn)
+     archive_terminal_payment_orders(conn)
+ 
+ def get_setting(conn: sqlite3.Connection, key: str, default: str) -> str:
+@@ -10171,17 +10172,26 @@
+     except (ValueError, OverflowError):
+         return None
+ 
++class DurationParseError(ValueError):
++    """An invalid or unsupported account access duration."""
++
++
+ def parse_duration(duration: str):
+-    duration = (duration or "1m").strip().lower()
+-    if duration in {"lifetime", "life", "10y"}:
++    raw = duration.strip().lower() if isinstance(duration, str) else ""
++    if raw in {"lifetime", "life", "10y"}:
+         return relativedelta(years=10)
+-    if duration.endswith("y") and duration[:-1].isdigit():
+-        return relativedelta(years=int(duration[:-1]))
+-    if duration.endswith("m") and duration[:-1].isdigit():
+-        return relativedelta(months=int(duration[:-1]))
+-    if duration.endswith("d") and duration[:-1].isdigit():
+-        return relativedelta(days=int(duration[:-1]))
+-    return relativedelta(months=1)
++    match = re.fullmatch(r"([1-9][0-9]{0,3})([dmy])", raw)
++    if match is None:
++        raise DurationParseError("duration must be 1d to 3650d, 1m to 120m, or 1y to 10y")
++    amount = int(match.group(1))
++    unit = match.group(2)
++    if amount > {"d": 3650, "m": 120, "y": 10}[unit]:
++        raise DurationParseError("duration exceeds the 10-year maximum")
++    if unit == "d":
++        return relativedelta(days=amount)
++    if unit == "m":
++        return relativedelta(months=amount)
++    return relativedelta(years=amount)
+ 
+ AWG_OBFUSCATION_MAX = 0xFFFFFFFF
+ 
+@@ -13989,8 +13999,8 @@
+         for row in rows:
+             client_key = (row["client_public_key"] or "").strip()
+             node_ip = row["ssh_host"] or extract_node_host(row["endpoint"] or "")
+-            if background_tasks is not None and client_key and node_ip:
+-                background_tasks.add_task(remove_peer_from_node, node_ip, client_key)
++            if client_key and node_ip:
++                queue_peer_revocation(conn, node_ip, client_key, background_tasks)
+         conn.execute("DELETE FROM devices WHERE last_seen IS NULL OR last_seen < ?", (cutoff,))
+     # Double VPN assignments deliberately retain their client IP while the
+     # owning device still exists, including when Double VPN is temporarily
+@@ -17279,7 +17289,7 @@
+         dec = Decimal(str(value).strip())
+     except (InvalidOperation, TypeError, ValueError):
+         return None
+-    return dec if dec > 0 else None
++    return dec if dec.is_finite() and dec > 0 else None
+ 
+ def extract_xmr_usd_price(data: Any) -> Optional[Decimal]:
+     # Tolerant parser so the operator can point MONERO_PRICE_API_URL at any common
+@@ -17362,33 +17372,49 @@
+     urls = MONERO_PRICE_SOURCE_URLS
+     if not urls:
+         raise RuntimeError("no Monero price source is configured")
+-    quotes = []
+-    sources = []
++    quotes_by_host = {}
+     for url in urls:
+-        host = urllib.parse.urlsplit(url).hostname or url
+         try:
+-            quote = fetch_bounded_monero_price(url)
++            host = (urllib.parse.urlsplit(url).hostname or "").lower().rstrip(".")
++        except ValueError:
++            logger.warning("Monero price source has an invalid origin")
++            continue
++        if not host or host in quotes_by_host:
++            continue
++        try:
++            quote = _to_positive_decimal(fetch_bounded_monero_price(url))
++            if quote is None:
++                raise RuntimeError("Monero price is not a finite positive decimal")
+         except RuntimeError as exc:
+             logger.warning("Monero price source unavailable (%s): %s", host, exc)
+             continue
+-        quotes.append(quote)
+-        sources.append(host)
+-    if not quotes:
++        quotes_by_host[host] = quote
++    if not quotes_by_host:
+         raise RuntimeError("no Monero price source was reachable")
+-    quotes_sorted = sorted(quotes)
+-    if len(quotes_sorted) >= 2:
+-        median = quotes_sorted[len(quotes_sorted) // 2]
+-        if last_quote > 0 and abs(median - last_quote) / last_quote > MONERO_PRICE_MAX_DEVIATION:
++    quotes_sorted = sorted(quotes_by_host.values())
++    baseline = _to_positive_decimal(last_quote)
++    try:
++        if len(quotes_sorted) >= 2:
++            if (quotes_sorted[-1] - quotes_sorted[0]) / quotes_sorted[0] > MONERO_PRICE_MAX_DEVIATION:
++                raise RuntimeError("independent Monero quotes disagree beyond the reviewed bound")
++            middle = len(quotes_sorted) // 2
++            median = quotes_sorted[middle]
++            if len(quotes_sorted) % 2 == 0:
++                median = quotes_sorted[middle - 1] / 2 + median / 2
++            if not median.is_finite() or median <= 0:
++                raise RuntimeError("Monero quote median is not a finite positive decimal")
++            if baseline is not None and abs(median - baseline) / baseline > MONERO_PRICE_MAX_DEVIATION:
++                raise RuntimeError("Monero quote changed beyond the reviewed bound")
++            return median, "median:" + ",".join(sorted(quotes_by_host))
++        # One origin needs a positive, finite persisted baseline.
++        single = quotes_sorted[0]
++        if baseline is None:
++            raise RuntimeError("insufficient independent Monero quotes")
++        if abs(single - baseline) / baseline > MONERO_PRICE_MAX_DEVIATION:
+             raise RuntimeError("Monero quote changed beyond the reviewed bound")
+-        return median, "median:" + ",".join(sorted(set(sources)))
+-    # Exactly one source answered: only trust it inside a deviation band of a known-good
+-    # last quote, so a single flexible oracle cannot dictate an arbitrary rate.
+-    single = quotes_sorted[0]
+-    if last_quote <= 0:
+-        raise RuntimeError("insufficient independent Monero quotes")
+-    if abs(single - last_quote) / last_quote > MONERO_PRICE_MAX_DEVIATION:
+-        raise RuntimeError("Monero quote changed beyond the reviewed bound")
+-    return single, sources[0]
++        return single, next(iter(quotes_by_host))
++    except ArithmeticError as exc:
++        raise RuntimeError("Monero quote arithmetic exceeded the supported bounds") from exc
+ 
+ def monero_usd_to_atomic(amount_usd: str, usd_per_xmr: Decimal) -> int:
+     # Convert a USD plan price to piconero at the given USD-per-XMR rate, rounding to
+@@ -18250,8 +18276,9 @@
+     if not row:
+         return False
+     status = str(row["status"] or "")
+-    expires_at = parse_iso_datetime(row["expiration_date"])
+-    due = expires_at is not None and utcnow() > expires_at
++    raw_expiration = str(row["expiration_date"] or "").strip()
++    expires_at = parse_iso_datetime(raw_expiration)
++    due = not raw_expiration or expires_at is None or utcnow() > expires_at
+     if status == "active" and due:
+         conn.execute(
+             "UPDATE users SET status='expired' "
+@@ -19932,6 +19959,9 @@
+     background_tasks: BackgroundTasks,
+ ):
+     acc = normalize_account_number(status_request.account_number)
++    dev_id = (status_request.device_id or "").strip()
++    if not dev_id:
++        raise HTTPException(status_code=401, detail="Unauthorized")
+     with get_db() as conn:
+         ensure_schema(conn)
+         check_rate_limit(
+@@ -19946,6 +19976,7 @@
+             VERIFY_ACCOUNT_RATE_LIMIT_PER_HOUR,
+             3600,
+         )
++        require_device_auth_token(conn, acc, dev_id, request, action="account status")
+         user_row = conn.execute(
+             "SELECT status, expiration_date FROM users WHERE account_number = ?",
+             (acc,),
+@@ -19955,14 +19986,6 @@
+         user = dict(user_row)
+         if expire_account_runtime_if_due(conn, acc, background_tasks):
+             user["status"] = "expired"
+-        dev_id = (status_request.device_id or "").strip()
+-        if dev_id:
+-            dev_row = conn.execute(
+-                "SELECT 1 FROM devices WHERE account_number = ? AND device_id = ?",
+-                (acc, dev_id),
+-            ).fetchone()
+-            if not dev_row:
+-                raise HTTPException(status_code=404, detail="Device has been removed or logged out from this account")
+         exp_out = user.get("expiration_date") or "Lifetime Access"
+         payload = {
+             "status": "ok" if user.get("status") == "active" else user.get("status"),
+@@ -20076,9 +20099,7 @@
+             raise HTTPException(status_code=403, detail="Free account must use the free server.")
+         if user.get("status") != "active":
+             alert_failed_login(fastapi_request, "account_inactive", acc)
+-        exp = parse_iso_datetime(user.get("expiration_date"))
+-        if exp and utcnow() > exp:
+-            expire_account_runtime_if_due(conn, acc, background_tasks)
++        if expire_account_runtime_if_due(conn, acc, background_tasks):
+             # alert_failed_login raises. Commit the status, device deletion,
+             # and durable revocation outbox before returning that terminal 401.
+             conn.commit()
+@@ -20162,8 +20183,8 @@
+         if user_row is None or user_row["status"] != "active":
+             raise HTTPException(status_code=401, detail="Account is no longer active.")
+         user = dict(user_row)
+-        current_expiry = parse_iso_datetime(user.get("expiration_date"))
+-        if current_expiry is not None and current_expiry <= utcnow():
++        if expire_account_runtime_if_due(conn, acc, background_tasks):
++            conn.commit()
+             raise HTTPException(status_code=401, detail="Account Expired. Renew subscription.")
+         if not login.free_access and (
+             acc == FREE_ACCESS_ACCOUNT_NUMBER
+@@ -20297,12 +20318,8 @@
+         old_peer_to_remove = ""
+         old_peer_node_ip = ""
+         old_location_slug = ""
+-        # M-5: issued only on this device row's first-ever activation (new
+-        # device) or, for a device row that predates this control, on the
+-        # first reconnect after it shipped (one-time backfill so every
+-        # device eventually gets a scoped credential without ever forcing a
+-        # re-issue -- and re-send over the wire -- once one is already on
+-        # file). Never re-returned once device_auth_token_hash is set.
++        # Issue a fresh bearer for enrollment, including slot replacement.
++        # Authenticated reconnects retain their bearer; legacy rows are backfilled.
+         issued_device_auth_token = None
+         if device_row:
+             device_cfg = dict(device_row)
+@@ -20326,7 +20343,7 @@
+                 device_cfg["preshared_key"] = maybe_generate_preshared_key()
+             elif not AWG_PRESHARED_KEYS_ENABLED and (device_cfg.get("preshared_key") or ""):
+                 device_cfg["preshared_key"] = ""
+-            if not (device_cfg.get("device_auth_token_hash") or ""):
++            if (not login.free_access and authorization_kind == "enrollment") or not (device_cfg.get("device_auth_token_hash") or ""):
+                 issued_device_auth_token = secrets.token_urlsafe(32)
+                 device_cfg["device_auth_token_hash"] = token_digest(issued_device_auth_token)
+             seen_at = utcnow().isoformat()
+@@ -20530,11 +20547,13 @@
+                 "preshared_key": "",
+                 "node_max_peers": node.get("max_peers"),
+             }):
++                conn.rollback()
+                 mark_node_management_status(conn, node["slug"], "failed", "double vpn exit peer sync failed")
+                 conn.commit()
+                 raise HTTPException(status_code=503, detail="Selected Double VPN exit node is not ready. Please try again in a minute.")
+             mark_node_management_status(conn, node["slug"], "ok")
+         elif not sync_peer_to_node(node_ssh_host, device_cfg):
++            conn.rollback()
+             mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
+             conn.commit()
+             raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
+@@ -21010,7 +21029,7 @@
+             "flag": node.get("flag") or "🌐",
+             "status": node.get("status") or "online",
+         }
+-        exp_out = user.get("expiration_date") or "Lifetime Access"
++        exp_out = FREE_ACCESS_LABEL if login.free_access else user.get("expiration_date")
+         response_payload = {
+             "status": "authenticated",
+             "free_access": bool(login.free_access),
+@@ -21040,11 +21059,9 @@
+             "vpnconfig": vpn_config_compat,
+         }
+         if issued_device_auth_token:
+-            # M-5: only present on first-ever activation of this device row
+-            # (or its one-time backfill) -- never resent on a plain
+-            # reconnect. The client must store this and send it back as
+-            # `Authorization: Bearer <token>` to /logout and any other
+-            # device-mutation endpoint.
++            # Enrollment and legacy backfill return a fresh bearer. Plain
++            # reconnects retain the stored token. The client must persist this
++            # token and send Authorization: Bearer for authenticated device APIs.
+             response_payload["device_auth_token"] = issued_device_auth_token
+             response_payload["deviceauthtoken"] = issued_device_auth_token
+         if login.free_access:
+@@ -21212,7 +21229,7 @@
+                 expiration_date=excluded.expiration_date,
+                 hardware_hash=excluded.hardware_hash,
+                 renewal_source='free_access'
+-        """, (account_number, FREE_ACCESS_LABEL, hardware_fingerprint, utcnow().isoformat()))
++        """, (account_number, lifetime_expiry(), hardware_fingerprint, utcnow().isoformat()))
+         selected_slug = node["slug"] or FREE_ACCESS_NODE_SLUG
+         record_free_access_event(
+             conn,
+@@ -21725,6 +21742,12 @@
+ @app.post("/account/deletion/status")
+ async def account_deletion_status(request: Request, background_tasks: BackgroundTasks):
+     body = await read_request_body_mapping(request)
++    return await asyncio.to_thread(
++        _account_deletion_status_sync, request, background_tasks, body
++    )
++
++
++def _account_deletion_status_sync(request: Request, background_tasks: BackgroundTasks, body: dict):
+     with get_db() as conn:
+         ensure_schema(conn)
+         acc, dev = authenticate_deletion_caller(conn, request, "account deletion status", body)
+@@ -21737,6 +21760,12 @@
+ @app.post("/account/deletion/request")
+ async def account_deletion_request(request: Request, background_tasks: BackgroundTasks):
+     body = await read_request_body_mapping(request)
++    return await asyncio.to_thread(
++        _account_deletion_request_sync, request, background_tasks, body
++    )
++
++
++def _account_deletion_request_sync(request: Request, background_tasks: BackgroundTasks, body: dict):
+     with get_db() as conn:
+         ensure_schema(conn)
+         acc, dev = authenticate_deletion_caller(conn, request, "account deletion request", body)
+@@ -21792,6 +21821,12 @@
+ @app.post("/account/deletion/confirm")
+ async def account_deletion_confirm(request: Request, background_tasks: BackgroundTasks):
+     body = await read_request_body_mapping(request)
++    return await asyncio.to_thread(
++        _account_deletion_confirm_sync, request, background_tasks, body
++    )
++
++
++def _account_deletion_confirm_sync(request: Request, background_tasks: BackgroundTasks, body: dict):
+     with get_db() as conn:
+         ensure_schema(conn)
+         acc, dev = authenticate_deletion_caller(conn, request, "account deletion confirm", body)
+@@ -21811,6 +21846,12 @@
+ @app.post("/account/deletion/cancel")
+ async def account_deletion_cancel(request: Request, background_tasks: BackgroundTasks):
+     body = await read_request_body_mapping(request)
++    return await asyncio.to_thread(
++        _account_deletion_cancel_sync, request, background_tasks, body
++    )
++
++
++def _account_deletion_cancel_sync(request: Request, background_tasks: BackgroundTasks, body: dict):
+     with get_db() as conn:
+         ensure_schema(conn)
+         acc, dev = authenticate_deletion_caller(conn, request, "account deletion cancel", body)
+@@ -24848,7 +24889,10 @@
+ @app.post("/admin/provision")
+ async def provision_account(request: Request, background_tasks: BackgroundTasks, name: str = Form(...), email: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "provision account")
+-    delta = parse_duration(duration)
++    try:
++        delta = parse_duration(duration)
++    except DurationParseError as exc:
++        raise HTTPException(status_code=400, detail=str(exc)) from exc
+     with get_db() as conn:
+         ensure_schema(conn)
+         existing = conn.execute("SELECT account_number, expiration_date FROM users WHERE email = ?", (email,)).fetchone()
+@@ -24878,7 +24922,10 @@
+ async def renew_account(request: Request, account_number: str = Form(...), duration: str = Form("1m"), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "renew account")
+     acc = normalize_account_number(account_number)
+-    delta = parse_duration(duration)
++    try:
++        delta = parse_duration(duration)
++    except DurationParseError as exc:
++        raise HTTPException(status_code=400, detail=str(exc)) from exc
+     with get_db() as conn:
+         ensure_schema(conn)
+         row = conn.execute("SELECT account_number, expiration_date FROM users WHERE account_number = ?", (acc,)).fetchone()
+@@ -26569,7 +26616,7 @@
+             conn.commit()
+             return ("declined", {})
+ 
+-        expiry = (now + parse_duration(str(batch["duration"] or "1m"))).isoformat()
++        expiry = (now + parse_duration(batch["duration"])).isoformat()
+         conn.execute(
+             "INSERT INTO users (account_number, email, subscriber_name, status, expiration_date, renewal_source, referral_code) "
+             "VALUES (?, ?, ?, 'active', ?, 'redemption', ?)",
+@@ -26992,6 +27039,11 @@
+     # one-time encrypted export handed to the printer. Nothing else in this
+     # process ever sees a plaintext code again: only the keyed HMAC is stored.
+     require_admin_token(x_admin_token, request, "issue redemption batch")
++    try:
++        parse_duration(duration)
++    except DurationParseError as exc:
++        raise HTTPException(status_code=400, detail=str(exc)) from exc
++    duration = duration.strip().lower()
+     if not redemption_enabled():
+         raise HTTPException(status_code=503, detail="Redemption is not configured on this hub.")
+     batch_id = str(batch_id or "").strip().lower()
+@@ -27020,7 +27072,7 @@
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             """, (
+                 batch_id, str(label or "")[:200], str(partner or "")[:120],
+-                str(plan_key or "")[:64], str(duration or "1m")[:16], count, canaries,
++                str(plan_key or "")[:64], duration, count, canaries,
+                 version, expires_at or None, now.isoformat(),
+             ))
+             # Canaries are placed at random positions so their index in the
+--- before/winn_protocol_experimental/winn3/carrier/udp_socket_buffers.go
++++ after/winn_protocol_experimental/winn3/carrier/udp_socket_buffers.go
+@@ -3,6 +3,7 @@
+ import (
+ 	"fmt"
+ 	"net"
++	"runtime"
+ 	"syscall"
+ )
+ 
+@@ -79,16 +80,23 @@
+ 	return nil
+ }
+ 
+-// shortUDPSocketGrant is true when the kernel granted less than we asked
+-// for. Linux getsockopt returns a doubled value when the request was not
+-// clamped, so a full grant is got >= requested. A clamped grant is
+-// strictly smaller than the request. This helper is for callers and tests;
+-// applyUDPSocketBuffers never refuses on it.
++// socketBufferRequestUnits converts raw getsockopt accounting into the units
++// passed to setsockopt. Linux and Android report twice the accepted request.
++func socketBufferRequestUnits(goos string, granted int) int {
++	if goos == "linux" || goos == "android" {
++		return granted / 2
++	}
++	return granted
++}
++
++// shortUDPSocketGrant reports a clamped grant without refusing the socket.
++// Raw grants remain unchanged in SocketBuffers and diagnostic output.
+ func shortUDPSocketGrant(requested, gotRead, gotWrite int) bool {
+ 	if requested <= 0 {
+ 		return false
+ 	}
+-	return gotRead < requested || gotWrite < requested
++	return socketBufferRequestUnits(runtime.GOOS, gotRead) < requested ||
++		socketBufferRequestUnits(runtime.GOOS, gotWrite) < requested
+ }
+ 
+ // FormatUDPSocketBufferGrant is the text a client log should print after
+--- before/winn_protocol_experimental/winn3/carrier/udp_socket_buffers_test.go
++++ after/winn_protocol_experimental/winn3/carrier/udp_socket_buffers_test.go
+@@ -3,8 +3,10 @@
+ import (
+ 	"context"
+ 	"errors"
++	"fmt"
+ 	"net"
+ 	"os"
++	"runtime"
+ 	"strings"
+ 	"syscall"
+ 	"testing"
+@@ -232,11 +234,15 @@
+ 			t.Errorf("short-grant line does not name %q:\n  %s", needle, line)
+ 		}
+ 	}
+-	ok := FormatUDPSocketBufferGrant(8<<20, 8<<20, 8<<20, nil)
++	fullGrant := 8 << 20
++	if runtime.GOOS == "linux" || runtime.GOOS == "android" {
++		fullGrant *= 2
++	}
++	ok := FormatUDPSocketBufferGrant(8<<20, fullGrant, fullGrant, nil)
+ 	if strings.Contains(ok, "short grant") {
+ 		t.Fatalf("a full grant was worded as a short grant: %s", ok)
+ 	}
+-	if !strings.Contains(ok, "granted read=8388608") {
++	if !strings.Contains(ok, fmt.Sprintf("granted read=%d", fullGrant)) {
+ 		t.Fatalf("full-grant line does not name the grant: %s", ok)
+ 	}
+ }
+@@ -326,3 +332,32 @@
+ 		t.Fatalf("applyUDPSocketBuffers returned read=%d but a second getsockopt is %d", gotRead, again)
+ 	}
+ }
++
++func TestSocketBufferGrantComparisonUsesRequestUnits(t *testing.T) {
++	const requested = 8 << 20
++	for _, goos := range []string{"linux", "android", "darwin", "ios", "windows"} {
++		t.Run(goos, func(t *testing.T) {
++			factor := 1
++			if goos == "linux" || goos == "android" {
++				factor = 2
++			}
++			for _, granted := range []int{0, requested / 2, requested - 1, requested, requested * 2} {
++				if got := socketBufferRequestUnits(goos, granted*factor); got != granted {
++					t.Fatalf("raw %d normalized to %d, want %d", granted*factor, got, granted)
++				}
++			}
++		})
++	}
++	factor := 1
++	if runtime.GOOS == "linux" || runtime.GOOS == "android" {
++		factor = 2
++	}
++	for _, pair := range [][2]int{{requested / 2, requested}, {requested, requested / 2}, {requested - 1, requested}} {
++		if !shortUDPSocketGrant(requested, pair[0]*factor, pair[1]*factor) {
++			t.Fatalf("clamped grant was not reported: %v", pair)
++		}
++	}
++	if shortUDPSocketGrant(requested, requested*factor, requested*factor) {
++		t.Fatal("full grant was reported as clamped")
++	}
++}
+--- /dev/null
++++ after/server/test_control_plane_round7.py
+@@ -0,0 +1,347 @@
++#!/usr/bin/env python3
++"""Round 7 security regressions against the generated hub and real SQLite.
++
++The shared harness stubs FastAPI/Pydantic and calendar arithmetic. Node I/O
++and price feeds are deterministic fakes; no production service is contacted.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++from contextlib import closing
++from datetime import timedelta
++from decimal import Decimal
++import logging
++import shutil
++import sqlite3
++import threading
++import unittest
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_winn3_serving_hub as serving
++
++
++class Round7Tests(unittest.TestCase):
++    def setUp(self):
++        def close_handlers(**kwargs):
++            for handler in kwargs.get("handlers", []):
++                handler.close()
++
++        with patch("logging.basicConfig", side_effect=close_handlers):
++            self.mod = harness.load_hub()
++        self.mod.logger.propagate = False
++        self.mod.logger.addHandler(logging.NullHandler())
++        self.mod.security_alert = lambda *args, **kwargs: None
++        self.mod.sync_peer_to_node = lambda *args, **kwargs: True
++        self.tokens = harness.seed_account(self.mod, devices=1)
++        self.device, self.token = next(iter(self.tokens.items()))
++        serving.seed_node(self.mod, slug="test-node")
++        self.mod.MONERO_PRICE_MANUAL_USD = ""
++        self.mod.MONERO_PRICE_MAX_DEVIATION = Decimal("0.20")
++        with self.mod.get_db() as conn:
++            self.secret = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++
++    def tearDown(self):
++        for handler in list(self.mod.logger.handlers):
++            handler.close()
++            self.mod.logger.removeHandler(handler)
++        shutil.rmtree(self.mod._TMPDIR)
++
++    def request(self, token=None, path="/account/status", body=None):
++        headers = {"content-type": "application/json"}
++        if token is not None:
++            headers["authorization"] = f"Bearer {token}"
++        return harness.FakeRequest(path=path, headers=headers, body=body)
++
++    def status(self, token=None, device=None, account=harness.ACCOUNT):
++        return self.mod._account_status_sync(
++            self.mod.AccountStatusRequest(account_number=account, device_id=device),
++            self.request(token), harness.BackgroundTasks(),
++        )
++
++    def login(self, **overrides):
++        fields = dict(device_id="round7-device", device_fingerprint="round7-fingerprint",
++                      device_model="audit-harness", location="test-node",
++                      selection_generation="a" * 32,
++                      ordinary_v3_failure_generation="a" * 32)
++        fields.update(overrides)
++        return serving.build_login(self.mod, **fields)
++
++    def admission(self, token=None, **overrides):
++        request = self.request(token, path="/verify")
++        if token is None:
++            request.headers["x-wins-activation"] = self.secret
++        return asyncio.run(self.mod.verify_account(
++            request, self.login(**overrides), harness.BackgroundTasks(),
++        ))
++
++    def quote(self, values, baseline=Decimal(0), urls=None):
++        self.mod.MONERO_PRICE_SOURCE_URLS = urls or [
++            f"https://feed{i}.example.test/price" for i in range(len(values))
++        ]
++        with patch.object(self.mod, "fetch_bounded_monero_price", side_effect=values):
++            return self.mod.resolve_monero_usd_per_xmr(last_quote=baseline)
++
++    def test_quote_consensus_requires_all_independent_sources_to_agree(self):
++        for values in ([Decimal(100), Decimal(1000)],
++                       [Decimal(100), Decimal(101), Decimal(1000)]):
++            with self.subTest(values=values), self.assertRaises(RuntimeError):
++                self.quote(values)
++        self.assertEqual(self.quote([Decimal(100), Decimal(120)])[0], Decimal(110))
++        with self.assertRaises(RuntimeError):
++            self.quote([Decimal(100), Decimal("120.0001")])
++
++    def test_quote_medians_average_even_counts_and_keep_odd_middle(self):
++        for values, expected in (([100, 110], 105), ([100, 110, 120], 110),
++                                 ([120, 100, 110, 106], 108)):
++            with self.subTest(values=values):
++                price, source = self.quote(list(map(Decimal, values)))
++                self.assertEqual(price, expected)
++                self.assertTrue(source.startswith("median:"))
++
++    def test_duplicate_hostname_paths_ports_and_case_cannot_create_quorum(self):
++        urls = ["https://FEED.example.test/one", "https://feed.example.test:443/two",
++                "https://feed.example.test./three"]
++        with self.assertRaises(RuntimeError):
++            self.quote([Decimal(100)], urls=urls)
++        price, source = self.quote([Decimal(100)], baseline=Decimal(100), urls=urls)
++        self.assertEqual((price, source), (Decimal(100), "feed.example.test"))
++
++    def test_nonfinite_quotes_manual_prices_and_baselines_are_not_trusted(self):
++        for raw in ("NaN", "sNaN", "Infinity", "-Infinity", "0", "-1"):
++            with self.subTest(raw=raw):
++                self.assertIsNone(self.mod._to_positive_decimal(raw))
++                with self.assertRaises(RuntimeError):
++                    self.mod.resolve_monero_usd_per_xmr(manual_hint=raw)
++                with self.assertRaises(RuntimeError):
++                    self.quote([Decimal(raw), Decimal(100)])
++                with self.assertRaises(RuntimeError):
++                    self.quote([Decimal(100)], baseline=Decimal(raw))
++
++    def test_single_source_and_consensus_obey_persisted_baseline(self):
++        self.assertEqual(self.quote([Decimal(120)], Decimal(100))[0], 120)
++        for values in ([Decimal(121)], [Decimal(121), Decimal(122)]):
++            with self.subTest(values=values), self.assertRaises(RuntimeError):
++                self.quote(values, Decimal(100))
++        with self.assertRaises(RuntimeError):
++            self.quote([Decimal(100)])
++
++    def test_decimal_overflow_is_a_controlled_quote_failure(self):
++        with self.assertRaises(RuntimeError):
++            self.quote([Decimal("1e9999999"), Decimal("1e-9999999")])
++
++    def test_stale_removal_and_outbox_commit_together_without_background_runner(self):
++        self.mod.STALE_DEVICE_RETENTION_DAYS = 1
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE devices SET last_seen=?", (
++                (self.mod.utcnow() - timedelta(days=2)).isoformat(),))
++        with self.mod.get_db() as conn:
++            self.assertEqual(self.mod.cleanup_stale_devices(conn), 1)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 1)
++            conn.rollback()
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 1)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 0)
++            tasks = harness.BackgroundTasks()
++            self.mod.cleanup_stale_devices(conn, tasks)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 1)
++        self.assertEqual(tasks.tasks[0][0], self.mod.drain_peer_revocation_outbox)
++        with patch.object(self.mod, "remove_peer_from_node", return_value=True) as remove:
++            self.mod.drain_peer_revocation_outbox()
++            remove.assert_called_once()
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 0)
++
++    def test_slot_replacement_returns_fresh_bearer_and_rejects_the_old_one(self):
++        self.mod.DEVICE_LIMIT = 1
++        response = self.admission()
++        fresh = response["device_auth_token"]
++        self.assertNotEqual(fresh, self.token)
++        with self.mod.get_db() as conn:
++            rows = conn.execute("SELECT device_id, device_auth_token_hash FROM devices").fetchall()
++            self.assertEqual(len(rows), 1)
++            self.assertEqual(tuple(rows[0]), ("round7-device", self.mod.token_digest(fresh)))
++        with self.assertRaises(harness.HTTPException) as error:
++            self.status(self.token, "round7-device")
++        self.assertEqual(error.exception.status_code, 401)
++        self.assertEqual(self.status(fresh, "round7-device")["status"], "ok")
++        self.assertNotIn("device_auth_token", self.admission(token=fresh))
++
++    def test_failed_direct_sync_preserves_existing_device_and_activation_for_retry(self):
++        self.mod.DEVICE_LIMIT = 1
++        with self.mod.get_db() as conn:
++            before = dict(conn.execute("SELECT * FROM devices").fetchone())
++        with patch.object(self.mod, "sync_peer_to_node", return_value=False):
++            with self.assertRaises(harness.HTTPException) as error:
++                self.admission()
++        self.assertEqual(error.exception.status_code, 503)
++        with self.mod.get_db() as conn:
++            self.assertEqual(dict(conn.execute("SELECT * FROM devices").fetchone()), before)
++            self.assertIsNone(conn.execute("SELECT activation_secret_used_at FROM users").fetchone()[0])
++            self.assertEqual(conn.execute("SELECT management_status FROM nodes").fetchone()[0], "failed")
++        serving.seed_node(self.mod, slug="test-node")
++        self.assertTrue(self.admission()["device_auth_token"])
++
++    def test_failed_double_exit_sync_rolls_back_assignments_and_activation(self):
++        core = {"core_id": "test-core", "exit_public_key": "D" * 43 + "="}
++        with self.mod.get_db() as conn:
++            conn.execute("INSERT INTO core_servers (core_id) VALUES (?)", (core["core_id"],))
++            before = conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0]
++        with patch.object(self.mod, "select_double_vpn_core", return_value=core), \
++                patch.object(self.mod, "sync_peer_to_node", return_value=False) as sync:
++            with self.assertRaises(harness.HTTPException) as error:
++                self.admission(double_vpn=True)
++        self.assertEqual(error.exception.status_code, 503)
++        self.assertEqual(sync.call_args.args[1]["client_public_key"], core["exit_public_key"])
++        with self.mod.get_db() as conn:
++            self.assertIsNone(conn.execute("SELECT activation_secret_used_at FROM users").fetchone()[0])
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], before)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM double_vpn_assignments").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM core_exit_peers").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT management_status FROM nodes").fetchone()[0], "failed")
++
++    def test_status_requires_matching_account_device_and_bearer(self):
++        other = harness.seed_account(self.mod, account="4444-5555-6666", devices=1)
++        for token, device, account in (
++            (None, self.device, harness.ACCOUNT), ("wrong", self.device, harness.ACCOUNT),
++            (next(iter(other.values())), self.device, harness.ACCOUNT),
++            (self.token, None, harness.ACCOUNT), (self.token, "missing", harness.ACCOUNT),
++            (self.token, self.device, "0000-1111-2222"),
++        ):
++            with self.subTest(device=device, account=account), \
++                    self.assertRaises(harness.HTTPException) as error:
++                self.status(token, device, account)
++            self.assertEqual((error.exception.status_code, error.exception.detail), (401, "Unauthorized"))
++        self.assertEqual(self.status(self.token, self.device)["status"], "ok")
++
++    def test_invalid_expirations_revoke_on_status_and_cannot_be_migrated_to_active(self):
++        for raw in (None, "", " ", "not-a-date", "2026-99-99", "99999-01-01", "Lifetime Access"):
++            with self.subTest(raw=raw):
++                tokens = harness.seed_account(self.mod, devices=1)
++                device, token = next(iter(tokens.items()))
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE users SET expiration_date=?", (raw,))
++                self.assertEqual(self.status(token, device)["status"], "expired")
++                with self.mod.get_db() as conn:
++                    self.assertEqual(conn.execute("SELECT status FROM users").fetchone()[0], "expired")
++                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0], 0)
++                    self.assertGreater(conn.execute("SELECT COUNT(*) FROM peer_revocations").fetchone()[0], 0)
++
++    def test_invalid_expiration_rejected_before_admission_and_after_writer_recheck(self):
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE users SET expiration_date='not-a-date'")
++        with self.assertRaises(harness.HTTPException) as error:
++            self.admission()
++        self.assertEqual(error.exception.status_code, 401)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT status FROM users").fetchone()[0], "expired")
++            conn.execute("UPDATE users SET status='active', expiration_date='2030-01-01'")
++        original = self.mod.expire_account_runtime_if_due
++        calls = []
++
++        def change_before_recheck(conn, *args):
++            calls.append(1)
++            if len(calls) == 2:
++                conn.execute("UPDATE users SET expiration_date='not-a-date'")
++            return original(conn, *args)
++
++        with patch.object(self.mod, "expire_account_runtime_if_due", side_effect=change_before_recheck):
++            with self.assertRaises(harness.HTTPException):
++                self.admission()
++        self.assertEqual(len(calls), 2)
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT status FROM users").fetchone()[0], "expired")
++
++    def test_free_access_stores_parseable_expiry_and_preserves_display_label(self):
++        self.mod.FREE_ACCESS_ENABLED = True
++        request = harness.FakeRequest(path="/free/verify")
++        free = self.mod.FreeAccessRequest(**vars(self.login()))
++        response = asyncio.run(self.mod.verify_free_access(request, free, harness.BackgroundTasks()))
++        self.assertEqual(response["expiration_date"], self.mod.FREE_ACCESS_LABEL)
++        with self.mod.get_db() as conn:
++            row = conn.execute("SELECT expiration_date FROM users WHERE renewal_source='free_access'").fetchone()
++            self.assertGreater(self.mod.parse_iso_datetime(row[0]), self.mod.utcnow())
++
++    def test_duration_accepts_only_bounded_terms(self):
++        for raw, expected in (("1d", {"days": 1}), ("3650d", {"days": 3650}),
++                              ("1m", {"months": 1}), ("120m", {"months": 120}),
++                              ("1y", {"years": 1}), ("10y", {"years": 10}),
++                              ("life", {"years": 10}), (" LIFETIME ", {"years": 10})):
++            with self.subTest(raw=raw):
++                self.assertEqual(self.mod.parse_duration(raw).kw, expected)
++        for raw in (None, "", "typo", "0d", "-1m", "01y", "11y", "121m", "3651d",
++                    "99999d", "1.5m", "1w", "1m garbage", "1\nd", 12, "1" * 10000 + "y"):
++            with self.subTest(raw=str(raw)[:30]), self.assertRaises(self.mod.DurationParseError):
++                self.mod.parse_duration(raw)
++
++    def test_invalid_admin_durations_return_400_before_database_changes(self):
++        for route in ("provision", "renew", "redemption/batch"):
++            for duration in ("", "mistyped", "0d", "3651d", "121m", "11y"):
++                with self.subTest(route=route, duration=duration):
++                    request = harness.FakeRequest(path=f"/admin/{route}")
++                    kwargs = dict(request=request, duration=duration, x_admin_token="test-admin-token")
++                    if route == "provision":
++                        call = self.mod.provision_account(background_tasks=harness.BackgroundTasks(),
++                                                          name="Test", email="new@example.test", **kwargs)
++                    elif route == "renew":
++                        call = self.mod.renew_account(account_number=harness.ACCOUNT, **kwargs)
++                    else:
++                        call = self.mod.admin_issue_redemption_batch(batch_id="test-batch", count=1, **kwargs)
++                    with patch.object(self.mod, "get_db", side_effect=AssertionError("invalid term reached database")):
++                        with self.assertRaises(harness.HTTPException) as error:
++                            asyncio.run(call)
++                    self.assertEqual(error.exception.status_code, 400)
++
++    def test_deletion_routes_parse_on_loop_and_keep_it_responsive_under_writer_lock(self):
++        for action in ("status", "request", "confirm", "cancel"):
++            with self.subTest(action=action):
++                locked = threading.Event()
++                release = threading.Event()
++                main_thread = threading.get_ident()
++                body_threads = []
++
++                class Request(harness.FakeRequest):
++                    async def json(self):
++                        body_threads.append(threading.get_ident())
++                        return await super().json()
++
++                def hold_writer():
++                    with closing(sqlite3.connect(self.mod._DB)) as conn:
++                        conn.execute("BEGIN IMMEDIATE")
++                        locked.set()
++                        release.wait(timeout=0.6)
++                        conn.rollback()
++
++                writer = threading.Thread(target=hold_writer)
++                writer.start()
++                self.assertTrue(locked.wait(timeout=5))
++                path = f"/account/deletion/{action}"
++                request = Request(path=path, headers={"content-type": "application/json"},
++                                  body={"account_number": harness.ACCOUNT, "device_id": self.device})
++
++                async def exercise():
++                    task = asyncio.create_task(self.mod.app.routes[("POST", path)](
++                        request, harness.BackgroundTasks()))
++                    ticks = 0
++                    while not task.done():
++                        await asyncio.sleep(0.02)
++                        if not task.done():
++                            ticks += 1
++                    with self.assertRaises(harness.HTTPException) as error:
++                        await task
++                    self.assertEqual(error.exception.status_code, 401)
++                    return ticks
++
++                try:
++                    self.assertGreaterEqual(asyncio.run(exercise()), 3)
++                    self.assertEqual(body_threads, [main_thread])
++                finally:
++                    release.set()
++                    writer.join(timeout=5)
++                self.assertFalse(writer.is_alive())
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- /dev/null
++++ after/tools/test_linux_round7.py
+@@ -0,0 +1,81 @@
++#!/usr/bin/env python3
++"""Compile the actual inhibitor functions with a recording command runner.
++
++No host service, PID, firewall or tunnel is changed by this test.
++"""
++from pathlib import Path
++import subprocess
++import tempfile
++import unittest
++
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++class PowerInhibitionTests(unittest.TestCase):
++    def test_named_service_start_repeated_start_failure_and_stop(self):
++        source = (ROOT / "linux/runner/linux_tunnel_backend.cc").read_text()
++        start = source.index("void StartTunnelPowerProtection()")
++        end = source.index("// Atomically and safely writes", start)
++        functions = source[start:end]
++        self.assertNotIn("PowerInhibitPidFile", source)
++        self.assertNotIn("wins_vpn_power_inhibit.pid", source)
++        prefix = r'''
++#include <cassert>
++#include <string>
++#include <vector>
++enum class ProcOutput { kSuppress };
++struct ProcResult { int exit_status; };
++std::vector<std::vector<std::string>> calls;
++bool active = false;
++int start_status = 0;
++ProcResult RunArgv(const std::vector<std::string>& argv, ProcOutput) {
++  calls.push_back(argv);
++  if (argv.size() > 2 && argv[2] == "is-active") return {active ? 0 : 3};
++  if (argv[0] == "systemd-run") {
++    active = start_status == 0;
++    return {start_status};
++  }
++  assert(argv == (std::vector<std::string>{
++      "systemctl", "--user", "stop", "winsvpn-power-inhibit.service"}));
++  active = false;
++  return {0};
++}
++'''
++        suffix = r'''
++int main() {
++  StartTunnelPowerProtection();
++  assert(active && calls.size() == 2);
++  assert(calls[0] == (std::vector<std::string>{
++      "systemctl", "--user", "is-active", "--quiet", "winsvpn-power-inhibit.service"}));
++  assert(calls[1] == (std::vector<std::string>{
++      "systemd-run", "--user", "--unit=winsvpn-power-inhibit.service",
++      "--collect", "--property=Type=exec", "systemd-inhibit",
++      "--what=sleep:idle", "--why=Win's VPN active tunnel", "--mode=block",
++      "sleep", "infinity"}));
++  StartTunnelPowerProtection();
++  assert(active && calls.size() == 3);
++  StopTunnelPowerProtection();
++  assert(!active && calls.size() == 4);
++  StopTunnelPowerProtection();
++  assert(!active && calls.size() == 5);
++  start_status = 1;
++  StartTunnelPowerProtection();
++  assert(!active && calls.size() == 7);
++  start_status = 0;
++  StartTunnelPowerProtection();
++  assert(active && calls.size() == 9);
++  StopTunnelPowerProtection();
++  assert(!active);
++}
++'''
++        with tempfile.TemporaryDirectory(prefix="winsvpn-power-test-") as directory:
++            path = Path(directory)
++            (path / "test.cc").write_text(prefix + functions + suffix)
++            subprocess.run(["c++", "-std=c++17", "-Wall", "-Wextra", "-Werror",
++                            "-UNDEBUG", str(path / "test.cc"), "-o", str(path / "test")], check=True)
++            subprocess.run([str(path / "test")], check=True, timeout=10)
++
++
++if __name__ == "__main__":
++    unittest.main()

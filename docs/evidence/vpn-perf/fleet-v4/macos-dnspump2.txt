@@ -1,0 +1,32 @@
+route-up 04:51:07.924
+no-answer 04:51:08.940 rc=9
+no-answer 04:51:09.957 rc=9
+no-answer 04:51:10.973 rc=9
+no-answer 04:51:11.988 rc=9
+no-answer 04:51:13.006 rc=9
+no-answer 04:51:14.024 rc=9
+no-answer 04:51:15.038 rc=9
+no-answer 04:51:16.054 rc=9
+no-answer 04:51:17.068 rc=9
+no-answer 04:51:18.084 rc=9
+no-answer 04:51:19.102 rc=9
+no-answer 04:51:20.120 rc=9
+no-answer 04:51:21.138 rc=9
+no-answer 04:51:22.154 rc=9
+no-answer 04:51:23.171 rc=9
+no-answer 04:51:24.189 rc=9
+no-answer 04:51:25.205 rc=9
+no-answer 04:51:26.223 rc=9
+no-answer 04:51:27.241 rc=9
+no-answer 04:51:28.252 rc=9
+no-answer 04:51:29.266 rc=9
+no-answer 04:51:30.285 rc=9
+no-answer 04:51:31.302 rc=9
+no-answer 04:51:32.320 rc=9
+no-answer 04:51:33.337 rc=9
+no-answer 04:51:34.354 rc=9
+no-answer 04:51:35.373 rc=9
+no-answer 04:51:36.391 rc=9
+no-answer 04:51:37.412 rc=9
+no-answer 04:51:38.429 rc=9
+gave up

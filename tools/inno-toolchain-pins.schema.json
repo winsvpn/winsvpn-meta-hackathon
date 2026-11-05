@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.local/schemas/inno-toolchain-pins-v1.json",
+  "title": "Win's VPN Inno Setup 7.1.0 toolchain pins",
+  "description": "Reviewed exact pins for official Inno Setup 7.1.0 installer and compiler custody. Compiler sha256, size, VERSIONINFO, Authenticode leaf, and install-tree sha256 remain JSON null (status unmeasured) until measured with verify-compiler --measure. This schema never authorizes executing a setup candidate, ISSigTool.exe, or a network fetch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract",
+    "product",
+    "vendor",
+    "version",
+    "channel",
+    "status",
+    "retrieved_utc",
+    "official_sources",
+    "verification_methods",
+    "publisher",
+    "issig_keys",
+    "installers",
+    "compilers",
+    "verification_tool",
+    "compiler_archive"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "contract": { "type": "string", "const": "winsvpn-inno-toolchain-custody-v1" },
+    "product": { "type": "string", "const": "Inno Setup" },
+    "vendor": { "type": "string", "const": "JRSoftware" },
+    "version": { "type": "string", "const": "7.1.0" },
+    "channel": { "type": "string", "const": "latest-stable" },
+    "status": { "type": "string", "enum": ["pinned", "unmeasured"] },
+    "retrieved_utc": { "$ref": "#/$defs/iso_utc" },
+    "official_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "downloads", "verify", "product", "whatsnew", "files_readme",
+        "x64_issig", "x86_issig", "def02_key", "def01_key", "issigtool",
+        "issigtool_issig", "immutable_x64", "immutable_x86", "immutable_tag",
+        "issig_help", "issigfunc"
+      ],
+      "properties": {
+        "downloads": { "$ref": "#/$defs/source" },
+        "verify": { "$ref": "#/$defs/source" },
+        "product": { "$ref": "#/$defs/source" },
+        "whatsnew": { "$ref": "#/$defs/source" },
+        "files_readme": { "$ref": "#/$defs/source" },
+        "x64_issig": { "$ref": "#/$defs/source" },
+        "x86_issig": { "$ref": "#/$defs/source" },
+        "def02_key": { "$ref": "#/$defs/source" },
+        "def01_key": { "$ref": "#/$defs/source" },
+        "issigtool": { "$ref": "#/$defs/source" },
+        "issigtool_issig": { "$ref": "#/$defs/source" },
+        "immutable_x64": { "$ref": "#/$defs/source" },
+        "immutable_x86": { "$ref": "#/$defs/source" },
+        "immutable_tag": { "$ref": "#/$defs/source" },
+        "issig_help": { "$ref": "#/$defs/source" },
+        "issigfunc": { "$ref": "#/$defs/source" }
+      }
+    },
+    "verification_methods": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authenticode", "issig_ecdsa_p256", "github_release_attestation"],
+      "properties": {
+        "authenticode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "publisher_name", "signer_binding", "source_url", "windows_api"],
+          "properties": {
+            "required": { "type": "boolean", "const": true },
+            "publisher_name": { "type": "string", "const": "Pyrsys B.V." },
+            "signer_binding": { "type": "string", "const": "pkcs7_signerinfo_issuer_serial" },
+            "source_url": { "$ref": "#/$defs/https_url" },
+            "windows_api": { "type": "string", "const": "WinVerifyTrust" }
+          }
+        },
+        "issig_ecdsa_p256": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "installer_key", "tool_key", "trust_anchor", "source_url", "execute_issigtool"],
+          "properties": {
+            "required": { "type": "boolean", "const": true },
+            "installer_key": { "type": "string", "const": "def02" },
+            "tool_key": { "type": "string", "const": "def01" },
+            "trust_anchor": { "type": "string", "const": "immutable_code_constants" },
+            "source_url": { "$ref": "#/$defs/https_url" },
+            "execute_issigtool": { "type": "boolean", "const": false }
+          }
+        },
+        "github_release_attestation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "source_url", "reason"],
+          "properties": {
+            "required": { "type": "boolean", "const": false },
+            "source_url": { "$ref": "#/$defs/https_url" },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authenticode_publisher_name",
+        "authenticode_subject_rfc4514",
+        "authenticode_issuer_rfc4514",
+        "authenticode_leaf_serial_hex",
+        "authenticode_leaf_sha256"
+      ],
+      "properties": {
+        "authenticode_publisher_name": { "type": "string", "const": "Pyrsys B.V." },
+        "authenticode_subject_rfc4514": { "type": "string", "minLength": 1 },
+        "authenticode_issuer_rfc4514": { "type": "string", "minLength": 1 },
+        "authenticode_leaf_serial_hex": { "type": "string", "pattern": "^[0-9a-f]+$" },
+        "authenticode_leaf_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "issig_keys": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["def02", "def01"],
+      "properties": {
+        "def02": { "$ref": "#/$defs/issig_key" },
+        "def01": { "$ref": "#/$defs/issig_key" }
+      }
+    },
+    "installers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["windows_x64", "windows_x86"],
+      "properties": {
+        "windows_x64": { "$ref": "#/$defs/installer" },
+        "windows_x86": { "$ref": "#/$defs/installer" }
+      }
+    },
+    "compilers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["windows_x64", "windows_arm64"],
+      "properties": {
+        "windows_x64": { "$ref": "#/$defs/compiler_x64" },
+        "windows_arm64": { "$ref": "#/$defs/compiler_arm64" }
+      }
+    },
+    "verification_tool": { "$ref": "#/$defs/verification_tool" },
+    "compiler_archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "filename", "sha256", "size", "owner_action"],
+      "properties": {
+        "status": { "type": "string", "const": "not_published" },
+        "filename": { "type": "null" },
+        "sha256": { "type": "null" },
+        "size": { "type": "null" },
+        "owner_action": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "iso_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "https_url": {
+      "type": "string",
+      "pattern": "^https://.+"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "not": { "const": "0000000000000000000000000000000000000000000000000000000000000000" }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "retrieved_utc", "role"],
+      "properties": {
+        "url": { "$ref": "#/$defs/https_url" },
+        "retrieved_utc": { "$ref": "#/$defs/iso_utc" },
+        "role": { "type": "string", "minLength": 1 }
+      }
+    },
+    "issig_key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "key_id", "public_x", "public_y", "sha256", "size"],
+      "properties": {
+        "filename": { "type": "string", "pattern": "^def0[12]\\.ispublickey$" },
+        "key_id": { "$ref": "#/$defs/sha256" },
+        "public_x": { "$ref": "#/$defs/sha256" },
+        "public_y": { "$ref": "#/$defs/sha256" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 32, "maximum": 4096 }
+      }
+    },
+    "installer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status", "filename", "edition", "pe_machine", "recommended_compiler_host",
+        "size", "sha256", "product_name", "product_version_string", "company_name",
+        "file_description", "download_url", "issig_url", "issig_sha256", "issig_size",
+        "issig_key", "issig_file_tag", "issig_sig_r", "issig_sig_s"
+      ],
+      "properties": {
+        "status": { "type": "string", "const": "pinned" },
+        "filename": { "type": "string", "pattern": "^innosetup-7\\.1\\.0-(x64|x86)\\.exe$" },
+        "edition": { "type": "string", "enum": ["64-bit", "32-bit"] },
+        "pe_machine": { "type": "string", "enum": ["x64", "x86"] },
+        "recommended_compiler_host": { "type": "boolean" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "product_name": { "type": "string", "const": "Inno Setup" },
+        "product_version_string": { "type": "string", "minLength": 1 },
+        "company_name": { "type": "string", "const": "jrsoftware.org" },
+        "file_description": { "type": "string", "const": "Inno Setup Setup" },
+        "download_url": { "$ref": "#/$defs/https_url" },
+        "issig_url": { "$ref": "#/$defs/https_url" },
+        "issig_sha256": { "$ref": "#/$defs/sha256" },
+        "issig_size": { "type": "integer", "minimum": 32, "maximum": 4096 },
+        "issig_key": { "type": "string", "const": "def02" },
+        "issig_file_tag": { "type": "string" },
+        "issig_sig_r": { "$ref": "#/$defs/sha256" },
+        "issig_sig_s": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "compiler_shared": {
+      "type": "object",
+      "required": [
+        "status", "filename", "pe_machine", "output_architectures",
+        "trusted_root_leaf", "trusted_root_kind", "publisher_name",
+        "expected_version", "sha256", "size", "install_tree_sha256",
+        "product_version_string", "owner_action"
+      ],
+      "properties": {
+        "filename": { "type": "string", "const": "ISCC.exe" },
+        "pe_machine": { "type": "string", "const": "x64" },
+        "trusted_root_leaf": { "type": "string", "const": "Inno Setup 7" },
+        "trusted_root_kind": { "type": "string", "const": "program_files" },
+        "publisher_name": { "type": "string", "const": "Pyrsys B.V." },
+        "expected_version": { "type": "string", "const": "7.1.0" },
+        "owner_action": { "type": "string", "minLength": 1 }
+      }
+    },
+    "compiler_owner_blocked": {
+      "allOf": [
+        { "$ref": "#/$defs/compiler_shared" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "type": "string", "const": "unmeasured" },
+            "filename": true,
+            "pe_machine": true,
+            "output_architectures": true,
+            "trusted_root_leaf": true,
+            "trusted_root_kind": true,
+            "publisher_name": true,
+            "expected_version": true,
+            "sha256": { "type": "null" },
+            "size": { "type": "null" },
+            "install_tree_sha256": { "type": "null" },
+            "product_version_string": { "type": "null" },
+            "owner_action": true,
+            "native_arm64_compiler": true
+          }
+        }
+      ]
+    },
+    "compiler_pinned": {
+      "allOf": [
+        { "$ref": "#/$defs/compiler_shared" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "type": "string", "const": "pinned" },
+            "filename": true,
+            "pe_machine": true,
+            "output_architectures": true,
+            "trusted_root_leaf": true,
+            "trusted_root_kind": true,
+            "publisher_name": true,
+            "expected_version": true,
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+            "install_tree_sha256": { "$ref": "#/$defs/sha256" },
+            "product_version_string": { "type": "string", "minLength": 1 },
+            "owner_action": true,
+            "native_arm64_compiler": true
+          }
+        }
+      ]
+    },
+    "compiler_x64": {
+      "allOf": [
+        { "oneOf": [
+          { "$ref": "#/$defs/compiler_owner_blocked" },
+          { "$ref": "#/$defs/compiler_pinned" }
+        ] },
+        {
+          "type": "object",
+          "properties": {
+            "output_architectures": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "prefixItems": [{ "type": "string", "const": "x64" }],
+              "items": false
+            }
+          }
+        }
+      ]
+    },
+    "compiler_arm64": {
+      "allOf": [
+        { "oneOf": [
+          { "$ref": "#/$defs/compiler_owner_blocked" },
+          { "$ref": "#/$defs/compiler_pinned" }
+        ] },
+        {
+          "type": "object",
+          "required": ["native_arm64_compiler"],
+          "properties": {
+            "native_arm64_compiler": { "type": "string", "const": "not_published" },
+            "output_architectures": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "prefixItems": [{ "type": "string", "const": "arm64" }],
+              "items": false
+            }
+          }
+        }
+      ]
+    },
+    "verification_tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status", "filename", "execute", "pe_machine", "size", "sha256",
+        "download_url", "issig_url", "issig_sha256", "issig_size", "issig_key",
+        "issig_file_tag", "issig_sig_r", "issig_sig_s", "note"
+      ],
+      "properties": {
+        "status": { "type": "string", "const": "pinned" },
+        "filename": { "type": "string", "const": "ISSigTool.exe" },
+        "execute": { "type": "boolean", "const": false },
+        "pe_machine": { "type": "string", "const": "x86" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "download_url": { "$ref": "#/$defs/https_url" },
+        "issig_url": { "$ref": "#/$defs/https_url" },
+        "issig_sha256": { "$ref": "#/$defs/sha256" },
+        "issig_size": { "type": "integer", "minimum": 32, "maximum": 4096 },
+        "issig_key": { "type": "string", "const": "def01" },
+        "issig_file_tag": { "type": "string" },
+        "issig_sig_r": { "$ref": "#/$defs/sha256" },
+        "issig_sig_s": { "$ref": "#/$defs/sha256" },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "compiler_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract", "product", "vendor", "version", "filename", "architecture",
+        "pe_machine", "output_architectures", "sha256", "size",
+        "product_version_string", "publisher_name", "authenticode_leaf_sha256",
+        "authenticode_leaf_serial_hex", "install_tree_sha256", "trusted_root_leaf",
+        "pin_path", "pin_sha256"
+      ],
+      "properties": {
+        "contract": { "type": "string", "const": "winsvpn-inno-compiler-receipt-v1" },
+        "product": { "type": "string", "const": "Inno Setup" },
+        "vendor": { "type": "string", "const": "JRSoftware" },
+        "version": { "type": "string", "const": "7.1.0" },
+        "filename": { "type": "string", "const": "ISCC.exe" },
+        "architecture": { "type": "string", "enum": ["x64", "arm64"] },
+        "pe_machine": { "type": "string", "const": "x64" },
+        "output_architectures": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "type": "string", "enum": ["x64", "arm64"] }
+        },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "product_version_string": { "type": "string", "minLength": 1 },
+        "publisher_name": { "type": "string", "const": "Pyrsys B.V." },
+        "authenticode_leaf_sha256": { "$ref": "#/$defs/sha256" },
+        "authenticode_leaf_serial_hex": { "type": "string", "pattern": "^[0-9a-f]+$" },
+        "install_tree_sha256": { "$ref": "#/$defs/sha256" },
+        "trusted_root_leaf": { "type": "string", "const": "Inno Setup 7" },
+        "pin_path": { "type": "string", "const": "tools/inno-toolchain-pins.json" },
+        "pin_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

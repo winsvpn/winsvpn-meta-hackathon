@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.org/schemas/production-deployment-owner-inputs-v1.json",
+  "title": "Win's VPN production deployment owner and external input evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "contract", "scope", "created_at_utc", "status",
+    "deployment_authorized", "secret_material_redacted", "approved_sha",
+    "source_documents", "producer", "authorization", "scope_exclusions",
+    "workstation_observations", "items"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "contract": { "const": "winsvpn-production-deployment-owner-inputs-v1" },
+    "scope": { "const": "production-server-deployment-only" },
+    "created_at_utc": { "$ref": "#/$defs/utc" },
+    "status": { "enum": ["PENDING-OWNER-INPUT", "PRESENT-UNVERIFIED", "CONFLICT", "VERIFIED"] },
+    "deployment_authorized": { "type": "boolean" },
+    "secret_material_redacted": { "const": true },
+    "approved_sha": { "type": ["string", "null"], "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+    "source_documents": {
+      "type": "array", "minItems": 2, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/source_document" }
+    },
+    "producer": { "$ref": "#/$defs/producer" },
+    "authorization": { "$ref": "#/$defs/authorization" },
+    "scope_exclusions": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/scope_exclusion" }
+    },
+    "workstation_observations": {
+      "type": "array", "uniqueItems": true,
+      "items": { "$ref": "#/$defs/workstation_observation" }
+    },
+    "items": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id", "stage", "roles", "category", "supplier_kind", "sensitivity",
+          "artifact_kind", "required", "owner_only", "status", "source_refs",
+          "requirement", "required_evidence", "candidate_paths", "depends_on",
+          "evidence", "missing_reason", "required_action"
+        ],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "stage": { "enum": ["stage-0", "stage-1", "stage-2", "stage-3", "bridge-exit"] },
+          "roles": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["shared", "hub", "spain", "germany", "aicore", "bridge"] } },
+          "category": { "enum": ["audit-authority", "role-input", "host-trust", "recovery", "network-identity", "artifact-authority", "key-custody", "external-service", "disk-custody", "physical-site", "bridge-governance", "external-test", "lane-authority"] },
+          "supplier_kind": { "enum": ["owner", "provider-console", "final-auditor", "authorized-producer", "external-tester", "preceding-lane"] },
+          "sensitivity": { "enum": ["public", "metadata-sensitive", "secret"] },
+          "artifact_kind": { "enum": ["file", "directory", "binary", "report", "attestation"] },
+          "required": { "type": "boolean" },
+          "owner_only": { "type": "boolean" },
+          "status": { "enum": ["PENDING-OWNER-INPUT", "PRESENT-UNVERIFIED", "CONFLICT", "VERIFIED"] },
+          "source_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/source_ref" } },
+          "requirement": { "type": "string", "minLength": 1 },
+          "required_evidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+          "candidate_paths": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^/" } },
+          "depends_on": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+          "evidence": { "$ref": "#/$defs/evidence" },
+          "missing_reason": { "type": ["string", "null"] },
+          "required_action": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{0,95}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "source_document": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256", "purpose"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "purpose": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source_ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "line_start", "line_end"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "line_start": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "producer": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["collector_path", "collector_sha256", "schema_path", "schema_sha256", "template_path", "template_sha256", "collector_closure_sha256", "repository_head", "repository_clean"],
+      "properties": {
+        "collector_path": { "type": "string", "minLength": 1 },
+        "collector_sha256": { "$ref": "#/$defs/sha256" },
+        "schema_path": { "type": "string", "minLength": 1 },
+        "schema_sha256": { "$ref": "#/$defs/sha256" },
+        "template_path": { "type": "string", "minLength": 1 },
+        "template_sha256": { "$ref": "#/$defs/sha256" },
+        "collector_closure_sha256": { "$ref": "#/$defs/sha256" },
+        "repository_head": { "$ref": "#/$defs/git_oid" },
+        "repository_clean": { "type": "boolean" }
+      }
+    },
+    "authorization": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["method", "approved_sha", "attestation_path", "attestation_sha256", "signer", "signed_at_utc"],
+      "properties": {
+        "method": { "const": "external-auditor-attestation" },
+        "approved_sha": { "$ref": "#/$defs/git_oid" },
+        "attestation_path": { "type": "string", "minLength": 1, "pattern": "^/" },
+        "attestation_sha256": { "$ref": "#/$defs/sha256" },
+        "signer": { "type": "string", "minLength": 1 },
+        "signed_at_utc": { "$ref": "#/$defs/utc" }
+      }
+    },
+    "evidence": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["path", "kind", "sha256", "size_bytes", "mode", "uid", "gid", "captured_at_utc", "member_count"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^/" },
+        "kind": { "enum": ["file", "directory"] },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "mode": { "type": "string", "pattern": "^0[0-7]{3}$" },
+        "uid": { "type": "integer", "minimum": 0 },
+        "gid": { "type": "integer", "minimum": 0 },
+        "captured_at_utc": { "$ref": "#/$defs/utc" },
+        "member_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "git_oid": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+    "scope_exclusion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "reason", "source_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "reason": { "type": "string", "minLength": 1 },
+        "source_refs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    },
+    "workstation_observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "relates_to", "path", "result", "kind", "mode", "size_bytes", "sha256", "captured_at_utc", "note"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "relates_to": { "$ref": "#/$defs/id" },
+        "path": { "type": "string", "minLength": 1 },
+        "result": { "enum": ["LOCATED-UNVERIFIED", "ABSENT"] },
+        "kind": { "type": ["string", "null"] },
+        "mode": { "type": ["string", "null"] },
+        "size_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+        "captured_at_utc": { "$ref": "#/$defs/utc" },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

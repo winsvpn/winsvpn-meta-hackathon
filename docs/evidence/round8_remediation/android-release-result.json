@@ -1,0 +1,11 @@
+{
+  "command": [
+    "pwsh",
+    "-NoProfile",
+    "-File",
+    "tools/build_android_release.ps1"
+  ],
+  "exit_code": 1,
+  "release_apk_exists": false,
+  "reviewed_indexes": []
+}

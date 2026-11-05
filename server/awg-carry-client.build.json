@@ -1,0 +1,139 @@
+{
+  "artifacts": {
+    "amd64": {
+      "GOARCH": "amd64",
+      "GOOS": "linux",
+      "bytes": 10316766,
+      "file": "awg-carry-client-linux-amd64",
+      "repeat_sha256": [
+        "7b9bd0531e20c420842c92ec088711ab53b948901056f8e9ff1f9032b0caf1b1",
+        "7b9bd0531e20c420842c92ec088711ab53b948901056f8e9ff1f9032b0caf1b1",
+        "7b9bd0531e20c420842c92ec088711ab53b948901056f8e9ff1f9032b0caf1b1"
+      ],
+      "sha256": "7b9bd0531e20c420842c92ec088711ab53b948901056f8e9ff1f9032b0caf1b1"
+    },
+    "arm64": {
+      "GOARCH": "arm64",
+      "GOOS": "linux",
+      "bytes": 9785545,
+      "file": "awg-carry-client-linux-arm64",
+      "repeat_sha256": [
+        "38ac4772dd07467191e1b66ce46b7032cf7beeddfe96356fbe483c91fbf868c1",
+        "38ac4772dd07467191e1b66ce46b7032cf7beeddfe96356fbe483c91fbf868c1",
+        "38ac4772dd07467191e1b66ce46b7032cf7beeddfe96356fbe483c91fbf868c1"
+      ],
+      "sha256": "38ac4772dd07467191e1b66ce46b7032cf7beeddfe96356fbe483c91fbf868c1"
+    }
+  },
+  "environment": {
+    "CGO_ENABLED": "0",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local"
+  },
+  "flags": [
+    "-trimpath",
+    "-buildvcs=false"
+  ],
+  "module": "winsvpn.local/awgcarryclient",
+  "modules": [
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "MIT",
+        "sha256": "9ec168d1f4af53f293be8bd2e882588f0e35af0334292d4ca4e5ede84408420e"
+      },
+      "path": "github.com/amnezia-vpn/amneziawg-go/v3",
+      "sum": "h1:D8d8gGvwXcTxUIsE4z6F6vjy4/VZddu95vMNtOygh1c=",
+      "version": "v3.1.20260828"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "Apache-2.0",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      "path": "github.com/google/btree",
+      "sum": "h1:CVpQJjYgC4VbzxeGVHfvZrv1ctoYCAI8vbl07Fcxlyg=",
+      "version": "v1.1.3"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "BSD-3-Clause",
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      "path": "golang.org/x/crypto",
+      "sum": "h1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=",
+      "version": "v0.57.0"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "BSD-3-Clause",
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      "path": "golang.org/x/exp",
+      "sum": "h1:TS73t7x3KarrNd5qAipmspBDS1rkMcgVG/fS1aRb4Rc=",
+      "version": "v0.0.0-20250711185948-6ae5c78190dc"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "BSD-3-Clause",
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      "path": "golang.org/x/net",
+      "sum": "h1:79p50tfZlm0J9YfoDsSi639qSXNGVwEzOPLCxM2FsYU=",
+      "version": "v0.60.0"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "BSD-3-Clause",
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      "path": "golang.org/x/sys",
+      "sum": "h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=",
+      "version": "v0.48.0"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "BSD-3-Clause",
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      "path": "golang.org/x/time",
+      "sum": "h1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=",
+      "version": "v0.16.0"
+    },
+    {
+      "license": {
+        "file": "LICENSE",
+        "kind": "Apache-2.0",
+        "sha256": "0fbab5c58efbdf6d31e8085214f2dd821659c03d73cff3ed2b08e98826ea1cd9"
+      },
+      "path": "gvisor.dev/gvisor",
+      "sum": "h1:Lk6hARj5UPY47dBep70OD/TIMwikJ5fGUGX0Rm3Xigk=",
+      "version": "v0.0.0-20260122175437-89a5d21be8f0"
+    }
+  ],
+  "package": ".",
+  "pins_checked_live_utc": "2026-10-08T18:02Z",
+  "repeats": 3,
+  "source_files": {
+    "build_release.py": "7b1b747a75d29e20be532580f537814d8c767b3866c3887427c897e32cb4192a",
+    "cmd/awg-carry-testpeer/main.go": "a2879dc8373ee3c0c8979fb963994e3d5f4b77a3f50ff26cc9074a553a748196",
+    "go.mod": "f3599f7fff9fc405a6671330a83f8c1b43c56d806512cf0973b71adb2ae51917",
+    "go.sum": "4eecefe71fb77c64b74775939ca11844c8c1276144f37515d3b98fc00e13d980",
+    "main.go": "18fb69a40cee27a125c68ef8fe9af9b2a72cecc39329256aca6d8a1bf62f4345",
+    "main_test.go": "242e9a2d009c43dfbf73655af2119f5beab2a4226ccd359c1f9117508c9a7c1c",
+    "peer/peer.go": "dc62fe53c3936e0cc0a39e2b0e1366a75ac8c62a78bd20fbb1220d70c7cd021b",
+    "peer/peer_test.go": "ebe7a93def9257d57f26dbe50e4e340c664ee931a49f62577dfeb0e486ad56f2",
+    "probe.go": "bc972e84db4093ba951915010f78b8e9dc138a211896eeca8467579150f5cb5a",
+    "probe_test.go": "75994c6570bd97674528d1a2fdaea65ced57078047ad84df35f7a4d8f92c5b57",
+    "request.go": "9220a073b2e782fe1716c2e6a9fe04ce0e539970bdf2160c59bf5b1331db55a6",
+    "request_test.go": "b1120bc48908c907176552fc01299e302391a88dc571af598f43ae7c7b97c066"
+  },
+  "toolchain": "go1.27.1 darwin/arm64"
+}

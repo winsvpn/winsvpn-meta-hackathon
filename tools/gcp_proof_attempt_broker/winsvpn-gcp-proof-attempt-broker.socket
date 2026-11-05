@@ -1,0 +1,16 @@
+[Unit]
+Description=Win's VPN root-owned GCP proof protocol attempt broker socket
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+ConditionFileNotEmpty=/var/lib/winsvpn-proof/fleet-binding.json
+ConditionFileNotEmpty=/etc/winsvpn/role
+
+[Socket]
+ListenStream=/run/winsvpn-proof/protocol-attempt.sock
+SocketMode=0700
+SocketUser=root
+SocketGroup=root
+DirectoryMode=0700
+Accept=no
+
+[Install]
+WantedBy=sockets.target

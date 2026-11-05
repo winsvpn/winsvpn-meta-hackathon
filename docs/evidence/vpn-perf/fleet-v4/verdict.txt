@@ -1,0 +1,43 @@
+LANE T-A: Android APP-LEVEL LIVE VPN TEST vs FLEET GATEWAY (fleet-v4)
+====================================================================
+Run: 2026-08-22 23:52:51 - 23:55:38 EDT (2026-08-23 03:52:51-03:55:38 UTC)
+Device: motorola edge plus 2023 (ZY22GTV6Z3), Android 15, Wi-Fi 192.168.50.171
+App: org.winsvpn.app.debug (dev-session APK, worktree /tmp/t-a-fleet @ HEAD b029ed7)
+Fleet: data-sim-winn3gw <DATA_SIM_IP>:9111 (GCP), FORWARD=1 10.10.0.0/24,
+       router+resolver 10.10.0.1, path_mtu 1450, REGISTERED lease inner 10.10.0.2
+Client identity: canary-client.key (pub aS5Vx6/M1xtWF/l83JKBV2vHJl18EweylHznw6P6nCw=)
+                 inner_v4=10.10.0.2, session 9845439f9aef0fb1f0e5dc634fe49365
+
+DESCRIPTOR: verified=true reason=winn3-descriptor-verified kid=g1 node=data-sim
+            endpoint=<DATA_SIM_IP>:9111 (signed env seq=2, sig verified locally)
+HANDSHAKE:  gate_state carrying in ~0.6 s of staged start (down->handshaking->carrying)
+PROMOTION:  datapath proven, gate=carrying rxPackets=2 after 55 polls; PROMOTED.
+            (promotion probe ICMP echo to 10.10.0.1 x3 injected; gateway INPUT
+            firewall drops ICMP echo on winn3gw0, so promotion came from the
+            TCP SYN -> 10.10.0.1:53 SYN-ACK delivered through the tunnel)
+ROUTES:     VPN CONNECTED tun1 10.10.0.2/32, 0.0.0.0/0->tun1, ::/0->tun1,
+            DNS 10.10.0.1, uids 0-99999, endpoint <DATA_SIM_IP>/32 excluded
+CLIENT CNTRS (during downloads): rx_packets 38,918  tx_packets 14,468
+            messages_received 38,921  gate carrying, posture promoted
+GATEWAY CNTRS: carrying=1 promoted=1 carriage_proven=true session established
+            rx_packets/rx_device_writes 15,246  inner_packets_delivered 39,753
+            messages_sent 39,732  device reads 39,880  ALL drop counters 0
+            resolver claimed=4 answered=4 tcp_accepted=1
+
+SPEED (same device, same Wi-Fi, single-stream Cloudflare 25 MB):
+BEFORE (no VPN): run1 38.37 Mbps (0.65 s), run3 57.16 Mbps (0.44 s)  avg 47.8 Mbps
+AFTER (through fleet tunnel): run1 10.85 Mbps (2.30 s), run2 9.83 Mbps (2.54 s),
+            run3 10.01 Mbps (2.50 s, in-tunnel DNS, no --resolve)  avg 10.2 Mbps
+LOSS vs baseline: 78.6% (47.8 -> 10.2 Mbps)
+
+HARNESS TRAFFIC RESULT: tx_datagrams 8,935, tx_bytes 11,186,620 in 155.4 s
+            (synthetic UDP 50/s -> ~0.58 Mbps; rx_datagrams_verified 0, loss
+            100%: no responder at 10.10.0.1:7777 and the gateway INPUT policy
+            drops it; known harness anomaly, engine counters are authoritative)
+TEARDOWN: clean; tun removed; tunnel status null (active=false).
+
+VERDICT: CARRYING YES. BEFORE 47.8 Mbps, AFTER 10.2 Mbps, LOSS 78.6%.
+         The Android app carried a real standalone winn/3 session end to end
+         against the GCP fleet gateway, promoted full-tunnel routing, and
+         moved 3x 25 MB Cloudflare downloads plus 11.2 MB of harness traffic
+         through the tunnel, with zero drops on both ends.

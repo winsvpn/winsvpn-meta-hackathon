@@ -1,0 +1,1829 @@
+--- a/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
++++ b/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt
+@@ -51,7 +51,6 @@
+     private var vpnInterface: ParcelFileDescriptor? = null
+     private var xrayProcess: Process? = null
+     private var tunnelWakeLock: android.os.PowerManager.WakeLock? = null
+-    private var tunnelWifiLock: android.net.wifi.WifiManager.WifiLock? = null
+     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+     private var lastUnderlyingNetwork: Network? = null
+     private var healthWatchdogThread: Thread? = null
+@@ -1431,44 +1430,19 @@
+             }
+             debugLog("IPv6 sink route installed.")
+ 
+-            // The native AmneziaWG socket is protected individually below via
+-            // protect(), the same mechanism upstream WireGuard-Android relies on, so
+-            // it never needs the whole app UID excluded from the tunnel. The Xray
+-            // subprocess (started via ProcessBuilder) has no per-socket protect()
+-            // path reachable from Kotlin, so stealth-xray mode still needs the
+-            // coarse UID exclusion to keep its outer connection from looping back
+-            // into this app's own TUN. Only apply that coarse exclusion when it is
+-            // actually required.
+-            // Xray is a ProcessBuilder child either way, so either way it needs
+-            // the coarse whole-UID exclusion. In the stacked mode that exclusion
+-            // also covers the Winn engine, which is the SIMPLIFICATION the
+-            // arrangement buys: the Winn outer socket now targets 127.0.0.1, and
+-            // loopback is never matched by the tunnel's own routes, so it needs
+-            // no protect() of its own for correctness. The host still protects
+-            // it (WinnAndroidEngineHost.openProtectedUnderlaySocket), which on a
+-            // loopback-destined socket is simply a no-op -- left in place rather
+-            // than made conditional, because a protect() that is unnecessary is
+-            // harmless and a missing one is a dead loop.
+-            val xrayRequiresWholeUidBypass =
++            val xrayRequiresProtectedCarrier =
+                 mode == "stealth-xray" || mode == "winn-v3-stealth-chain"
+-            if (xrayRequiresWholeUidBypass) {
+-                try {
+-                    builder.addDisallowedApplication(packageName)
+-                    debugLog("App UID excluded from the VPN tunnel for the stealth Xray outer transport.")
+-                } catch (e: PackageManager.NameNotFoundException) {
+-                    logError("Failed to exclude the app process from its own VPN tunnel", e)
+-                }
++            if (xrayRequiresProtectedCarrier) {
++                logError("Refusing Xray mode because its carrier socket is not individually protected; excluding the app UID would route app traffic outside the VPN.")
++                clearRestartConfig()
++                executeTunnelTeardown()
++                return START_NOT_STICKY
+             } else if (winnEnabled) {
+-                // Same reasoning as AmneziaWG, reached a different way: the
+-                // Winn engine is a subprocess and cannot have its sockets
+-                // protected after the fact, so the host opens the one outer
+-                // UDP socket, protects it, and passes the descriptor in. See
+-                // WinnUnderlaySocket for why that ordering is mandatory.
+                 debugLog("App UID remains inside the VPN tunnel; the Winn outer UDP socket is individually protected.")
+             } else {
+                 debugLog("App UID remains inside the VPN tunnel; the AmneziaWG socket is individually protected.")
+             }
+-            speedTestMeasuresPhysicalRoute = xrayRequiresWholeUidBypass
++            speedTestMeasuresPhysicalRoute = false
+             applyUserExcludedApplications(builder, appSection)
+             applyUnderlyingNetworkHints(builder)
+ 
+@@ -3662,11 +3636,9 @@
+ 
+     private fun acquireTunnelPerformanceLocks() {
+         acquireTunnelWakeLock()
+-        acquireTunnelWifiLock()
+     }
+ 
+     private fun releaseTunnelPerformanceLocks() {
+-        releaseTunnelWifiLock()
+         releaseTunnelWakeLock()
+     }
+ 
+@@ -3693,38 +3665,6 @@
+             logWarning("VPN wake lock release was incomplete", e)
+         } finally {
+             tunnelWakeLock = null
+-        }
+-    }
+-
+-    private fun acquireTunnelWifiLock() {
+-        try {
+-            if (tunnelWifiLock?.isHeld == true) return
+-            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE)
+-                    as? android.net.wifi.WifiManager ?: return
+-            val wifiMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+-                android.net.wifi.WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+-            } else {
+-                android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF
+-            }
+-            tunnelWifiLock = wifiManager.createWifiLock(
+-                wifiMode,
+-                "WinsVPN:TunnelWifiFastPath"
+-            ).apply {
+-                setReferenceCounted(false)
+-                acquire()
+-            }
+-        } catch (e: Exception) {
+-            logWarning("Wi-Fi performance lock is unavailable", e)
+-        }
+-    }
+-
+-    private fun releaseTunnelWifiLock() {
+-        try {
+-            tunnelWifiLock?.takeIf { it.isHeld }?.release()
+-        } catch (e: Exception) {
+-            logWarning("Wi-Fi performance lock release was incomplete", e)
+-        } finally {
+-            tunnelWifiLock = null
+         }
+     }
+ 
+--- a/docs/evidence/round5_remediation/asgi_probe.py
++++ b/docs/evidence/round5_remediation/asgi_probe.py
+@@ -0,0 +1,128 @@
++"""Real ASGI validation with outbound sockets, processes and SMTP prohibited."""
++import asyncio
++import importlib.metadata
++import json
++import logging
++from pathlib import Path
++import shutil
++import sqlite3
++import sys
++import threading
++import time
++
++ROOT = Path(__file__).resolve().parents[3]
++sys.path.insert(0, str(ROOT / "server"))
++import test_account_deletion_hub as harness
++import test_winn3_serving_hub as serving
++
++harness._install_stubs = lambda: None
++
++
++def guard(event, args):
++    if event in {"socket.connect", "subprocess.Popen"}:
++        raise PermissionError("Round 5 ASGI probe prohibits outbound I/O")
++
++
++sys.addaudithook(guard)
++
++
++async def post(module, path, payload, headers=None):
++    messages = []
++    body = json.dumps(payload).encode()
++    sent = False
++    request_headers = [(b"host", b"localhost"), (b"content-type", b"application/json")]
++    request_headers += [(key.lower().encode(), value.encode()) for key, value in (headers or {}).items()]
++    scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.4"},
++             "http_version": "1.1", "method": "POST", "scheme": "http", "path": path,
++             "raw_path": path.encode(), "query_string": b"", "root_path": "", "headers": request_headers,
++             "client": ("127.0.0.1", 12345), "server": ("localhost", 80)}
++
++    async def receive():
++        nonlocal sent
++        if not sent:
++            sent = True
++            return {"type": "http.request", "body": body, "more_body": False}
++        await asyncio.Event().wait()
++
++    async def send(message):
++        messages.append(message)
++
++    await module.app(scope, receive, send)
++    status = next(message["status"] for message in messages if message["type"] == "http.response.start")
++    raw = b"".join(message.get("body", b"") for message in messages if message["type"] == "http.response.body")
++    return status, json.loads(raw)
++
++
++async def run():
++    module = harness.load_hub()
++    for handler in list(module.logger.handlers):
++        handler.close()
++        module.logger.removeHandler(handler)
++    module.logger.addHandler(logging.NullHandler())
++    module.logger.propagate = False
++    module.security_alert = lambda *args, **kwargs: None
++    module.paypal_enabled = lambda: True
++    module.PAYPAL_WEBHOOK_ID = "test-webhook"
++    module.PAYPAL_PLAN_1M = "test-plan"
++    owner = threading.get_ident()
++    provider_threads = []
++
++    def signature(*args):
++        provider_threads.append(threading.get_ident())
++        time.sleep(0.15)
++        return True
++
++    def subscription(sub_id):
++        provider_threads.append(threading.get_ident())
++        time.sleep(0.15)
++        return {"id": sub_id, "status": "ACTIVE", "plan_id": "test-plan",
++                "subscriber": {"email_address": "buyer@example.test"}}
++
++    def forbidden(*args, **kwargs):
++        raise AssertionError("unexpected external effect")
++
++    module.verify_paypal_webhook_signature = signature
++    module.fetch_paypal_subscription = subscription
++    module.send_account_email = forbidden
++    module.smart_router_trigger_for_existing_node = forbidden
++    module.smart_router_recommend_node = forbidden
++    try:
++        harness.seed_account(module, devices=0)
++        serving.seed_node(module)
++        login = serving.build_login(module, location="auto").model_dump()
++        denied, _ = await post(module, "/verify", login)
++        assert denied == 401, denied
++        payload = {"id": "evt-real-asgi", "event_type": "BILLING.SUBSCRIPTION.ACTIVATED",
++                   "resource": {"id": "I-ASGI"}}
++        async def ticker():
++            started = time.monotonic()
++            await asyncio.sleep(0.01)
++            return time.monotonic() - started
++        timer = asyncio.create_task(ticker())
++        await asyncio.sleep(0)
++        status, result = await post(module, "/webhook/paypal", payload)
++        elapsed = await timer
++        assert status == 200 and result["created"], (status, result)
++        assert elapsed < 0.1, elapsed
++        assert all(worker != owner for worker in provider_threads), provider_threads
++        with module.get_db() as conn:
++            row = conn.execute("SELECT status, sealed_secret FROM activation_delivery_outbox").fetchone()
++            assert row["status"] == "pending" and row["sealed_secret"].startswith("wao1|")
++        duplicate, result = await post(module, "/webhook/paypal", payload)
++        assert duplicate == 200 and result["status"] == "duplicate"
++        summary = {"frameworks": {name: importlib.metadata.version(name) for name in ("fastapi", "starlette", "pydantic")},
++                   "unauthorizedVerify": denied, "paidWebhook": status, "duplicateWebhook": duplicate,
++                   "timerSeconds": round(elapsed, 4), "providerCallsOffLoop": True,
++                   "durableQueueBeforeResponse": True, "smtpCalled": False,
++                   "lifespanStarted": False, "outboundConnectionsPermitted": False}
++        (Path(__file__).parent / "asgi-result.json").write_text(json.dumps(summary, indent=2) + "\n")
++        print(json.dumps(summary, indent=2))
++    finally:
++        for handler in list(module.logger.handlers):
++            handler.close()
++            module.logger.removeHandler(handler)
++        shutil.rmtree(module._TMPDIR)
++
++
++if __name__ == "__main__":
++    asyncio.run(run())
+--- a/extension/src/adapters/firefox.js
++++ b/extension/src/adapters/firefox.js
+@@ -339,25 +339,19 @@
+   }
+ 
+   async applyPrivacyProtections() {
+-    const result = { webrtc: 'unsupported', prediction: 'unsupported' };
+-    try {
+-      await api.privacy.network.webRTCIPHandlingPolicy.set({ value: 'disable_non_proxied_udp' });
+-      const got = await api.privacy.network.webRTCIPHandlingPolicy.get({});
+-      result.webrtc = got?.value === 'disable_non_proxied_udp' ? 'applied' : 'not_applied';
+-      result.webrtcDetail = `${got?.value} / ${got?.levelOfControl}`;
+-    } catch (e) {
+-      result.webrtc = 'not_applied';
+-      result.webrtcDetail = describeError(e);
+-    }
+-    try {
+-      await api.privacy.network.networkPredictionEnabled.set({ value: false });
+-      const got = await api.privacy.network.networkPredictionEnabled.get({});
+-      result.prediction = got?.value === false ? 'applied' : 'not_applied';
+-    } catch (e) {
+-      result.prediction = 'not_applied';
+-      result.predictionDetail = describeError(e);
+-    }
+-    return result;
++    const webrtcSet = await api.privacy.network.webRTCIPHandlingPolicy.set({ value: 'disable_non_proxied_udp' });
++    const webrtc = await api.privacy.network.webRTCIPHandlingPolicy.get({});
++    if (webrtcSet !== true || webrtc?.value !== 'disable_non_proxied_udp'
++      || webrtc?.levelOfControl !== 'controlled_by_this_extension') {
++      throw new Error('Firefox WebRTC protection did not take effect');
++    }
++    const predictionSet = await api.privacy.network.networkPredictionEnabled.set({ value: false });
++    const prediction = await api.privacy.network.networkPredictionEnabled.get({});
++    if (predictionSet !== true || prediction?.value !== false
++      || prediction?.levelOfControl !== 'controlled_by_this_extension') {
++      throw new Error('Firefox network prediction remained enabled');
++    }
++    return { webrtc: 'applied', prediction: 'applied' };
+   }
+ 
+   async releasePrivacyProtections() {
+--- a/extension/tools/test_browser_enforcement_regressions.py
++++ b/extension/tools/test_browser_enforcement_regressions.py
+@@ -463,6 +463,100 @@
+     assert got["state"] == "protected"
+ 
+ 
++def test_firefox_privacy_requires_success_value_and_exclusive_control(tmp_path: Path) -> None:
++    got = _run_node(tmp_path, """
++const own = 'controlled_by_this_extension';
++let active;
++const setting = name => ({
++  set: async ({value}) => {
++    const state = active[name];
++    if (state.setError) throw new Error('set refused');
++    state.requested = value;
++    return state.setResult;
++  },
++  get: async () => {
++    if (active[name].getError) throw new Error('readback refused');
++    return active[name].got;
++  },
++});
++globalThis.browser = {runtime: {}, privacy: {network: {
++  webRTCIPHandlingPolicy: setting('webrtc'),
++  networkPredictionEnabled: setting('prediction'),
++}}};
++const {FirefoxAdapter} = await import('./src/adapters/firefox.js');
++const good = () => ({
++  webrtc: {setResult: true, got: {value: 'disable_non_proxied_udp', levelOfControl: own}},
++  prediction: {setResult: true, got: {value: false, levelOfControl: own}},
++});
++const outcomes = [];
++for (const name of ['webrtc', 'prediction']) {
++  for (const fault of ['false', 'undefined', 'wrongValue', 'otherControl', 'unknown', 'setError', 'getError']) {
++    active = good();
++    const state = active[name];
++    if (fault === 'false') state.setResult = false;
++    if (fault === 'undefined') state.setResult = undefined;
++    if (fault === 'wrongValue') state.got.value = 'wrong';
++    if (fault === 'otherControl') state.got.levelOfControl = 'controlled_by_other_extensions';
++    if (fault === 'unknown') state.got = undefined;
++    if (fault === 'setError') state.setError = true;
++    if (fault === 'getError') state.getError = true;
++    let error = '';
++    try { await new FirefoxAdapter().applyPrivacyProtections(); }
++    catch (e) { error = String(e.message || e); }
++    outcomes.push({name, fault, error});
++  }
++}
++active = good();
++const success = await new FirefoxAdapter().applyPrivacyProtections();
++console.log(JSON.stringify({outcomes, success, active}));
++""")
++    assert len(got["outcomes"]) == 14
++    for result in got["outcomes"]:
++        assert result["error"], result
++        if result["fault"] not in {"setError", "getError"}:
++            expected = ("Firefox WebRTC protection did not take effect" if result["name"] == "webrtc"
++                        else "Firefox network prediction remained enabled")
++            assert result["error"] == expected
++    assert got["success"] == {"webrtc": "applied", "prediction": "applied"}
++    assert got["active"]["webrtc"]["requested"] == "disable_non_proxied_udp"
++    assert got["active"]["prediction"]["requested"] is False
++
++
++def test_controller_refuses_protected_state_when_privacy_rejects(tmp_path: Path) -> None:
++    got = _run_node(tmp_path, """
++globalThis.chrome = {
++  runtime: {id: 'a'.repeat(32), getManifest: () => ({version: '1.0.0'})},
++  action: {setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}},
++};
++const {Controller} = await import('./src/background/controller.js');
++const {defaultSettings} = await import('./src/core/rules.js');
++const controller = new Controller();
++let blocks = 0;
++controller.adapter = {
++  name: 'firefox', authStats: {}, blockTypesDropped: [],
++  isAllowedIncognitoAccess: async () => false,
++  proxyLevelOfControl: async () => 'controlled_by_this_extension',
++  applyRouting: async () => 'onRequest',
++  applyPrivacyProtections: async () => { throw new Error('Firefox WebRTC protection did not take effect'); },
++  blockLayerTypes: async () => ({ok: true, types: ['main_frame'], dropped: []}),
++  setBlockRules: async rules => { blocks = rules.length; },
++  clearRouting: async () => {},
++};
++controller.settings = {...defaultSettings(), armed: true};
++controller.hostConnected = true;
++controller.hostSpoke = true;
++controller.status = {status: 'connected', detail: '', proxyReady: true, proxyPort: 45678};
++controller.statusAtMs = Date.now();
++controller.credential = {endpoint: {kind: 'http', host: '127.0.0.1', port: 45678}, token: 'A'.repeat(43)};
++controller.canAuthenticate = true;
++controller.blockLayer = {ok: true, error: '', dropped: []};
++await controller.reconcile();
++console.log(JSON.stringify({state: controller.current.state, blocks}));
++""")
++    assert got["state"] != "protected"
++    assert got["blocks"] > 0
++
++
+ def test_block_failure_uses_sink_without_clearing_prior_route(tmp_path: Path) -> None:
+     got = _run_node(
+         tmp_path,
+--- a/server/test_control_plane_round5.py
++++ b/server/test_control_plane_round5.py
+@@ -0,0 +1,410 @@
++#!/usr/bin/env python3
++"""Round 5 payment delivery and scheduling regressions on real isolated SQLite.
++
++The installer is extracted by the existing hub harness. Provider calls and
++SMTP are test doubles; no external messages or payments are made.
++"""
++import _toolchain  # noqa: F401
++import asyncio
++import contextlib
++import json
++import logging
++import shutil
++import sqlite3
++import threading
++import time
++import unittest
++from concurrent.futures import ThreadPoolExecutor
++from datetime import timedelta
++from unittest.mock import patch
++
++import test_account_deletion_hub as harness
++import test_winn3_serving_hub as serving
++
++
++class WebhookRequest(harness.FakeRequest):
++    async def body(self):
++        return json.dumps(self._body).encode()
++
++
++class Round5Tests(unittest.TestCase):
++    def setUp(self):
++        def discard_handlers(**kwargs):
++            for handler in kwargs.get("handlers", []):
++                handler.close()
++        with patch("logging.basicConfig", side_effect=discard_handlers):
++            self.mod = harness.load_hub()
++        self.mod.logger.propagate = False
++        self.mod.logger.addHandler(logging.NullHandler())
++        self.mod.security_alert = lambda *args, **kwargs: None
++        self.mod.sync_peer_to_node = lambda *args, **kwargs: True
++        self.mod.paypal_enabled = lambda: True
++        self.mod.PAYPAL_WEBHOOK_ID = "test-webhook"
++        self.mod.PAYPAL_PLAN_1M = "test-plan"
++        self.mod.verify_paypal_webhook_signature = lambda *args: True
++        self.mod.fetch_paypal_subscription = self.subscription
++        self.mod.send_account_email = lambda *args: True
++
++    def tearDown(self):
++        for handler in list(self.mod.logger.handlers):
++            handler.close()
++            self.mod.logger.removeHandler(handler)
++        shutil.rmtree(self.mod._TMPDIR)
++
++    def subscription(self, sub_id):
++        return {
++            "id": sub_id, "plan_id": "test-plan", "status": "ACTIVE",
++            "subscriber": {"email_address": "buyer@example.test",
++                           "name": {"given_name": "Test", "surname": "Buyer"}},
++            "billing_info": {"next_billing_time": (self.mod.utcnow() + timedelta(days=30)).isoformat()},
++        }
++
++    def paypal(self, event="evt-subscription"):
++        tasks = harness.BackgroundTasks()
++        request = WebhookRequest(path="/webhook/paypal", body={
++            "id": event, "event_type": "BILLING.SUBSCRIPTION.ACTIVATED",
++            "resource": {"id": "I-TEST"},
++        })
++        return self.mod.paypal_webhook(request, tasks), tasks
++
++    def deliveries(self):
++        with self.mod.get_db() as conn:
++            return [dict(row) for row in conn.execute("SELECT * FROM activation_delivery_outbox")]
++
++    def seed_delivery(self):
++        harness.seed_account(self.mod, devices=0)
++        with self.mod.get_db() as conn:
++            secret = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++            self.mod.enqueue_activation_delivery(
++                conn, "test-delivery", f"user-{harness.ACCOUNT}@example.test", "Test",
++                harness.ACCOUNT, "Monthly", secret,
++            )
++        return secret
++
++    def make_due(self):
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE activation_delivery_outbox SET next_attempt_at=?",
++                         ((self.mod.utcnow() - timedelta(seconds=1)).isoformat(),))
++
++    def test_sealed_secret_authenticates_ciphertext_and_identity(self):
++        secret = self.seed_delivery()
++        item = self.deliveries()[0]
++        sealed = item["sealed_secret"]
++        self.assertNotIn(secret, sealed)
++        self.assertEqual(self.mod.open_activation_delivery(sealed, "test-delivery", harness.ACCOUNT), secret)
++        self.assertNotEqual(sealed, self.mod.seal_activation_delivery(secret, "test-delivery", harness.ACCOUNT))
++        for candidate, delivery_id, account in (
++            (sealed, "other-delivery", harness.ACCOUNT),
++            (sealed, "test-delivery", "other-account"),
++            (sealed[:-3] + "AAAA", "test-delivery", harness.ACCOUNT),
++            ("wao1|AA==|AA==|AA==", "test-delivery", harness.ACCOUNT),
++        ):
++            with self.subTest(delivery_id=delivery_id, account=account):
++                with self.assertRaises(ValueError):
++                    self.mod.open_activation_delivery(candidate, delivery_id, account)
++
++    def test_smtp_failure_retries_same_key_and_scrubs_after_success(self):
++        secret = self.seed_delivery()
++        for failure in (False, RuntimeError("do-not-store-this-secret")):
++            self.make_due()
++            with patch.object(self.mod, "send_account_email") as send:
++                if isinstance(failure, Exception):
++                    send.side_effect = failure
++                else:
++                    send.return_value = failure
++                self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 0)
++            item = self.deliveries()[0]
++            self.assertEqual(item["status"], "failed")
++            self.assertGreater(self.mod.parse_iso_datetime(item["next_attempt_at"]), self.mod.utcnow())
++            self.assertNotIn("do-not-store", item["last_error"])
++            self.assertEqual(self.mod.claim_activation_delivery_batch(), [])
++        self.make_due()
++        with patch.object(self.mod, "send_account_email", return_value=True) as send:
++            self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 1)
++            self.assertEqual(send.call_args.args[-1], secret)
++        item = self.deliveries()[0]
++        self.assertEqual((item["status"], item["sealed_secret"], item["attempts"]), ("sent", "", 3))
++
++    def test_restart_expired_lease_reclaims_and_fences_stale_completion(self):
++        self.seed_delivery()
++        stale = self.mod.claim_activation_delivery_batch()[0]
++        self.assertEqual(self.mod.claim_activation_delivery_batch(), [])
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE activation_delivery_outbox SET lease_until=?",
++                         ((self.mod.utcnow() - timedelta(seconds=1)).isoformat(),))
++        current = self.mod.claim_activation_delivery_batch()[0]
++        self.assertNotEqual(stale["lease_token"], current["lease_token"])
++        self.mod.finish_activation_delivery(stale, True)
++        self.assertEqual(self.deliveries()[0]["status"], "sending")
++        self.assertIsNone(self.mod._prepare_activation_delivery(stale))
++        self.mod.finish_activation_delivery(current, True)
++        self.assertEqual(self.deliveries()[0]["status"], "sent")
++
++    def test_concurrent_workers_claim_exactly_once(self):
++        self.seed_delivery()
++        barrier = threading.Barrier(4)
++        def claim(_):
++            barrier.wait(timeout=5)
++            return self.mod.claim_activation_delivery_batch()
++        with ThreadPoolExecutor(max_workers=4) as pool:
++            self.assertEqual(sum(len(rows) for rows in pool.map(claim, range(4))), 1)
++
++    def test_smtp_runs_after_connection_close_and_key_expiry_is_refreshed(self):
++        secret = self.seed_delivery()
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE users SET activation_secret_expires_at=? WHERE account_number=?",
++                         ((self.mod.utcnow() - timedelta(hours=1)).isoformat(), harness.ACCOUNT))
++        def send(*args):
++            with sqlite3.connect(self.mod._DB, timeout=0.1) as conn:
++                conn.execute("BEGIN IMMEDIATE")
++                conn.rollback()
++            self.assertEqual(args[-1], secret)
++            return True
++        self.mod.send_account_email = send
++        self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 1)
++        with self.mod.get_db() as conn:
++            self.assertTrue(self.mod.verify_and_consume_activation_secret(conn, harness.ACCOUNT, secret))
++
++    def test_consumed_key_cancels_delivery_and_delete_cascades(self):
++        secret = self.seed_delivery()
++        with self.mod.get_db() as conn:
++            self.mod.verify_and_consume_activation_secret(conn, harness.ACCOUNT, secret)
++        with patch.object(self.mod, "send_account_email") as send:
++            self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 0)
++            send.assert_not_called()
++        self.assertEqual(self.deliveries()[0]["status"], "cancelled")
++        self.assertEqual(self.deliveries()[0]["sealed_secret"], "")
++        with self.mod.get_db() as conn:
++            conn.execute("DELETE FROM users WHERE account_number=?", (harness.ACCOUNT,))
++        self.assertEqual(self.deliveries(), [])
++
++    def test_changed_recipient_or_reissued_key_never_receives_old_delivery(self):
++        for change in ("recipient", "secret", "refund"):
++            with self.subTest(change=change):
++                with self.mod.get_db() as conn:
++                    self.mod.ensure_schema(conn)
++                    conn.execute("DELETE FROM activation_delivery_outbox")
++                self.seed_delivery()
++                with self.mod.get_db() as conn:
++                    if change == "recipient":
++                        conn.execute("UPDATE users SET email='new@example.test' WHERE account_number=?", (harness.ACCOUNT,))
++                    elif change == "secret":
++                        self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++                    else:
++                        conn.execute("UPDATE users SET status='expired', paypal_status='REFUNDED' WHERE account_number=?", (harness.ACCOUNT,))
++                with patch.object(self.mod, "send_account_email") as send:
++                    self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 0)
++                    send.assert_not_called()
++                self.assertEqual(self.deliveries()[0]["status"], "cancelled")
++
++    def test_startup_runs_delivery_worker_and_shutdown_cancels_it(self):
++        self.mod.HIDE_CONTROL_ORIGIN = True
++        self.mod.MONERO_WALLET_RPC_URL = ""
++        self.mod.EMERGENCY_DISPATCH_ENABLED = False
++        called = threading.Event()
++        self.mod.drain_activation_delivery_outbox_once = lambda: called.set() or 0
++        async def idle():
++            await asyncio.Event().wait()
++        for name in ("account_deletion_sweep_loop", "account_expiry_revocation_sweep_loop", "fleet_availability_sweep_loop"):
++            setattr(self.mod, name, idle)
++        async def exercise():
++            before = asyncio.all_tasks()
++            try:
++                await self.mod.startup_event()
++                self.assertTrue(await asyncio.to_thread(called.wait, 2))
++                worker = self.mod._activation_delivery_task
++                self.assertIsNotNone(worker)
++                await self.mod.stop_activation_delivery_worker()
++                self.assertTrue(worker.cancelled())
++                self.assertIsNone(self.mod._activation_delivery_task)
++            finally:
++                created = asyncio.all_tasks() - before
++                for task in created:
++                    task.cancel()
++                await asyncio.gather(*created, return_exceptions=True)
++        asyncio.run(exercise())
++
++    def test_paid_subscription_commits_queue_and_duplicate_does_not_regrant(self):
++        work, tasks = self.paypal()
++        self.assertTrue(asyncio.run(work)["created"])
++        self.assertFalse(any(fn == self.mod.send_account_email for fn, _, _ in tasks.tasks))
++        item = self.deliveries()[0]
++        self.assertEqual((item["delivery_id"], item["status"]), ("paypal:evt-subscription", "pending"))
++        self.assertEqual(asyncio.run(self.paypal()[0])["status"], "duplicate")
++        self.assertEqual(len(self.deliveries()), 1)
++        self.assertEqual(self.mod.drain_activation_delivery_outbox_once(), 1)
++
++    def test_outbox_insert_failure_rolls_back_paid_grant_and_event_completion(self):
++        with patch.object(self.mod, "enqueue_activation_delivery", side_effect=sqlite3.OperationalError("injected")):
++            with self.assertRaises(sqlite3.OperationalError):
++                asyncio.run(self.paypal()[0])
++        with self.mod.get_db() as conn:
++            self.assertEqual(conn.execute("SELECT COUNT(*) FROM users WHERE paypal_subscription_id='I-TEST'").fetchone()[0], 0)
++            self.assertEqual(conn.execute("SELECT status FROM paypal_events WHERE event_id='evt-subscription'").fetchone()[0], "failed")
++        self.assertEqual(self.deliveries(), [])
++        self.assertTrue(asyncio.run(self.paypal()[0])["created"])
++
++    def provider_grant(self, provider):
++        tasks = harness.BackgroundTasks()
++        if provider == "lifetime":
++            self.mod.PAYPAL_LIFETIME_NO_SUPPORT_AMOUNT = "99.00"
++            self.mod.PAYPAL_LIFETIME_CURRENCY = "USD"
++            return asyncio.run(self.mod.paypal_webhook(WebhookRequest(body={
++                "id": "evt-lifetime", "event_type": "PAYMENT.CAPTURE.COMPLETED",
++                "resource": {"id": "CAPTURE-TEST", "custom_id": "lifetime_no_support",
++                             "amount": {"value": "99.00", "currency_code": "USD"},
++                             "payer": {"email_address": "lifetime@example.test"}},
++            }), tasks))
++        if provider == "btcpay":
++            self.mod.btcpay_enabled = lambda: True
++            self.mod.verify_btcpay_webhook_signature = lambda *args: True
++            self.mod.btcpay_fetch_invoice = lambda invoice_id: {
++                "id": invoice_id, "status": "Settled", "amount": "0.99", "currency": "USD",
++                "metadata": {"hub_order_id": "hub-btcpay", "plan_key": "one_month",
++                             "buyerEmail": "btcpay@example.test"},
++            }
++            return asyncio.run(self.mod.btcpay_webhook(WebhookRequest(body={
++                "type": "InvoiceSettled", "invoiceId": "invoice-test",
++            }), tasks))
++        with self.mod.get_db() as conn:
++            return self.mod.settle_one_monero_order(conn, "hub-monero", 1000, 1000,
++                                                   "test-tx", self.mod.utcnow(), "test-lease")
++
++    def test_all_other_payment_providers_roll_back_then_queue_once(self):
++        for provider in ("lifetime", "btcpay", "monero"):
++            with self.subTest(provider=provider):
++                if provider != "lifetime":
++                    with self.mod.get_db() as conn:
++                        conn.execute("""
++                            INSERT INTO payment_orders(hub_order_id, provider, provider_order_id,
++                                plan_key, expected_amount, expected_currency, buyer_email, status, created_at)
++                            VALUES (?, ?, ?, 'one_month', '0.99', 'USD', ?, 'pending', ?)
++                        """, (f"hub-{provider}", provider, "invoice-test" if provider == "btcpay" else "test-subaddress",
++                              f"{provider}@example.test", self.mod.utcnow().isoformat()))
++                        if provider == "monero":
++                            conn.execute("""
++                                INSERT INTO monero_orders(hub_order_id, subaddress, subaddress_index,
++                                    plan_key, amount_atomic, buyer_email, expires_at, lease_until)
++                                VALUES ('hub-monero', 'test-subaddress', 1, 'one_month', 1000,
++                                        'monero@example.test', ?, 'test-lease')
++                            """, ((self.mod.utcnow() + timedelta(hours=1)).isoformat(),))
++                with patch.object(self.mod, "enqueue_activation_delivery", side_effect=sqlite3.OperationalError("queue unavailable")):
++                    with self.assertRaises(sqlite3.OperationalError):
++                        self.provider_grant(provider)
++                with self.mod.get_db() as conn:
++                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM users WHERE email=?", (f"{provider}@example.test",)).fetchone()[0], 0)
++                    if provider != "lifetime":
++                        self.assertEqual(conn.execute("SELECT status FROM payment_orders WHERE provider=?", (provider,)).fetchone()[0], "pending")
++                result = self.provider_grant(provider)
++                self.assertIn(result["status"], ("ok", "settled"))
++                item = next(row for row in self.deliveries() if row["target_email"] == f"{provider}@example.test")
++                self.assertEqual(item["status"], "pending")
++                self.assertNotIn("delivery", result)
++                self.assertNotIn("activation_secret", result)
++                self.assertIn(self.provider_grant(provider)["status"], ("duplicate", "skipped"))
++                self.assertEqual(sum(row["target_email"] == f"{provider}@example.test" for row in self.deliveries()), 1)
++
++    def test_admin_sync_runs_in_worker_and_successful_sync_commits(self):
++        asyncio.run(self.paypal()[0])
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE users SET last_paypal_sync=NULL WHERE paypal_subscription_id='I-TEST'")
++        self.mod.require_admin_token = lambda *args: None
++        owner = threading.get_ident()
++        def fetch(sub_id):
++            self.assertNotEqual(threading.get_ident(), owner)
++            with sqlite3.connect(self.mod._DB, timeout=0.1) as conn:
++                conn.execute("BEGIN IMMEDIATE")
++                conn.rollback()
++            return self.subscription(sub_id)
++        self.mod.fetch_paypal_subscription = fetch
++        result = asyncio.run(self.mod.admin_paypal_sync(harness.FakeRequest(), 48, "test"))
++        self.assertEqual((result["checked"], result["updated"], result["errors"]), (1, 1, []))
++
++    def test_advisory_accepts_only_valid_bearer_or_unconsumed_activation(self):
++        tokens = harness.seed_account(self.mod, devices=1)
++        with self.mod.get_db() as conn:
++            secret = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++            key = conn.execute("SELECT client_public_key FROM devices WHERE account_number=?", (harness.ACCOUNT,)).fetchone()[0]
++            for headers in ({"authorization": f"Bearer {next(iter(tokens.values()))}"}, {"x-wins-activation": secret}):
++                self.assertTrue(self.mod.verify_advisory_request_authorized(conn, account_number=harness.ACCOUNT,
++                                requested_client_public_key=key, request=harness.FakeRequest(headers=headers)))
++            self.assertFalse(self.mod.verify_advisory_request_authorized(conn, account_number=harness.ACCOUNT,
++                             requested_client_public_key="other-key", request=harness.FakeRequest(headers={"authorization": f"Bearer {next(iter(tokens.values()))}"})))
++
++    def test_paypal_remote_calls_are_off_event_loop_without_database_connections(self):
++        original_get_db = self.mod.get_db
++        active = []
++        @contextlib.contextmanager
++        def tracked_db():
++            with original_get_db() as conn:
++                active.append(conn)
++                try:
++                    yield conn
++                finally:
++                    active.remove(conn)
++        calls = []
++        owner = threading.get_ident()
++        def offloop(name, result):
++            def call(*args):
++                self.assertNotEqual(threading.get_ident(), owner)
++                self.assertEqual(active, [])
++                time.sleep(0.04)
++                calls.append(name)
++                return result(*args) if callable(result) else result
++            return call
++        self.mod.get_db = tracked_db
++        self.mod.verify_paypal_webhook_signature = offloop("signature", True)
++        self.mod.fetch_paypal_subscription = offloop("subscription", self.subscription)
++        asyncio.run(self.paypal()[0])
++        self.mod.paypal_refund_is_terminal = offloop("refund", (False, [], ""))
++        asyncio.run(self.mod.paypal_webhook(WebhookRequest(body={
++            "id": "evt-refund", "event_type": "PAYMENT.CAPTURE.REFUNDED", "resource": {},
++        }), harness.BackgroundTasks()))
++        self.assertEqual(calls, ["signature", "subscription", "signature", "refund"])
++
++    def test_paypal_sync_closes_candidates_and_concurrent_refund_wins(self):
++        asyncio.run(self.paypal()[0])
++        with self.mod.get_db() as conn:
++            conn.execute("UPDATE users SET last_paypal_sync=NULL WHERE paypal_subscription_id='I-TEST'")
++        original_get_db = self.mod.get_db
++        active = []
++        @contextlib.contextmanager
++        def tracked_db():
++            with original_get_db() as conn:
++                active.append(conn)
++                try:
++                    yield conn
++                finally:
++                    active.remove(conn)
++        def fetch(sub_id):
++            self.assertEqual(active, [])
++            with original_get_db() as conn:
++                conn.execute("UPDATE users SET status='expired', paypal_status='REFUNDED' WHERE paypal_subscription_id=?", (sub_id,))
++            return self.subscription(sub_id)
++        self.mod.get_db = tracked_db
++        self.mod.fetch_paypal_subscription = fetch
++        self.assertEqual(self.mod.sync_due_paypal_subscriptions()["updated"], 0)
++        with original_get_db() as conn:
++            self.assertEqual(conn.execute("SELECT paypal_status FROM users WHERE paypal_subscription_id='I-TEST'").fetchone()[0], "REFUNDED")
++
++    def test_unauthorized_paid_verify_cannot_trigger_smart_router(self):
++        harness.seed_account(self.mod, devices=0)
++        serving.seed_node(self.mod)
++        with self.mod.get_db() as conn:
++            secret = self.mod.issue_activation_secret(conn, harness.ACCOUNT)
++        login = serving.build_login(self.mod, location="auto")
++        for marker, expiry, presented in ((None, None, "wrong"), ("used", None, secret), (None, "malformed", secret)):
++            with self.subTest(marker=marker, expiry=expiry):
++                with self.mod.get_db() as conn:
++                    conn.execute("UPDATE users SET activation_secret_used_at=?, activation_secret_expires_at=? WHERE account_number=?",
++                                 (marker, expiry, harness.ACCOUNT))
++                with patch.object(self.mod, "smart_router_trigger_for_existing_node") as trigger, patch.object(self.mod, "smart_router_recommend_node") as recommend:
++                    with self.assertRaises(harness.HTTPException) as error:
++                        asyncio.run(self.mod.verify_account(harness.FakeRequest(path="/verify", headers={"x-wins-activation": presented}), login, harness.BackgroundTasks()))
++                    self.assertEqual(error.exception.status_code, 401)
++                    trigger.assert_not_called()
++                    recommend.assert_not_called()
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/server/test_winn3_descriptor_hub.py
++++ b/server/test_winn3_descriptor_hub.py
+@@ -2080,19 +2080,20 @@
+ def arm_activation(mod, account="1111-2222-3333"):
+     with sqlite3.connect(mod._DB) as conn:
+         conn.execute(
+-            "UPDATE users SET activation_secret_hash = ? WHERE account_number = ?",
++            "UPDATE users SET activation_secret_hash = ?, activation_secret_used_at = NULL, "
++            "activation_secret_expires_at = NULL WHERE account_number = ?",
+             (mod.token_digest(ACTIVATION_SECRET), account))
+         conn.commit()
+ 
+ 
+-def served_config(mod, **login_overrides):
++def served_config(mod, request_headers=None, **login_overrides):
+     from test_account_deletion_hub import BackgroundTasks
+     # The one stub on this path, and it is a NETWORK stub: sync_peer_to_node
+     # SSHes to the selected node. This suite must never contact a node.
+     mod.sync_peer_to_node = lambda *a, **k: True
+     mod.sync_winn3_registry_to_node = lambda *a, **k: True
+     request = FakeRequest(
+-        path="/verify", headers={"x-wins-activation": ACTIVATION_SECRET})
++        path="/verify", headers=request_headers or {"x-wins-activation": ACTIVATION_SECRET})
+     result = asyncio.run(
+         mod.verify_account(request, build_login(mod, **login_overrides),
+                            BackgroundTasks()))
+@@ -2131,8 +2132,8 @@
+     assert config["protocol_version"] == "winn/3"
+     assert config["winn3_descriptor"] == {}
+     # Both flags: the envelope, byte for byte.
+-    body = served_config(mod, supports_winn3=True,
+-                         supports_winn3_descriptor=True)
++    body = served_config(mod, request_headers={"authorization": f"Bearer {body['device_auth_token']}"},
++                         supports_winn3=True, supports_winn3_descriptor=True)
+     config = body["vpn_config"] if "vpn_config" in body else body["vpnconfig"]
+     assert config["winn3_descriptor"] == {"payload": payload_b64,
+                                           "sig": sig_b64}
+@@ -2202,8 +2203,8 @@
+     # against this address and this public key, so re-rolling either on an
+     # ordinary reconnect would strand the device silently -- the gateway would
+     # drop its packets and, being a v3 gateway, answer nothing.
+-    body = served_config(mod, supports_winn3=True,
+-                         supports_winn3_descriptor=True)
++    body = served_config(mod, request_headers={"authorization": f"Bearer {body['device_auth_token']}"},
++                         supports_winn3=True, supports_winn3_descriptor=True)
+     again = body["vpn_config"] if "vpn_config" in body else body["vpnconfig"]
+     assert again["winn3_inner_v4"] == inner
+     assert again["winn3_static_private"] == private_key
+@@ -2454,7 +2455,7 @@
+             {"payload": alpha_payload, "sig": alpha_sig}
+         ),
+     )
+-    served_config(
++    enrolled = served_config(
+         mod, supports_winn3=True, supports_winn3_descriptor=True
+     )
+ 
+@@ -2477,7 +2478,7 @@
+         lambda conn, host, slug: synchronized.append(slug) or True
+     )
+     request = FakeRequest(
+-        path="/verify", headers={"x-wins-activation": ACTIVATION_SECRET}
++        path="/verify", headers={"authorization": f"Bearer {enrolled['device_auth_token']}"}
+     )
+     asyncio.run(
+         mod.verify_account(
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -7823,6 +7823,31 @@
+         )
+     """)
+ 
++def create_activation_delivery_outbox_table(conn: sqlite3.Connection):
++    conn.execute("""
++        CREATE TABLE IF NOT EXISTS activation_delivery_outbox (
++            delivery_id TEXT PRIMARY KEY,
++            account_number TEXT NOT NULL REFERENCES users(account_number) ON DELETE CASCADE,
++            target_email TEXT NOT NULL,
++            subscriber_name TEXT NOT NULL,
++            plan_type TEXT NOT NULL,
++            sealed_secret TEXT NOT NULL,
++            status TEXT NOT NULL DEFAULT 'pending'
++                CHECK (status IN ('pending', 'sending', 'failed', 'sent', 'cancelled')),
++            attempts INTEGER NOT NULL DEFAULT 0,
++            lease_token TEXT,
++            lease_until TEXT,
++            next_attempt_at TEXT NOT NULL,
++            last_error TEXT,
++            created_at TEXT NOT NULL,
++            sent_at TEXT
++        )
++    """)
++    conn.execute("""
++        CREATE INDEX IF NOT EXISTS idx_activation_delivery_ready
++        ON activation_delivery_outbox(status, next_attempt_at, lease_until)
++    """)
++
+ def create_payment_clicks_table(conn: sqlite3.Connection):
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS payment_clicks (
+@@ -8265,6 +8290,7 @@
+     create_core_exit_peers_table(conn)
+     create_settings_table(conn)
+     create_paypal_events_table(conn)
++    create_activation_delivery_outbox_table(conn)
+     create_monero_orders_table(conn)
+     create_payment_orders_table(conn)
+     create_payment_order_archive_table(conn)
+@@ -14214,6 +14240,244 @@
+     return cur.rowcount == 1
+ 
+ 
++def verify_advisory_request_authorized(
++    conn: sqlite3.Connection,
++    *,
++    account_number: str,
++    requested_client_public_key: str,
++    request: Request,
++) -> bool:
++    bearer = bearer_token_from_request(request)
++    if bearer:
++        rows = conn.execute(
++            "SELECT device_auth_token_hash FROM devices "
++            "WHERE account_number = ? AND client_public_key = ?",
++            (account_number, requested_client_public_key),
++        ).fetchall()
++        if any(device_auth_token_matches(row["device_auth_token_hash"], bearer) for row in rows):
++            return True
++    presented = request.headers.get("x-wins-activation", "").strip()
++    if not presented:
++        return False
++    row = conn.execute(
++        "SELECT activation_secret_hash, activation_secret_expires_at, activation_secret_used_at "
++        "FROM users WHERE account_number = ?", (account_number,),
++    ).fetchone()
++    if row is None or row["activation_secret_used_at"] is not None:
++        return False
++    if row["activation_secret_expires_at"]:
++        expires = parse_iso_datetime(row["activation_secret_expires_at"])
++        if expires is None or expires <= now_utc():
++            return False
++    return activation_secret_matches(row["activation_secret_hash"], presented)
++
++
++def _activation_outbox_keys() -> tuple[bytes, bytes]:
++    root = hmac.new(_ACTIVATION_SECRET_PEPPER, b"wins-activation-outbox-root/v1", hashlib.sha256).digest()
++    return (
++        hmac.new(root, b"enc/v1", hashlib.sha256).digest(),
++        hmac.new(root, b"mac/v1", hashlib.sha256).digest(),
++    )
++
++
++def _activation_outbox_stream(key: bytes, nonce: bytes, length: int) -> bytes:
++    output = bytearray()
++    for counter in range((length + 31) // 32):
++        output.extend(hmac.new(key, nonce + counter.to_bytes(8, "big"), hashlib.sha256).digest())
++    return bytes(output[:length])
++
++
++def _activation_outbox_aad(delivery_id: str, account_number: str) -> bytes:
++    return json.dumps([delivery_id, account_number], separators=(",", ":")).encode("utf-8")
++
++
++def seal_activation_delivery(secret: str, delivery_id: str, account_number: str) -> str:
++    # Encrypt-then-MAC with independent HMAC-SHA256 keys and a random nonce.
++    # This uses the same stdlib PRF construction as the prepaid outbox, with
++    # distinct keys and framing. HMAC alone would not conceal the credential.
++    plaintext = secret.encode("utf-8")
++    if not 1 <= len(plaintext) <= 256:
++        raise ValueError("invalid activation delivery secret length")
++    enc_key, mac_key = _activation_outbox_keys()
++    nonce = secrets.token_bytes(32)
++    stream = _activation_outbox_stream(enc_key, nonce, len(plaintext))
++    ciphertext = bytes(left ^ right for left, right in zip(plaintext, stream))
++    aad = _activation_outbox_aad(delivery_id, account_number)
++    tag = hmac.new(mac_key, b"wao1|" + aad + b"|" + nonce + ciphertext, hashlib.sha256).digest()
++    return "wao1|" + "|".join(base64.b64encode(value).decode("ascii") for value in (nonce, ciphertext, tag))
++
++
++def open_activation_delivery(sealed: str, delivery_id: str, account_number: str) -> str:
++    if not isinstance(sealed, str) or len(sealed) > 512:
++        raise ValueError("invalid activation delivery envelope")
++    parts = sealed.split("|")
++    if len(parts) != 4 or parts[0] != "wao1":
++        raise ValueError("invalid activation delivery envelope")
++    try:
++        nonce, ciphertext, tag = (base64.b64decode(value, validate=True) for value in parts[1:])
++    except (ValueError, TypeError) as exc:
++        raise ValueError("malformed activation delivery envelope") from exc
++    if len(nonce) != 32 or len(tag) != 32 or not 1 <= len(ciphertext) <= 256:
++        raise ValueError("invalid activation delivery envelope lengths")
++    enc_key, mac_key = _activation_outbox_keys()
++    aad = _activation_outbox_aad(delivery_id, account_number)
++    expected = hmac.new(mac_key, b"wao1|" + aad + b"|" + nonce + ciphertext, hashlib.sha256).digest()
++    if not hmac.compare_digest(expected, tag):
++        raise ValueError("activation delivery authentication failed")
++    stream = _activation_outbox_stream(enc_key, nonce, len(ciphertext))
++    return bytes(left ^ right for left, right in zip(ciphertext, stream)).decode("utf-8")
++
++
++def enqueue_activation_delivery(
++    conn: sqlite3.Connection, delivery_id: str, target_email: str,
++    subscriber_name: str, account_number: str, plan_type: str, activation_secret: str,
++) -> None:
++    # No commit here: granting access, event completion and delivery are atomic.
++    now = utcnow().isoformat()
++    conn.execute("""
++        INSERT INTO activation_delivery_outbox (
++            delivery_id, account_number, target_email, subscriber_name,
++            plan_type, sealed_secret, next_attempt_at, created_at
++        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
++    """, (
++        delivery_id, account_number, target_email.strip().lower(),
++        subscriber_name or "Wins VPN User", plan_type,
++        seal_activation_delivery(activation_secret, delivery_id, account_number), now, now,
++    ))
++
++
++def claim_activation_delivery_batch(limit: int = 20) -> list[dict]:
++    now = utcnow()
++    now_text = now.isoformat()
++    claimed = []
++    with get_db() as conn:
++        conn.execute("BEGIN IMMEDIATE")
++        rows = conn.execute("""
++            SELECT * FROM activation_delivery_outbox
++            WHERE (status IN ('pending', 'failed') OR (status='sending' AND lease_until <= ?))
++              AND next_attempt_at <= ? AND (lease_until IS NULL OR lease_until <= ?)
++            ORDER BY next_attempt_at, created_at LIMIT ?
++        """, (now_text, now_text, now_text, max(1, min(int(limit), 100)))).fetchall()
++        for row in rows:
++            item = dict(row)
++            item["lease_token"] = secrets.token_hex(16)
++            item["attempts"] += 1
++            conn.execute("""
++                UPDATE activation_delivery_outbox SET status='sending', attempts=?, lease_token=?, lease_until=?
++                WHERE delivery_id=?
++            """, (item["attempts"], item["lease_token"], (now + timedelta(minutes=5)).isoformat(), item["delivery_id"]))
++            claimed.append(item)
++    return claimed
++
++
++def finish_activation_delivery(item: dict, sent: bool, error: str = "") -> None:
++    now = utcnow()
++    delay = min(3600, 30 * (2 ** min(max(int(item["attempts"]) - 1, 0), 7)))
++    with get_db() as conn:
++        if sent:
++            conn.execute("""
++                UPDATE activation_delivery_outbox SET status='sent', sealed_secret='',
++                    lease_token=NULL, lease_until=NULL, last_error=NULL, sent_at=?
++                WHERE delivery_id=? AND status='sending' AND lease_token=?
++            """, (now.isoformat(), item["delivery_id"], item["lease_token"]))
++        else:
++            conn.execute("""
++                UPDATE activation_delivery_outbox SET status='failed', lease_token=NULL,
++                    lease_until=NULL, next_attempt_at=?, last_error=?
++                WHERE delivery_id=? AND status='sending' AND lease_token=?
++            """, ((now + timedelta(seconds=delay)).isoformat(), error[:100] or "smtp_not_accepted",
++                  item["delivery_id"], item["lease_token"]))
++
++
++def _prepare_activation_delivery(item: dict) -> Optional[str]:
++    # Revalidate custody immediately before delivery. A resend, consumption,
++    # refund or deletion must not cause an obsolete key to be emailed.
++    with get_db() as conn:
++        conn.execute("BEGIN IMMEDIATE")
++        delivery = conn.execute("""
++            SELECT sealed_secret FROM activation_delivery_outbox
++            WHERE delivery_id=? AND status='sending' AND lease_token=? AND lease_until>?
++        """, (item["delivery_id"], item["lease_token"], utcnow().isoformat())).fetchone()
++        if delivery is None:
++            return None
++        secret = open_activation_delivery(delivery["sealed_secret"], item["delivery_id"], item["account_number"])
++        user = conn.execute("""
++            SELECT status, email, expiration_date, activation_secret_hash,
++                   activation_secret_used_at, activation_secret_expires_at
++            FROM users WHERE account_number=?
++        """, (item["account_number"],)).fetchone()
++        expiry = parse_iso_datetime(user["expiration_date"]) if user else None
++        valid = (
++            user is not None and user["status"] == "active"
++            and (not user["expiration_date"] or (expiry is not None and expiry > utcnow()))
++            and str(user["email"] or "").strip().lower() == item["target_email"]
++            and user["activation_secret_used_at"] is None
++            and activation_secret_matches(user["activation_secret_hash"], secret)
++        )
++        if not valid:
++            conn.execute("""
++                UPDATE activation_delivery_outbox SET status='cancelled', sealed_secret='',
++                    lease_token=NULL, lease_until=NULL, last_error='credential_superseded_or_account_inactive'
++                WHERE delivery_id=? AND lease_token=?
++            """, (item["delivery_id"], item["lease_token"]))
++            return None
++        key_expiry = parse_iso_datetime(user["activation_secret_expires_at"])
++        if key_expiry is None or key_expiry < utcnow() + timedelta(minutes=30):
++            # Keep the same secret across ambiguous SMTP retries. Extend only
++            # the still-current, unconsumed key, under the writer lock.
++            conn.execute("UPDATE users SET activation_secret_expires_at=? WHERE account_number=?",
++                         ((utcnow() + timedelta(minutes=30)).isoformat(), item["account_number"]))
++    return secret
++
++
++def drain_activation_delivery_outbox_once() -> int:
++    sent_count = 0
++    # Claim each message just before sending, so slow SMTP cannot age a batch
++    # past its lease while another worker starts delivering the same messages.
++    for _ in range(20):
++        batch = claim_activation_delivery_batch(limit=1)
++        if not batch:
++            break
++        item = batch[0]
++        try:
++            secret = _prepare_activation_delivery(item)
++            if secret is None:
++                continue
++            sent = send_account_email(item["target_email"], item["subscriber_name"],
++                                      item["account_number"], item["plan_type"], secret)
++        except Exception as exc:
++            # Exception text may contain addresses or credentials from SMTP.
++            finish_activation_delivery(item, False, type(exc).__name__)
++            continue
++        finish_activation_delivery(item, bool(sent))
++        sent_count += int(bool(sent))
++    return sent_count
++
++
++async def activation_delivery_outbox_sweep_loop() -> None:
++    while True:
++        try:
++            await asyncio.to_thread(drain_activation_delivery_outbox_once)
++        except Exception as exc:
++            logger.error("Activation delivery outbox sweep failed: %s", type(exc).__name__)
++        await asyncio.sleep(30)
++
++
++_activation_delivery_task = None
++
++
++@app.on_event("shutdown")
++async def stop_activation_delivery_worker():
++    global _activation_delivery_task
++    if _activation_delivery_task is not None:
++        _activation_delivery_task.cancel()
++        try:
++            await _activation_delivery_task
++        except asyncio.CancelledError:
++            pass
++        _activation_delivery_task = None
++
++
+ def require_verify_authorization(
+     *,
+     activation_secret_hash: Optional[str],
+@@ -17385,18 +17649,14 @@
+     granted = conn.execute("UPDATE monero_orders SET status='settled', tx_hash=? WHERE hub_order_id=? AND status='pending' AND lease_until=?", (tx_hash or "", hub_order_id, lease_token)).rowcount
+     if order is not None:
+         conn.execute("UPDATE payment_orders SET status='settled', settled_at=? WHERE provider='monero' AND hub_order_id=?", (utcnow().isoformat(), hub_order_id))
++    if granted != 1:
++        raise RuntimeError("Monero settlement lost its order lease")
++    if created and activation_secret:
++        enqueue_activation_delivery(conn, dedupe_id, grant_email, subscriber_name,
++                                    account_number, f"Monero {label}", activation_secret)
+     finish_paypal_event(conn, dedupe_id, "processed", account_number=account_number)
+     conn.commit()
+-    result = {"status": "settled"}
+-    if granted == 1 and created and activation_secret:
+-        result["delivery"] = {
+-            "email": grant_email,
+-            "subscriber_name": subscriber_name,
+-            "account_number": account_number,
+-            "label": f"Monero {label}",
+-            "activation_secret": activation_secret,
+-        }
+-    return result
++    return {"status": "settled"}
+ 
+ async def run_monero_poll_sweep() -> dict:
+     # M-4: the Monero settle sweep, restructured so a wallet-RPC call is NEVER made while
+@@ -17407,12 +17667,11 @@
+     #   (3) settle each result in its own short txn, granting only when exactly one
+     #       still-pending leased row is claimed.
+     # A whole-sweep in-process lock + DB lease keep the timer and a manual admin poll from
+-    # overlapping. Returns the same summary shape the route expects, plus a private
+-    # "deliveries" list the CALLER emails only AFTER the grants have committed.
++    # overlapping. Activation delivery is queued inside each grant transaction.
+     if not monero_rpc_enabled():
+-        return {"enabled": False, "detail": "MONERO_WALLET_RPC_URL is not configured", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": [], "deliveries": []}
++        return {"enabled": False, "detail": "MONERO_WALLET_RPC_URL is not configured", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": []}
+     if not _monero_poll_inflight.acquire(blocking=False):
+-        return {"enabled": True, "detail": "a Monero poll is already running in this worker", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": [], "deliveries": []}
++        return {"enabled": True, "detail": "a Monero poll is already running in this worker", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": []}
+     lease_seconds = MONERO_POLL_LEASE_MINUTES * 60
+     lease_token = (utcnow() + timedelta(minutes=MONERO_POLL_LEASE_MINUTES)).isoformat()
+     try:
+@@ -17422,7 +17681,7 @@
+             ensure_schema(conn)
+         with get_db() as conn:
+             if not acquire_monero_poll_db_lease(conn, lease_seconds):
+-                return {"enabled": True, "detail": "another Monero poll holds the lease", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": [], "deliveries": []}
++                return {"enabled": True, "detail": "another Monero poll holds the lease", "checked": 0, "settled": 0, "expired": 0, "manual_review": 0, "errors": []}
+             batch = claim_monero_poll_batch(conn, MONERO_SETTLE_BATCH_LIMIT, lease_token)
+         try:
+             semaphore = asyncio.Semaphore(MONERO_POLL_CONCURRENCY)
+@@ -17441,7 +17700,6 @@
+             now = utcnow()
+             checked = settled = expired = manual = 0
+             errors = []
+-            deliveries = []
+             for (order, confirmed, seen, txh, exc) in results:
+                 checked += 1
+                 hub_order_id = order["hub_order_id"]
+@@ -17465,9 +17723,7 @@
+                     expired += 1
+                 elif status == "manual_review":
+                     manual += 1
+-                if outcome.get("delivery"):
+-                    deliveries.append(outcome["delivery"])
+-            return {"enabled": True, "checked": checked, "settled": settled, "expired": expired, "manual_review": manual, "errors": errors[:10], "deliveries": deliveries}
++            return {"enabled": True, "checked": checked, "settled": settled, "expired": expired, "manual_review": manual, "errors": errors[:10]}
+         finally:
+             with get_db() as conn:
+                 release_monero_poll_db_lease(conn)
+@@ -18092,11 +18348,8 @@
+             next_billing_time=next_time,
+         )
+         if created and activation_secret:
+-            # This dead-letter/manual-retry path does not itself email the
+-            # welcome message (pre-existing behavior). An operator can
+-            # recover full credential delivery afterward via /admin/resend,
+-            # which rotates and (re)sends the activation secret.
+-            logger.info("Account %s created via PayPal retry sync; deliver credentials via /admin/resend", mask_id(account_number))
++            enqueue_activation_delivery(conn, f"paypal-sync:{subscription_id}", email, subscriber_name,
++                                        account_number, f"PayPal {plan_id or 'subscription'}", activation_secret)
+         return {"account_number": account_number, "created": created, "status": status, "expiry": expiry}
+ 
+     rows = conn.execute("SELECT account_number FROM users WHERE paypal_subscription_id = ?", (subscription_id,)).fetchall()
+@@ -18125,7 +18378,7 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         rows = conn.execute("""
+-            SELECT account_number, paypal_subscription_id, expiration_date, paypal_status
++            SELECT account_number, paypal_subscription_id, expiration_date, paypal_status, last_paypal_sync
+             FROM users
+             WHERE paypal_subscription_id IS NOT NULL
+               AND paypal_subscription_id != ''
+@@ -18134,29 +18387,45 @@
+             ORDER BY expiration_date ASC
+             LIMIT 200
+         """, (cutoff, (utcnow() - timedelta(hours=PAYPAL_SYNC_STALE_HOURS)).isoformat())).fetchall()
+-        for row in rows:
+-            checked += 1
+-            sub_id = row["paypal_subscription_id"]
+-            try:
+-                details = fetch_paypal_subscription(sub_id)
+-                status = (details.get("status") or "").upper()
+-                plan_id = details.get("plan_id") or ""
+-                payer_id = str(find_first_key(details, {"payer_id"}) or "")
+-                email = extract_paypal_email(details)
+-                name = extract_paypal_name(details)
+-                next_time = ((details.get("billing_info") or {}).get("next_billing_time") if isinstance(details.get("billing_info"), dict) else None)
+-                if status in PAYPAL_ACTIVE_STATUSES and str(row["paypal_status"] or "").upper() not in {"REFUNDED", "REVERSED"}:
+-                    account_number, _, _, _ = upsert_paypal_account(conn, email=email, subscriber_name=name, subscription_id=sub_id, plan_id=plan_id, payer_id=payer_id, paypal_status=status, next_billing_time=next_time)
++    # The candidate connection is closed before any remote PayPal call.
++    for row in rows:
++        checked += 1
++        sub_id = row["paypal_subscription_id"]
++        try:
++            details = fetch_paypal_subscription(sub_id)
++            status = (details.get("status") or "").upper()
++            plan_id = details.get("plan_id") or ""
++            payer_id = str(find_first_key(details, {"payer_id"}) or "")
++            email = extract_paypal_email(details)
++            name = extract_paypal_name(details)
++            next_time = ((details.get("billing_info") or {}).get("next_billing_time") if isinstance(details.get("billing_info"), dict) else None)
++            with get_db() as conn:
++                conn.execute("BEGIN IMMEDIATE")
++                current = conn.execute("""
++                    SELECT account_number, paypal_subscription_id, expiration_date, paypal_status, last_paypal_sync
++                    FROM users WHERE account_number=? AND status='active'
++                """, (row["account_number"],)).fetchone()
++                # A concurrent webhook, renewal, refund or deletion wins over
++                # the snapshot that preceded the HTTP call.
++                if current is None or tuple(current) != tuple(row):
++                    continue
++                if str(current["paypal_status"] or "").upper() in {"REFUNDED", "REVERSED"}:
++                    continue
++                if status in PAYPAL_ACTIVE_STATUSES:
++                    upsert_paypal_account(conn, email=email, subscriber_name=name, subscription_id=sub_id,
++                                          plan_id=plan_id, payer_id=payer_id, paypal_status=status, next_billing_time=next_time)
+                     updated += 1
+                 elif status in PAYPAL_INACTIVE_STATUSES:
+-                    conn.execute("UPDATE users SET status='expired', paypal_status=?, last_paypal_sync=? WHERE account_number=?", (status, utcnow().isoformat(), row["account_number"]))
++                    conn.execute("UPDATE users SET status='expired', paypal_status=?, last_paypal_sync=? WHERE account_number=?",
++                                 (status, utcnow().isoformat(), row["account_number"]))
+                     revoke_account_runtime(conn, row["account_number"])
+                     updated += 1
+                 else:
+-                    conn.execute("UPDATE users SET paypal_status=?, last_paypal_sync=? WHERE account_number=?", (status or "UNKNOWN", utcnow().isoformat(), row["account_number"]))
+-            except Exception as exc:
+-                errors.append({"subscription_id": mask_id(sub_id), "error": str(exc)})
+-                logger.error("PayPal sync failed for subscription %s: %s", mask_id(sub_id), exc)
++                    conn.execute("UPDATE users SET paypal_status=?, last_paypal_sync=? WHERE account_number=?",
++                                 (status or "UNKNOWN", utcnow().isoformat(), row["account_number"]))
++        except Exception as exc:
++            errors.append({"subscription_id": mask_id(sub_id), "error": str(exc)})
++            logger.error("PayPal sync failed for subscription %s: %s", mask_id(sub_id), exc)
+     return {"enabled": True, "checked": checked, "updated": updated, "errors": errors[:10]}
+ 
+ async def expire_spa_window(ip: str, lease_seconds: int = 20):
+@@ -18213,6 +18482,7 @@
+ 
+ @app.on_event("startup")
+ async def startup_event():
++    global _activation_delivery_task
+     with get_db() as conn:
+         ensure_schema(conn)
+     # D7/D15: the inner pool is pinned to EXACTLY /24 and an unusable pool
+@@ -18245,6 +18515,7 @@
+     # period ends, with no further action from the user -- so completion must
+     # not depend on anyone opening the app again. The loop is fully guarded and
+     # its failure can never affect request handling.
++    _activation_delivery_task = asyncio.create_task(activation_delivery_outbox_sweep_loop())
+     asyncio.create_task(account_deletion_sweep_loop())
+     # Entitlement expiry is authoritative at the gateways, not only in the
+     # client UI. This loop also repairs already-expired accounts whose peers
+@@ -19806,6 +20077,13 @@
+                 str(route_device_row["location_slug"] or "").strip().lower()
+                 if route_device_row else ""
+             )
++            if not verify_advisory_request_authorized(
++                conn, account_number=acc,
++                requested_client_public_key=requested_client_public_key,
++                request=fastapi_request,
++            ):
++                consume_verify_auth_failure(conn, fastapi_request, acc)
++                raise HTTPException(status_code=401, detail="Activation key or device token required before smart routing.")
+             smart_router_trigger = smart_router_trigger_for_existing_node(
+                 conn,
+                 route_existing_slug,
+@@ -24853,7 +25131,7 @@
+     if not (paypal_enabled() and PAYPAL_WEBHOOK_ID):
+         logger.warning("PayPal webhook ignored because PAYPAL_CLIENT_ID/PAYPAL_CLIENT_SECRET/PAYPAL_WEBHOOK_ID are not configured")
+         return {"status": "ignored", "event": event, "reason": "paypal_credentials_not_configured"}
+-    if not verify_paypal_webhook_signature(dict(request.headers), raw_body, payload):
++    if not await asyncio.to_thread(verify_paypal_webhook_signature, dict(request.headers), raw_body, payload):
+         security_alert(2, "invalid paypal webhook signature", request=request, details={
+             "event": event,
+             "event_id_hash": security_event_hash(payload.get("id", "")),
+@@ -24893,7 +25171,7 @@
+         if event in subscription_events and subscription_id:
+             # Never grant from webhook fields alone. Re-read the signed-in app's
+             # subscription object and require PayPal's definitive ACTIVE state.
+-            details = fetch_paypal_subscription(subscription_id)
++            details = await asyncio.to_thread(fetch_paypal_subscription, subscription_id)
+             merged = details
+             plan_id = str(merged.get("plan_id") or resource.get("plan_id") or "")
+             paypal_status = str(merged.get("status") or "UNKNOWN").upper()
+@@ -24927,13 +25205,14 @@
+             payment_reference = payment_references[0] if payment_references else subscription_id
+             with get_db() as conn:
+                 account_number, created, expiry, activation_secret = upsert_paypal_account(conn, email=email, subscriber_name=subscriber_name, subscription_id=subscription_id, plan_id=plan_id, payer_id=payer_id, paypal_status=paypal_status, next_billing_time=next_time, referral_code=referral_code, purchase_reference=subscription_id, paypal_purchase_reference=payment_reference)
++                if created and activation_secret:
++                    enqueue_activation_delivery(conn, f"paypal:{event_id}", email, subscriber_name,
++                                                account_number, f"PayPal {plan_id or 'subscription'}", activation_secret)
+                 finish_paypal_event(conn, event_id, "processed", account_number=account_number)
+-            if created:
+-                background_tasks.add_task(send_account_email, email, subscriber_name, account_number, f"PayPal {plan_id or 'subscription'}", activation_secret)
+             return {"status": "ok", "event": event, "created": created, "subscription_status": paypal_status}
+ 
+         if event in refund_events:
+-            terminal_refund, payment_references, refund_subscription_id = paypal_refund_is_terminal(event, resource)
++            terminal_refund, payment_references, refund_subscription_id = await asyncio.to_thread(paypal_refund_is_terminal, event, resource)
+             subscription_id = subscription_id or refund_subscription_id
+             if not terminal_refund:
+                 with get_db() as conn:
+@@ -25053,9 +25332,10 @@
+                         account_number, created, expiry, activation_secret = upsert_paypal_account(conn, email=email, subscriber_name=subscriber_name, subscription_id="", plan_id=lifetime_plan_id, payer_id=str(find_first_key(resource, {"payer_id"}) or ""), paypal_status="ACTIVE", next_billing_time=(utcnow() + relativedelta(years=10)).isoformat(), duration_text="10y", referral_code=wallet_grant_referral, purchase_reference=payment_references[0], paypal_purchase_reference=payment_references[0])
+                         if order is not None:
+                             conn.execute("UPDATE payment_orders SET status='settled', settled_at=? WHERE provider='paypal_wallet' AND provider_order_id=?", (utcnow().isoformat(), wallet_order_id))
++                        if created and activation_secret:
++                            enqueue_activation_delivery(conn, f"paypal:{event_id}", email, subscriber_name,
++                                                        account_number, lifetime_label, activation_secret)
+                         finish_paypal_event(conn, event_id, "processed", account_number=account_number)
+-                    if created:
+-                        background_tasks.add_task(send_account_email, email, subscriber_name, account_number, lifetime_label, activation_secret)
+                     return {"status": "ok", "event": event, "created": created, "plan": lifetime_plan_id}
+                 raise RuntimeError("completed lifetime PayPal payment did not include a customer email")
+             # Not a lifetime pass, not a subscription payment: this is the
+@@ -25286,10 +25566,10 @@
+                 "UPDATE payment_orders SET status='settled', settled_at=? WHERE provider='btcpay' AND provider_order_id=?",
+                 (utcnow().isoformat(), invoice_id),
+             )
++            if created and activation_secret:
++                enqueue_activation_delivery(conn, dedupe_id, grant_email, subscriber_name,
++                                            account_number, f"Crypto {label}", activation_secret)
+             finish_paypal_event(conn, dedupe_id, "processed", account_number=account_number)
+-            email = grant_email
+-        if created and activation_secret:
+-            background_tasks.add_task(send_account_email, email, subscriber_name, account_number, f"Crypto {label}", activation_secret)
+         return {"status": "ok", "event": event_type, "created": created, "plan": plan_key}
+     except Exception as exc:
+         with get_db() as conn:
+@@ -25299,34 +25579,16 @@
+ @app.post("/admin/paypal/sync")
+ async def admin_paypal_sync(request: Request, lookahead_hours: int = Form(default=PAYPAL_SYNC_LOOKAHEAD_HOURS), x_admin_token: str = Header(...)):
+     require_admin_token(x_admin_token, request, "paypal sync")
+-    return sync_due_paypal_subscriptions(lookahead_hours)
++    return await asyncio.to_thread(sync_due_paypal_subscriptions, lookahead_hours)
+ 
+ @app.post("/admin/monero/poll")
+ async def admin_monero_poll(request: Request, background_tasks: BackgroundTasks, x_admin_token: str = Header(...)):
+-    # Internal-only endpoint: the wins-monero-poll systemd timer curls it locally with
+-    # the admin token, exactly like /admin/paypal/sync. It runs the M-4 Monero settle
+-    # sweep (batch-claim -> concurrent off-loop wallet RPC -> per-order short-txn
+-    # settle), then -- ONLY after the grant transactions have committed -- schedules the
+-    # welcome email for any freshly-created account, so an email failure can never roll
+-    # back or double a grant. run_monero_poll_sweep's own in-process lock + DB lease keep
+-    # this manual poll and the timer from overlapping. The activation secrets in the
+-    # deliveries list are popped before the summary is returned, so no secret is ever
+-    # emitted in the HTTP response.
++    # The timer and manual poll share the sweep lease. Each settlement commits
++    # its activation outbox row atomically; no credential enters the response.
+     require_admin_token(x_admin_token, request, "monero poll")
+     if not monero_rpc_enabled():
+         return {"enabled": False, "detail": "Monero wallet RPC is not configured"}
+-    result = await run_monero_poll_sweep()
+-    deliveries = result.pop("deliveries", []) if isinstance(result, dict) else []
+-    for delivery in deliveries:
+-        background_tasks.add_task(
+-            send_account_email,
+-            delivery["email"],
+-            delivery["subscriber_name"],
+-            delivery["account_number"],
+-            delivery["label"],
+-            delivery["activation_secret"],
+-        )
+-    return result
++    return await run_monero_poll_sweep()
+ 
+ @app.get("/admin/paypal/dead-letter")
+ async def admin_paypal_dead_letter(request: Request, status: str = "failed", limit: int = 50, x_admin_token: str = Header(...)):
+--- a/tools/test_round5_crypto_checkout.py
++++ b/tools/test_round5_crypto_checkout.py
+@@ -0,0 +1,103 @@
++#!/usr/bin/env python3
++"""Exercise the real website with CSP and intercepted configuration responses.
++
++Run with a Playwright environment and installed Chromium. All requests are
++fulfilled locally or aborted; this test cannot create a real payment order.
++"""
++import argparse
++import asyncio
++import json
++from pathlib import Path
++
++async def check_site(web_root: Path, executable: str | None):
++    from playwright.async_api import async_playwright
++
++    html = (web_root / "index.html").read_text()
++    csp = next(line.strip().split(":", 1)[1].strip() for line in
++               (web_root / "_headers").read_text().splitlines()
++               if line.strip().startswith("Content-Security-Policy:"))
++    cases = {
++        "loading": None,
++        "failed": "fail",
++        "disabled": {},
++        "malformed": "malformed",
++        "monero_only": {"monero_enabled": True, "crypto_enabled": False},
++        "btcpay_only": {"monero_enabled": False, "crypto_enabled": True},
++        "both": {"monero_enabled": True, "crypto_enabled": True},
++    }
++    results = []
++    async with async_playwright() as playwright:
++        browser = await playwright.chromium.launch(**({"executable_path": executable} if executable else {}))
++        try:
++            for width in (390, 1440):
++                for name, config in cases.items():
++                    page = await browser.new_page(viewport={"width": width, "height": 1000})
++                    held = []
++                    async def route_request(route):
++                        url = route.request.url
++                        if url == "https://winsvpn.org/":
++                            await route.fulfill(body=html, content_type="text/html", headers={"Content-Security-Policy": csp})
++                        elif url.endswith("/api/site/crypto-config"):
++                            if config is None:
++                                held.append(route)
++                            elif config == "fail":
++                                await route.fulfill(status=503, body="unavailable")
++                            elif config == "malformed":
++                                await route.fulfill(body="{broken", content_type="application/json")
++                            else:
++                                await route.fulfill(body=json.dumps(config), content_type="application/json")
++                        elif "/api/" in url or "/i18n/" in url or url.endswith(".json"):
++                            await route.fulfill(body="{}", content_type="application/json")
++                        else:
++                            await route.abort()
++                    await page.route("**/*", route_request)
++                    await page.goto("https://winsvpn.org/", wait_until="domcontentloaded")
++                    await page.wait_for_function("document.querySelector('.crypto-plan-btn').hasAttribute('aria-expanded')")
++                    card = page.locator('[data-plan-key="one_month"]')
++                    await card.locator(".crypto-plan-btn").click()
++                    if isinstance(config, dict) and config:
++                        await card.locator(".crypto-pay-button").first.wait_for()
++                    elif config is not None:
++                        await page.wait_for_function("document.querySelector('[data-plan-key=one_month] [data-crypto-row]').textContent.includes('Automated crypto checkout is unavailable')")
++                    buttons = card.locator(".crypto-coin-selector-grid .crypto-coin-btn")
++                    states = await buttons.evaluate_all("buttons => Object.fromEntries(buttons.map(b => [b.dataset.switch, !b.disabled]))")
++                    expected = {"btc": False, "dash": False, "xmr": False}
++                    if isinstance(config, dict):
++                        expected.update(btc=config.get("crypto_enabled", False), dash=config.get("crypto_enabled", False), xmr=config.get("monero_enabled", False))
++                    assert states == expected, (width, name, states, expected)
++                    for coin, enabled in expected.items():
++                        button = card.locator(f'.crypto-coin-btn[data-switch="{coin}"]')
++                        if enabled:
++                            await button.click()
++                            panel = card.locator(".crypto-monero-panel" if coin == "xmr" else ".crypto-pay-panel:not(.crypto-monero-panel)")
++                            assert await panel.is_visible(), (width, name, coin)
++                            await button.click()
++                    # Dispatch a synthetic event even through a disabled control:
++                    # the handler itself must also refuse the donation fallback.
++                    if not any(expected.values()):
++                        await buttons.first.dispatch_event("click")
++                        assert "Automated crypto checkout is unavailable" in await card.locator("[data-crypto-row]").inner_text()
++                    assert await page.locator("#cryptoModalBackdrop").is_hidden()
++                    assert not await page.locator("body").evaluate("el => el.classList.contains('crypto-modal-open')")
++                    assert await page.locator("#cryptoModalBackdrop").evaluate("el => el.parentElement === document.body")
++                    # Donation remains visible even if its former parent is hidden.
++                    await page.locator("#cryptoBtnBtc").dispatch_event("click")
++                    assert await page.locator("#cryptoDonationDrawer").is_hidden()
++                    assert await page.locator("#cryptoModalBackdrop").is_visible()
++                    await page.locator("#cryptoModalClose").click()
++                    assert not await page.locator("body").evaluate("el => el.classList.contains('crypto-modal-open')")
++                    for route in held:
++                        await route.fulfill(status=503, body="unavailable")
++                    results.append({"width": width, "configuration": name, "passed": True})
++                    await page.close()
++        finally:
++            await browser.close()
++    print(json.dumps({"cases": results, "passed": len(results)}, indent=2))
++
++
++if __name__ == "__main__":
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--web-root", type=Path, default=Path(__file__).resolve().parents[1] / "web")
++    parser.add_argument("--executable")
++    args = parser.parse_args()
++    asyncio.run(check_site(args.web_root, args.executable))
+--- a/web/_headers
++++ b/web/_headers
+@@ -8,7 +8,7 @@
+   Cross-Origin-Resource-Policy: same-origin
+   Origin-Agent-Cluster: ?1
+   X-Permitted-Cross-Domain-Policies: none
+-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https: https://www.facebook.com https://www.google-analytics.com https://www.google.com https://www.googleadservices.com; font-src 'self' data:; style-src 'self' 'sha256-P45HqbdjH1H4b8EdWPK7kcr9bePfZN21yZBw1ufcS0w='; script-src 'self' 'sha256-/xEynGcgRnJ5g17gUox8eVJMbT6BOetJ909M0cYfk5k=' 'sha256-uV+Lf1Fylqf9F1qVJrJAuBzf/a8dp3anqcMr4NbxDp4=' https://www.googletagmanager.com https://connect.facebook.net https://www.paypal.com https://www.paypalobjects.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.facebook.com https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://applepay.cdn-apple.com https://pay.google.com; frame-src 'self' https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://pay.google.com; form-action 'self' https://www.paypal.com https://www.paypalobjects.com; upgrade-insecure-requests
++  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https: https://www.facebook.com https://www.google-analytics.com https://www.google.com https://www.googleadservices.com; font-src 'self' data:; style-src 'self' 'sha256-P45HqbdjH1H4b8EdWPK7kcr9bePfZN21yZBw1ufcS0w='; script-src 'self' 'sha256-rsoC5LXzwZ6X10jhP+IqVrjDVLw8L6AFJ+1xcvm1pbA=' 'sha256-uV+Lf1Fylqf9F1qVJrJAuBzf/a8dp3anqcMr4NbxDp4=' https://www.googletagmanager.com https://connect.facebook.net https://www.paypal.com https://www.paypalobjects.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.facebook.com https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://applepay.cdn-apple.com https://pay.google.com; frame-src 'self' https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://pay.google.com; form-action 'self' https://www.paypal.com https://www.paypalobjects.com; upgrade-insecure-requests
+ 
+ /releases/downloads.json
+   Cache-Control: no-cache, max-age=0, must-revalidate
+--- a/web/_worker.js
++++ b/web/_worker.js
+@@ -1755,7 +1755,7 @@
+ // navigation (like clicking a link), not a fetch/iframe/script, so it
+ // needs no connect-src or frame-src entry either.
+ const CONTENT_SECURITY_POLICY =
+-  "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https: https://www.facebook.com https://www.google-analytics.com https://www.google.com https://www.googleadservices.com; font-src 'self' data:; style-src 'self' 'sha256-P45HqbdjH1H4b8EdWPK7kcr9bePfZN21yZBw1ufcS0w='; script-src 'self' 'sha256-/xEynGcgRnJ5g17gUox8eVJMbT6BOetJ909M0cYfk5k=' 'sha256-uV+Lf1Fylqf9F1qVJrJAuBzf/a8dp3anqcMr4NbxDp4=' https://www.googletagmanager.com https://connect.facebook.net https://www.paypal.com https://www.paypalobjects.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.facebook.com https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://applepay.cdn-apple.com https://pay.google.com; frame-src 'self' https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://pay.google.com; form-action 'self' https://www.paypal.com https://www.paypalobjects.com; upgrade-insecure-requests";
++  "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https: https://www.facebook.com https://www.google-analytics.com https://www.google.com https://www.googleadservices.com; font-src 'self' data:; style-src 'self' 'sha256-P45HqbdjH1H4b8EdWPK7kcr9bePfZN21yZBw1ufcS0w='; script-src 'self' 'sha256-rsoC5LXzwZ6X10jhP+IqVrjDVLw8L6AFJ+1xcvm1pbA=' 'sha256-uV+Lf1Fylqf9F1qVJrJAuBzf/a8dp3anqcMr4NbxDp4=' https://www.googletagmanager.com https://connect.facebook.net https://www.paypal.com https://www.paypalobjects.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.facebook.com https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://applepay.cdn-apple.com https://pay.google.com; frame-src 'self' https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://pay.google.com; form-action 'self' https://www.paypal.com https://www.paypalobjects.com; upgrade-insecure-requests";
+ 
+ // Exported for tests as a function, not as the bare string. workerd validates
+ // every named module export and rejects anything that is not a function or an
+--- a/web/index.html
++++ b/web/index.html
+@@ -3818,17 +3818,17 @@
+             <div class="crypto-tier-options" id="cryptoOptions-one_month" hidden>
+               <p class="crypto-tier-prompt">Select payment currency:</p>
+               <div class="crypto-coin-selector-grid">
+-                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="one_month">
++                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="one_month" disabled aria-disabled="true">
+                   <span class="coin-symbol">₿</span>
+                   <span class="coin-name">Bitcoin</span>
+                   <span class="coin-ticker">BTC</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="one_month">
++                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="one_month" disabled aria-disabled="true">
+                   <span class="coin-symbol">Đ</span>
+                   <span class="coin-name">Dash</span>
+                   <span class="coin-ticker">DASH</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="one_month">
++                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="one_month" disabled aria-disabled="true">
+                   <span class="coin-symbol">ɱ</span>
+                   <span class="coin-name">Monero</span>
+                   <span class="coin-ticker">XMR</span>
+@@ -3848,17 +3848,17 @@
+             <div class="crypto-tier-options" id="cryptoOptions-one_year" hidden>
+               <p class="crypto-tier-prompt">Select payment currency:</p>
+               <div class="crypto-coin-selector-grid">
+-                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="one_year">
++                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="one_year" disabled aria-disabled="true">
+                   <span class="coin-symbol">₿</span>
+                   <span class="coin-name">Bitcoin</span>
+                   <span class="coin-ticker">BTC</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="one_year">
++                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="one_year" disabled aria-disabled="true">
+                   <span class="coin-symbol">Đ</span>
+                   <span class="coin-name">Dash</span>
+                   <span class="coin-ticker">DASH</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="one_year">
++                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="one_year" disabled aria-disabled="true">
+                   <span class="coin-symbol">ɱ</span>
+                   <span class="coin-name">Monero</span>
+                   <span class="coin-ticker">XMR</span>
+@@ -3878,17 +3878,17 @@
+             <div class="crypto-tier-options" id="cryptoOptions-lifetime_support" hidden>
+               <p class="crypto-tier-prompt">Select payment currency:</p>
+               <div class="crypto-coin-selector-grid">
+-                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="lifetime_support">
++                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="lifetime_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">₿</span>
+                   <span class="coin-name">Bitcoin</span>
+                   <span class="coin-ticker">BTC</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="lifetime_support">
++                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="lifetime_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">Đ</span>
+                   <span class="coin-name">Dash</span>
+                   <span class="coin-ticker">DASH</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="lifetime_support">
++                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="lifetime_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">ɱ</span>
+                   <span class="coin-name">Monero</span>
+                   <span class="coin-ticker">XMR</span>
+@@ -3908,17 +3908,17 @@
+             <div class="crypto-tier-options" id="cryptoOptions-lifetime_no_support" hidden>
+               <p class="crypto-tier-prompt">Select payment currency:</p>
+               <div class="crypto-coin-selector-grid">
+-                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="lifetime_no_support">
++                <button type="button" class="crypto-coin-btn btc" data-switch="btc" data-plan="lifetime_no_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">₿</span>
+                   <span class="coin-name">Bitcoin</span>
+                   <span class="coin-ticker">BTC</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="lifetime_no_support">
++                <button type="button" class="crypto-coin-btn dash" data-switch="dash" data-plan="lifetime_no_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">Đ</span>
+                   <span class="coin-name">Dash</span>
+                   <span class="coin-ticker">DASH</span>
+                 </button>
+-                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="lifetime_no_support">
++                <button type="button" class="crypto-coin-btn xmr" data-switch="xmr" data-plan="lifetime_no_support" disabled aria-disabled="true">
+                   <span class="coin-symbol">ɱ</span>
+                   <span class="coin-name">Monero</span>
+                   <span class="coin-ticker">XMR</span>
+@@ -6480,21 +6480,51 @@
+         }
+       }
+ 
++      function setCryptoCoinSelectors(card, moneroEnabled, cryptoEnabled) {
++        card.querySelectorAll(".crypto-coin-selector-grid .crypto-coin-btn").forEach((button) => {
++          const coin = button.getAttribute("data-switch");
++          const enabled = coin === "xmr" ? moneroEnabled :
++            (coin === "btc" || coin === "dash") && cryptoEnabled;
++          button.disabled = !enabled;
++          button.setAttribute("aria-disabled", String(!enabled));
++        });
++      }
++
++      function renderCryptoUnavailable(card, message) {
++        if (!card) return;
++        setCryptoCoinSelectors(card, false, false);
++        const row = card.querySelector("[data-crypto-row]");
++        if (!row) return;
++        row.replaceChildren();
++        const notice = document.createElement("p");
++        notice.className = "crypto-pay-status";
++        notice.setAttribute("role", "status");
++        notice.textContent = translateRuntimeText(message);
++        row.appendChild(notice);
++        const trigger = card.querySelector(".crypto-plan-btn");
++        row.hidden = trigger ? trigger.getAttribute("aria-expanded") !== "true" : false;
++      }
++
+       async function setupCryptoPayments() {
+         const cards = [...document.querySelectorAll("[data-plan-key]")];
+         if (!cards.length) return;
+-
++        cards.forEach((card) => setCryptoCoinSelectors(card, false, false));
++        const unavailable = "Automated crypto checkout is unavailable. Please retry shortly or choose another payment method.";
+         let config = null;
+         try {
+           const response = await fetch("/api/site/crypto-config", { cache: "no-store" });
+-          if (!response.ok) return;
++          if (!response.ok) throw new Error("Crypto configuration unavailable");
+           config = await response.json();
+         } catch (_) {
++          cards.forEach((card) => renderCryptoUnavailable(card, unavailable));
+           return;
+         }
+         const moneroEnabled = Boolean(config && config.monero_enabled === true);
+         const cryptoEnabled = Boolean(config && config.crypto_enabled === true);
+-        if (!moneroEnabled && !cryptoEnabled) return;
++        if (!moneroEnabled && !cryptoEnabled) {
++          cards.forEach((card) => renderCryptoUnavailable(card, unavailable));
++          return;
++        }
+ 
+         for (const card of cards) {
+           const planKey = card.dataset.planKey;
+@@ -6502,8 +6532,9 @@
+           if (!row || !planKey) continue;
+           try {
+             buildCryptoRow(row, planKey, moneroEnabled, cryptoEnabled);
++            setCryptoCoinSelectors(card, moneroEnabled, cryptoEnabled);
+           } catch (_) {
+-            row.hidden = true;
++            renderCryptoUnavailable(card, unavailable);
+           }
+         }
+       }
+@@ -6580,6 +6611,9 @@
+       // Cryptocurrency donation modal popup
+       (function () {
+         var backdrop = document.getElementById("cryptoModalBackdrop");
++        if (backdrop && backdrop.parentElement !== document.body) {
++          document.body.appendChild(backdrop);
++        }
+         var closeBtn = document.getElementById("cryptoModalClose");
+         var titleEl = document.getElementById("cryptoModalTitle");
+         var badgeEl = document.getElementById("cryptoModalCoinBadge");
+@@ -6732,8 +6766,6 @@
+             e.preventDefault();
+             var coin = coinBtn.getAttribute("data-switch") || "btc";
+             var card = coinBtn.closest("[data-plan-key]");
+-            var planBtn = card ? card.querySelector(".crypto-plan-btn") : null;
+-            var planTitle = planBtn ? planBtn.getAttribute("data-plan-title") : "";
+             var automatedRow = card ? card.querySelector("[data-crypto-row]") : null;
+ 
+             var triggered = false;
+@@ -6755,7 +6787,7 @@
+               }
+             }
+             if (!triggered) {
+-              openModal(coin, planTitle);
++              renderCryptoUnavailable(card, "Automated crypto checkout is unavailable. Please retry shortly or choose another payment method.");
+             }
+           });
+         });
+--- a/winn_protocol_experimental/internal/carrier/h3.go
++++ b/winn_protocol_experimental/internal/carrier/h3.go
+@@ -1108,6 +1108,20 @@
+ 	return errors.Join(cause, closeErr)
+ }
+ 
++const (
++	clientInitialStreamReceiveWindow     uint64 = 128 * 1024
++	clientMaxStreamReceiveWindow         uint64 = 512 * 1024
++	clientInitialConnectionReceiveWindow uint64 = 256 * 1024
++	clientMaxConnectionReceiveWindow     uint64 = 2 * 1024 * 1024
++)
++
++func applyClientReceiveWindowLimits(config *quic.Config) {
++	config.InitialStreamReceiveWindow = clientInitialStreamReceiveWindow
++	config.MaxStreamReceiveWindow = clientMaxStreamReceiveWindow
++	config.InitialConnectionReceiveWindow = clientInitialConnectionReceiveWindow
++	config.MaxConnectionReceiveWindow = clientMaxConnectionReceiveWindow
++}
++
+ func (d *H3Dialer) h3QUICConfig() *quic.Config {
+ 	requiredInitialPacketSize := H3InitialPacketSize(d.MaxOuterDatagram)
+ 	quicConfig := d.QUICConfig
+@@ -1116,7 +1130,7 @@
+ 		if !d.DisableLengthPadding {
+ 			keepAlive = 12*time.Second + secureJitter(6*time.Second)
+ 		}
+-		return &quic.Config{
++		quicConfig = &quic.Config{
+ 			EnableDatagrams:         true,
+ 			InitialPacketSize:       requiredInitialPacketSize,
+ 			DisablePathMTUDiscovery: false,
+@@ -1126,7 +1140,10 @@
+ 			Allow0RTT:               false,
+ 		}
+ 	}
+-	quicConfig = quicConfig.Clone()
++	if d.QUICConfig != nil {
++		quicConfig = quicConfig.Clone()
++	}
++	applyClientReceiveWindowLimits(quicConfig)
+ 	quicConfig.EnableDatagrams = true
+ 	quicConfig.Allow0RTT = false
+ 	if quicConfig.InitialPacketSize < requiredInitialPacketSize {
+--- a/winn_protocol_experimental/internal/carrier/h3_receive_window_test.go
++++ b/winn_protocol_experimental/internal/carrier/h3_receive_window_test.go
+@@ -0,0 +1,32 @@
++package carrier
++
++import (
++	"testing"
++
++	"github.com/quic-go/quic-go"
++)
++
++func TestClientReceiveWindowsBoundDefaultsAndSuppliedConfigs(t *testing.T) {
++	for _, disablePadding := range []bool{false, true} {
++		for _, supplied := range []*quic.Config{nil, {
++			InitialStreamReceiveWindow:     8 * 1024 * 1024,
++			MaxStreamReceiveWindow:         16 * 1024 * 1024,
++			InitialConnectionReceiveWindow: 16 * 1024 * 1024,
++			MaxConnectionReceiveWindow:     32 * 1024 * 1024,
++			Allow0RTT:                      true,
++		}} {
++			dialer := &H3Dialer{QUICConfig: supplied, DisableLengthPadding: disablePadding}
++			got := dialer.h3QUICConfig()
++			if got.InitialStreamReceiveWindow != 128*1024 || got.MaxStreamReceiveWindow != 512*1024 ||
++				got.InitialConnectionReceiveWindow != 256*1024 || got.MaxConnectionReceiveWindow != 2*1024*1024 {
++				t.Fatalf("unbounded client receive windows: %+v", got)
++			}
++			if !got.EnableDatagrams || got.Allow0RTT || got.InitialPacketSize < H3InitialPacketSize(0) {
++				t.Fatal("receive window limits changed client transport invariants")
++			}
++			if supplied != nil && (supplied == got || supplied.MaxConnectionReceiveWindow != 32*1024*1024 || !supplied.Allow0RTT) {
++				t.Fatal("client limits mutated the caller's shared configuration")
++			}
++		}
++	}
++}

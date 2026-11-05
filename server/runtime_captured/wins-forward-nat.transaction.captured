@@ -1,0 +1,72 @@
+--- transaction file ---
+-rw-r--r-- 1 root root 3810 Aug  5 01:55 /root/wins-forward-nat.transaction
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+:DOCKER-USER - [0:0]
+:WINVPN-FORWARD - [0:0]
+:WINVPN-DOCKER - [0:0]
+-F WINVPN-FORWARD
+-F WINVPN-DOCKER
+-A WINVPN-FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-I FORWARD 1 -i awg0 -j WINVPN-FORWARD
+-I FORWARD 1 -o awg0 -j WINVPN-FORWARD
+-A WINVPN-FORWARD -s 10.8.0.0/16 -d 10.8.0.0/16 -i awg0 -o awg0 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i awg0 -p tcp --dport 6881:6889 -j DROP
+-A WINVPN-FORWARD -i awg0 -p udp --dport 6881:6889 -j DROP
+-A WINVPN-FORWARD -i awg0 -p tcp --dport 6969 -j DROP
+-A WINVPN-FORWARD -i awg0 -p tcp --dport 853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i awg0 -p udp --dport 853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i awg0 -p udp --dport 784 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i awg0 -p udp --dport 8853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i awg0 -p tcp --dport 25 -j DROP
+-A WINVPN-FORWARD -i awg0 -p udp --dport 123 -j DROP
+-A WINVPN-FORWARD -i awg0 -p udp --dport 1900 -j DROP
+-A WINVPN-FORWARD -i awg0 -p udp --dport 389 -j DROP
+-A WINVPN-FORWARD -i awg0 -p udp --dport 53 -j ACCEPT
+-A WINVPN-FORWARD -i awg0 -p tcp --dport 53 -j ACCEPT
+-A WINVPN-FORWARD -i awg0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -m hashlimit --hashlimit-upto 100/sec --hashlimit-burst 200 --hashlimit-mode srcip --hashlimit-name vpn_syn_limit_awg0 -j ACCEPT
+-A WINVPN-FORWARD -i awg0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -j DROP
+-A WINVPN-FORWARD -i awg0 -o ens6 -j ACCEPT
+-I FORWARD 1 -i amn0 -j WINVPN-FORWARD
+-I FORWARD 1 -o amn0 -j WINVPN-FORWARD
+-A WINVPN-FORWARD -s 10.8.0.0/16 -d 10.8.0.0/16 -i amn0 -o amn0 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i amn0 -p tcp --dport 6881:6889 -j DROP
+-A WINVPN-FORWARD -i amn0 -p udp --dport 6881:6889 -j DROP
+-A WINVPN-FORWARD -i amn0 -p tcp --dport 6969 -j DROP
+-A WINVPN-FORWARD -i amn0 -p tcp --dport 853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i amn0 -p udp --dport 853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i amn0 -p udp --dport 784 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i amn0 -p udp --dport 8853 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-FORWARD -i amn0 -p tcp --dport 25 -j DROP
+-A WINVPN-FORWARD -i amn0 -p udp --dport 123 -j DROP
+-A WINVPN-FORWARD -i amn0 -p udp --dport 1900 -j DROP
+-A WINVPN-FORWARD -i amn0 -p udp --dport 389 -j DROP
+-A WINVPN-FORWARD -i amn0 -p udp --dport 53 -j ACCEPT
+-A WINVPN-FORWARD -i amn0 -p tcp --dport 53 -j ACCEPT
+-A WINVPN-FORWARD -i amn0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -m hashlimit --hashlimit-upto 100/sec --hashlimit-burst 200 --hashlimit-mode srcip --hashlimit-name vpn_syn_limit_amn0 -j ACCEPT
+-A WINVPN-FORWARD -i amn0 -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -j DROP
+-A WINVPN-FORWARD -i amn0 -o ens6 -j ACCEPT
+-A WINVPN-FORWARD -j DROP
+-I DOCKER-USER 1 -j WINVPN-DOCKER
+-A WINVPN-DOCKER -s 10.8.0.0/16 -d 10.8.0.0/16 -i awg0 -o awg0 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-DOCKER -s 10.8.0.0/16 -d 10.8.0.0/16 -i amn0 -o amn0 -j REJECT --reject-with icmp-port-unreachable
+-A WINVPN-DOCKER -j RETURN
+COMMIT
+*nat
+:WINVPN-NAT-PREROUTING - [0:0]
+:WINVPN-NAT-POSTROUTING - [0:0]
+-F WINVPN-NAT-POSTROUTING
+-I POSTROUTING 1 -j WINVPN-NAT-POSTROUTING
+-A WINVPN-NAT-POSTROUTING -s 10.8.0.0/16 -o ens6 -j MASQUERADE
+COMMIT
+*mangle
+:WINVPN-MANGLE-FORWARD - [0:0]
+-F WINVPN-MANGLE-FORWARD
+-I FORWARD 1 -i awg0 -j WINVPN-MANGLE-FORWARD
+-I FORWARD 1 -o awg0 -j WINVPN-MANGLE-FORWARD
+-I FORWARD 1 -i amn0 -j WINVPN-MANGLE-FORWARD
+-I FORWARD 1 -o amn0 -j WINVPN-MANGLE-FORWARD
+-A WINVPN-MANGLE-FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1240
+COMMIT

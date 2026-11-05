@@ -1,0 +1,13 @@
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+SWIFT_VERSION = 5.0
+CODE_SIGN_STYLE = Automatic
+CURRENT_PROJECT_VERSION = 1
+MARKETING_VERSION = 0.1
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+GCC_TREAT_WARNINGS_AS_ERRORS = YES
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+
+SPIKE_HOST_BUNDLE_ID = org.winsvpn.experimental.wcf3privacyspike
+SPIKE_PROVIDER_BUNDLE_ID = org.winsvpn.experimental.wcf3privacyspike.PacketTunnel
+SPIKE_APP_GROUP = group.org.winsvpn.experimental.wcf3privacyspike
+

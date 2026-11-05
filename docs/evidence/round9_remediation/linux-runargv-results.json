@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--pull=never",
+      "--network=none",
+      "--read-only",
+      "--tmpfs",
+      "/tmp:rw,exec,size=256m",
+      "--mount",
+      "type=bind,src=/Users/owner/xprize/winsvpnv3,dst=/repo,readonly",
+      "--entrypoint",
+      "python3",
+      "winsvpn-linux-desktop-builder:arm64",
+      "-B",
+      "/repo/tools/test_linux_runargv_round9.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:44:41.830126+00:00",
+    "exit_code": 0,
+    "seconds": 43.61,
+    "log": "linux-runargv.log"
+  }
+]

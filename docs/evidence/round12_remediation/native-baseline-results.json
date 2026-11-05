@@ -1,0 +1,8 @@
+{
+  "tests_run": 2,
+  "failures": [
+    "round12_native_baseline.MacOSNativeHostHelperContractTests.test_macos_helper_first_rollback_failure_still_restores_later_files",
+    "round12_native_baseline.MacOSNativeHostHelperContractTests.test_macos_helper_owner_blocks_edge_without_touching_live_registration"
+  ],
+  "same_source_freeze_failures": true
+}

@@ -1,0 +1,72 @@
+# Win's VPN Linux release builder (Debian 12), the host image for
+# tools/build_linux_release.sh.
+#
+# WHAT THIS IMAGE IS
+# ------------------
+# The apt layer of the Linux release producer and nothing else. The package
+# set is read from tools/linux_apt_pins.json (the single source of truth) by
+# tools/verify_linux_apt_pins.py emit-install, exactly as the producer itself
+# does, and the build fails unless tools/verify_linux_apt_pins.py verify
+# passes inside the image. A pin mismatch therefore stops the image build; the
+# fix is a deliberate edit of tools/linux_apt_pins.json, never a relaxed check.
+#
+#   pin  set: installed at the recorded version (pkg=version).
+#   keep set: installed unpinned.
+#   drop set: never requested. liblzma-dev still arrives as a dependency of
+#             libgtk-3-dev (libtiff-dev depends on it); the drop verdict means
+#             the release does not need it, not that dpkg lacks it.
+#
+# Added beyond linux_apt_pins.json, because the producer needs it in the
+# container: python3 (Debian's python3 = 3.11, at /usr/bin/python3, which the
+# producer calls for every check; libglib2.0-dev-bin pulls it in anyway, it is
+# named here so the dependency is explicit). Recommends are not installed, so
+# the image holds the requested packages and their hard dependencies only.
+#
+# WHAT IS NOT IN THE IMAGE
+# ------------------------
+# No Flutter SDK, Pub cache, Go SDK, module cache or cosign. The producer takes
+# the reviewed Flutter SDK and Pub cache from WINS_LINUX_FLUTTER_ARCHIVE and
+# WINS_LINUX_PUB_CACHE_ARCHIVE, verifies both against tools/toolchain-pins.json
+# and extracts them itself; the Go SDK comes from WINS_ENGINE_SOURCE_ROOT and
+# the module cache from WINS_STORE_GOMODCACHE. Baking any of them here would
+# put an unpinned toolchain under the release.
+#
+# BASE
+# ----
+# debian:12 by index digest. The same digest resolves to the native linux/amd64
+# image on aicore and the native linux/arm64 image on aione. Build natively on
+# each host; do not emulate.
+#
+# BUILD (minimal context: only the two files this Dockerfile copies)
+# ------------------------------------------------------------------
+#   ctx="$(mktemp -d)"; mkdir -p "$ctx/tools"
+#   cp tools/linux_apt_pins.json tools/verify_linux_apt_pins.py "$ctx/tools/"
+#   docker build --pull=false --no-cache \
+#     -f tools/Dockerfile.linux-release-builder \
+#     -t wins-linux-release-builder:1.0.16-<amd64|arm64> "$ctx"
+#
+# RUN (non-root; the producer requires the repository to be owned by the
+# invoking uid, so the source copy must belong to uid 1000)
+#   docker run --rm --user 1000:1000 ... wins-linux-release-builder:1.0.16-<arch>
+FROM debian:12@sha256:2c037a04925515fdd6ea85ea14a682d0e79931f5e9f5d07b6dbfc6ba12f9e858
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+COPY tools/linux_apt_pins.json tools/verify_linux_apt_pins.py /opt/winsvpn-apt-pins/tools/
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends python3; \
+    pin_args="$(/usr/bin/python3 -I /opt/winsvpn-apt-pins/tools/verify_linux_apt_pins.py emit-install)"; \
+    apt-get install -y --no-install-recommends $pin_args; \
+    /usr/bin/python3 -I /opt/winsvpn-apt-pins/tools/verify_linux_apt_pins.py verify; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    useradd --uid 1000 --user-group --create-home --shell /bin/bash builder
+
+USER 1000:1000
+WORKDIR /home/builder

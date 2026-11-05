@@ -1,0 +1,22 @@
+[
+  {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "exit_code": 0,
+    "seconds": 2.01,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/flutter-analyze-final.log"
+  },
+  {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub"
+    ],
+    "exit_code": 0,
+    "seconds": 14.56,
+    "log": "/Users/owner/xprize/winsvpnv3/docs/evidence/round11_remediation/flutter-test-final.log"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/test_apple_proving_ownership.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:43:41.619674+00:00",
+    "exit_code": 0,
+    "seconds": 2.16,
+    "log": "apple-ownership.log"
+  }
+]

@@ -1,0 +1,88 @@
+[Unit]
+Description=Winn Protocol v2 post-quantum AWG key controller (PostgreSQL)
+Documentation=file:///usr/local/share/doc/winn-protocol/OPERATIONS.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=winn
+Group=winn
+EnvironmentFile=/etc/winn/server.env
+LoadCredential=server.pem:/etc/winn/credentials/server.pem
+LoadCredential=server-key.pem:/etc/winn/credentials/server-key.pem
+LoadCredential=ech-server-keys.json:/etc/winn/credentials/ech-server-keys.json
+LoadCredential=cover.pem:/etc/winn/credentials/cover.pem
+LoadCredential=cover-key.pem:/etc/winn/credentials/cover-key.pem
+LoadCredential=ca.pem:/etc/winn/credentials/ca.pem
+LoadCredential=state.key:/etc/winn/credentials/state.key
+LoadCredential=audit.key:/etc/winn/credentials/audit.key
+LoadCredential=controller-pq.seed:/etc/winn/credentials/controller-pq.seed
+LoadCredential=device-registry.json:/etc/winn/credentials/device-registry.json
+LoadCredential=postgres.dsn:/etc/winn/credentials/postgres.dsn
+ExecStart=/usr/local/libexec/winn/winn-server \
+  -listen ${WINN_LISTEN} \
+  -admin-listen ${WINN_ADMIN_LISTEN} \
+  -cert %d/server.pem \
+  -key %d/server-key.pem \
+  -ech-keys %d/ech-server-keys.json \
+  -cover-cert %d/cover.pem \
+  -cover-key %d/cover-key.pem \
+  -client-ca %d/ca.pem \
+  -postgres-dsn-file %d/postgres.dsn \
+  -postgres-max-connections ${WINN_POSTGRES_MAX_CONNECTIONS} \
+  -state-key %d/state.key \
+  -audit-log /var/log/winn/audit.jsonl \
+  -audit-key %d/audit.key \
+  -controller-id ${WINN_CONTROLLER_ID} \
+  -controller-pq-seed %d/controller-pq.seed \
+  -device-pq-registry %d/device-registry.json \
+  -suite ${WINN_SUITE} \
+  -key-ttl ${WINN_KEY_TTL} \
+  -awg-bin ${WINN_AWG_BINARY} \
+  -interface ${WINN_AWG_INTERFACE} \
+  -rate-burst ${WINN_RATE_BURST} \
+  -rate-per-minute ${WINN_RATE_PER_MINUTE} \
+  -rate-max-keys ${WINN_RATE_MAX_KEYS} \
+  -max-concurrent ${WINN_MAX_CONCURRENT}
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGTERM
+LogsDirectory=winn
+LogsDirectoryMode=0700
+RuntimeDirectory=winn
+RuntimeDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateMounts=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RemoveIPC=yes
+SystemCallArchitectures=native
+ReadWritePaths=/var/log/winn /run/winn
+LimitNOFILE=4096
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target

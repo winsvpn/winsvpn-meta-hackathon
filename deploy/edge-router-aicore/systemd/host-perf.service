@@ -1,0 +1,13 @@
+[Unit]
+Description=CPU and PCIe performance for VPN + inference
+After=network-online.target
+Wants=network-online.target irqbalance.service
+
+[Service]
+Type=oneshot
+Slice=wins-ai.slice
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/host-perf.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Win's VPN Local Release Readiness</title>
+<style>
+  :root { --bg:#090d15; --panel:#121927; --line:#263147; --text:#edf3ff; --muted:#98a6bf; --ready:#3ddc97; --partial:#f5b84b; --bad:#ff6b75; --stale:#c892ff; --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
+  * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  .wrap { width:min(1500px,calc(100% - 32px)); margin:0 auto; padding:24px 0 40px; } header { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  h1 { margin:0; font-size:clamp(22px,3vw,32px); } h2 { margin:24px 0 10px; color:var(--muted); font-size:12px; letter-spacing:.11em; text-transform:uppercase; }
+  h3 { margin:0; font-size:15px; } .subtitle,.target-id,.timestamp,.detail { color:var(--muted); } .target-id,.timestamp,.detail { font:10px/1.45 var(--mono); overflow-wrap:anywhere; }
+  .connection,.status,.dimension-status,.blocker-kind { border:1px solid var(--line); border-radius:999px; padding:4px 8px; font:700 10px var(--mono); text-transform:uppercase; }
+  .connection { height:max-content; color:var(--muted); } .connection.live { color:var(--ready); border-color:#1f6849; } .connection.error,.status.blocked,.status.invalid,.status.unavailable,.dimension-status.failed,.dimension-status.invalid,.blocker { color:var(--bad); border-color:#77333a; }
+  .status.ready,.dimension-status.verified { color:var(--ready); border-color:#1f6849; } .status.partial,.status.unverified,.dimension-status.missing { color:var(--partial); } .status.stale,.dimension-status.stale { color:var(--stale); border-color:#604b83; }
+  .notice { margin-top:18px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:#0d1420; color:var(--muted); } .notice.error { color:var(--bad); border-color:#77333a; }
+  .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; } .metric,.card { border:1px solid var(--line); border-radius:11px; background:var(--panel); padding:14px; min-width:0; }
+  .metric .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; } .metric .value { margin-top:4px; font:700 21px var(--mono); } .metric .value.small { font-size:12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; } .card-top,.score { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; } .score { margin-top:13px; align-items:baseline; flex-wrap:wrap; } .score strong { font:700 22px var(--mono); }
+  .bar { height:9px; margin:7px 0 10px; overflow:hidden; border-radius:999px; background:#080d16; } .bar i { display:block; width:var(--pct); height:100%; background:var(--bad); } .card[data-status="ready"] .bar i { background:var(--ready); } .card[data-status="partial"] .bar i { background:var(--partial); }
+  .dimensions,.blockers { margin-top:10px; border-top:1px solid var(--line); } .section-label { margin:10px 0 4px; color:var(--muted); font:700 10px var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+  details { padding:8px 0; border-bottom:1px solid var(--line); } details:last-child { border-bottom:0; } summary { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:7px; cursor:pointer; list-style:none; } summary::-webkit-details-marker { display:none; }
+  .artifact { margin-top:5px; padding:6px; border-radius:6px; background:#090e18; font:10px/1.45 var(--mono); overflow-wrap:anywhere; } footer { margin-top:24px; color:var(--muted); text-align:center; font-size:11px; }
+  @media (max-width:760px) { .wrap { width:min(100% - 20px,1500px); padding-top:14px; } .summary { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header><div><h1>Win's VPN Local Release Readiness</h1><div class="subtitle">Only current, hash-verified local receipts can change a card. Engineering/test evidence stays separate from signed-artifact and store-upload evidence. Missing, stale, forged, or reused receipts earn zero. Chrome and Edge stay distinct. Android TV AAB remains one of the 16 required upload targets.</div></div><div id="connection" class="connection" role="status">CONNECTING</div></header>
+  <div id="notice" class="notice"><strong>Local only. DO-NOT-UPLOAD.</strong> Handoffs, plans, unit tests, workers, and source presence are excluded. Missing receipts stay pending; failed evidence stays failed. Neither is PASS. Current evidence is 0/16 required upload receipts (strict store denominator) and 0/20 engineering/operator targets. The Chrome/Edge operator split yields 21 blocker-audit entries and is not a store denominator. No valid fresh GCP proof, AGP migration in progress, and a pending macOS release Python owner prompt. Chrome and Edge stay distinct. Android TV AAB remains one of the 16 required upload targets.</div>
+  <div id="publication-hold" class="notice error" role="status">DO-NOT-UPLOAD</div>
+  <div class="summary" aria-label="Release readiness summary">
+    <div class="metric"><div class="label">Publication</div><div id="publication" class="value small">DO-NOT-UPLOAD</div></div>
+    <div class="metric"><div class="label">Store-ready</div><div id="overall" class="value">0%</div></div>
+    <div class="metric"><div class="label">Engineering/test evidence</div><div id="engineering" class="value">0%</div></div>
+    <div class="metric"><div class="label">Store-upload evidence</div><div id="store-evidence" class="value">0%</div></div>
+    <div class="metric"><div class="label">Technical evidence</div><div id="technical" class="value">0%</div></div>
+    <div class="metric"><div class="label">Store-upload coverage (16)</div><div id="upload-coverage" class="value">0 / 16</div></div>
+    <div class="metric"><div class="label">Engineering/operator targets (20)</div><div id="ready-count" class="value">0 / 20</div></div>
+    <div class="metric"><div class="label">Pending</div><div id="pending-count" class="value small">20 targets, 16 uploads</div></div>
+    <div class="metric"><div class="label">Failed</div><div id="failed-count" class="value small">0 targets, 0 uploads</div></div>
+    <div class="metric"><div class="label">GCP proof</div><div id="gcp-proof" class="value small">no valid fresh proof</div></div>
+    <div class="metric"><div class="label">AGP migration</div><div id="agp-migration" class="value small">in progress</div></div>
+    <div class="metric"><div class="label">macOS Python</div><div id="macos-python" class="value small">owner prompt pending</div></div>
+    <div class="metric"><div class="label">Owner blockers</div><div id="owner-blockers" class="value">0</div></div>
+    <div class="metric"><div class="label">External blockers</div><div id="external-blockers" class="value">0</div></div>
+    <div class="metric"><div class="label">Undisclosed audits</div><div id="undisclosed-audits" class="value">0</div></div>
+    <div class="metric"><div class="label">Blocker categories</div><div id="blocker-category-count" class="value">0</div></div>
+    <div class="metric"><div class="label">Freshness</div><div id="freshness" class="value small">24 hours</div></div>
+    <div class="metric"><div class="label">Snapshot</div><div id="generated-at" class="value small">waiting</div></div>
+    <div class="metric"><div class="label">Evidence</div><div id="evidence-root" class="value small">local only</div></div>
+  </div>
+  <h2>Active blocker categories</h2>
+  <div id="blocker-category-list" class="grid" aria-label="Active blocker categories"></div>
+  <h2>Required upload targets (16 store uploads)</h2>
+  <div id="upload-target-list" class="grid" aria-label="Required upload targets, 16 store uploads"></div>
+  <h2>Engineering/operator targets (20 scored; Chrome/Edge split is not the store denominator)</h2>
+  <div id="target-groups"></div>
+  <footer>Loopback only. Polling uses no-store requests and never uploads evidence.</footer>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

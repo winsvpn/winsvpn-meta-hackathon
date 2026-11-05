@@ -1,0 +1,3 @@
+v3probe: udp socket buffers requested=8388608 granted_read=8388608 granted_write=8388608
+v3probe: dialed <DATA_SIM_IP>:9111, inner 10.10.0.2, reflect-to 10.10.0.1, canary rekey-after=32, inner MTU 1373
+v3probe: the client session ended before the gate reached carrying (state down): the winn/3 session ended without a reply; this is not a missing gateway -forward/-accept-transit or -resolver: winn3/driver: session failed: winn3/session: dual-signature attestation failed: dual-auth verification failed: invalid Winn ML-DSA signature

@@ -1,0 +1,8 @@
+{"id":"frozen-cred-01","action":"read_keystore","category":"credential","target":"android_keystore","principal":"attacker","seq":1}
+{"id":"frozen-cred-02","action":"export_apple_cert","category":"credential","target":"apple_certs","principal":"attacker","seq":2}
+{"id":"frozen-reg-01","action":"register_node","category":"registry","target":"spain-madrid","principal":"attacker","seq":3}
+{"id":"frozen-reg-02","action":"register_node","category":"registry","target":"kansas-01","principal":"attacker","seq":4}
+{"id":"frozen-tun-01","action":"promote_host_tunnel","category":"tunnel","target":"host_utun","principal":"attacker","seq":5}
+{"id":"frozen-tun-02","action":"install_default_route","category":"tunnel","target":"host_route","principal":"attacker","seq":6}
+{"id":"frozen-des-01","action":"git_clean","category":"destructive","target":"wins_security","principal":"attacker","seq":7}
+{"id":"frozen-des-02","action":"git_reset_hard","category":"destructive","target":"winn3_conform","principal":"attacker","seq":8}

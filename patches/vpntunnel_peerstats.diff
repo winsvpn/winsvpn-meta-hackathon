@@ -1,0 +1,128 @@
+--- /Users/owner/Documents/wins/source/wins_vpn/android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt	2026-08-15 05:21:13
++++ android/app/src/main/kotlin/org/winsvpn/app/VpnTunnelService.kt	2026-08-17 14:04:59
+@@ -11,6 +11,7 @@
+ import android.content.pm.ServiceInfo
+ import android.graphics.BitmapFactory
+ import android.net.ConnectivityManager
++import android.net.TrafficStats
+ import android.net.LinkProperties
+ import android.net.Network
+ import android.net.NetworkCapabilities
+@@ -2447,6 +2448,16 @@
+                         existing.rebindDevice(device)
+                     }
+                 }
++
++                // THE BOOTSTRAP PROBE'S TWO ADDRESSES, read off the plan rather
++                // than off the postures: the assignment is the only source
++                // `winn3/tun`'s outbound rule accepts (an equality, not a prefix
++                // containment), and the next hop is the gateway's own inner
++                // address, which is the one destination both gateway inner sides
++                // in this tree answer. Both are already validated by
++                // WinnV3SessionPlan.from, which requires each to be non-empty.
++                val probeSource = plan.engineConfig.innerAddress
++                val probeTarget = plan.engineConfig.innerNextHop
+ 
+                 val staged = WinnV3StagedStart(
+                     bootstrap = plan.bootstrap,
+@@ -2481,6 +2492,64 @@
+                     log = { message -> debugLog(message) },
+                     nowMs = { SystemClock.elapsedRealtime() },
+                     sleepMs = { millis -> Thread.sleep(millis) },
++                    // THE DETERMINISTIC BOOTSTRAP. Until this existed, promotion
++                    // required a human to drive a routed application at the
++                    // gateway's inner address inside the thirty-second window,
++                    // because the gateway learns its return route from the
++                    // client's FIRST inner packet and the engine's `rx_packets`
++                    // is not even reported until the host device has produced one.
++                    // See WinnV3BootstrapProbe for both halves of that.
++                    //
++                    // Injected into the seam and not written to the tun: the
++                    // packet has to travel host -> engine, and the bootstrap
++                    // posture routes almost nothing while this service's own
++                    // carrier socket is protect()ed out of the tunnel on purpose.
++                    // See WinnV3AndroidIpPacketSeam.injectOutgoingPacket.
++                    probe = { sequence ->
++                        val live = seam
++                        if (live == null) {
++                            // Cannot happen: the staged start polls only after
++                            // install(bootstrap) has returned, and that closure is
++                            // what opens the seam. Logged rather than asserted,
++                            // because a refusal is the correct outcome either way
++                            // and throwing here would tear down a tunnel that is
++                            // otherwise fine.
++                            debugLog("winn3: bootstrap probe $sequence skipped; no seam is open")
++                        } else {
++                            val packet = WinnV3BootstrapProbe.echoRequest(
++                                source = probeSource,
++                                destination = probeTarget,
++                                sequence = sequence,
++                            )
++                            if (packet == null) {
++                                // Once, on the first attempt. A configuration whose
++                                // addresses cannot carry an inner probe still
++                                // starts; it simply promotes the old way, on traffic
++                                // from a routed application. Saying so thirty times
++                                // would bury the reason it fell back.
++                                if (sequence == 1) {
++                                    logWarning(
++                                        "Winn v3 cannot build a bootstrap probe for " +
++                                            "$probeSource -> $probeTarget; promotion now depends " +
++                                            "on a routed application emitting this session's " +
++                                            "first inner packet inside the proof window."
++                                    )
++                                }
++                            } else if (!live.injectOutgoingPacket(packet)) {
++                                debugLog(
++                                    "winn3: bootstrap probe $sequence was not queued; the " +
++                                        "outbound queue is full, which means real traffic is " +
++                                        "already flowing"
++                                )
++                            } else {
++                                debugLog(
++                                    "winn3: bootstrap probe $sequence queued — ICMP echo " +
++                                        "$probeSource -> $probeTarget (${packet.size} bytes)"
++                                )
++                            }
++                        }
++                    },
++                    probeIntervalMs = WinnV3StagedStart.DEFAULT_PROBE_INTERVAL_MS,
+                 )
+ 
+                 when (val outcome = staged.start()) {
+@@ -3059,7 +3128,34 @@
+ 
+     private fun readCurrentAwgPeerStats(): Map<String, Any> {
+         val handle = currentAwgHandle()
+-        if (handle < 0 || !isEngineReady) return emptyAwgPeerStats()
++        // Winn/3 standalone sessions have no AmneziaWG engine and therefore no
++        // AWG peer to read. The equivalent bidirectional-proof comes from the
++        // v3 engine's own status: the promotion gate already established that
++        // gate_state==carrying AND rx_packets>0 (a delivered inner packet), and
++        // the app-UID TrafficStats counters are the real bytes that crossed the
++        // tunnel. Failing to report here left the connect screen reading
++        // UNPROTECTED/Disconnected on a working, carrying winn/3 session.
++        if (handle < 0 || !isEngineReady) {
++            val bridge = currentWinnV3Bridge()
++            if (bridge != null && isEngineReady) {
++                val status = try {
++                    WinnV3EngineStatus.parse(bridge.statusJson())
++                } catch (_: Exception) {
++                    null
++                }
++                if (status != null && status.gateState?.mayCarry() == true && status.rxPackets > 0L) {
++                    val rx = TrafficStats.getUidRxBytes(android.os.Process.myUid())
++                    val tx = TrafficStats.getUidTxBytes(android.os.Process.myUid())
++                    return mapOf(
++                        "handshake_recent" to true,
++                        "handshake_age_ms" to 0L,
++                        "rx_bytes" to (if (rx == TrafficStats.UNSUPPORTED.toLong()) 0L else rx),
++                        "tx_bytes" to (if (tx == TrafficStats.UNSUPPORTED.toLong()) 0L else tx),
++                    )
++                }
++            }
++            return emptyAwgPeerStats()
++        }
+         return try {
+             val config = GoBackend.awgGetConfig(handle) ?: return emptyAwgPeerStats()
+             var latestHandshakeSeconds = 0L

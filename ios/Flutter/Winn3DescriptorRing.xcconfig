@@ -1,0 +1,24 @@
+// Winn v3 descriptor verification ring for iOS Release archives.
+// Public keys only. Release.xcconfig includes this AFTER Generated.xcconfig
+// so Xcode-driven archives append these onto Flutter's DART_DEFINES.
+//
+// Flutter encodes each NAME=VALUE as UTF-8 then standard base64, comma-joined
+// (flutter_tools/lib/src/build_info.dart encodeDartDefines). xcode_backend.dart
+// passes the merged setting to `flutter assemble --DartDefines=...`.
+//
+// Slot keys (ceremony ring-manifest.json):
+//   WINS_WINN3_DESCRIPTOR_PUBKEY_G1=L2mAYdYIXPCFuNoH5ntgBBubFSnnlzIAnXwKttpehaQ=
+//   WINS_WINN3_DESCRIPTOR_PUBKEY_G2=eVCAHWXqUM1+m5nlVy2JR+Q4/mkYGTxlk119aiQh89M=
+//   WINS_WINN3_DESCRIPTOR_PUBKEY_G3=53JhsQBxKH5DG145LcaBunOX4lbt+J7Js0oPyJnj9Q0=
+// Ring identity is WIRE-FORM sha256 of "g1=<hex>\ng2=<hex>\ng3=<hex>\n":
+//   WINS_WINN3_DESCRIPTOR_RING_SHA256=52e91c72ca52d23059724e0a6c25c2f45bae574a85a84c884c5b7fd367cbf032
+// Do not substitute the ceremony MANIFEST digest
+//   29c66c18f5aef6eb064e065a5d7c3c98aa1548f758ac6d19b19a9d4a7863e7fb
+// Platform gate for this Xcode target:
+//   WINS_WINN3_ENABLED_PLATFORMS=ios
+// Dual-signature gate: WINS_WINN3_DUAL_AUTH stays off (BLOCKED). The iOS
+// parser reads auth_ed25519 / auth_mldsa65 fail-closed, but Apple cdatapath's
+// create document has no DualAuth fields and DisallowUnknownFields, so a
+// valid pair is a named start refusal. Compiling the define would emit the
+// pair into [winn] and refuse every dual-auth session.
+DART_DEFINES=$(DART_DEFINES),V0lOU19XSU5OM19ERVNDUklQVE9SX1BVQktFWV9HMT1MMm1BWWRZSVhQQ0Z1Tm9INW50Z0JCdWJGU25ubHpJQW5Yd0t0dHBlaGFRPQ==,V0lOU19XSU5OM19ERVNDUklQVE9SX1BVQktFWV9HMj1lVkNBSFdYcVVNMSttNW5sVnkySlIrUTQvbWtZR1R4bGsxMTlhaVFoODlNPQ==,V0lOU19XSU5OM19ERVNDUklQVE9SX1BVQktFWV9HMz01M0poc1FCeEtINURHMTQ1TGNhQnVuT1g0bGJ0K0o3SnMwb1B5Sm5qOVEwPQ==,V0lOU19XSU5OM19ERVNDUklQVE9SX1JJTkdfU0hBMjU2PTUyZTkxYzcyY2E1MmQyMzA1OTcyNGUwYTZjMjVjMmY0NWJhZTU3NGE4NWE4NGM4ODRjNWI3ZmQzNjdjYmYwMzI=,V0lOU19XSU5OM19FTkFCTEVEX1BMQVRGT1JNUz1pb3M=

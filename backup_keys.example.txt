@@ -1,0 +1,10 @@
+# Example only. Never paste tokens, refresh tokens, OAuth client secrets, or
+# rclone crypt passwords into a tracked repository file.
+
+Rclone config location: /root/.config/rclone/rclone.conf
+Required permissions: directory 700, file 600, owner root
+Expected encrypted remote name: GoogleDrive_secured
+
+Authorize and configure rclone on a trusted administration machine, transfer
+the completed config over an authenticated encrypted channel, then delete the
+transfer copy. Rotate credentials immediately if they were ever committed.

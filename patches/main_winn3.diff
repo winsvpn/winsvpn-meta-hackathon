@@ -1,0 +1,26 @@
+--- /Users/owner/Documents/wins/source/wins_vpn/lib/main.dart	2026-08-15 05:41:29
++++ lib/main.dart	2026-08-17 11:58:48
+@@ -4719,6 +4719,23 @@
+       'protocol_params': protoParams is Map
+           ? Map<String, dynamic>.from(protoParams)
+           : <String, dynamic>{},
++      // Standalone winn/3 material is served outside protocol_params (that
++      // allowlist intentionally rejects key-shaped fields). Preserve it here:
++      // verifyWinn3Descriptor and resolveWinnProtocolStart consume THIS
++      // normalized map. Dropping these fields reduced every valid config to
++      // `no-descriptor-served` after authentication.
++      'winn3_descriptor': _mapValue(
++          raw, ['winn3_descriptor', 'winn3descriptor']),
++      'winn3_inner_v4':
++          _stringValue(raw, ['winn3_inner_v4', 'winn3innerv4']) ?? '',
++      'winn3_static_private': _stringValue(
++              raw, ['winn3_static_private', 'winn3staticprivate']) ??
++          '',
++      'winn3_path_mtu':
++          _stringValue(raw, ['winn3_path_mtu', 'winn3pathmtu']) ?? '',
++      'winn3_carrier_classes': _stringValue(
++              raw, ['winn3_carrier_classes', 'winn3carrierclasses']) ??
++          '',
+       // The outer transport ARRANGEMENT, served per node and absent by
+       // default. Carried through normalization unchanged so
+       // resolveWinnProtocolStart can see it; an absent or unrecognised value

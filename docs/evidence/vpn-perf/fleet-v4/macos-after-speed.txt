@@ -1,0 +1,3 @@
+after1: 16963091 B/s (25000000 bytes in 1.473788s)
+after2: 18097005 B/s (25000000 bytes in 1.381444s)
+after3: 15668460 B/s (25000000 bytes in 1.595562s)

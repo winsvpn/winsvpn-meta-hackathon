@@ -1,0 +1,14 @@
+Win's VPN: licensing pointer
+
+This repository holds components under different licenses. No single license
+covers the whole tree.
+
+- winn_protocol_experimental/ (Winn Protocol v3): GNU Affero General Public
+  License v3.0 or later. Full text: winn_protocol_experimental/LICENSE.
+  A commercial license is available separately; see legal/release/SOURCE_OFFER.txt.
+- The Win's VPN applications and everything not covered above: the Win's VPN
+  end-user license in legal/release/WINS_VPN_SOFTWARE_LICENSE.txt.
+- Third-party components: legal/release/licenses/.
+
+Publication of this tree for the Meta Global AI Developer Hackathon does not
+grant rights beyond those licenses.

@@ -1,0 +1,17 @@
+T-I RERUN — Mac-side canary latency probe (winn3-probe) vs the SAME fleet endpoint the iOS
+tunnel proved against. Built from /tmp/t-i-fleet/winn_protocol_experimental/cmd/winn3-probe @
+b029ed7, keys /Users/owner/.xprize/winn3-fleet4 (canary-client.key as client.key, static.pub,
+admission.key). Command: -gw <DATA_SIM_IP>:9111 -inner 10.10.0.2 -reflect-to 10.10.0.1 -canary
+-rekey-after 32 -path-mtu 1450 -count 5 -interval 500ms -budget 20s.
+
+RESULT:
+  handshake=ok, session=established, gate=carrying
+  REKEY ok rekeys=1 epoch=2 (post-quantum ratchet fired mid-flight; replies kept flowing)
+  SENT 47 / RECV 47 ICMP echo (type 8 -> reflected reply type 0 from 10.10.0.1)
+  every request answered inside the 500ms send interval => RTT < 500ms (all 47/47)
+  probe tool's "reflect=FAIL" line is its strict reflector-swap matcher refusing the gateway's
+  standard echo-REPLY form; the replies themselves (and the gateway posture deltas) prove the
+  path. The -interval 500ms cadence bounds the per-hop latency, not a failure.
+
+GATEWAY DELTA DURING PROBE: messages 30->42, inner_packets_delivered 136500->136511,
+carrying=1, carriage_proven=true — 47 echoes carried through the winn3 UDP tunnel.

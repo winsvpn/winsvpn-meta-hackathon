@@ -1,0 +1,29 @@
+{
+  "version": "winn-leak-deployment-config/v2",
+  "ssh": {
+    "identity_file": "/Users/operator/.ssh/id_ed25519_winncloud",
+    "public_fingerprint": "SHA256:REPLACE_WITH_OPERATOR_KEY_FINGERPRINT",
+    "known_hosts_file": "/Users/operator/.ssh/known_hosts"
+  },
+  "client": {
+    "disposable_marker": "/etc/winn-leak-v2/DISPOSABLE_ACCEPTANCE_CLIENT",
+    "expected_hostname": "winn-leak-client-v2",
+    "orchestrator_binary": "/opt/winn-leak-v2/bin/winn-leak-orchestrator-v2",
+    "awg_binary": "/opt/winn-lab/bin/awg",
+    "private_root": "/etc/winn-leak-v2/client-private"
+  },
+  "providers": {
+    "gateway": {
+      "host": "<NODE_EXIT_CHI>",
+      "user": "root",
+      "expected_hostname": "winn-exit-chi",
+      "host_ed25519_fingerprint": "SHA256:BBMi53dwLuizXJtfb6a9qofC99kbX2sI/88daLG6kqU"
+    },
+    "observer": {
+      "host": "<NODE_CONTROL_ATL>",
+      "user": "root",
+      "expected_hostname": "winn-control-atl",
+      "host_ed25519_fingerprint": "SHA256:UD2htSona+dxG+mvft/7DArVeT9u/3I4nw1vc/UfOUE"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Burmese (my) — SCAFFOLD ONLY. AWAITING HUMAN TRANSLATION.
+
+  This file deliberately contains NO translated strings. Its presence is what
+  registers Burmese as a locale the watch app can serve: Android resolves
+  res/values-my/ automatically when the watch language is Burmese, and any
+  string missing from here falls back to res/values/strings.xml (English). So
+  today a Burmese watch shows English text, correctly and without crashing,
+  and the moment a real translation lands it takes effect with no code change.
+
+  No machine translation has been added and none should be. This app remote-
+  controls a VPN for people who may be relying on it for their safety; a
+  plausible-looking but wrong "Connected" is worse than an honest English one.
+
+  To translate: copy a <string> element from res/values/strings.xml into this
+  file and replace only the text. Keep the name attribute identical, keep the
+  %1$s placeholders, and do not translate the app name ("Win's VPN") itself.
+
+  tools:ignore="MissingTranslation" is on the <resources> element because lint
+  is otherwise correct to shout that every string here is missing. That IS the
+  current state, it is tracked here in this comment, and the alternative (no
+  values-my at all) would leave Burmese unregistered entirely.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+</resources>

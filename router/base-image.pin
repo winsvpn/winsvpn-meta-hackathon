@@ -1,0 +1,6 @@
+# Reviewed 2026-08-23. Latest stable CPython slim image, immutable digest.
+# python.org /downloads/latest/python3/ redirects to /downloads/release/python-3147/.
+# 3.15 exists only as alpha/beta/rc on python.org and Docker Hub; it is not stable.
+# Docker Hub official library/python tag 3.14.7-slim-trixie (Debian trixie).
+# The digest below is the multi-arch index digest (linux/amd64 + linux/arm64).
+python:3.14.7-slim-trixie@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4

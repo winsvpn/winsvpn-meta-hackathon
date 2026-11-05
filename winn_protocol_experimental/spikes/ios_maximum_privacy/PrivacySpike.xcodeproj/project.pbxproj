@@ -1,0 +1,643 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		173A6C1E5EB86CB3221FE5D8 /* WinnStageBNativeEngine.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D13D732DAAC8A84C8ABEA3F /* WinnStageBNativeEngine.c */; };
+		1BB800437BF7D34092ADA516 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67265B601C649F3ED4D8DD8B /* PacketTunnelProvider.swift */; };
+		23E6DD3F7B7FD40B85104172 /* StageBProviderNativeAdapterSeam.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA44910BA26EA5284406F2B4 /* StageBProviderNativeAdapterSeam.swift */; };
+		3CF8F43606136BD94A240D3C /* VPNController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CE97082D81D3978029DDF7 /* VPNController.swift */; };
+		448B711E29CBC1AD09DAAA64 /* ImmutableReceiptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C3216935DDDF350F5E61 /* ImmutableReceiptStore.swift */; };
+		494BE9C0C40E74972C77F835 /* WinnAWGUAPISanitizer.c in Sources */ = {isa = PBXBuildFile; fileRef = DF5148E9617343DE78F6435C /* WinnAWGUAPISanitizer.c */; };
+		4BC5374DC1F98671397ECA8F /* WinnStageBFrameworkLoader.c in Sources */ = {isa = PBXBuildFile; fileRef = 244738F2AFD735D00B38CE12 /* WinnStageBFrameworkLoader.c */; };
+		78B962EAFE515D202B2D13AD /* WinnPrivacyCore in Frameworks */ = {isa = PBXBuildFile; productRef = DDC0B08389CC2F4B2E31954C /* WinnPrivacyCore */; };
+		7C080C13FD9694091E33721F /* WinnPrivacyCore in Frameworks */ = {isa = PBXBuildFile; productRef = D0BC721AFBA52689616D6CE1 /* WinnPrivacyCore */; };
+		7C74F65A95A62A0004D35EEB /* WinnStageBProviderCore in Frameworks */ = {isa = PBXBuildFile; productRef = F099CC617DA3F2D3C58396BC /* WinnStageBProviderCore */; };
+		868B820BCE68C616B74BFBB9 /* WinnStageBDarwinUtun.c in Sources */ = {isa = PBXBuildFile; fileRef = 87C382F5091CD6C15868B25E /* WinnStageBDarwinUtun.c */; };
+		9DEF5085A6AA2A194F67DA3E /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40549DFDE21C61C4FF3A5B0 /* RunView.swift */; };
+		C65906CC7303309FB807A72B /* CollectedEvidenceValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9BB270818FC46E46C9C859 /* CollectedEvidenceValidator.swift */; };
+		CA8C616837D03BFA8CF60F54 /* WinsAmneziaWGPacketEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6AB113119B01DA61661ECB66 /* WinsAmneziaWGPacketEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D1E878A28A21254538724AA4 /* WinnStageBProviderNativeOwner.c in Sources */ = {isa = PBXBuildFile; fileRef = 25FFB37A7EAF50827C6AADBC /* WinnStageBProviderNativeOwner.c */; };
+		DFF8E67C0A23484FB65F6F4C /* WinnStageBFrameworkDarwin.c in Sources */ = {isa = PBXBuildFile; fileRef = D4D122EED1838F2739B5FAB0 /* WinnStageBFrameworkDarwin.c */; };
+		F43DEA3F168293E70FDCABD1 /* PrivacySpikeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977456FC56BF47B5A4D7C85C /* PrivacySpikeApp.swift */; };
+		F6AF9007278D8B8B9E4F119D /* PrivacySpikePacketTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 89CF2272F13719F781F7FB09 /* PrivacySpikePacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		66DE61B2EE38EB6438B934EB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C3B81944D789F61AF982428D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D87DAF3F2EEBE95C266080B;
+			remoteInfo = PrivacySpikePacketTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1B28C5F64851F6EBE9409691 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F6AF9007278D8B8B9E4F119D /* PrivacySpikePacketTunnel.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		20887A9987A6EF9A8BFC7865 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				CA8C616837D03BFA8CF60F54 /* WinsAmneziaWGPacketEngine.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		10D492004F5BE4432BCDCEF4 /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = Config/Base.xcconfig; sourceTree = "<group>"; };
+		11EC948FD758FB19227B3A29 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		244738F2AFD735D00B38CE12 /* WinnStageBFrameworkLoader.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnStageBFrameworkLoader.c; sourceTree = "<group>"; };
+		25FFB37A7EAF50827C6AADBC /* WinnStageBProviderNativeOwner.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnStageBProviderNativeOwner.c; sourceTree = "<group>"; };
+		2D13D732DAAC8A84C8ABEA3F /* WinnStageBNativeEngine.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnStageBNativeEngine.c; sourceTree = "<group>"; };
+		2F3414737EA7F79ACDE2580B /* WinnStageBFrameworkDarwin.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBFrameworkDarwin.h; sourceTree = "<group>"; };
+		5A9BB270818FC46E46C9C859 /* CollectedEvidenceValidator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CollectedEvidenceValidator.swift; sourceTree = "<group>"; };
+		6406698E570C7724E0CDC944 /* PacketTunnel.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = PacketTunnel.entitlements; sourceTree = "<group>"; };
+		67265B601C649F3ED4D8DD8B /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
+		6AB113119B01DA61661ECB66 /* WinsAmneziaWGPacketEngine.framework */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.framework; path = WinsAmneziaWGPacketEngine.framework; sourceTree = WINN_STAGEB_ENGINE_DIR; };
+		7431CFC2B84C68F943CE1477 /* WinnStageBFrameworkLoaderInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBFrameworkLoaderInternal.h; sourceTree = "<group>"; };
+		87C382F5091CD6C15868B25E /* WinnStageBDarwinUtun.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnStageBDarwinUtun.c; sourceTree = "<group>"; };
+		89CF2272F13719F781F7FB09 /* PrivacySpikePacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrivacySpikePacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		977456FC56BF47B5A4D7C85C /* PrivacySpikeApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacySpikeApp.swift; sourceTree = "<group>"; };
+		98CE97082D81D3978029DDF7 /* VPNController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VPNController.swift; sourceTree = "<group>"; };
+		9B9AE45FF4948E15B147C8ED /* WinnStageBNativeEngine.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBNativeEngine.h; sourceTree = "<group>"; };
+		A07B37D5A47A5426B14BDCB8 /* WinnStageBProviderNativeOwner.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBProviderNativeOwner.h; sourceTree = "<group>"; };
+		A99BFA5058CFE7406D6BECE1 /* WinnStageBFrameworkLoader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBFrameworkLoader.h; sourceTree = "<group>"; };
+		B22BD8DD85ED11B2BF669737 /* WinnStageBDarwinUtun.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBDarwinUtun.h; sourceTree = "<group>"; };
+		B2C32623AEF00C8952843A06 /* PrivacySpike.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrivacySpike.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD666387F711C4CC0B0A16D1 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C33227387CEAD9779061D9B3 /* StageBProviderNativeBridge.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = StageBProviderNativeBridge.h; sourceTree = "<group>"; };
+		D4C4C3216935DDDF350F5E61 /* ImmutableReceiptStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImmutableReceiptStore.swift; sourceTree = "<group>"; };
+		D4D122EED1838F2739B5FAB0 /* WinnStageBFrameworkDarwin.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnStageBFrameworkDarwin.c; sourceTree = "<group>"; };
+		DA44910BA26EA5284406F2B4 /* StageBProviderNativeAdapterSeam.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StageBProviderNativeAdapterSeam.swift; sourceTree = "<group>"; };
+		DF5148E9617343DE78F6435C /* WinnAWGUAPISanitizer.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; path = WinnAWGUAPISanitizer.c; sourceTree = "<group>"; };
+		EEF0DBB81097580B9615E39F /* Host.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Host.entitlements; sourceTree = "<group>"; };
+		F40549DFDE21C61C4FF3A5B0 /* RunView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		F8E4A4293B9D218B84BC46F5 /* WinnStageBProviderNativeOwnerInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnStageBProviderNativeOwnerInternal.h; sourceTree = "<group>"; };
+		FFAB57A4DD83B7BFB17ADFB7 /* WinnAWGUAPISanitizer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = WinnAWGUAPISanitizer.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		566ADC08F3151113D62C8233 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78B962EAFE515D202B2D13AD /* WinnPrivacyCore in Frameworks */,
+				7C74F65A95A62A0004D35EEB /* WinnStageBProviderCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E431ACE2A8F92B1C417D22CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7C080C13FD9694091E33721F /* WinnPrivacyCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4F073FA4933A128C2F11DAAE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B2C32623AEF00C8952843A06 /* PrivacySpike.app */,
+				89CF2272F13719F781F7FB09 /* PrivacySpikePacketTunnel.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		598CBC880AD5CF40C02D3575 /* Host */ = {
+			isa = PBXGroup;
+			children = (
+				5A9BB270818FC46E46C9C859 /* CollectedEvidenceValidator.swift */,
+				EEF0DBB81097580B9615E39F /* Host.entitlements */,
+				D4C4C3216935DDDF350F5E61 /* ImmutableReceiptStore.swift */,
+				BD666387F711C4CC0B0A16D1 /* Info.plist */,
+				977456FC56BF47B5A4D7C85C /* PrivacySpikeApp.swift */,
+				F40549DFDE21C61C4FF3A5B0 /* RunView.swift */,
+				98CE97082D81D3978029DDF7 /* VPNController.swift */,
+			);
+			name = Host;
+			path = Host;
+			sourceTree = "<group>";
+		};
+		7616CAA87C51F7354271BC6B /* PacketTunnel */ = {
+			isa = PBXGroup;
+			children = (
+				11EC948FD758FB19227B3A29 /* Info.plist */,
+				6406698E570C7724E0CDC944 /* PacketTunnel.entitlements */,
+				67265B601C649F3ED4D8DD8B /* PacketTunnelProvider.swift */,
+				DA44910BA26EA5284406F2B4 /* StageBProviderNativeAdapterSeam.swift */,
+				C33227387CEAD9779061D9B3 /* StageBProviderNativeBridge.h */,
+			);
+			name = PacketTunnel;
+			path = PacketTunnel;
+			sourceTree = "<group>";
+		};
+		9EEC8A0150D52510F1731269 = {
+			isa = PBXGroup;
+			children = (
+				10D492004F5BE4432BCDCEF4 /* Base.xcconfig */,
+				E156D33C64AF218D3B7F9461 /* Frameworks */,
+				598CBC880AD5CF40C02D3575 /* Host */,
+				AD34BE4A0CE87308D12AB968 /* NativeEngine */,
+				7616CAA87C51F7354271BC6B /* PacketTunnel */,
+				4F073FA4933A128C2F11DAAE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AD34BE4A0CE87308D12AB968 /* NativeEngine */ = {
+			isa = PBXGroup;
+			children = (
+				DF5148E9617343DE78F6435C /* WinnAWGUAPISanitizer.c */,
+				FFAB57A4DD83B7BFB17ADFB7 /* WinnAWGUAPISanitizer.h */,
+				87C382F5091CD6C15868B25E /* WinnStageBDarwinUtun.c */,
+				B22BD8DD85ED11B2BF669737 /* WinnStageBDarwinUtun.h */,
+				D4D122EED1838F2739B5FAB0 /* WinnStageBFrameworkDarwin.c */,
+				2F3414737EA7F79ACDE2580B /* WinnStageBFrameworkDarwin.h */,
+				244738F2AFD735D00B38CE12 /* WinnStageBFrameworkLoader.c */,
+				A99BFA5058CFE7406D6BECE1 /* WinnStageBFrameworkLoader.h */,
+				7431CFC2B84C68F943CE1477 /* WinnStageBFrameworkLoaderInternal.h */,
+				2D13D732DAAC8A84C8ABEA3F /* WinnStageBNativeEngine.c */,
+				9B9AE45FF4948E15B147C8ED /* WinnStageBNativeEngine.h */,
+				25FFB37A7EAF50827C6AADBC /* WinnStageBProviderNativeOwner.c */,
+				A07B37D5A47A5426B14BDCB8 /* WinnStageBProviderNativeOwner.h */,
+				F8E4A4293B9D218B84BC46F5 /* WinnStageBProviderNativeOwnerInternal.h */,
+			);
+			name = NativeEngine;
+			path = NativeEngine;
+			sourceTree = "<group>";
+		};
+		E156D33C64AF218D3B7F9461 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6AB113119B01DA61661ECB66 /* WinsAmneziaWGPacketEngine.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7D87DAF3F2EEBE95C266080B /* PrivacySpikePacketTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4267010F2E4A584A20DA7480 /* Build configuration list for PBXNativeTarget "PrivacySpikePacketTunnel" */;
+			buildPhases = (
+				C83ADE234B3C1810633D5487 /* Sources */,
+				566ADC08F3151113D62C8233 /* Frameworks */,
+				7F23C8BD1AA582F7640C7014 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PrivacySpikePacketTunnel;
+			packageProductDependencies = (
+				DDC0B08389CC2F4B2E31954C /* WinnPrivacyCore */,
+				F099CC617DA3F2D3C58396BC /* WinnStageBProviderCore */,
+			);
+			productName = PrivacySpikePacketTunnel;
+			productReference = 89CF2272F13719F781F7FB09 /* PrivacySpikePacketTunnel.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		88C905F1C0F5097853BB942C /* PrivacySpike */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0EC91474C350CEDB80E7609 /* Build configuration list for PBXNativeTarget "PrivacySpike" */;
+			buildPhases = (
+				FDD9B9431C5699D6E948B3E9 /* Sources */,
+				E431ACE2A8F92B1C417D22CB /* Frameworks */,
+				6C2A157EAE8809D6AE986DCA /* Resources */,
+				20887A9987A6EF9A8BFC7865 /* Embed Frameworks */,
+				1B28C5F64851F6EBE9409691 /* Embed App Extensions */,
+				1AC4595DDA6C6C7D6B6D9B05 /* Seal Stage B Engine Runtime Pin */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE1F9B360EE0E54808CCC080 /* PBXTargetDependency */,
+			);
+			name = PrivacySpike;
+			packageProductDependencies = (
+				D0BC721AFBA52689616D6CE1 /* WinnPrivacyCore */,
+			);
+			productName = PrivacySpike;
+			productReference = B2C32623AEF00C8952843A06 /* PrivacySpike.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C3B81944D789F61AF982428D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+			};
+			buildConfigurationList = 840B175D9960C97ED0126DF1 /* Build configuration list for PBXProject "PrivacySpike" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9EEC8A0150D52510F1731269;
+			minimizedProjectReferenceProxies = 0;
+			packageReferences = (
+				04AFBCAC5D6F334086E92C1A /* XCLocalSwiftPackageReference "PrivacyCore" */,
+			);
+			preferredProjectObjectVersion = 100;
+			productRefGroup = 4F073FA4933A128C2F11DAAE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				88C905F1C0F5097853BB942C /* PrivacySpike */,
+				7D87DAF3F2EEBE95C266080B /* PrivacySpikePacketTunnel */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6C2A157EAE8809D6AE986DCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7F23C8BD1AA582F7640C7014 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1AC4595DDA6C6C7D6B6D9B05 /* Seal Stage B Engine Runtime Pin */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Frameworks/WinsAmneziaWGPacketEngine.framework/WinsAmneziaWGPacketEngine",
+			);
+			name = "Seal Stage B Engine Runtime Pin";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/WinnStageBEngineRuntimePin.manifest",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\n\n# A caller-supplied runtime digest would defeat the entire pin: the point is\n# that these bytes were measured from what actually shipped.\nif [ -n \"${WINN_STAGEB_ENGINE_RUNTIME_SHA256:-}\" ]; then\n  echo \"error: the runtime digest is measured here, never supplied\" >&2\n  exit 1\nfi\n\nwinn_source_sha256=\"${WINN_STAGEB_ENGINE_SOURCE_SHA256:-}\"\nif [ \"${#winn_source_sha256}\" -ne 64 ]; then\n  echo \"error: WINN_STAGEB_ENGINE_SOURCE_SHA256 must be 64 hex digits\" >&2\n  exit 1\nfi\ncase \"${winn_source_sha256}\" in\n  *[!0123456789abcdef]*)\n    echo \"error: WINN_STAGEB_ENGINE_SOURCE_SHA256 must be lowercase hex\" >&2\n    exit 1\n    ;;\nesac\n\nwinn_engine=\"${SCRIPT_INPUT_FILE_0}\"\nwinn_manifest=\"${SCRIPT_OUTPUT_FILE_0}\"\n\nif [ -L \"${winn_engine}\" ] || [ ! -f \"${winn_engine}\" ]; then\n  echo \"error: embedded engine is not a regular file: ${winn_engine}\" >&2\n  exit 1\nfi\n# The loader refuses st_nlink != 1, so a hard-linked copy would build here\n# and fail on device.\nwinn_links=\"$(stat -f '%l' \"${winn_engine}\")\"\nif [ \"${winn_links}\" != \"1\" ]; then\n  echo \"error: embedded engine has ${winn_links} hard links; 1 required\" >&2\n  exit 1\nfi\n\ncase \"${PLATFORM_NAME}\" in\n  iphoneos) winn_expected_arches=\"arm64\" ;;\n  iphonesimulator) winn_expected_arches=\"arm64,x86_64\" ;;\n  *)\n    echo \"error: unsupported platform for the engine pin\" >&2\n    exit 1\n    ;;\nesac\n\nwinn_raw_arches=\"$(xcrun lipo -archs \"${winn_engine}\")\"\nwinn_arches=\"$(\n  printf '%s\\n' ${winn_raw_arches} |\n    LC_ALL=C sort |\n    awk 'BEGIN { sep = \"\" } { printf \"%s%s\", sep, $0; sep = \",\" } END { print \"\" }'\n)\"\nif [ \"${winn_arches}\" != \"${winn_expected_arches}\" ]; then\n  echo \"error: embedded engine architectures ${winn_arches} do not match ${winn_expected_arches}\" >&2\n  exit 1\nfi\n\nwinn_runtime_sha256=\"$(shasum -a 256 \"${winn_engine}\" | awk '{ print $1 }')\"\nif [ \"${#winn_runtime_sha256}\" -ne 64 ]; then\n  echo \"error: could not measure the embedded engine digest\" >&2\n  exit 1\nfi\ncase \"${winn_runtime_sha256}\" in\n  *[!0123456789abcdef]*)\n    echo \"error: measured engine digest is not lowercase hex\" >&2\n    exit 1\n    ;;\nesac\n\n# Replacement policy for the declared output.\n#\n# Xcode does not promise to delete a script phase's declared outputs before\n# rerunning it, and this phase legitimately reruns whenever the embedded\n# engine changes. A plain noclobber create therefore fails the second valid\n# build -- verified, not assumed: build, touch the staged engine, rebuild,\n# and the second build exits 65 with \"cannot overwrite existing file\".\n#\n# So the stale file is removed first. That is deliberately NOT adoption: the\n# previous bytes are never opened, read, parsed, or trusted, and every byte\n# written below is derived from the measured engine plus the independently\n# pinned source digest. The distinction being enforced is replacing a file\n# inside the build's own declared output path versus inheriting content of\n# unknown provenance -- only the former happens here.\n#\n# Anything at that path which is not a plain regular file is refused rather\n# than removed, so a planted symlink or directory fails the build instead of\n# redirecting the write. The create then still uses noclobber, which is an\n# O_CREAT|O_EXCL open: it cannot follow a symlink planted in the window\n# between the removal and the create, and it fails closed if anything raced\n# in.\n#\n# Xcode script sandboxing constrains the shape of this: the phase may only\n# touch paths it declared. Writing to a temporary sibling and renaming would\n# need a second declared path, and declaring a temp file as a build output\n# would make it a tracked artifact. Removing and recreating the one declared\n# output is the only form available that is both sandbox-legal and\n# non-adopting.\nif [ -e \"${winn_manifest}\" ] || [ -L \"${winn_manifest}\" ]; then\n  if [ -L \"${winn_manifest}\" ] || [ ! -f \"${winn_manifest}\" ]; then\n    echo \"error: refusing to replace a non-regular runtime pin at ${winn_manifest}\" >&2\n    exit 1\n  fi\n  rm -- \"${winn_manifest}\"\nfi\nset -C\nprintf '%s\\n' \\\n  'schema=winn-stageb-engine-runtime-pin/1' \\\n  \"source_binary_sha256=${winn_source_sha256}\" \\\n  \"signed_runtime_binary_sha256=${winn_runtime_sha256}\" \\\n  'relative_path=Frameworks/WinsAmneziaWGPacketEngine.framework/WinsAmneziaWGPacketEngine' \\\n  \"platform=${PLATFORM_NAME}\" \\\n  \"architectures=${winn_arches}\" \\\n  'install_name=@rpath/WinsAmneziaWGPacketEngine.framework/WinsAmneziaWGPacketEngine' \\\n  >\"${winn_manifest}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C83ADE234B3C1810633D5487 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1BB800437BF7D34092ADA516 /* PacketTunnelProvider.swift in Sources */,
+				23E6DD3F7B7FD40B85104172 /* StageBProviderNativeAdapterSeam.swift in Sources */,
+				494BE9C0C40E74972C77F835 /* WinnAWGUAPISanitizer.c in Sources */,
+				868B820BCE68C616B74BFBB9 /* WinnStageBDarwinUtun.c in Sources */,
+				DFF8E67C0A23484FB65F6F4C /* WinnStageBFrameworkDarwin.c in Sources */,
+				4BC5374DC1F98671397ECA8F /* WinnStageBFrameworkLoader.c in Sources */,
+				173A6C1E5EB86CB3221FE5D8 /* WinnStageBNativeEngine.c in Sources */,
+				D1E878A28A21254538724AA4 /* WinnStageBProviderNativeOwner.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDD9B9431C5699D6E948B3E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C65906CC7303309FB807A72B /* CollectedEvidenceValidator.swift in Sources */,
+				448B711E29CBC1AD09DAAA64 /* ImmutableReceiptStore.swift in Sources */,
+				F43DEA3F168293E70FDCABD1 /* PrivacySpikeApp.swift in Sources */,
+				9DEF5085A6AA2A194F67DA3E /* RunView.swift in Sources */,
+				3CF8F43606136BD94A240D3C /* VPNController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BE1F9B360EE0E54808CCC080 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PrivacySpikePacketTunnel;
+			target = 7D87DAF3F2EEBE95C266080B /* PrivacySpikePacketTunnel */;
+			targetProxy = 66DE61B2EE38EB6438B934EB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		15EE600850EC92BC66B7BD65 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3EFC7C708CCB9847CDA56027 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5YT8H4U72M;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/NativeEngine",
+				);
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SPIKE_PROVIDER_BUNDLE_ID)";
+				PRODUCT_NAME = "WCF3 Privacy Packet Tunnel";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = PacketTunnel/StageBProviderNativeBridge.h;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		594F60F7160252EB0A58BBB6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Host/Host.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5YT8H4U72M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Host/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SPIKE_HOST_BUNDLE_ID)";
+				PRODUCT_NAME = "WCF3 Privacy Spike";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7104366C3BF6BF6FD6FFB3C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B759E423A64C408728AF9277 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5YT8H4U72M;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/NativeEngine",
+				);
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SPIKE_PROVIDER_BUNDLE_ID)";
+				PRODUCT_NAME = "WCF3 Privacy Packet Tunnel";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = PacketTunnel/StageBProviderNativeBridge.h;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EEF83FD78DCD427111E53CB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10D492004F5BE4432BCDCEF4 /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Host/Host.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5YT8H4U72M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Host/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SPIKE_HOST_BUNDLE_ID)";
+				PRODUCT_NAME = "WCF3 Privacy Spike";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4267010F2E4A584A20DA7480 /* Build configuration list for PBXNativeTarget "PrivacySpikePacketTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3EFC7C708CCB9847CDA56027 /* Debug */,
+				B759E423A64C408728AF9277 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		840B175D9960C97ED0126DF1 /* Build configuration list for PBXProject "PrivacySpike" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				15EE600850EC92BC66B7BD65 /* Debug */,
+				7104366C3BF6BF6FD6FFB3C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F0EC91474C350CEDB80E7609 /* Build configuration list for PBXNativeTarget "PrivacySpike" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				594F60F7160252EB0A58BBB6 /* Debug */,
+				EEF83FD78DCD427111E53CB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		04AFBCAC5D6F334086E92C1A /* XCLocalSwiftPackageReference "PrivacyCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PrivacyCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D0BC721AFBA52689616D6CE1 /* WinnPrivacyCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04AFBCAC5D6F334086E92C1A /* XCLocalSwiftPackageReference "PrivacyCore" */;
+			productName = WinnPrivacyCore;
+		};
+		DDC0B08389CC2F4B2E31954C /* WinnPrivacyCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04AFBCAC5D6F334086E92C1A /* XCLocalSwiftPackageReference "PrivacyCore" */;
+			productName = WinnPrivacyCore;
+		};
+		F099CC617DA3F2D3C58396BC /* WinnStageBProviderCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04AFBCAC5D6F334086E92C1A /* XCLocalSwiftPackageReference "PrivacyCore" */;
+			productName = WinnStageBProviderCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = C3B81944D789F61AF982428D /* Project object */;
+}

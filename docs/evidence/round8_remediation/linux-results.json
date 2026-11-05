@@ -1,0 +1,40 @@
+{
+  "arm64": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network=none",
+      "--platform",
+      "linux/arm64",
+      "-v",
+      "/Users/owner/xprize/winsvpnv3:/src:ro",
+      "-w",
+      "/src",
+      "winsvpn-linux-desktop-builder:arm64",
+      "bash",
+      "-c",
+      "clang++ -std=c++17 -Wall -Wextra -Werror -fsyntax-only -I/opt/flutter/bin/cache/artifacts/engine/linux-arm64 $(pkg-config --cflags gtk+-3.0) linux/runner/linux_tunnel_backend.cc && python3 tools/test_linux_round7.py"
+    ],
+    "exit_code": 0
+  },
+  "x64": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network=none",
+      "--platform",
+      "linux/amd64",
+      "-v",
+      "/Users/owner/xprize/winsvpnv3:/src:ro",
+      "-w",
+      "/src",
+      "winsvpn-linux-desktop-builder:x64",
+      "bash",
+      "-c",
+      "clang++ -std=c++17 -Wall -Wextra -Werror -fsyntax-only -I/opt/flutter/bin/cache/artifacts/engine/linux-x64 $(pkg-config --cflags gtk+-3.0) linux/runner/linux_tunnel_backend.cc && python3 tools/test_linux_round7.py"
+    ],
+    "exit_code": 0
+  }
+}

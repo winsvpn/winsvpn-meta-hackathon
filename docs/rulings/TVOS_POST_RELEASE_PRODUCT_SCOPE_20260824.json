@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "ruling_date": "2026-08-24",
+  "release": "1.0.15+30",
+  "status": "post_release_native_product_only",
+  "current_release": {
+    "required_apple_artifacts": [
+      "ios_app_store_ipa_with_embedded_watchos",
+      "macos_app_store_pkg"
+    ],
+    "optional_separate_distribution": [
+      "macos_developer_id"
+    ],
+    "required_app_store_upload_targets": [
+      "ios-app-store-ipa",
+      "macos-app-store-pkg"
+    ],
+    "optional_evidence_targets": [
+      "macos-developer-id-app"
+    ],
+    "developer_id_is_required_readiness_target": false,
+    "developer_id_affects_freeze_completeness": false,
+    "developer_id_affects_app_store_upload_readiness": false,
+    "tvos_is_shipping_surface": false,
+    "tvos_is_release_blocker": false,
+    "tvos_is_readiness_denominator": false
+  },
+  "future_tvos_product": {
+    "classification": "new_native_apple_tv_product_work",
+    "requires_separate_product_approval": true,
+    "must_not_reuse_ios_artifact": true,
+    "minimum_scope": [
+      "native_tvos_host_and_packet_tunnel_targets",
+      "tvos_engine_slices",
+      "focus_driven_ui",
+      "tvos_privacy_and_store_metadata",
+      "physical_apple_tv_runtime_evidence",
+      "dedicated_build_freeze_receipt_and_upload_contract"
+    ]
+  }
+}

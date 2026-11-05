@@ -1,0 +1,52 @@
+[
+  {
+    "path": "docs/blueprints/WINS_VPN_COMPLETE_HANDOFF_BLUEPRINT.md",
+    "before_sha256": "64eece9873ce96b1bff98048909e0b4a98af41f1d95b6f3f8af60b34d4d6544d",
+    "after_sha256": "124422ff785107fbcedcf97161bef7bcc8c64ac0923d8ad8218cf3d78410706b"
+  },
+  {
+    "path": "lib/main.dart",
+    "before_sha256": "82101daee4b795c0a9ee395d89e361e22ca66bce9debe058402034eadb6974ca",
+    "after_sha256": "cabfc25302f1e3dffb6e98419f40d9477d0db9e811a6e0ba43f423f394594d35"
+  },
+  {
+    "path": "linux/runner/linux_tunnel_backend.cc",
+    "before_sha256": "8d55987f055e517bacb354c28de42f7b812efc9b4a5417de4606af0d4966c88e",
+    "after_sha256": "c103e52865a3b882c317644a9dabc732140795625b9b831f66e96686e340508f"
+  },
+  {
+    "path": "server/test_account_expiry_revocation_hub.py",
+    "before_sha256": "39e2fff4a7e680da5d6f9633ebf6cf58fa445ae3611ec46ecc98a4ed91a62c58",
+    "after_sha256": "0316422fd0b793a1349bb302ad9604a56ceb50bf79d391c4e4f4ab488136a06f"
+  },
+  {
+    "path": "server/test_control_plane_deepseek_round2.py",
+    "before_sha256": "5d542ca9b972367c24086aa98a15152de95080d8017f8efd0233377eb57160a2",
+    "after_sha256": "a35b99fbec59d91ced76cc9361782780bf4f2b0b7c33f7879f3c06115f7ee7a3"
+  },
+  {
+    "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+    "before_sha256": "7b368e808ac260d82c73d1efb182a867f2cf1ce5554a8eb48766c9d17e36c9ff",
+    "after_sha256": "8b5f322f0f5fa672432a5632ada2a3df7462297688042057d0b03953fb2ea95a"
+  },
+  {
+    "path": "winn_protocol_experimental/winn3/carrier/udp_socket_buffers.go",
+    "before_sha256": "164fabf250c03f703a781ca472b60a2214505a1973555e4f269af1a6393340b4",
+    "after_sha256": "a82373d1296b1c5397e3bd4c6014491cae62e6cbd117efce4ec95423ee71849c"
+  },
+  {
+    "path": "winn_protocol_experimental/winn3/carrier/udp_socket_buffers_test.go",
+    "before_sha256": "023bf8a28f902de327e820665357f572394732cd22628be0ce0e7081dc378c80",
+    "after_sha256": "75daa23ff7fac0bef73c3d23602eb5fcce47cc8ca1be757e1fa7436d0898ac66"
+  },
+  {
+    "path": "server/test_control_plane_round7.py",
+    "after_sha256": "72be0a4c3f3272fa2cf16ba4bd4ca4ab3bb9f5016c86b37b5db56b98b0759e27",
+    "new_file": true
+  },
+  {
+    "path": "tools/test_linux_round7.py",
+    "after_sha256": "a64f631c496467141c2d026379b962491d52cce550b7546db8dcfd3b569c45ec",
+    "new_file": true
+  }
+]

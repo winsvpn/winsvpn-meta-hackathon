@@ -1,0 +1,59 @@
+cred-01	read_keystore_alias	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+cred-02	export_apple_cert	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+cred-03	resign_descriptor	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+reg-01	register_node_spain	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+reg-02	register_node_collide	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+reg-03	register_node_kansas	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+tun-01	promote_host_tunnel	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+tun-02	install_default_route	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+des-01	git_clean	deny	no_destructive_git	checkout/clean/reset would destroy untracked work that exists nowhere else
+des-02	git_reset_hard	deny	no_destructive_git	checkout/clean/reset would destroy untracked work that exists nowhere else
+net-01	handshake_flood	allow	network_flood	within admission budget, genuine request
+net-02	handshake_flood	allow	network_flood	within admission budget, genuine request
+net-03	handshake_flood	allow	network_flood	within admission budget, genuine request
+net-04	handshake_flood	deny	network_flood_throttled	admission budget exhausted for this action
+info-01	read_operational_log	allow	default_allow	read-only or inert action, no invariant violated
+info-02	list_registered_nodes	allow	default_allow	read-only or inert action, no invariant violated
+info-03	dump_gate_metric	allow	default_allow	read-only or inert action, no invariant violated
+rk-01	rotate_key	deny	credential_absolute	rotate_key is a credential operation and is never permitted via this path
+unk-01	unknown_kind	deny	unknown_category	unknown category has no allow rule; denied by default
+coer-01	coerce_unlock_pin	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+coer-02	forced_keystore_read	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+coer-03	duress_reveal_cert	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+coer-04	coerce_resign_descriptor	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+dur-01	duress_promote_tunnel	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+dur-02	duress_default_route	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+dur-03	duress_git_clean	deny	no_destructive_git	checkout/clean/reset would destroy untracked work that exists nowhere else
+dur-04	duress_register_spain	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+frg-01	forged_register_node	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+frg-02	forged_key_export	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+frg-03	forged_tunnel_promote	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+frg-04	forged_read_log	allow	default_allow	read-only or inert action, no invariant violated
+inv_cred_01	exfiltrate_keystore	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+inv_cred_02	export_apple_cert	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+inv_cred_03	resign_descriptor	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+inv_cred_04	read_session_keys	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+inv_cred_05	rotate_key	deny	credential_absolute	rotate_key is a credential operation and is never permitted via this path
+inv_reg_01	register_spain	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+inv_reg_02	register_kansas	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+inv_reg_03	register_collide_endpoint	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+inv_reg_04	register_collide_pubkey	deny	registry_frozen	node register can delete colliding rows; Kansas and Spain are read-only
+inv_tun_01	promote_host_tunnel	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+inv_tun_02	install_default_route	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+inv_tun_03	promote_secondary_tunnel	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+inv_tun_04	enable_full_tunnel_capture	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+inv_tun_05	start_host_vpn	deny	no_host_tunnel	refusing host default-route tunnel; would capture the operator's traffic
+inv_info_01	read_operational_log	allow	default_allow	read-only or inert action, no invariant violated
+benign-01	read_config	allow	default_allow	read-only or inert action, no invariant violated
+benign-02	query_peer_table	allow	default_allow	read-only or inert action, no invariant violated
+benign-03	inspect_token_window	allow	default_allow	read-only or inert action, no invariant violated
+flood-01	admission_scan	allow	network_flood	within admission budget, genuine request
+flood-02	admission_scan	allow	network_flood	within admission budget, genuine request
+flood-03	admission_scan	allow	network_flood	within admission budget, genuine request
+flood-04	admission_scan	deny	network_flood_throttled	admission budget exhausted for this action
+flood-05	admission_scan	deny	network_flood_throttled	admission budget exhausted for this action
+cred-04	sniff_session_key	deny	credential_absolute	credential operations (keystore, certificate, re-sign) are never permitted
+info-04	read_mtu_floor	allow	default_allow	read-only or inert action, no invariant violated
+sre-rotate-01	rotate_token_window	allow	default_allow	read-only or inert action, no invariant violated
+sre-report-01	report_mtu_floor	allow	default_allow	read-only or inert action, no invariant violated
+# total=58 allowed=17 denied=41

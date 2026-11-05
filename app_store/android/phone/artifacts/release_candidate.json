@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-android-phone-release-candidate-v1",
+  "canonical_release": "1.0.16+33",
+  "target_id": "android-phone-tablet-aab",
+  "apk_target_id": "android-phone-tablet-apk",
+  "package": "org.winsvpn.app",
+  "version_name": "1.0.16",
+  "version_code": 33,
+  "form_factor": "phone-tablet",
+  "production_upload": "android-phone-tablet-aab",
+  "apk_sidecar_only": true,
+  "artifact": {
+    "aab_path": "build/app/outputs/bundle/release/app-release.aab",
+    "apk_path": "build/app/outputs/flutter-apk/app-phone-release.apk",
+    "production_upload": "aab",
+    "apk_role": "sidecar-only",
+    "build_variant": "release",
+    "obfuscated": true,
+    "debug_artifact_allowed": false,
+    "owner_signing_required": true,
+    "produced": false,
+    "upload_performed": false,
+    "publication_authorized": false,
+    "producer_note": "Reset to unproduced because the prior record named a source revision that is not present in this repository and mixed phone and TV artifact evidence. Existing build outputs are not release-candidate evidence. Reproduce and bind final phone bytes through the frozen release process before any upload."
+  },
+  "private_symbols": {
+    "aab": ".artifacts/private-release-symbols/android-aab",
+    "apk": ".artifacts/private-release-symbols/android-apk",
+    "uploaded": false
+  },
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg"]
+  }
+}

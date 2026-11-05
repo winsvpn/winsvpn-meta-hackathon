@@ -1,0 +1,39 @@
+{
+  "schema": "winn-cloud-cost-snapshot/v1",
+  "observed_at_local": "2026-07-26T14:48:30-04:00",
+  "provider": "vultr",
+  "source": "authenticated Vultr instance inventory",
+  "inventory": {
+    "instances_total": 3,
+    "instances_running": 0,
+    "instances_stopped": 3,
+    "instances": [
+      {
+        "uuid": "<VULTR_INSTANCE_UUID_ENTRY_MIA>",
+        "name": "winn-entry-mia",
+        "state": "stopped",
+        "location": "Miami",
+        "public_ipv4": "<NODE_ENTRY_MIA>",
+        "current_charges_usd": 5.45
+      },
+      {
+        "uuid": "<VULTR_INSTANCE_UUID_CONTROL_ATL>",
+        "name": "winn-control-atl",
+        "state": "stopped",
+        "location": "Atlanta",
+        "public_ipv4": "<NODE_CONTROL_ATL>",
+        "current_charges_usd": 4.64
+      },
+      {
+        "uuid": "<VULTR_INSTANCE_UUID_ENTRY_NYC>",
+        "name": "winn-entry-nyc",
+        "state": "stopped",
+        "location": "New York",
+        "public_ipv4": "<NODE_ENTRY_NYC>",
+        "current_charges_usd": 4.64
+      }
+    ]
+  },
+  "action": "confirmed all three Winn VPS instances remain stopped",
+  "reason": "Authenticated inventory rechecked at 2026-07-26T14:48:30-04:00. No provider test is authorized or active. The previously unreachable winn-leak-client-v2 is absent from the complete three-entry inventory, so it is destroyed/not billable on this Vultr account. The three retained Winn instances remain stopped and their data is preserved. Vultr explicitly warns that stopped instances continue to incur charges; destruction would stop billing but was not performed because it is irreversible and was not authorized."
+}

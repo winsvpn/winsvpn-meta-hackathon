@@ -1,0 +1,11 @@
+/privacy /privacy/index.html 200
+/terms /terms/index.html 200
+/billing /billing/index.html 200
+/browser-extension-privacy /browser-extension-privacy/index.html 200
+/trusted-contact /trusted-contact/index.html 200
+/vdp /vdp/index.html 200
+/support /support/index.html 200
+/source /source/index.html 200
+/referral/:code /index.html 200
+/ref/:code /index.html 200
+/pay/:option https://sync.winsvpn.org/pay/:option 302

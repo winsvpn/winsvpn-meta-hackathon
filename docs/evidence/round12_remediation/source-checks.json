@@ -1,0 +1,76 @@
+{
+  "changed_tracked_since_baseline": [
+    "pubspec.yaml",
+    "server/wins_control_plane_setup_ONETOUCH.sh",
+    "tools/native_messaging/test_native_host_registration.py",
+    "tools/test_linux_native_host_delivery.py",
+    "winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go"
+  ],
+  "unexpected_tracked_changes": [],
+  "files": [
+    {
+      "path": "server/wins_control_plane_setup_ONETOUCH.sh",
+      "before_sha256": "d44269c39d045a6b558591d183a9abfff40720d18d89308aed409d0c3c548c04",
+      "sha256": "2ab1d6f5cea42f57fc0e37e8f634a5aece6e2e65e9d4505bd026106f174aad0b",
+      "before_carriage_returns": 0,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "server/test_control_plane_round9.py",
+      "before_sha256": "200d4975f81524acc49b1f4c0224a4b7e97ed586fc4c3df4c047af67e0307ef9",
+      "sha256": "403da103e4f93e275ffef047ef64a4da681a418347c9198f52586b6773268d30",
+      "before_carriage_returns": 0,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "server/test_control_plane_round12.py",
+      "before_sha256": null,
+      "sha256": "1d5fb24b8e7754682635309bad574694120782883c2e2d5863fadceb6754d64e",
+      "before_carriage_returns": 0,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "tools/native_messaging/test_native_host_registration.py",
+      "before_sha256": "7e2e2685d366880b835e7c4201146d5addbfdf6ac99a904224d33f5dc8487eec",
+      "sha256": "a21e8844f3d8abeb6b1ba8edee8b7982d3ad74de79363b0424c7d28cbe054b08",
+      "before_carriage_returns": 0,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "tools/test_linux_native_host_delivery.py",
+      "before_sha256": "8f971ea14f26f65abbe02dcf76ee65dbbb4c7695271ec88cd0fcb000fcd53d4a",
+      "sha256": "215803652b36feb7f967ec30f6fc4337b3f16f10bf0d7d4dd752d5825e79b90d",
+      "before_carriage_returns": 421,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go",
+      "before_sha256": "27efcfb21aefea58c37ec57a618afe8185aacfc853278008e48a3fdafca2897d",
+      "sha256": "9000f31378f05d4473d3d39404aed650e1fe97cdf5bd16c0743ca8708c31a9ce",
+      "before_carriage_returns": 0,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    },
+    {
+      "path": "pubspec.yaml",
+      "before_sha256": "f956aaff350f94b1d64dd1027a1fe522ed920897d4f769f54cbecc5049fed570",
+      "sha256": "5596dec88191805f64c60eaaf6d9f829038ff033749f905d7eb1916b8447cf72",
+      "before_carriage_returns": 73,
+      "carriage_returns": 0,
+      "added_long_dashes": 0,
+      "added_trailing_whitespace_lines": 0
+    }
+  ],
+  "diff_note": "Semantic diff normalizes pre-edit CRLF to LF; hashes retain exact byte identity."
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default (English) strings for the watch app.
+
+  Everything the watch can put in front of a user lives here rather than in
+  Kotlin, because Android picks a translation by resource qualifier: a string
+  compiled into a .kt file can never follow the watch's language, no matter what
+  else is configured. Adding res/values-<lang>/strings.xml is then the whole job
+  of supporting a new language; see res/values-my/strings.xml.
+-->
+<resources>
+    <string name="app_name">Win\'s VPN</string>
+
+    <!-- Label on the big round connect/disconnect button. Kept to one short
+         word: it has to fit inside a watch-sized circle. -->
+    <string name="watch_toggle_phone_unreachable">Phone</string>
+    <string name="watch_toggle_cancel">Cancel</string>
+    <string name="watch_toggle_on">On</string>
+    <string name="watch_toggle_off">Off</string>
+    <string name="watch_toggle_retry">Retry</string>
+
+    <!-- The single line of explanation under the button. Every one of these is
+         a state that would otherwise look like an unexplained dead button. -->
+    <string name="watch_status_reaching_phone">Reaching phone…</string>
+    <string name="watch_status_phone_unreachable">Phone not reachable</string>
+    <string name="watch_status_approve_on_phone">Approve VPN on phone</string>
+    <string name="watch_status_connecting">Connecting…</string>
+    <string name="watch_status_disconnecting">Disconnecting…</string>
+    <string name="watch_status_connection_failed">Connection failed</string>
+    <string name="watch_status_connected">Connected</string>
+    <string name="watch_status_not_connected">Not connected</string>
+    <!-- %1$s is the app name. Passed in rather than written out so translators
+         cannot accidentally translate or mistype the brand. -->
+    <string name="watch_status_open_app_on_phone">Open %1$s on phone</string>
+
+    <!-- Country picker. -->
+    <string name="watch_country_choose">Choose country</string>
+    <string name="watch_country_none_available">No servers yet</string>
+    <string name="watch_country_list_title">Country</string>
+    <!-- %1$s is the app name. -->
+    <string name="watch_country_list_empty">Open %1$s on your phone to load servers.</string>
+</resources>

@@ -1,0 +1,54 @@
+================================================================================
+Win's VPN for Windows -- third-party component notice
+AmneziaWG Windows client, amneziawg-go
+================================================================================
+
+AmneziaWG Windows client 3.1.0 -- maintenance helper
+amneziawg-go/v3 v3.1.20260828 -- userspace data plane, statically linked into it
+Copyright (C) 2017-2025 WireGuard LLC. All Rights Reserved.
+Licence: MIT
+
+Covers, in this installation: amneziawg.exe
+
+Windows client source: github.com/amnezia-vpn/amneziawg-windows-client 3.1.0,
+commit ca5dd3b983bd19c335ab095ccd21fc2f804ec968. Embedded engine source:
+github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260828, commit
+b5928efb6ca19f0153958460c3d141f04abc5c2e. The 19-line LICENSE below is
+reproduced byte for byte from that pinned engine tree. The copyright above is
+the file's own first line.
+
+Two accuracy notes, both carried across from this project's in-app notice work
+rather than re-derived here:
+
+  * The 17-line variant of this licence that begins at "Permission is hereby
+    granted" and carries NO copyright line belongs to the third-party fork
+    github.com/wgtunnel/amneziawg-go, not to the upstream this product builds.
+    Shipping that file alone would not satisfy MIT.
+
+  * The AmneziaWG Windows client helper's own COPYING is recorded as MIT in
+    THIRD_PARTY_NOTICES.md, but that file is not present in this project's
+    tree, so the text below was not reproduced from it. It is amneziawg-go's,
+    from the same copyright holder, and it is the licence of the code that
+    makes up the bulk of the helper. No text has been invented for either.
+
+--------------------------------------------------------------------------------
+
+Copyright (C) 2017-2025 WireGuard LLC. All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

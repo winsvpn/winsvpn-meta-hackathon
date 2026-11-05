@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Single-colour layer for themed launcher icons. The system supplies the
+     tint, so this must be one flat shape with the glyph knocked out.
+
+     Calculator, replacing the shield on 2026-08-08 — see
+     ic_launcher_foreground.xml for why, and for the 44x56-on-(54,54) geometry
+     that keeps it inside the Wear launcher's circular mask.
+
+     ONE PATH, evenOdd. The body is the ink; the screen and the six keys are
+     subpaths that punch through it. What survives is the body outline plus the
+     gutters between the keys, which is what makes this read as a calculator
+     rather than as a filled rectangle — a themed icon gets no second colour to
+     carry the detail, so the negative space has to do it.
+
+     Deliberately NOT the readout bar from the colour layer: at one tint it
+     would merge with the screen cutout and only thicken an edge.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M38,26h32a6,6 0 0 1 6,6v44a6,6 0 0 1 -6,6h-32a6,6 0 0 1 -6,-6v-44a6,6 0 0 1 6,-6zM38,32h32v14h-32zM38,54h8v10h-8zM50,54h8v10h-8zM62,54h8v10h-8zM38,68h8v10h-8zM50,68h8v10h-8zM62,68h8v10h-8z" />
+</vector>

@@ -1,0 +1,86 @@
+{
+  "format": "winn-test-vectors/v2",
+  "vectors": [
+    {
+      "key_id": "9c09bddb03369cdaf6a8c4ee1bf443af9633abb3bd4373d698dbbd848b74c551",
+      "name": "x25519-mlkem768",
+      "preshared_key": "WlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlo=",
+      "request": {
+        "auth_algorithm": "mldsa65",
+        "auth_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "auth_signature": "",
+        "capabilities": [
+          "awg-preshared-key-32",
+          "dual-auth-x509-mldsa65",
+          "monotonic-key-generation",
+          "mutual-x509-auth",
+          "tls13-x25519-mlkem768"
+        ],
+        "controller_id": "controller-1",
+        "current_generation": 7,
+        "device_id": "vector-device-1",
+        "nonce": "IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI",
+        "peer_public_key": "nNOe1VBs+qdVjQGHgems9Xd3SO6gsrVl7+DM8y/EZAQ=",
+        "request_id": "ERERERERERERERERERERERERERERERERERERERERERE",
+        "suite": "x25519-mlkem768",
+        "version": "winn/2"
+      },
+      "request_digest": "fee63eca16e4804efd0391902c599fb580f509dd83fd889b2c21e6dbea2aa1ed",
+      "response_generation": 8
+    },
+    {
+      "key_id": "aee29e26059a15328f2d310e8f3648c9099a81384b68d95daffb518062b1e946",
+      "name": "p256-mlkem768",
+      "preshared_key": "WlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlo=",
+      "request": {
+        "auth_algorithm": "mldsa65",
+        "auth_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "auth_signature": "",
+        "capabilities": [
+          "awg-preshared-key-32",
+          "dual-auth-x509-mldsa65",
+          "monotonic-key-generation",
+          "mutual-x509-auth",
+          "tls13-p256-mlkem768"
+        ],
+        "controller_id": "controller-1",
+        "current_generation": 7,
+        "device_id": "vector-device-1",
+        "nonce": "IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI",
+        "peer_public_key": "nNOe1VBs+qdVjQGHgems9Xd3SO6gsrVl7+DM8y/EZAQ=",
+        "request_id": "ERERERERERERERERERERERERERERERERERERERERERE",
+        "suite": "p256-mlkem768",
+        "version": "winn/2"
+      },
+      "request_digest": "37c832a40612b065ece58add6f0d73a64b10cfd677e222c28da4818768b4db35",
+      "response_generation": 8
+    },
+    {
+      "key_id": "361f377fa7fffa44786d599689412e896ed19092aac9218fdcf3559f04ee37d1",
+      "name": "p384-mlkem1024",
+      "preshared_key": "WlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlo=",
+      "request": {
+        "auth_algorithm": "mldsa87",
+        "auth_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "auth_signature": "",
+        "capabilities": [
+          "awg-preshared-key-32",
+          "dual-auth-x509-mldsa87",
+          "monotonic-key-generation",
+          "mutual-x509-auth",
+          "tls13-p384-mlkem1024"
+        ],
+        "controller_id": "controller-1",
+        "current_generation": 7,
+        "device_id": "vector-device-1",
+        "nonce": "IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI",
+        "peer_public_key": "nNOe1VBs+qdVjQGHgems9Xd3SO6gsrVl7+DM8y/EZAQ=",
+        "request_id": "ERERERERERERERERERERERERERERERERERERERERERE",
+        "suite": "p384-mlkem1024",
+        "version": "winn/2"
+      },
+      "request_digest": "2e21024a194dada8ed27673aa89114300734faa85deefac72f12e5a615ea0b13",
+      "response_generation": 8
+    }
+  ]
+}

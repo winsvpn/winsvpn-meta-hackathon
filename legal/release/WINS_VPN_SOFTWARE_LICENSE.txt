@@ -1,0 +1,40 @@
+WIN'S VPN SOFTWARE LICENSE
+Version 2026-08-25.v3
+
+Copyright (C) 2025-2026 Win Empire LLC. All rights reserved.
+
+Owner/legal approval of this proprietary license and of the company-rights
+chain is OWNER-BLOCKED: ABSENT. This file is the bundled proprietary-license
+text. It is not counsel approval, not a publication authorization, and not
+store-release legal clearance.
+
+Win Empire LLC grants the person who lawfully obtains Win's VPN a limited,
+personal, non-exclusive, non-transferable, revocable license to install and
+run the proprietary portions of the application solely to access the Win's
+VPN service and use the user-facing features supplied with the application.
+
+Except where applicable law, an app-store term, or a third-party license
+expressly permits otherwise, the user may not copy, sell, sublicense,
+distribute, rent, lease, modify, or create derivative works from the
+proprietary portions of the application, nor bypass access, payment, device,
+security, or abuse-prevention controls.
+
+This proprietary license does not apply to third-party software or to Winn
+Protocol code distributed under an open-source license. Those components are
+licensed directly under the separate terms reproduced in the bundled legal
+materials. No proprietary restriction in this file narrows a right granted by
+the MIT, Apache-2.0, MPL-2.0, GPL-2.0, AGPL-3.0-or-later, BSD, or other
+third-party license that accompanies a component.
+
+The Win's VPN service terms, privacy policy, acceptable-use requirements,
+disclaimers, and limitations are in MASTER_LEGAL_DOCUMENT.txt and
+APP_PRIVACY_POLICY.txt. Use of the service requires acceptance of the current
+clickwrap terms where the application presents them. Mandatory consumer rights
+and app-store terms continue to apply where they cannot lawfully be excluded.
+
+The software is provided subject to the warranties, disclaimers, and liability
+terms in the controlling service terms and any non-waivable applicable law.
+Third-party licensors provide their components under their own terms and do
+not sponsor or endorse Win's VPN.
+
+Questions about this license: legal@winsvpn.org

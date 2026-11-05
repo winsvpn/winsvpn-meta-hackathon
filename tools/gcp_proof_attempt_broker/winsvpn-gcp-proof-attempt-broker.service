@@ -1,0 +1,39 @@
+[Unit]
+Description=Win's VPN root-owned GCP proof protocol attempt broker
+Documentation=file:///usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+After=network-online.target
+Wants=network-online.target
+ConditionFileNotEmpty=/var/lib/winsvpn-proof/fleet-binding.json
+ConditionFileNotEmpty=/etc/winsvpn/role
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/libexec/winsvpn-gcp-proof-attempt-broker
+Restart=no
+RuntimeDirectory=winsvpn-proof
+RuntimeDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/winsvpn-proof
+# Witness argv (ip link show, awg show) needs netlink. CAP_NET_ADMIN is the
+# minimum capability those read/witness commands require. Do not add AF_INET,
+# AF_INET6, CAP_NET_RAW, or ambient capabilities.
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=
+SystemCallArchitectures=native
+TimeoutStartSec=15
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

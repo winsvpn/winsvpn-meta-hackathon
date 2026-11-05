@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "last_reviewed": "2026-08-25",
+  "production_ready": false,
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "source_readiness_status": "pending_current_refresh",
+  "source_readiness_log": null,
+  "release_candidate_manifest": "app_store/apple/artifacts/release_candidate.json",
+  "runtime_evidence_manifest": "app_store/apple/artifacts/runtime_evidence.json",
+  "owner_signoff_manifest": "app_store/apple/review/owner_signoff.json",
+  "app_store_connect_record": {
+    "status": "created",
+    "apple_id": "6789417002",
+    "company_name": "Win's VPN Inc",
+    "platforms": [
+      "ios",
+      "macos"
+    ],
+    "bundle_id": "org.winsvpn.app",
+    "sku": "winsvpn-apple-20260709"
+  },
+  "app_store_connect_api_access": {
+    "status": "pending_external_credentials_refresh",
+    "required_env": [
+      "WINS_APPLE_AUTHENTICATION_KEY_PATH",
+      "WINS_APPLE_AUTHENTICATION_KEY_ID",
+      "WINS_APPLE_AUTHENTICATION_KEY_ISSUER_ID"
+    ],
+    "storage_rule": "outside_repo_chmod_600",
+    "verification_log": null,
+    "expected_apple_id": "6789417002",
+    "expected_bundle_id": "org.winsvpn.app"
+  },
+  "current_release_status": {
+    "status": "no_current_candidate",
+    "upload_status": "not_uploaded",
+    "app_review_status": "not_started",
+    "historical_processed_version": "1.0.3",
+    "historical_processed_build": "18",
+    "notes": "There is no current 1.0.17+34 signed iOS IPA with embedded watchOS or signed macOS App Store PKG. Historical processed build 18 and retired 1.0.14+29 hashes are not current identities. Unsigned, ad-hoc, Apple Development, and placeholder signing fail closed."
+  },
+  "negative_upload_guard_logs": {
+    "missing_auth": null,
+    "pending_owner_signoff": null
+  },
+  "completed_gates": {},
+  "remaining_blockers": {
+    "owner_signoff": {
+      "status": "pending",
+      "source_file": "app_store/apple/review/owner_signoff.json",
+      "required_before": [
+        "testflight_upload",
+        "app_store_connect_upload"
+      ]
+    },
+    "final_metadata_privacy_review": {
+      "status": "pending_owner_review",
+      "source_file": "app_store/apple/review/owner_review_packet.md"
+    },
+    "macos_pkg_clean_install": {
+      "status": "pending_clean_system_install",
+      "source_file": "app_store/apple/artifacts/release_candidate.json",
+      "latest_root_gate_log": null,
+      "notes": "No current 1.0.17+34 macOS App Store PKG exists. Historical 1.0.14+29 install evidence is not a current gate."
+    },
+    "testflight_or_app_store_upload": {
+      "status": "not_run",
+      "blocked_by": [
+        "owner_signoff",
+        "app_store_connect_api_auth"
+      ]
+    },
+    "app_store_connect_api_auth": {
+      "status": "pending_external_credentials_refresh",
+      "required_env": [
+        "WINS_APPLE_AUTHENTICATION_KEY_PATH",
+        "WINS_APPLE_AUTHENTICATION_KEY_ID",
+        "WINS_APPLE_AUTHENTICATION_KEY_ISSUER_ID"
+      ],
+      "storage_rule": "outside_repo_chmod_600"
+    },
+    "apple_processing_and_review": {
+      "status": "not_started",
+      "blocked_by": [
+        "testflight_or_app_store_upload",
+        "digital_services_act_trader_verification",
+        "encryption_export_documentation"
+      ]
+    },
+    "digital_services_act_trader_verification": {
+      "status": "not_configured",
+      "source_url": "https://appstoreconnect.apple.com/business",
+      "blocked_by": [
+        "account_holder_trader_declaration_and_verification"
+      ]
+    },
+    "encryption_export_documentation": {
+      "status": "pending_legal_determination_and_apple_review",
+      "source_file": "app_store/apple/review/export_compliance_facts.txt",
+      "blocked_by": [
+        "owner_legal_export_classification",
+        "app_store_connect_encryption_questionnaire"
+      ]
+    }
+  }
+}

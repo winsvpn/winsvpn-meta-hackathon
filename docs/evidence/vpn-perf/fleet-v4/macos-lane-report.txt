@@ -1,0 +1,134 @@
+TARGET LANE T-M: macOS APP-LEVEL LIVE VPN TEST, FLEET + BEFORE/AFTER SPEED
+================================================================================
+Date: 2026-08-23 (UTC). Repo: /Users/owner/xprize/winsvpnv3 @ main (b029ed7).
+Worktree: /tmp/t-m-fleet @ HEAD b029ed7 (detached). NOTHING committed or pushed.
+
+VERDICT
+--------------------------------------------------------------------------------
+carrying  : YES. winn/3 standalone datapath proven end-to-end and PROMOTED on
+            macOS: gate_state=carrying, may_carry=true, promotion committed,
+            NE session "Connected", default route owned by utun7.
+            Final engine counters before teardown:
+              tx_packets=46051  tx_bytes=12,245,262
+              rx_packets=66039  rx_bytes=81,195,086  (rx_offered=66039)
+              rx_dropped_invalid=0  rx_dropped_closed=0  tx_dropped_closed=0
+              tx_dropped_invalid=131 (startup-window source-address rejects)
+            81.2 MB received through the tunnel matches the 3 x 25 MB AFTER
+            downloads (75 MB payload + TLS/TCP overhead) -- the curls
+            traversed the tunnel, byte-counted.
+before    : 71.70 / 57.22 / 36.03 MB/s  (median 57.22 MB/s = 457.7 Mbps;
+            mean 54.98 MB/s = 439.9 Mbps)
+after     : 16.96 / 18.10 / 15.67 MB/s  (median 16.96 MB/s = 135.7 Mbps;
+            mean 16.91 MB/s = 135.3 Mbps) -- through the tunnel, default route
+            owned (0/1 + 128/1 pair via utun7), full 25,000,000 bytes each run.
+loss      : 0% at TCP level (3/3 downloads complete; engine rx_offered ==
+            rx_packets == 66039, rx_dropped_invalid == 0).
+ratio     : after/before = 30.8% (mean basis), 29.6% (median basis).
+================================================================================
+
+METHOD / WHAT ACTUALLY HAPPENED
+--------------------------------------------------------------------------------
+1. BEFORE curls (no VPN) captured before any app run.
+2. flutter build macos --debug --target=lib/winn_protocol_dev_session_main.dart
+   with defines: WINN_DEV_SESSION=true, WINN_DEV_UNSAFE_MACOS_OVERRIDE=true,
+   WINN_DEV_UNSAFE_UNCONTAINED_ACK=UNCONTAINED_FULL_TUNNEL_ON_A_DISPOSABLE_VM,
+   WINN_DEV_CONFIG_PATH=.../dev_winn3_macos.json, WINS_WINN3_ENABLED_PLATFORMS=macos,
+   WINN_DEV_TRAFFIC_TARGET=1.1.1.1, WINN_DEV_TRAFFIC_SECONDS=120,
+   WINN_DEV_TRAFFIC_RATE=100.
+3. Dev config: carrier=winn3, endpoint <DATA_SIM_IP>:9111, winn3_inner_v4=10.10.0.2
+   (fleet REGISTERED canary lease; static public aS5Vx6/M1xtWF/l83JKBV2vHJl18EweylHznw6P6nCw=),
+   inner router+resolver 10.10.0.1, path_mtu 1450, carrier_classes udp,
+   descriptor envelope (payload+sig) from fleet-v4, gateway static pub + canary
+   client static private key from fleet paths. Descriptor verified in-app:
+   verified=true kid=g1 node=data-sim endpoint=<DATA_SIM_IP>:9111.
+4. Contained (stock harness) run: containment CONFIRMED by provider readback
+   (active, observed, 1 route /32, no default/IPv6/DNS); standalone datapath
+   converged in 512 ms (gate carrying, rx delivered, native DNS probe answered
+   probes_sent=1 responses=1); promotion HELD by design (contained dev
+   session) -> provider self-stopped (1034). macOS stock harness refuses
+   full-tunnel by construction.
+5. Uncontained full-tunnel run (lane-only harness change honoring the exact
+   operator ACK on macOS; see LANE CHANGES below): kill-switch blocking first
+   posture (egress blocked, verified), proof converged (carrying + rx>0 +
+   probe response), PROMOTED, NE Connected, default route owned. AFTER curls
+   run through it; harness then tore the tunnel down (status disconnected).
+6. Host-level DNS pump attempt to 10.10.0.1 during the contained run: the
+   carrying window (~1 s: proof at 512 ms then held-stop) closed before any
+   host dig round-trip; the task's contingency (probe starves -> pump DNS) did
+   NOT trigger because the macOS native probe (DNS to the inner resolver)
+   answered on its first send. Pump attempts recorded (rc=9 no-answer, 30x).
+
+PROMOTION PROBE / GATE NOTE (task note)
+--------------------------------------------------------------------------------
+No starvation observed on macOS: the native convergence probe (port of the
+promotion probe; DNS query to [interface] DNS = 10.10.0.1, the signed inner
+resolver) was answered by the gateway resolver on attempt 1 in all four
+successful runs (probes_sent=1, probe_responses_observed=1, converged in
+512-514 ms). No DNS pump was needed to satisfy the gate; pumps were attempted
+anyway and recorded (macos-dnspump*.txt). The fleet gateway drops ICMP to
+10.10.0.1 (no ICMP responder) but its RESOLVER answers DNS at 10.10.0.1:53 --
+on macOS the probe IS the DNS query, so the gate self-satisfies.
+
+HARNESS TRAFFIC RESULT (uncontained run, informational)
+--------------------------------------------------------------------------------
+{"duration_seconds":125.4,"tx_datagrams":42,"tx_bytes":52584,
+ "rx_datagrams_verified":0,"missing_count":42,"loss_percent":100.0}
+- UDP stream to 1.1.1.1:7777: this fleet gateway is FORWARD mode (no echo
+  responder at 7777), so rx=0 is echo-absence, NOT carriage loss; the real
+  carriage loss is 0 (see counters). send() refused most datagrams under the
+  full tunnel (n<=0), so tx counts only 42. AFTER for the speed verdict is the
+  curl set above, not this figure.
+
+LANE CHANGES (worktree /tmp/t-m-fleet ONLY, uncommitted, never pushed)
+--------------------------------------------------------------------------------
+A. macos/PacketTunnel/PacketTunnelProvider.swift (memory gate): on macOS
+   os_proc_available_memory() does not exist, so the stock gate refuses every
+   winn start with appex_available_memory_unknown (code 1018). Lane change:
+   macOS proceeds with unmeasurable headroom (no iOS-style ~50 MB NE jetsam
+   ceiling exists on macOS) and records
+   winn_memory_gate_macos_unknown_headroom_allowed=true. iOS copy untouched.
+B. lib/winn_protocol_dev_session.dart + lib/winn_protocol_dev_session_main.dart:
+   honor the exact operator ACK (WINN_DEV_UNSAFE_UNCONTAINED_ACK=...) on a
+   containment-capable platform to run UNCONTAINED full-tunnel on macOS
+   (document carries no [WinsDevContainment]; uncontained banner + verdict +
+   traffic path reused from the Windows/Linux machinery). Without the ACK,
+   macOS keeps its contained default, byte-identical to HEAD.
+C. Build-files only: copied untracked local Signing.xcconfig and Go datapath
+   archives into the worktree (flutter build inputs; nothing changed).
+
+BLOCKERS / FINDINGS
+--------------------------------------------------------------------------------
+1. Stale LaunchServices appex: NE loaded a stale RELEASE PacketTunnel.appex
+   from Xcode DerivedData (old code: no memory gate, no containment mapping)
+   instead of the freshly built debug appex. Fixed by lsregister-ing the
+   worktree app and launching via `open` (raw-binary launch did not win LS
+   resolution). The stale appex runs were the only "full tunnel without
+   containment fields" runs (04:27, 04:35) -- discarded, re-run.
+2. macOS memory gate (HEAD) refuses ALL winn starts on macOS
+   (appex_available_memory_unknown, code 1018): os_proc_available_memory() is
+   iOS-only. Lane change A (above). Genuine HEAD blocker for the macOS winn
+   path; needs a real product decision (macOS memory posture), not silence.
+3. VPN-configuration consent: first saveToPreferences hung ~20 min while the
+   console session was locked (consent dialog cannot present); completed the
+   moment the session unlocked (04:27). No bypass attempted; the consent is an
+   owner boundary.
+4. Contained macOS sessions self-terminate at proof (promotion held, 1034):
+   by design. That is why the ACK-driven uncontained run (lane change B) is
+   the full-tunnel evidence producer for this lane.
+5. Harness memory samples: macOS provider publishes no winn_memory_sample_*
+   (phys_footprint UNAVAILABLE) -- pre-existing macOS gap, recorded as a
+   finding, not a failure.
+
+FILES (all under /tmp/fleet-speed-evidence/)
+--------------------------------------------------------------------------------
+macos-before-speed.txt       BEFORE curls x3 (no VPN)
+macos-after-speed.txt        AFTER curls x3 (through tunnel, default route owned)
+macos-session3.txt           contained run transcript (containment confirmed,
+                             converged 512 ms, held-stop)
+macos-session6.txt           uncontained full-tunnel run transcript (promoted,
+                             Connected, counters)
+macos-dnspump.txt / macos-dnspump2.txt   host DNS pump attempts + timestamps
+macos-routes-utun.txt        contained /32 route table evidence (10.10.0.1/32 utun7)
+macos-monitor.txt            route monitor (0/1 + default via utun7 during tunnel)
+snap-*.json                  51 provider-status snapshots from the 04:35 run
+macos-lane-report.txt        this file

@@ -1,0 +1,51 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The INTERNET permission is required for development. Specifically,
+         the Flutter tool needs it to communicate with the running application
+         to allow setting breakpoints, to provide hot reload, etc.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- DEBUG VARIANT ONLY. DevVpnPrepareActivity has existed in
+         src/debug/kotlin since 2026-08-07 but was declared in NO manifest, in
+         any commit, so `am start -n .../DevVpnPrepareActivity` answered
+         "Activity class does not exist" while `am` still exited 0. The class
+         compiled, merged into the debug APK, and was unreachable; the one
+         framework call that seats the prepared-VPN slot could not be made, and
+         VpnService.Builder.establish() therefore returned null for every lane
+         that followed the documented recipe.
+
+         Declared here rather than in src/main so the release AAB and the
+         release dependency freeze for 1.0.14+29 are untouched, which is the
+         same boundary the activity's own KDoc argues for.
+
+         exported=true because it is started over adb by a lane; it takes no
+         input, reads no config, touches no key material, starts no tunnel, and
+         refuses to show the consent dialog if the ACTIVATE_VPN appop is not
+         already allow. -->
+    <application>
+        <activity
+            android:name="org.winsvpn.app.DevVpnPrepareActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay"/>
+        <!-- DEBUG VARIANT ONLY, same boundary as DevVpnPrepareActivity above.
+             Driver for the kill switch over adb (arm/disarm/block/exit); takes a
+             boolean and nothing else, starts no tunnel unless explicitly asked,
+             touches no key material, no config and no PIN gate. -->
+        <activity
+            android:name="org.winsvpn.app.DevKillSwitchActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay"/>
+        <!-- DEBUG VARIANT ONLY, same boundary as the two activities above.
+             Minimal real VpnService the instrumented AndroidKillSwitchTest
+             starts to prove the blocking interface stops cleartext egress on
+             the device. Starts no tunnel, touches no key material. -->
+        <service
+            android:name="org.winsvpn.app.KillSwitchBlockService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE"/>
+    </application>
+</manifest>

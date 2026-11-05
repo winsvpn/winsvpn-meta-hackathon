@@ -1,0 +1,58 @@
+[Unit]
+Description=Wins Edge AI Router
+After=network-online.target vllm-gemma4.service
+Wants=network-online.target vllm-gemma4.service
+
+[Service]
+Type=exec
+User=aicore
+Group=aicore
+Slice=wins-ai.slice
+WorkingDirectory=/opt/winsvpn-router/current
+EnvironmentFile=/etc/winsvpn/router.env
+Environment=PYTHONNOUSERSITE=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStartPre=+/usr/local/libexec/winsvpn-router-install --verify-runtime
+ExecStart=/opt/winsvpn-router/current/.venv/bin/python -I -m uvicorn main:app --host 127.0.0.1 --port 8090 --no-access-log
+Restart=on-failure
+RestartSec=2
+UMask=0077
+StateDirectory=winsvpn-router
+StateDirectoryMode=0700
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+# R-01: the syscall filter the vLLM sibling unit already carries. This is the
+# process that terminates HMAC-authenticated requests and parses their bodies,
+# so it is the one that most needs the filter, and unlike vLLM it has no CUDA
+# or JIT constraint to trade away (MemoryDenyWriteExecute is already set above,
+# which vLLM cannot set at all). @system-service is the standard base set for a
+# long-running daemon; the negated groups remove the classes a loopback HTTP
+# service has no use for.
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @obsolete @debug @mount @swap @reboot @raw-io @cpu-emulation
+SystemCallErrorNumber=EPERM
+# Binds 127.0.0.1:8090 only. AF_INET6 was allowed but never used.
+RestrictAddressFamilies=AF_UNIX AF_INET
+RemoveIPC=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

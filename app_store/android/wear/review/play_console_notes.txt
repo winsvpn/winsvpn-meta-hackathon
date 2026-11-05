@@ -1,0 +1,30 @@
+Wear OS Play Console notes for org.winsvpn.app 1.0.16+33 (watch versionCode 3301).
+
+Form factor:
+- Same application ID as the phone companion: org.winsvpn.app
+- com.google.android.wearable.standalone=false
+- Required hardware feature android.hardware.type.watch
+- Wear listing/screenshot inventory: owner-blocked
+
+What the watch does:
+- Remote connect, disconnect, and country select for the paired phone
+- Renders phone-reported tunnel status
+- Never presents Android VPN consent; the user must approve VPN on the phone
+
+What the watch does not do:
+- No INTERNET permission
+- No VpnService
+- No QUERY_ALL_PACKAGES
+- No account number, key, node address, or tunnel config on the watch
+- No local Winn v3, AmneziaWG, or Xray native engines
+
+Protocol (executed on the paired phone, not the watch):
+- Primary: Winn v3
+- Ordered Winn v1 compatibility path: AWG first, then Xray
+- A served Winn v3 lead attempt cannot be skipped
+
+Reviewer path:
+1. Install the matching phone release of org.winsvpn.app on a paired phone.
+2. Confirm the watch app appears only after the phone companion is installed.
+3. Open the watch app (launcher name Calculator).
+4. Use the watch toggle only after VPN consent has been granted on the phone.

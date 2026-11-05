@@ -1,0 +1,12 @@
+{
+  "mandatory_commands_passed": 19,
+  "source_hashes_rechecked": 16,
+  "new_go_tests_staged": [
+    "winn_protocol_experimental/cmd/winn3-gateway/forward_round10_test.go",
+    "winn_protocol_experimental/cmd/winn3-gateway/gateway_authority_test.go",
+    "winn_protocol_experimental/cmd/winn3-gateway/peer_registry_round11_test.go",
+    "winn_protocol_experimental/internal/carrier/h3_receive_window_test.go"
+  ],
+  "untracked_go_tests": [],
+  "working_and_staged_diff_check": "PASS"
+}

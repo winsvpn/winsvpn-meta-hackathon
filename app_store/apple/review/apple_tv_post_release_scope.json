@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-apple-tv-post-release-scope-v1",
+  "canonical_release": "1.0.17+34",
+  "app_version": "1.0.17",
+  "build_number": "34",
+  "shipping_surface": false,
+  "upload_target": false,
+  "freeze_platform": false,
+  "release_blocker": false,
+  "readiness_denominator": false,
+  "dashboard_target": false,
+  "artifact_status": "not_a_current_candidate",
+  "listing_status": "not_in_this_release",
+  "privacy_label_status": "not_applicable_not_shipping",
+  "export_compliance_status": "not_applicable_not_shipping",
+  "signing_status": "unbound_not_shipping",
+  "receipt_status": "refused_not_a_current_target",
+  "must_not_reuse_ios_artifact": true,
+  "must_not_reuse_watchos_companion": true,
+  "publication_authorized": false,
+  "upload_authorized": false,
+  "required_future_work": [
+    "native_tvos_host_and_packet_tunnel_targets",
+    "tvos_engine_slices",
+    "focus_driven_ui",
+    "tvos_privacy_and_store_metadata",
+    "physical_apple_tv_runtime_evidence",
+    "dedicated_build_freeze_receipt_and_upload_contract"
+  ]
+}

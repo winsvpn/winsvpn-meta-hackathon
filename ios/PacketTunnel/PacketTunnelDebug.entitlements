@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- DEBUG-ONLY entitlements for the coexisting dev build.
+
+	     Identical to the shipping entitlements except for the App Group, which
+	     is deliberately NOT group.org.winsvpn.app. The dev build installs
+	     alongside the App Store build under org.winsvpn.app.debug, and if it
+	     shared the production App Group it would overwrite the real app's
+	     Tunnel/latest_tunnel.conf and Tunnel/latest_status.json — both are keyed
+	     only by path inside the container.
+
+	     group.org.winsvpn.devicecheck is the group already carried by the
+	     Apple-issued provisioning profiles for org.winsvpn.app.debug and
+	     org.winsvpn.app.debug.PacketTunnel, so nothing new was registered.
+
+	     The debug Keychain group is also separate. A development provider must
+	     provision its own test identity and cannot read production tunnel,
+	     admission, or client-key material from the shipping app. -->
+	<key>com.apple.developer.networking.networkextension</key>
+	<array>
+		<string>packet-tunnel-provider</string>
+	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)org.winsvpn.shared.debug</string>
+	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.org.winsvpn.devicecheck</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,63 @@
+diff --git a/tools/native_messaging/test_native_host_registration.py b/tools/native_messaging/test_native_host_registration.py
+--- a/tools/native_messaging/test_native_host_registration.py
++++ b/tools/native_messaging/test_native_host_registration.py
+@@ -59,17 +59,22 @@ def isolated_store_env(**values: str):
+         renderer.OWNER_IDENTITY_ENV,
+     )
+     previous = {key: os.environ.get(key) for key in keys}
+-    for key in keys:
+-        os.environ.pop(key, None)
+-    os.environ.update(values)
+-    try:
+-        yield
+-    finally:
+-        for key, value in previous.items():
+-            if value is None:
+-                os.environ.pop(key, None)
+-            else:
+-                os.environ[key] = value
++    with tempfile.TemporaryDirectory(prefix="winsvpn-owner-identity-absent-") as raw:
++        values.setdefault(
++            renderer.OWNER_IDENTITY_ENV,
++            str(Path(raw) / "missing-owner-identity.json"),
++        )
++        for key in keys:
++            os.environ.pop(key, None)
++        os.environ.update(values)
++        try:
++            yield
++        finally:
++            for key, value in previous.items():
++                if value is None:
++                    os.environ.pop(key, None)
++                else:
++                    os.environ[key] = value
+ 
+ 
+ def _dummy_host_interpreter() -> Path:
+diff --git a/tools/test_linux_native_host_delivery.py b/tools/test_linux_native_host_delivery.py
+--- a/tools/test_linux_native_host_delivery.py
++++ b/tools/test_linux_native_host_delivery.py
+@@ -310,6 +310,9 @@ class LinuxNativeHostIsolatedInstallTests(unittest.TestCase):
+         env.pop("WINSVPN_EDGE_STORE_ID", None)
+         with tempfile.TemporaryDirectory(prefix="winsvpn-native-host-chrome-id-") as raw:
+             root = pathlib.Path(raw)
++            env["WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT"] = str(
++                root / "missing-owner-identity.json"
++            )
+             host = root / "wins_bridge_host"
+             host.write_text("#!/bin/sh\nexit 0\n", encoding="ascii")
+             host.chmod(0o755)
+@@ -344,9 +347,11 @@ class LinuxNativeHostIsolatedInstallTests(unittest.TestCase):
+         env = os.environ.copy()
+         env.pop("WINSVPN_CHROME_STORE_ID", None)
+         env.pop("WINSVPN_EDGE_STORE_ID", None)
+-        env.pop("WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT", None)
+         with tempfile.TemporaryDirectory(prefix="winsvpn-native-host-edge-id-") as raw:
+             root = pathlib.Path(raw)
++            env["WINSVPN_BROWSER_EXTENSION_IDENTITY_RECEIPT"] = str(
++                root / "missing-owner-identity.json"
++            )
+             host = root / "wins_bridge_host"
+             host.write_text("#!/bin/sh\nexit 0\n", encoding="ascii")
+             host.chmod(0o755)

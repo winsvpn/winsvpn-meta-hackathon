@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.org/schemas/windows-lab-machine-evidence-v1.json",
+  "title": "Win's VPN nonpublishable Windows lab machine evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "contract", "platform", "app_version", "build_number",
+    "run_id", "captured_at_utc", "secret_material_redacted",
+    "evidence_class", "lab_only", "publication_authorized",
+    "public_release_gate_eligible", "unsigned_local_candidate", "step_nonce",
+    "sequence", "started_at_utc", "finished_at_utc",
+    "release_input_index_sha256", "platform_manifest_sha256",
+    "artifact_input_fingerprint_sha256", "build_receipt_sha256",
+    "producer_contract_sha256", "collector_closure_sha256", "artifact_sha256",
+    "artifact_size_bytes", "installed_gui_sha256", "installed_gui_size_bytes",
+    "installed_service_sha256", "installed_service_size_bytes",
+    "installed_awg_engine_sha256", "installed_awg_engine_size_bytes",
+    "candidate_manifest", "signature_receipt", "install_receipt",
+    "route_advertisement_receipt", "node_direct_awg_port",
+    "core_direct_awg_port", "node_advertised_xray_routes",
+    "core_advertised_xray_routes", "lanes", "rapid_cancel_receipt",
+    "split_tunnel_receipt", "network_change_receipt", "leak_receipt",
+    "watchdog_receipt",
+    "teardown_rollback_receipt", "map_receipt"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "contract": { "const": "winsvpn-windows-lab-machine-evidence-v1" },
+    "platform": { "const": "windows" },
+    "app_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "build_number": { "type": "string", "pattern": "^[0-9]+$" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "captured_at_utc": { "type": "string", "format": "date-time" },
+    "secret_material_redacted": { "const": true },
+    "evidence_class": { "const": "nonpublishable_lab" },
+    "lab_only": { "const": true },
+    "publication_authorized": { "const": false },
+    "public_release_gate_eligible": { "const": false },
+    "unsigned_local_candidate": { "const": true },
+    "step_nonce": { "type": "string", "format": "uuid" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "started_at_utc": { "type": "string", "format": "date-time" },
+    "finished_at_utc": { "type": "string", "format": "date-time" },
+    "release_input_index_sha256": { "$ref": "#/$defs/sha256" },
+    "platform_manifest_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_input_fingerprint_sha256": { "$ref": "#/$defs/sha256" },
+    "build_receipt_sha256": { "$ref": "#/$defs/sha256" },
+    "producer_contract_sha256": { "$ref": "#/$defs/sha256" },
+    "collector_closure_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "artifact_size_bytes": { "type": "integer", "minimum": 1 },
+    "installed_gui_sha256": { "$ref": "#/$defs/sha256" },
+    "installed_gui_size_bytes": { "type": "integer", "minimum": 1 },
+    "installed_service_sha256": { "$ref": "#/$defs/sha256" },
+    "installed_service_size_bytes": { "type": "integer", "minimum": 1 },
+    "installed_awg_engine_sha256": { "$ref": "#/$defs/sha256" },
+    "installed_awg_engine_size_bytes": { "type": "integer", "minimum": 1 },
+    "candidate_manifest": { "$ref": "#/$defs/ref" },
+    "signature_receipt": { "$ref": "#/$defs/ref" },
+    "install_receipt": { "$ref": "#/$defs/ref" },
+    "route_advertisement_receipt": { "$ref": "#/$defs/ref" },
+    "node_direct_awg_port": { "const": 9110 },
+    "core_direct_awg_port": { "type": "integer", "minimum": 1, "maximum": 65535, "not": { "const": 9110 } },
+    "node_advertised_xray_routes": { "$ref": "#/$defs/routes" },
+    "core_advertised_xray_routes": { "$ref": "#/$defs/routes" },
+    "lanes": { "type": "array", "minItems": 4, "maxItems": 66 },
+    "rapid_cancel_receipt": { "$ref": "#/$defs/ref" },
+    "split_tunnel_receipt": { "$ref": "#/$defs/ref" },
+    "network_change_receipt": { "$ref": "#/$defs/ref" },
+    "leak_receipt": { "$ref": "#/$defs/ref" },
+    "watchdog_receipt": { "$ref": "#/$defs/ref" },
+    "teardown_rollback_receipt": { "$ref": "#/$defs/ref" },
+    "map_receipt": { "$ref": "#/$defs/ref" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "routes": {
+      "type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": ["protocol", "port", "security"],
+            "properties": {
+              "protocol": { "const": "tcp" },
+              "port": { "const": 80 },
+              "security": { "const": "none" }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": ["protocol", "port", "security"],
+            "properties": {
+              "protocol": { "const": "tcp" },
+              "port": { "const": 443 },
+              "security": { "const": "tls" }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ],
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["protocol", "port", "security"],
+        "properties": {
+          "protocol": { "const": "tcp" },
+          "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "security": { "enum": ["none", "tls"] }
+        }
+      }
+    }
+  }
+}

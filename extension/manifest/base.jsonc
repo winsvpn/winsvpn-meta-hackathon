@@ -1,0 +1,143 @@
+// Shared manifest. The build merges this with one target file and strips these
+// comments, so what ships is plain JSON and what is reviewed carries the
+// reasoning. Comments in a manifest are otherwise impossible: Chrome reports
+// unrecognised keys as warnings, so the justification cannot live in the file
+// as data.
+{
+  "manifest_version": 3,
+
+  // Named plainly. This extension does what it says and is listed under the
+  // name of the product it belongs to.
+  "name": "Win's VPN Companion",
+  "version": "1.0.17",
+
+  // The description is the first thing a reader sees, so it carries the
+  // limitation rather than burying it in the options page. Chrome Web Store
+  // and Edge Add-ons reject a description longer than 132 characters.
+  "description": "Sends chosen sites through the Win's VPN desktop tunnel. Not a VPN on its own; it does nothing unless the desktop app is connected.",
+
+  // ---------------------------------------------------------------------
+  // PERMISSIONS. Each one is here because a named feature cannot work
+  // without it. There is nothing speculative in this list.
+  // ---------------------------------------------------------------------
+  "permissions": [
+    // Setting the browser's proxy configuration. This is the extension.
+    "proxy",
+
+    // Talking to the desktop app's bridge process over stdio. The only source
+    // of connection truth, and the only place a network address is ever
+    // learned. Without it the extension has no idea whether the tunnel is up
+    // and therefore fails closed.
+    "nativeMessaging",
+
+    // Persisting the user's own site list and the on/off state. Nothing else
+    // is written; see the note on storage in the options page.
+    "storage",
+
+    // privacy.network.webRTCIPHandlingPolicy, to stop WebRTC opening its own
+    // connections outside the proxy, and privacy.network.networkPredictionEnabled,
+    // to stop the browser resolving and connecting to links before they are
+    // clicked. Both are leaks that the proxy setting alone does not close.
+    "privacy",
+
+    // The fail-closed block layer. Only `block` and `allow` actions are used,
+    // and neither requires host permissions. No request is read, redirected or
+    // modified, and no header is touched.
+    "declarativeNetRequest",
+
+    // The heartbeat that survives the background context being killed. Without
+    // it a terminated service worker could leave a stale "connected" belief in
+    // place until the next user interaction.
+    "alarms",
+
+    // Reading the address of the current tab, and only in the moment the user
+    // clicks "add this site" in the popup. This is why the `tabs` permission is
+    // absent: `tabs` would grant the address of every tab at all times, which
+    // is a browsing history this extension has no reason to be able to read.
+    "activeTab"
+  ],
+
+  // ---------------------------------------------------------------------
+  // NOT DECLARED, DELIBERATELY
+  // ---------------------------------------------------------------------
+  //
+  // "host_permissions": absent. The extension issues no network request of
+  //     its own. It does not fetch a status endpoint, a node list, an update
+  //     feed, or anything else. Every fact it knows comes over the native
+  //     messaging pipe from the desktop app. This is stricter than required and
+  //     it is deliberate: a fetch from the browser would mean a DNS lookup for
+  //     a name belonging to this product, from the user's own network, which is
+  //     a disclosure the extension has no need to make. Enforced at build time
+  //     by tools/leakscan.py, which fails the package if any remote URL,
+  //     fetch(), XMLHttpRequest, WebSocket or EventSource appears in the bundle.
+  //
+  // "web_accessible_resources": absent, and this is the point of the whole
+  //     entry. A web-accessible resource is fetchable from any page by its
+  //     extension URL, which lets a website test whether this extension is
+  //     installed. On a machine that may be inspected, and against a censor who
+  //     may operate or observe the sites being visited, "is this browser
+  //     running circumvention software" is exactly the question that must not
+  //     have a cheap answer. There is no resource this extension needs a page
+  //     to reach, so there is no entry to justify and the key is omitted
+  //     entirely rather than left empty.
+  //
+  // "tabs", "webNavigation", "history", "cookies", "downloads", "scripting",
+  // "content_scripts": absent. None of them is needed to route traffic, and
+  //     each would give the extension a view of what the user is doing.
+  //
+  // "externally_connectable": absent, so no web page can send this extension a
+  //     message.
+
+  // Requested from a click in the options page, never at install time, and
+  // never automatically.
+  //
+  // This is the permission the extension would most like not to need, and the
+  // reason it needs it is specific: Chromium only delivers
+  // webRequest.onAuthRequired for a URL the extension has host access to, so
+  // without this the desktop proxy's authentication challenge goes unanswered
+  // and nothing can be routed at all. Firefox needs it for the second reason
+  // given in the Firefox fragment.
+  //
+  // What limits the damage is that the extension registers exactly one
+  // webRequest listener, for onAuthRequired only, and declares no content
+  // script, no scripting permission and no other webRequest event. It never
+  // sees a URL being fetched. If the user declines, the extension does not
+  // route -- it says it cannot and blocks, rather than routing without being
+  // able to authenticate.
+  "optional_host_permissions": ["<all_urls>"],
+
+  "background": {
+    "type": "module"
+  },
+
+  "action": {
+    "default_popup": "src/ui/popup.html",
+    "default_icon": {
+      "16": "src/assets/icon16.png",
+      "32": "src/assets/icon32.png",
+      "48": "src/assets/icon48.png",
+      "128": "src/assets/icon128.png"
+    }
+  },
+
+  "options_ui": {
+    "page": "src/ui/options.html",
+    "open_in_tab": true
+  },
+
+  "icons": {
+    "16": "src/assets/icon16.png",
+    "32": "src/assets/icon32.png",
+    "48": "src/assets/icon48.png",
+    "128": "src/assets/icon128.png"
+  },
+
+  // Manifest V3 forbids remote code, and this restates it rather than relying
+  // on it: everything executed is in the package, there is no eval, no new
+  // Function, no inline <script>, and no third-party library of any kind. A
+  // circumvention tool that pulled in a dependency at build time would be a
+  // circumvention tool whose supply chain is an attack on its users.
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'self'; style-src 'self'"
+  }
+}

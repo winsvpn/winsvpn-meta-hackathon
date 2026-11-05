@@ -1,0 +1,21 @@
+interface: winsvpn
+  public key: 6TAPiU34LiYCcS8Vejw2bCfEZVwHyl1K+jrkkBO7iz4=
+  private key: (hidden)
+  listening port: 50539
+  jc: 2
+  jmin: 10
+  jmax: 30
+  s1: 16
+  s2: 80
+  s3: 16
+  h1: 11
+  h2: 22
+  h3: 33
+  h4: 44
+
+peer: 3jeHy5jOFHWp4snc5btOGhx4Fu+yFcQUlwnDldxwgm0=
+  endpoint: 127.0.0.1:56554
+  allowed ips: 0.0.0.0/0, ::/0
+  latest handshake: 1 minute, 55 seconds ago
+  transfer: 28.76 MiB received, 2.09 MiB sent
+  persistent keepalive: every 25 seconds

@@ -1,0 +1,265 @@
+--- a/server/wins_control_plane_setup_ONETOUCH.sh
++++ b/server/wins_control_plane_setup_ONETOUCH.sh
+@@ -20767,18 +20767,6 @@
+                 conn.commit()
+                 raise HTTPException(status_code=503, detail="Selected Double VPN exit node is not ready. Please try again in a minute.")
+             mark_node_management_status(conn, node["slug"], "ok")
+-        elif not sync_peer_to_node(node_ssh_host, device_cfg):
+-            conn.rollback()
+-            # A lost SSH acknowledgment does not prove the peer was absent.
+-            # Reconcile against committed authority using the durable outbox.
+-            queue_peer_revocation(
+-                conn, node_ssh_host, device_cfg.get("client_public_key") or ""
+-            )
+-            mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
+-            conn.commit()
+-            raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
+-        else:
+-            mark_node_management_status(conn, node["slug"], "ok")
+         if old_peer_to_remove and old_peer_node_ip:
+             queue_peer_revocation(conn, old_peer_node_ip, old_peer_to_remove, background_tasks)
+ 
+@@ -21069,6 +21057,19 @@
+                 status_code=503,
+                 detail="Selected Winn Protocol v3 node cannot be served for this request.",
+             )
++        # Validate the complete route before installing its remote AWG peer.
++        if not double_vpn_requested and not sync_peer_to_node(node_ssh_host, device_cfg):
++            conn.rollback()
++            # A lost SSH acknowledgment does not prove the peer was absent.
++            # Reconcile against committed authority using the durable outbox.
++            queue_peer_revocation(
++                conn, node_ssh_host, device_cfg.get("client_public_key") or ""
++            )
++            mark_node_management_status(conn, node["slug"], "failed", "peer sync failed")
++            conn.commit()
++            raise HTTPException(status_code=503, detail="Selected VPN node is not ready. Please try again in a minute.")
++        elif not double_vpn_requested:
++            mark_node_management_status(conn, node["slug"], "ok")
+         if served_winn3_descriptor and served_winn3_device:
+             # Publish while the admission transaction still owns its writer
+             # lock. A failed publication must not consume the activation key
+@@ -25540,7 +25541,16 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         if not reserve_paypal_event(conn, event_id, event, subscription_id):
+-            return {"status": "duplicate", "event": event}
++            existing = conn.execute(
++                "SELECT status FROM paypal_events WHERE event_id=?", (event_id,)
++            ).fetchone()
++            if existing is not None and existing["status"] in {"processed", "ignored"}:
++                return {"status": "duplicate", "event": event}
++            raise HTTPException(
++                status_code=409,
++                detail="PayPal event processing is still in progress. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+ 
+     try:
+         if event in stop_events and subscription_id:
+@@ -25825,7 +25835,16 @@
+     with get_db() as conn:
+         ensure_schema(conn)
+         if not reserve_paypal_event(conn, dedupe_id, event_type, ""):
+-            return {"status": "duplicate", "event": event_type}
++            existing = conn.execute(
++                "SELECT status FROM paypal_events WHERE event_id=?", (dedupe_id,)
++            ).fetchone()
++            if existing is not None and existing["status"] in {"processed", "ignored"}:
++                return {"status": "duplicate", "event": event_type}
++            raise HTTPException(
++                status_code=409,
++                detail="BTCPay invoice processing is still in progress. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+     try:
+         # Never grant from webhook fields alone: re-read the authoritative invoice
+         # for its settled status AND its metadata (the delivery body carries
+@@ -25833,11 +25852,14 @@
+         invoice = btcpay_fetch_invoice(invoice_id)
+         status = str(invoice.get("status") or "").strip().lower()
+         if status not in BTCPAY_SETTLED_INVOICE_STATUSES:
+-            # A per-payment settle that reached us before the invoice itself
+-            # settled. Leave the reservation NON-terminal (still 'processing') --
+-            # do NOT mark it processed/ignored -- so the eventual InvoiceSettled
+-            # delivery can still provision this invoice.
+-            return {"status": "pending", "event": event_type, "invoice_status": status}
++            # The exception handler releases this reservation as failed.
++            # A successful HTTP response would acknowledge an unsettled invoice
++            # and could suppress the later settlement during the live lease.
++            raise HTTPException(
++                status_code=409,
++                detail="BTCPay invoice settlement is not ready. Please retry.",
++                headers={"Retry-After": "10"},
++            )
+         metadata = invoice.get("metadata") if isinstance(invoice.get("metadata"), dict) else {}
+         plan_key = str(metadata.get("plan_key") or "").strip()
+         if plan_key not in CRYPTO_PLAN_KEYS:
+@@ -25901,7 +25923,8 @@
+             # back to the invoice amount because a Greenfield "Settled" invoice is
+             # guaranteed fully paid. hub_order_id/plan_key/currency must ALL match
+             # the bound order, requested must equal what we priced, and paid must
+-            # cover it. crypto_settled_invoice_amount_ok stays as an extra gate.
++            # cover it. The bound order owns the accepted purchase price;
++            # changing the catalog price cannot invalidate that purchase.
+             try:
+                 requested = Decimal(str(invoice.get("amount") or ""))
+                 paid = Decimal(str(invoice.get("paidAmount") or invoice.get("amount") or ""))
+@@ -25917,7 +25940,6 @@
+                 and expected > 0
+                 and requested == expected
+                 and paid >= expected
+-                and crypto_settled_invoice_amount_ok(conn, plan_key, invoice)
+             )
+             if not contract_ok:
+                 conn.execute(
+@@ -31479,6 +31501,7 @@
+ import json
+ import os
+ import sqlite3
++from contextlib import closing
+ from datetime import UTC, datetime, timedelta
+ from pathlib import Path
+ 
+@@ -31738,7 +31761,7 @@
+     feedback = {"false_positive": 0, "benign_expected": 0, "threat": 0}
+     try:
+         EVENTS_DB.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+-        with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_schema(conn)
+             feedback = feedback_counts(conn, key)
+@@ -31789,7 +31812,7 @@
+     reason = " ".join(reason.strip().split())[:500]
+     if len(reason) < 8:
+         raise ValueError("feedback reason must contain at least 8 characters")
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         ensure_schema(conn)
+         row = conn.execute(
+@@ -31822,7 +31845,7 @@
+ def reclassify_events(limit: int, include_stale: bool = False):
+     """Backfill missing classifier results without overwriting human labels."""
+     bounded_limit = max(1, min(int(limit or 1), 50000))
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+@@ -31872,7 +31895,7 @@
+         ))
+ 
+     if updates:
+-        with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_schema(conn)
+             conn.executemany("""
+@@ -31893,7 +31916,7 @@
+ 
+ 
+ def list_events(limit: int):
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         conn.row_factory = sqlite3.Row
+         ensure_schema(conn)
+@@ -31909,7 +31932,7 @@
+ 
+ def report(hours: int):
+     cutoff = (datetime.now(UTC) - timedelta(hours=max(1, min(hours, 24 * 90)))).isoformat()
+-    with sqlite3.connect(EVENTS_DB, timeout=10) as conn:
++    with closing(sqlite3.connect(EVENTS_DB, timeout=10)) as conn, conn:
+         configure_security_events_connection(conn)
+         ensure_schema(conn)
+         rows = conn.execute("""
+@@ -32025,11 +32048,13 @@
+ import os
+ import re
+ import sqlite3
++from contextlib import closing
+ import smtplib
+ import ssl
+ import subprocess
+ import sys
+ import time
++import tempfile
+ from datetime import UTC, datetime, timedelta, timezone
+ from email.mime.text import MIMEText
+ from pathlib import Path
+@@ -32320,7 +32345,7 @@
+                 "model_version": "fail-safe",
+                 "feedback_state": "unavailable",
+             }
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             ensure_events_db(conn)
+             conn.execute("""
+@@ -32363,7 +32388,7 @@
+     if not event_id:
+         return
+     try:
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             conn.execute(
+                 "UPDATE security_events SET email_status = ?, email_error = ? WHERE event_id = ?",
+@@ -32398,7 +32423,7 @@
+     ]
+     triage_reasons = []
+     try:
+-        with sqlite3.connect(SECURITY_EVENTS_DB, timeout=10) as conn:
++        with closing(sqlite3.connect(SECURITY_EVENTS_DB, timeout=10)) as conn, conn:
+             configure_security_events_connection(conn)
+             row = conn.execute("""
+                 SELECT triage_label, triage_score, triage_confidence, triage_reasons
+@@ -32613,19 +32638,34 @@
+     match = IP_RE.search(line)
+     return match.group(1) if match else "local"
+ 
++def write_journal_cursor(path: Path, timestamp: int) -> None:
++    fd, temporary = tempfile.mkstemp(prefix=".journal-cursor-", dir=path.parent)
++    try:
++        with os.fdopen(fd, "w", encoding="utf-8") as stream:
++            stream.write(str(timestamp))
++            stream.flush()
++            os.fsync(stream.fileno())
++        os.replace(temporary, path)
++        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
++        try:
++            os.fsync(directory)
++        finally:
++            os.close(directory)
++    finally:
++        Path(temporary).unlink(missing_ok=True)
++
+ def monitor_journal():
+     state_path = STATE_DIR / "journal-auth.last"
+     now = int(time.time())
+     if not state_path.exists():
+-        state_path.write_text(str(now), encoding="utf-8")
++        write_journal_cursor(state_path, now)
+         return
+     try:
+         since = int(float(state_path.read_text(encoding="utf-8").strip() or str(now - 60)))
+     except Exception:
+         since = now - 60
+-    state_path.write_text(str(now), encoding="utf-8")
+     cmd = ["journalctl", f"--since=@{since}", f"--until=@{now}", "-o", "short-unix", "--no-pager"]
+-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=25)
++    result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=25)
+     for line in result.stdout.splitlines():
+         lowered = line.lower()
+         if "failed password" in lowered or "invalid user" in lowered:
+@@ -32656,6 +32696,8 @@
+                 "mechanism": "su",
+                 "line_hash": event_hash(line),
+             })
++    write_journal_cursor(state_path, now)
++
+ 
+ def main():
+     if "--test-email" in sys.argv:

@@ -1,0 +1,61 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      TV VARIANT: NEVER DISGUISED. Android TV (leanback / TELEVISION uiMode)
+      has no focus handling on the decoy calculator (Material+InkWell+onTap)
+      so the disguise would permanently lock the user out on a D-pad remote.
+      This manifest bakes the OPPOSITE invariant to the phone's
+      AndroidManifest.xml: the application label is the real product name and
+      remains so even when camouflage is enrolled on a phone. The census in
+      CamouflageLatchedSurfaceTest asserts this file never carries the
+      disguised name.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+      android.hardware.touchscreen declared explicitly with required="false".
+      aapt2 rejects a uses-feature declared inside <application> (measured:
+      "unexpected element <uses-feature> found in <manifest><application>"), so
+      these MUST be direct children of <manifest> or the feature never reaches
+      the merged manifest and the tv variant does not even link. With
+      required="false" a TV-only device that has no touchscreen is not blocked
+      from installing the APK, and is not miscategorised by Play/leanback as
+      touch-required.
+    -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <application
+        android:label="Win's VPN"
+        android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/banner"
+        tools:replace="android:label">
+
+        <activity
+            android:name="org.winsvpn.app.MainActivity"
+            android:exported="true"
+            tools:replace="android:exported"
+            android:screenOrientation="landscape"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:theme="@style/LaunchTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name=".LauncherReal"
+            tools:node="remove" />
+        <activity-alias
+            android:name=".LauncherDecoy"
+            tools:node="remove" />
+    </application>
+</manifest>

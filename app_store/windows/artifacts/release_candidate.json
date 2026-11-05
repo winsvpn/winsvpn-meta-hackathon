@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-windows-release-candidate-v1",
+  "canonical_release": "1.0.17+34",
+  "product_version": "1.0.17",
+  "four_part_version": "1.0.17.34",
+  "pubspec_version": "1.0.17+34",
+  "identity_map": "docs/rulings/RELEASE_IDENTITY_MAP_20260824.json",
+  "form_factor": "windows-x64",
+  "candidate_set_status": "no_current_candidate",
+  "upload_status": "not_uploaded",
+  "submission_package_validation_status": "no_current_candidate",
+  "owner_state": "OWNER-BLOCKED: ABSENT",
+  "authenticode_leaf_sha256": "OWNER-BLOCKED: ABSENT",
+  "installer_sha256": "OWNER-BLOCKED: ABSENT",
+  "versioned_https_url": "OWNER-BLOCKED: ABSENT",
+  "notes": "There is no current 1.0.17+34 Windows candidate set. Producer output paths are not current candidate bytes. A file at those paths is not 1.0.17+34 evidence. Authenticode, Partner Center enrollment, reviewer account, reviewer routes, versioned HTTPS URL, and installer SHA-256 remain OWNER-BLOCKED: ABSENT. Unsigned local EXEs, development MSIX identities, and historical 1.0.14+29 files are not current candidates. 2026-08-27 DeepSeek WINDOWS lane: build attempt BLOCKED, zero installer bytes produced, all produced flags remain false. Designated x64 build host winpc (192.168.50.19, BOOK-OFOIHG3LA4) is powered off and unreachable (ping fail, port 22 fail, ARP incomplete); WOL via UDP broadcast and raw EtherType 0x0842 frames from aicore (MAC 4c:0f:3e:24:46:40) did not wake it; owner must physically power it on and complete the documented first-unlock login. The Win11 ARM64 VM on yoga (win11arm64elev, booted and surveyed as the only other Windows host) has an empty C:\\ProgramData\\WinsVPN (no ReleaseWindowsWinn3Authority ledger), no C:\\Program Files\\WinsVPN ReleasePython custody, and a stale 2026-08-18 C:\\wv tree, so it cannot pass the installer producer fail-closed sealed-pair gates either. Regardless of host power state, a 1.0.17+34 full installer also needs the owner Winn v3 sealed-pair ceremony (authorization.json, sealed generation, WINS_WINDOWS_WINN3_CANDIDATE_ID / WINS_WINDOWS_WINN3_RECEIPT_SHA256 / WINS_WINDOWS_WINN3_SEALED_GENERATION), ReleasePython 3.14.7 custody, a RELEASE_INPUT_INDEX freeze, Flutter 3.47.6 (5fc346839b5d0eef006ed8404392afb4dfae428d), and reviewed Inno Setup custody before build_installer.ps1 can succeed; -AllowMissingWinn3Carrier was deliberately NOT used.",
+  "required_upload_targets": [
+    "windows-x64-installer",
+    "windows-x64-partner-center",
+    "windows-arm64-installer",
+    "windows-arm64-partner-center"
+  ],
+  "targets": {
+    "windows-x64-installer": {
+      "filename": "WinsVPN-Setup.exe",
+      "architecture": "x64",
+      "surface": "website",
+      "path": "build/windows-installer/WinsVPN-Setup.exe",
+      "sha256": "",
+      "size_bytes": 0,
+      "artifact_status": "no_current_candidate",
+      "authenticode": "OWNER-BLOCKED: ABSENT",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false
+    },
+    "windows-x64-partner-center": {
+      "filename": "WinsVPN-PartnerCenter.exe",
+      "architecture": "x64",
+      "surface": "partner-center",
+      "path": "build/windows-installer/WinsVPN-PartnerCenter.exe",
+      "sha256": "",
+      "size_bytes": 0,
+      "artifact_status": "no_current_candidate",
+      "authenticode": "OWNER-BLOCKED: ABSENT",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false
+    }
+  },
+  "pending_required_targets": {
+    "windows-arm64-installer": {
+      "filename": "WinsVPN-Setup-arm64.exe",
+      "architecture": "arm64",
+      "surface": "website",
+      "path": "build/windows-installer/WinsVPN-Setup-arm64.exe",
+      "sha256": "",
+      "size_bytes": 0,
+      "artifact_status": "no_current_candidate",
+      "authenticode": "OWNER-BLOCKED: ABSENT",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false,
+      "status": "pending-owner-evidence"
+    },
+    "windows-arm64-partner-center": {
+      "filename": "WinsVPN-PartnerCenter-arm64.exe",
+      "architecture": "arm64",
+      "surface": "partner-center",
+      "path": "build/windows-installer/WinsVPN-PartnerCenter-arm64.exe",
+      "sha256": "",
+      "size_bytes": 0,
+      "artifact_status": "no_current_candidate",
+      "authenticode": "OWNER-BLOCKED: ABSENT",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false,
+      "status": "pending-owner-evidence"
+    }
+  },
+  "msix": {
+    "upload_target": false,
+    "production_allowed": false,
+    "development_identity_only": true,
+    "canonical_release": "1.0.17+34",
+    "package_version": "1.0.17.34",
+    "architecture": "x64",
+    "filename": "WinsVPN-Store-1.0.17.34-x64.msix",
+    "sha256": "",
+    "size_bytes": 0,
+    "artifact_status": "not_an_upload_target",
+    "authenticode": "OWNER-BLOCKED: ABSENT",
+    "produced": false,
+    "upload_performed": false,
+    "publication_authorized": false
+  },
+  "arm64_targets_status": "pending-owner-evidence",
+  "private_symbols": {
+    "x64": ".artifacts/private-release-symbols/windows/x64/1.0.17+34",
+    "arm64": ".artifacts/private-release-symbols/windows/arm64/1.0.17+34",
+    "uploaded": false
+  },
+  "obfuscation_receipts": {
+    "windows-x64-installer": ".artifacts/private-release-symbols/windows/x64/1.0.17+34/manifest-website.json",
+    "windows-x64-partner-center": ".artifacts/private-release-symbols/windows/x64/1.0.17+34/manifest-partner-center.json"
+  },
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg", "xray"]
+  },
+  "historical_non_authoritative": {
+    "note": "Unsigned local EXEs, development MSIX identities, and any 1.0.14+29 Windows files are retired snapshot history only. They are not current 1.0.17+34 candidates and must not be uploaded, attached, or reused as owner-authorization evidence.",
+    "retired_release": "1.0.14+29"
+  }
+}

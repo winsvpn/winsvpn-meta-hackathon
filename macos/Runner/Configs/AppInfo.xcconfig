@@ -1,0 +1,22 @@
+// Signing inputs for the Runner target. project.pbxproj references these as
+// $(WINS_APPLE_...) instead of hardcoding an identity; see Signing.xcconfig for
+// the measured precedence order and for how to sign for distribution.
+// This reaches Runner Debug, Release and Profile, because all three include
+// AppInfo.xcconfig via AppInfo-{Debug,Release,Profile}.xcconfig.
+#include "Signing.defaults.xcconfig"
+#include? "Signing.xcconfig"
+
+// Application-level settings for the Runner target.
+//
+// This may be replaced with something auto-generated from metadata (e.g., pubspec.yaml) in the
+// future. If not, the values below would default to using the project name when this becomes a
+// 'flutter create' template.
+
+// The application's name. By default this is also the title of the Flutter window.
+PRODUCT_NAME = Win's VPN
+
+// The application's bundle identifier
+PRODUCT_BUNDLE_IDENTIFIER = org.winsvpn.app
+
+// The copyright displayed in application information
+PRODUCT_COPYRIGHT = Copyright © 2026 Win's VPN. All rights reserved.

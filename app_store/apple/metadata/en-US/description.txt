@@ -1,0 +1,25 @@
+Win's VPN is an encrypted VPN app for iPhone, iPad, and Mac. Win's VPN Inc., a U.S. 501(c)(3) nonprofit, operates the service. This release does not include an Apple TV app.
+
+Use Try Free Server or an existing Win's VPN account number to connect. This Apple app does not sell subscriptions inside the app.
+
+Winn v3 is the primary tunnel protocol. If Winn v3 cannot connect, Win's VPN uses the Winn v1 compatibility path: AWG (AmneziaWG) first, then Xray.
+
+Features:
+- Encrypted VPN on iPhone, iPad, and Mac
+- Winn v3 primary, with Winn v1 AWG then Xray when needed
+- Always-on calculator camouflage after activation on iPhone and iPad: a calculator safety screen and an alternate calculator icon (the app installs as Win's VPN)
+- Embedded Apple Watch companion on iPhone for connect, disconnect, and location selection
+
+Calculator camouflage (iPhone and iPad):
+Calculator camouflage is built for high-censorship environments where a visible VPN interface can create personal risk. On iPhone and iPad the app installs under the name Win's VPN. After device activation the calculator camouflage is always on and cannot be switched off in the app: the app shows a working calculator. While the calculator screen is showing, the home-screen icon is the calculator artwork; entering the configured six-digit PIN reveals the VPN interface and restores the app's primary icon. iOS may show its standard confirmation each time the icon changes. While a tunnel is active, iOS still shows its normal VPN status. The Mac app installs under the name Win's VPN and has no calculator camouflage. The Apple Watch companion also installs under the name Win's VPN, but it has no calculator screen and no PIN gate.
+
+Apple Watch companion (iPhone):
+The iPhone app includes an embedded Apple Watch companion. On a paired Apple Watch you can connect or disconnect the iPhone VPN and choose a location. The companion is not a standalone VPN, cannot approve VPN permission, and does not collect data. Apple Watch features require the iPhone app.
+
+Mac:
+Use the Win's VPN Mac app to connect with the same Winn v3 primary path and Winn v1 AWG then Xray compatibility path. Calculator camouflage and the Apple Watch companion are not part of the Mac app.
+
+Privacy:
+Win's VPN does not collect browsing history, DNS query contents, traffic contents, or destination activity logs. Limited data is linked to your account to run the service: account and device identifiers for the three-device limit, app choices such as selected VPN location, and, only when you open the approximate-location map, coarse IP-derived location. None of it is used for tracking.
+
+Support: https://www.winsvpn.org/support/

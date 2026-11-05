@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "server/test_crypto_payments_spain.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:40:13.125246+00:00",
+    "exit_code": 0,
+    "seconds": 0.57,
+    "log": "crypto-payments.log"
+  }
+]

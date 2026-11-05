@@ -1,0 +1,85 @@
+OWNER-APPROVED-COUNSEL-REVIEW-PENDING
+
+WIN'S VPN BROWSER EXTENSION PRIVACY POLICY
+
+Status: Owner approved on August 31, 2026. Counsel review remains pending.
+This marking does not state or imply that counsel has reviewed this policy.
+Version 2026-08-31.v1, effective August 31, 2026.
+Canonical URL: https://www.winsvpn.org/browser-extension-privacy/
+This URL must resolve publicly before any store listing cites it.
+
+Scope
+
+This policy applies to the Win's VPN browser companion, listed as Win's VPN
+Proxy for Chrome, Win's VPN Proxy for Microsoft Edge, and Win's VPN Proxy on
+Firefox. The extension works with the Win's VPN desktop application. It does
+not create a VPN account, process a payment, or operate a VPN tunnel by itself.
+A Safari build exists only as an internal preview that is not distributed. It
+requests native messaging, storage, and alarms only, does not route traffic,
+and is not covered by the routing, current-tab, leak-protection, or block-rule
+statements below.
+
+Information kept in the browser profile
+
+The extension stores the routing mode, whether routing is on, the list of sites
+the user chooses to route, and the list of sites the user chooses to keep
+outside the tunnel. It does not store account details, a record of sites visited,
+VPN server addresses, or the short-lived key issued by the desktop application.
+That key is kept in memory only for the duration of its connection to the
+desktop application and is never written to extension storage. The user can
+erase either stored site list and turn routing off from the extension.
+
+Current-tab and optional site access
+
+When the user chooses Add this site, the extension uses active-tab access to
+read the address of that tab at that moment. It does not request the broader
+tabs permission. Chrome, Edge, and Firefox may ask the user for optional access
+to all site addresses so the browser can apply proxy authentication to routed
+requests. On Firefox that access is also used to choose the route for each
+request: while routing is on, the extension reads the address of each request
+in memory, compares its site name against the user's lists, and decides route
+or direct. Nothing about the request is stored, logged, or sent off the
+computer. If the user declines, routing fails closed. The extension has no
+content script and does not read page contents or keep browsing history.
+
+Local communication and network requests
+
+The extension communicates with the installed Win's VPN desktop bridge through
+the browser's native-messaging interface. This communication stays on the same
+computer. The extension does not make separate remote network requests to
+Win's VPN or another party. Web traffic selected by the user is handled by the
+browser and desktop application under the main Win's VPN Privacy Policy.
+
+Use and sharing
+
+The locally held settings are used only to provide the user-selected routing,
+leak-protection, status, and troubleshooting features. Win's VPN does not sell
+extension data or use it for advertising or tracking. The extension does not
+send its stored site lists, page contents, browsing history, or in-memory bridge
+key to Win's VPN or third parties.
+
+The privacy permission is used to apply and verify WebRTC and network-prediction
+leak protections. Declarative network rules provide a fail-closed block while
+the selected proxy route is unavailable; those rules are removed when routing
+is turned off after browser settings are verified clear.
+
+Chrome Web Store Limited Use
+
+Use of information received from Google APIs will adhere to the Chrome Web
+Store User Data Policy, including its Limited Use requirements.
+
+User controls and deletion
+
+The user can remove individual sites, erase either stored site list, turn
+routing off, revoke optional site access in the browser, or uninstall the
+extension. Erasing a list removes it from the browser profile. Both lists are
+stored with browser local storage and are not synchronized through a browser
+account.
+Uninstall behavior is controlled by the browser provider.
+
+Related policy and contact
+
+Win's VPN Inc. operates the service, and Win Empire LLC designs and builds the
+software. The service Privacy Policy is https://www.winsvpn.org/privacy/, and
+its rights, retention, and contact sections apply to Win's VPN Inc. Questions
+or privacy requests may be sent to privacy@winsvpn.org or support@winsvpn.org.

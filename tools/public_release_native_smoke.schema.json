@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://winsvpn.org/schemas/public-release-native-smoke-v2.json",
+  "title": "Win's VPN sanitized platform-native live-smoke transcript",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract",
+    "platform",
+    "app_version",
+    "build_number",
+    "artifact_sha256",
+    "evidence_bundle_index_sha256",
+    "run_id",
+    "captured_at_utc",
+    "secret_material_redacted",
+    "checks",
+    "map_visual",
+    "direct_awg",
+    "advertised_xray_routes",
+    "tested_xray_routes"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "contract": { "const": "winsvpn-native-live-smoke-v2" },
+    "platform": { "enum": ["android", "windows", "linux", "ios", "macos"] },
+    "app_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "build_number": { "type": "string", "pattern": "^[0-9]+$" },
+    "artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "evidence_bundle_index_sha256": {
+      "allOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "not": { "const": "0000000000000000000000000000000000000000000000000000000000000000" } }
+      ]
+    },
+    "run_id": { "type": "string", "format": "uuid" },
+    "captured_at_utc": { "type": "string", "format": "date-time" },
+    "secret_material_redacted": { "const": true },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_signature",
+        "clean_install",
+        "ip_map_50_mile_city_context",
+        "split_tunneling_contract",
+        "double_vpn",
+        "leak_test"
+      ],
+      "properties": {
+        "artifact_signature": { "const": true },
+        "clean_install": { "const": true },
+        "ip_map_50_mile_city_context": { "const": true },
+        "split_tunneling_contract": { "const": true },
+        "double_vpn": { "const": true },
+        "leak_test": { "const": true }
+      }
+    },
+    "map_visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "screenshot_sha256",
+        "radius_miles",
+        "city_labels_visible",
+        "target_marker_visible",
+        "viewport_not_world_zoom"
+      ],
+      "properties": {
+        "screenshot_sha256": { "$ref": "#/$defs/sha256" },
+        "radius_miles": { "const": 50 },
+        "city_labels_visible": { "const": true },
+        "target_marker_visible": { "const": true },
+        "viewport_not_world_zoom": { "const": true }
+      }
+    },
+    "direct_awg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "port", "passed"],
+      "properties": {
+        "protocol": { "const": "udp" },
+        "port": { "const": 9110 },
+        "passed": { "const": true }
+      }
+    },
+    "advertised_xray_routes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/advertised_xray_route" }
+    },
+    "tested_xray_routes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/tested_xray_route" }
+    },
+    "windows_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rapid_connect_cancel_no_late_restart",
+        "reconnect_after_cancel",
+        "dynamic_xray_awg_fallback",
+        "per_app_split_tunneling",
+        "wifi_ethernet_dhcp_ipv6_recovery",
+        "leak_protection",
+        "disconnect_teardown",
+        "rollback"
+      ],
+      "properties": {
+        "rapid_connect_cancel_no_late_restart": { "const": true },
+        "reconnect_after_cancel": { "const": true },
+        "dynamic_xray_awg_fallback": { "const": true },
+        "per_app_split_tunneling": { "const": true },
+        "wifi_ethernet_dhcp_ipv6_recovery": { "const": true },
+        "leak_protection": { "const": true },
+        "disconnect_teardown": { "const": true },
+        "rollback": { "const": true }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "platform": { "const": "windows" } },
+        "required": ["platform"]
+      },
+      "then": { "required": ["windows_matrix"] },
+      "else": { "not": { "required": ["windows_matrix"] } }
+    }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "advertised_xray_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "port", "security"],
+      "properties": {
+        "protocol": { "const": "tcp" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "security": { "enum": ["none", "tls"] }
+      }
+    },
+    "tested_xray_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "port", "security", "passed"],
+      "properties": {
+        "protocol": { "const": "tcp" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "security": { "enum": ["none", "tls"] },
+        "passed": { "const": true }
+      }
+    }
+  }
+}

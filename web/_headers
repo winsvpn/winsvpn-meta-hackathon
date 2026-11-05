@@ -1,0 +1,15 @@
+/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Origin-Agent-Cluster: ?1
+  X-Permitted-Cross-Domain-Policies: none
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'sha256-O4P8tGak9to1a5n8RxMJM6rpmeZekzqrDDcPvJYuA1k='; script-src 'self' 'sha256-hL2BaESmkJRQRxLD3tPlx81jnGv1ZJFmqiFIzZhrU7A=' 'sha256-uV+Lf1Fylqf9F1qVJrJAuBzf/a8dp3anqcMr4NbxDp4='; connect-src 'self'; frame-src 'self'; form-action 'self'; upgrade-insecure-requests
+
+/releases/downloads.json
+  Cache-Control: no-cache, max-age=0, must-revalidate

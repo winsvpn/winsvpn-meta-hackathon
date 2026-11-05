@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-android-toolchain-custody-v1",
+  "issuance_id": "7f3a91c2e8b04d65a1c9e0f247b6d83a",
+  "created_utc": "2026-08-24T18:00:00Z",
+  "helper": "tools/release_android_toolchain_archive_custody.sh",
+  "helper_sha256": "5b9b2f3cb7018adbf2b55ca8409a5317678e93c6622c17becaacee3cbbc341e8",
+  "provisioner": "tools/provision_macos_release_android_toolchains.sh",
+  "manifest": "tools/toolchain-pins.json",
+  "manifest_sha256": "3615ddbd9cb8602c610e6c3bfed4804749b3d5de29f7c7436434f0da5c28e365",
+  "windows_helper": "tools/android_toolchain_custody.ps1",
+  "windows_helper_sha256": "db178cd0106955049164a596f9ed7dc10a536881a75bd349f01df304944fa9c6",
+  "platforms": {
+    "darwin_arm64": {
+      "status": "pinned",
+      "flutter": {
+        "version": "3.47.6",
+        "revision": "5fc346839b5d0eef006ed8404392afb4dfae428d",
+        "dart_version": "3.13.5",
+        "archive_name": "flutter_macos_arm64_3.47.6-stable.zip",
+        "archive_path": "/Users/owner/Downloads/flutter_macos_arm64_3.47.6-stable.zip",
+        "archive_sha256": "a1946d3b6b3de15ce247dc89649df9035ce29e6b4e7ebe91919a25890ea2e79a",
+        "install_tree_sha256": "c6104c4e1bf190986eae3c589c74683022b003067374e348d4b5c9fb8ff5e773"
+      },
+      "java": {
+        "version": "17.0.20.1",
+        "distribution": "eclipse-temurin",
+        "release_name": "jdk-17.0.20.1+1",
+        "vendor": "Eclipse Adoptium",
+        "jvm": "hotspot",
+        "architecture": "aarch64",
+        "image_type": "jdk",
+        "release_type": "ga",
+        "archive_name": "OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.20.1_1.tar.gz",
+        "archive_path": "/Users/owner/Downloads/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.20.1_1.tar.gz",
+        "archive_sha256": "196d13ba5f10414bef7f6a05a9b3f00edacb18ebacef2b99485db9e2ee18f0e8",
+        "install_tree_sha256": "db1c82d16dcda3fda01523da938f2c32783f4fc441d6fc93e13be3313d5ed798"
+      },
+      "flutter_pub_cache": {
+        "top_level_root": "pub-cache",
+        "archive_name": "wins-flutter-pub-cache-20261007.zip",
+        "archive_path": "/Users/owner/Downloads/wins-flutter-pub-cache-20261007.zip",
+        "archive_sha256": "e16389c74e32b36763f4e7fcc5252f309dae09371871c0adb216fecbf985ffaf",
+        "install_tree_sha256": "79779e314b0e304d10a5caa8ac36f59f17e80ca82d6d0cac04b16151852dbc91",
+        "package_count": 78
+      }
+    },
+    "windows_amd64": {
+      "status": "owner_inputs_required",
+      "owner_action": "Keep status as owner_inputs_required until every python, flutter, and jdk record contains the complete helper-required pin fields: archive_environment, archive_sha256, install_tree_sha256, version, vendor, architecture, and revision. Provide the exact original Windows amd64 distribution archives outside the repository via WINS_ANDROID_PYTHON_ARCHIVE, WINS_ANDROID_FLUTTER_ARCHIVE, and WINS_ANDROID_JDK_ARCHIVE. Record independently verified archive_sha256 values and derive install_tree_sha256 with tools/android_toolchain_custody.ps1; those two hashes must differ. Python version is the runtime major.minor.micro string, revision is platform.python_revision() and may be an empty string, vendor must be exact CPython from platform.python_implementation() rather than the toolchain-pins cpython spelling, and architecture is platform.machine() (AMD64). Flutter version is flutter --version --machine frameworkVersion, revision is frameworkRevision, and vendor is repositoryUrl; Flutter 3.47.6 does not emit architecture, so flutter architecture is the windows_amd64 archive_sha256 plus install_tree_sha256 of that SDK rather than a nonexistent --machine field. JDK version is java.version, revision is java.runtime.version, vendor is java.vendor, and architecture is os.arch. Change status to pinned only after those fields are reviewed.",
+      "tools": {
+        "python": {
+          "version": null,
+          "revision": null,
+          "vendor": null,
+          "architecture": null,
+          "version_source": "tools/toolchain-pins.json#tools.python.version",
+          "revision_source": "platform.python_revision(); empty string is allowed",
+          "vendor_source": "platform.python_implementation exact CPython, not toolchain-pins cpython",
+          "architecture_source": "platform.machine AMD64",
+          "archive_environment": "WINS_ANDROID_PYTHON_ARCHIVE",
+          "archive_sha256": null,
+          "install_tree_sha256": null
+        },
+        "flutter": {
+          "version": null,
+          "revision": null,
+          "vendor": null,
+          "architecture": null,
+          "version_source": "tools/toolchain-pins.json#tools.flutter.version and flutter --version --machine frameworkVersion",
+          "revision_source": "tools/toolchain-pins.json#tools.flutter.revision and flutter --version --machine frameworkRevision",
+          "vendor_source": "flutter --version --machine repositoryUrl",
+          "architecture_source": "windows_amd64 archive_sha256 and install_tree_sha256; Flutter 3.47.6 --version --machine has no architecture field",
+          "archive_environment": "WINS_ANDROID_FLUTTER_ARCHIVE",
+          "archive_sha256": null,
+          "install_tree_sha256": null
+        },
+        "jdk": {
+          "version": null,
+          "revision": null,
+          "vendor": null,
+          "architecture": null,
+          "version_source": "java.version for JDK major 17",
+          "revision_source": "java.runtime.version; empty string is allowed only if the live JDK reports empty",
+          "vendor_source": "java.vendor",
+          "architecture_source": "os.arch",
+          "archive_environment": "WINS_ANDROID_JDK_ARCHIVE",
+          "archive_sha256": null,
+          "install_tree_sha256": null
+        }
+      }
+    }
+  }
+}

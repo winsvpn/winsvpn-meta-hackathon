@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "contract": "winsvpn-linux-release-candidate-v1",
+  "canonical_release": "1.0.17+34",
+  "appstream_version": "1.0.17",
+  "debian_version": "1.0.17-34",
+  "form_factor": "linux-x64",
+  "candidate_set_status": "no_current_candidate",
+  "required_upload_targets": [
+    "linux-x64-package",
+    "linux-arm64-package",
+    "linux-flathub-manifest",
+    "linux-snap-manifest"
+  ],
+  "required_artifact_kinds": {
+    "linux-x64-package": "tarball",
+    "linux-arm64-package": "tarball",
+    "linux-flathub-manifest": "flatpak-manifest",
+    "linux-snap-manifest": "snap-manifest"
+  },
+  "targets": {
+    "linux-x64-package": {
+      "filename": "wins-vpn-linux-x64.tar.gz",
+      "architecture": "x64",
+      "kind": "tarball",
+      "surface": "website-tarball",
+      "path": "web/downloads/wins-vpn-linux-x64.tar.gz",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false
+    },
+    "linux-flathub-manifest": {
+      "filename": "org.winsvpn.app.json",
+      "architecture": "x64",
+      "required_architectures": ["x64", "arm64"],
+      "surface": "flathub-separate-manifest",
+      "path": ".artifacts/linux/org.winsvpn.app.json",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false
+    },
+    "linux-snap-manifest": {
+      "filename": "snapcraft.yaml",
+      "architecture": "x64",
+      "required_architectures": ["x64", "arm64"],
+      "surface": "snap-separate-manifest",
+      "path": ".artifacts/linux/snapcraft.yaml",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false
+    }
+  },
+  "pending_required_targets": {
+    "linux-arm64-package": {
+      "filename": "wins-vpn-linux-arm64.tar.gz",
+      "architecture": "arm64",
+      "kind": "tarball",
+      "surface": "website-tarball",
+      "path": "web/downloads/wins-vpn-linux-arm64.tar.gz",
+      "produced": false,
+      "upload_performed": false,
+      "publication_authorized": false,
+      "status": "pending-owner-evidence"
+    }
+  },
+  "deb": {
+    "upload_target": false,
+    "separate_cross_store_target": false,
+    "derived_from": "linux-x64-package",
+    "canonical_release": "1.0.17+34",
+    "debian_version": "1.0.17-34",
+    "architecture": "amd64",
+    "filename": "wins-vpn_1.0.17-34_amd64.deb",
+    "path": "build/linux-deb/wins-vpn_1.0.17-34_amd64.deb",
+    "produced": false,
+    "upload_performed": false,
+    "publication_authorized": false
+  },
+  "appimage": {
+    "upload_target": false,
+    "production_allowed": false,
+    "canonical_release": "1.0.17+34",
+    "architecture": "x64",
+    "filename": "wins-vpn-1.0.17-x86_64.AppImage"
+  },
+  "arm64_targets_status": "pending-owner-evidence",
+  "private_symbols": {
+    "x64": ".artifacts/private-release-symbols/linux/x64/1.0.17+34",
+    "arm64": ".artifacts/private-release-symbols/linux/arm64/1.0.17+34",
+    "uploaded": false
+  },
+  "obfuscation_receipts": {
+    "linux-x64-package": ".artifacts/private-release-symbols/linux/x64/1.0.17+34/manifest-website-tarball.json",
+    "linux-arm64-package": ".artifacts/private-release-symbols/linux/arm64/1.0.17+34/manifest-website-tarball.json",
+    "linux-flathub-manifest": ".artifacts/private-release-symbols/linux/x64/1.0.17+34/manifest-flathub-separate-manifest.json",
+    "linux-snap-manifest": ".artifacts/private-release-symbols/linux/x64/1.0.17+34/manifest-snap-separate-manifest.json"
+  },
+  "tunnel_protocol": {
+    "executed_on": "local-device",
+    "primary": "winn-v3",
+    "fallback": ["awg", "xray"]
+  }
+}

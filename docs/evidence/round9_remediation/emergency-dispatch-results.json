@@ -1,0 +1,13 @@
+[
+  {
+    "command": [
+      "python3",
+      "server/test_emergency_dispatch_hub.py"
+    ],
+    "cwd": "/Users/owner/xprize/winsvpnv3",
+    "started_at": "2026-09-13T19:41:49.222173+00:00",
+    "exit_code": 0,
+    "seconds": 5.67,
+    "log": "emergency-dispatch.log"
+  }
+]

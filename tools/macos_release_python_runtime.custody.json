@@ -1,0 +1,109 @@
+{
+  "schema_version": 3,
+  "contract": "winsvpn-macos-release-python-runtime-v2",
+  "platform": "darwin_arm64",
+  "python_version": "3.14.7",
+  "wrapper": "tools/release_python_archive_custody.sh",
+  "wrapper_sha256": "ec65b81111989c71f140ecd962bb9f0158cfd618471c62b3bf88fd398be98179",
+  "provisioner": "tools/provision_macos_release_python_runtime.sh",
+  "provisioner_sha256": "11260d2641cfdc5344387b7f9380df13b5e43e6dda9368dd346f6e58b6c3155b",
+  "custody_controller": "tools/macos_release_python_runtime_receipt.py",
+  "custody_controller_sha256": "5d29a5c0f7c8b01dc4bf7b94ae61d9379c7035916bc753ee08f020f36d26ea5e",
+  "receipt_test": "tools/test_macos_release_python_runtime_receipt.py",
+  "receipt_test_sha256": "a8ace1a2c7fe890b2dbb65eb746f2a52ee15d493a07918e41f5223878461bd08",
+  "provision_test": "tools/test_provision_macos_release_python_runtime.py",
+  "provision_test_sha256": "1bae6c38bd7666e6fa28db4ab442de4802b9004c88002b0d6722b7a344db8ea7",
+  "archive_test": "tools/test_release_python_archive_custody.py",
+  "archive_test_sha256": "e9ba70d86c792bc0a45aa7ba658758ec13d2e3265aa1e7176dadb0fb8e2b9e71",
+  "fin_g00_test": "tools/test_fin_release_gate_g00_python_custody.py",
+  "fin_g00_test_sha256": "326c0c41d3474b0a225af9e3a0c719ae8b03f668fbc8e585cd37b59daa23fe65",
+  "fin_release_gate": "tools/fin_release_gate.sh",
+  "fin_release_gate_sha256": "02555981ea9d79dcc8f72fea22708bd8262811eb738793f32000e1d62323fbc9",
+  "android_custody": "tools/release_android_toolchain_archive_custody.sh",
+  "android_custody_sha256": "4c8e03442462937d2155f559ee06839c3030b9bbdc60d975b7f140a0f3d4b718",
+  "openssl_custody": "tools/release_openssl_archive_custody.sh",
+  "openssl_custody_sha256": "b6fae6322d15bb760ead9b6c3f959f881ef74dc818dadbc9b4c08f07c89830b2",
+  "node_custody": "tools/release_node_archive_custody.sh",
+  "node_custody_sha256": "1bba27c55d39d9709831fce8e6971e721add18627bd10efa8c0098d85b910f5c",
+  "browser_custody": "tools/release_browser_archive_custody.sh",
+  "browser_custody_sha256": "a86e61b8d21f71724f258185c5592aa4237228e5da6cfd30309113076f28691a",
+  "go_custody": "tools/release_go_archive_custody.sh",
+  "go_custody_sha256": "5b981a3713866995c5e6ff020fc15fc697fbd8bc2303e25d034f506dee416933",
+  "gcp_proof_collector": "tools/gcp_proof_evidence.py",
+  "gcp_proof_collector_sha256": "b119b5b4133894dd48971ddf680da16ebb7f76a213be7f410a809300b522cc2a",
+  "gcp_proof_live_probe": "tools/gcp_proof_live_probe.py",
+  "gcp_proof_live_probe_sha256": "97dbf99edbd594de14b015251b583aac8765b57a8696c38ad86270d59d75ea24",
+  "pin_manifest": "tools/toolchain-pins.json",
+  "pin_manifest_sha256": "36886cc389de7647ca1d35700dadc615c304da756e5809430e333c32ce36847c",
+  "producer_closure": [
+    {
+      "path": "tools/build_macos_release_python_inputs_manifest.py",
+      "sha256": "4a6e7f8ba758253b73443247eb0c0c5df881348a33c1efdb867b0afceb36bd8c"
+    },
+    {
+      "path": "tools/install_macos_release_python_inputs.py",
+      "sha256": "918e0b4364cd4cc8fc636aa3582dc191d4e15a2eb54e8172e9d2d3b7034019d1"
+    },
+    {
+      "path": "tools/macos_release_python_entrypoint.c",
+      "sha256": "e95aa9b44746ea3b42859fdbbd07cda8f223e78e49556678d87f1283fcfaa1f0"
+    },
+    {
+      "path": "tools/macos_release_python_inputs.custody.json",
+      "sha256": "3882f940e94513fd35d10c4232038257fe339f502fed7cc40704428a061e9430"
+    },
+    {
+      "path": "tools/macos_release_python_owner_launcher.c",
+      "sha256": "15f5bf992af07aa425dd43d50e96763136df617ddcda333ce3363c49474e510d"
+    },
+    {
+      "path": "tools/macos_release_python_runtime_production.py",
+      "sha256": "5b4c29dbb146fed42cf1dc26bc9e41bebe143de11a0c809de36fa64efe5840ad"
+    },
+    {
+      "path": "tools/materialize_macos_release_python_psf_candidate.py",
+      "sha256": "291a9514e8ebda33cb6f40cbb150bca493ba8e4fa2e08f28daeb4926a249d6ac"
+    },
+    {
+      "path": "tools/release_python_archive_custody.sh",
+      "sha256": "ec65b81111989c71f140ecd962bb9f0158cfd618471c62b3bf88fd398be98179"
+    },
+    {
+      "path": "tools/test_macos_release_python_inputs_custody.py",
+      "sha256": "26fe2f985bae203ccc8efca87aece188461b645de743bfd9f7960c8f67e01f79"
+    },
+    {
+      "path": "tools/test_macos_release_python_owner_launcher.py",
+      "sha256": "272d7536c62ac6c3f7cdaa4e89c29e0480bb0f750572b2398f87cb32473fd97b"
+    },
+    {
+      "path": "tools/test_macos_release_python_runtime_receipt.py",
+      "sha256": "a8ace1a2c7fe890b2dbb65eb746f2a52ee15d493a07918e41f5223878461bd08"
+    },
+    {
+      "path": "tools/test_release_gate_determinism.py",
+      "sha256": "e0f223b82bc4167cce868019796c90cb8144ae96a692a837505c524e862573e2"
+    },
+    {
+      "path": "tools/test_release_python_archive_custody.py",
+      "sha256": "e9ba70d86c792bc0a45aa7ba658758ec13d2e3265aa1e7176dadb0fb8e2b9e71"
+    },
+    {
+      "path": "tools/toolchain-pins.json",
+      "sha256": "36886cc389de7647ca1d35700dadc615c304da756e5809430e333c32ce36847c"
+    }
+  ],
+  "runtime_path": "/Library/WinsVPN/ReleasePython/3.14.7",
+  "receipt_path": "/Library/WinsVPN/ReleasePython/3.14.7.receipt.json",
+  "migration_authority_path": "/Library/WinsVPN/ReleasePythonAuthority/v2/authority.json",
+  "owner_provision_boundary": "/Library/WinsVPN/ReleasePythonAuthority/v2/owner-provision",
+  "owner_action": "use-fixed-external-owner-provisioning-boundary",
+  "notes": [
+    "Repository code is non-mutating and refuses root execution.",
+    "Migration planning executes authority-bound held controller bytes under ReleasePython -I -S.",
+    "Live GCP collection loads authority-bound collector and probe bytes through retained descriptors under the exact authenticated CPython 3.14 executable.",
+    "The fixed external authority binds this metadata, fin_release_gate.sh, its direct sourced custody wrappers, and every closure digest for normal authentication and migration planning.",
+    "The fixed external owner boundary is root-owned, SF_IMMUTABLE, and bound by its owner-authorized implementation digest.",
+    "Migration output remains dry-run, nonzero, and OWNER-BLOCKED."
+  ]
+}

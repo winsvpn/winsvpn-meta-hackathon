@@ -1,0 +1,196 @@
+/* Win's VPN - Privacy Policy page.
+   Deliberately an EXTERNAL stylesheet, not an inline <style> block.
+
+   The site-wide Content-Security-Policy (web/_headers and the
+   CONTENT_SECURITY_POLICY constant in web/_worker.js) allows inline CSS only by
+   SHA-256 hash, and only the hash of index.html's single inline <style> block is
+   whitelisted. An inline <style> here would be blocked by the browser and this
+   page would render unstyled -- which is exactly the state /vdp/ and /support/
+   are in today. Loading the CSS from same-origin satisfies `style-src 'self'`
+   with no CSP change at all, so this page can never drift out of sync with the
+   pinned hashes. Do not move these rules inline. */
+
+:root {
+  --ink: #0d1b2a;
+  --muted: #526173;
+  --line: #d8e0ea;
+  --panel: #ffffff;
+  --soft: #f4f7fb;
+  --brand: #0f6b5c;
+  --brand-dark: #0a4d42;
+  --accent: #f5b642;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--soft);
+  line-height: 1.65;
+}
+
+a { color: var(--brand-dark); }
+
+.shell {
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.site-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav {
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+.brand img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-links a {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 6px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+main { padding: 52px 0; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 28px;
+}
+
+/* The page title. Google Play review rejected the previous document because it
+   carried no explicit "Privacy policy" label, so this h1 is the first heading in
+   the document and must keep reading exactly "Privacy Policy". */
+h1 {
+  margin: 0 0 12px;
+  line-height: 1.15;
+  font-size: clamp(34px, 5vw, 56px);
+}
+
+h2 {
+  margin: 0 0 12px;
+  line-height: 1.2;
+  font-size: 24px;
+  color: var(--brand-dark);
+}
+
+p { margin: 0 0 16px; }
+
+.lead {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.version {
+  display: inline-block;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 14px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.note {
+  border-left: 5px solid var(--accent);
+  padding: 14px 16px;
+  background: #fff9e8;
+  border-radius: 6px;
+  color: #4d3a0d;
+}
+
+.policy { margin-top: 28px; }
+
+.policy p { margin: 0 0 18px; }
+
+.policy code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.94em;
+}
+
+.contact-list {
+  display: grid;
+  gap: 14px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-list li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.contact-list strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.footer {
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.footer a { font-weight: 700; }
+
+@media (max-width: 760px) {
+  .nav { align-items: flex-start; flex-direction: column; padding: 14px 0; }
+  .nav-links { justify-content: flex-start; }
+  .panel { padding: 22px; }
+  main { padding: 32px 0; }
+}

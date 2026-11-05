@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@array/android_wear_capabilities">
+    <!--
+      Advertised to paired watches over the Wearable Data Layer. The watch app
+      resolves this capability rather than "any connected node", so a phone
+      without this app installed reports as unreachable instead of silently
+      swallowing commands.
+
+      DO NOT DELETE THIS BECAUSE LINT CALLS IT UNUSED. It is unused in the only
+      sense lint can measure: no R.array reference exists anywhere in this
+      project, and none ever will. Google Play services looks this array up BY
+      NAME at runtime, from the resources of every installed package, and the
+      name is fixed by the Wearable API. Removing it would compile, ship, pass
+      every test in this repository, and silently unpair every watch: the phone
+      would stop advertising wins_vpn_phone, the watch would resolve no node,
+      and connect/country commands from the wrist would report unreachable
+      forever. That is the exact failure mode this array was added to prevent.
+
+      So the warning is answered here rather than obeyed. Scoped to this one
+      element, not the file and not the project. The tools:keep on <resources>
+      is the same answer for the release resource shrinker
+      (isShrinkResources = true), which cannot see a by-name lookup either.
+    -->
+    <string-array name="android_wear_capabilities" tools:ignore="UnusedResources">
+        <item>wins_vpn_phone</item>
+    </string-array>
+</resources>
